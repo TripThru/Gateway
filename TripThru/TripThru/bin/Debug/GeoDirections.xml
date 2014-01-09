@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SerializableDictionaryOfStringArrayOfWaypoint>
+  <Item>
+    <Key>
+      <string>(37.782551, -122.445368):(37.786956, -122.440279)</string>
+    </Key>
+    <Value>
+      <ArrayOfWaypoint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <Waypoint>
+          <lat>37.782551</lat>
+          <lng>-122.445368</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7832488</lat>
+          <lng>-122.4394838</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.324977133416</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.782455</lat>
+          <lng>-122.4393321</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.380279169504</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7861936</lat>
+          <lng>-122.4399883</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.64622603967999992</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7863976</lat>
+          <lng>-122.4383945</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.73446074894399993</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7873249</lat>
+          <lng>-122.438582</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.799083352912</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7871189</lat>
+          <lng>-122.4402601</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.89166766051999991</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.7869625</lat>
+          <lng>-122.4402282</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.902852341976</distance>
+        </Waypoint>
+        <Waypoint>
+          <lat>37.786956</lat>
+          <lng>-122.440279</lng>
+          <name>""</name>
+          <elapse />
+          <distance>0.902852341976</distance>
+        </Waypoint>
+      </ArrayOfWaypoint>
+    </Value>
+  </Item>
+</SerializableDictionaryOfStringArrayOfWaypoint>

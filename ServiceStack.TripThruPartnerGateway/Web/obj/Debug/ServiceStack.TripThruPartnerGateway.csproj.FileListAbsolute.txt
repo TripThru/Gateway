@@ -1,0 +1,14 @@
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\sqlite3.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.MovieRest.dll.config
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.MovieRest.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.MovieRest.pdb
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\Newtonsoft.Json.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\RestSharp.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.Common.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.Interfaces.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.Redis.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\bin\ServiceStack.Text.xml
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\obj\Debug\ServiceStack.TripThruPartnerGateway.csprojResolveAssemblyReference.cache
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\obj\Debug\ServiceStack.MovieRest.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruPartnerGateway\Web\obj\Debug\ServiceStack.MovieRest.pdb
