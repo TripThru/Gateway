@@ -1,2 +1,22 @@
 Sim Configuration
-GetPartnerInfo called on Luxor Cab: Response = Fleets = System.Collections.Generic.List`1[ServiceStack.TripThruGateway.TripThru.Fleet], Result = OK
+	Partner = Luxor Cab: SimRate = 00:00:10, StatusUpdateRate = 00:00:30
+		PartnerFleets:
+			PartnerFleet = Luxor Cab - SF((37.78906, -122.402127)): SimRate = 00:00:10, StatusUpdateRate = 00:00:30, MaxTripAdvancedNotice = 00:00:15, CriticalPeriod = 00:01:00, MissedPeriod = 00:01:00, RemovalAge = 00:05:00, NumTripsPeriodHour = 200
+				Drivers:
+					Alex Goldman(@(37.78906, -122.402127))
+					Jason Fama(@(37.78906, -122.402127))
+					Simon Shvarts(@(37.78906, -122.402127))
+				Passengers:
+					Elvis Presley
+					John Riggins
+					Bart Star
+					Michelle Phieffer
+					Zong Zi Yi
+					Mickey Rourke
+Simulation started at 10/01/2014 03:02:36 a. m.
+	Time = 10/01/2014 03:02:36 a. m.
+		Luxor Cab - SF
+			Pickup request: Zong Zi Yi requests to be picked up at 286 Harvard Street, Brookline, MA 02446, USA on 10/01/2014 03:02:36 a. m. and dropped off at 970-1114 Soldiers Field Road, Boston, MA 02163, USA
+				Queueing Trip11, Status = Queued, Origination/Service = Local, PickupLocation = 286 Harvard Street, Brookline, MA 02446, USA, PickupTime = 10/01/2014 03:02:36 a. m., Passenger = Zong Zi Yi, DropoffLocation = 970-1114 Soldiers Field Road, Boston, MA 02163, USA
+			Ready for dispatch: Trip11, Status = Queued, Origination/Service = Local, PickupLocation = 286 Harvard Street, Brookline, MA 02446, USA, PickupTime = 10/01/2014 03:02:36 a. m., Passenger = Zong Zi Yi, DropoffLocation = 970-1114 Soldiers Field Road, Boston, MA 02163, USA
+				Pickup location 286 Harvard Street, Brookline, MA 02446, USA is outside of coverage area

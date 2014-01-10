@@ -1,5 +1,6 @@
 ﻿{
   "tripThruUrl" : "http://localhost:17187/json/asynconeway/",
+  "simInterval" : 10,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",

@@ -1,5 +1,8 @@
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.Common.Utils;
 using ServiceStack.Text;
 using ServiceStack.TripThruGateway;
@@ -66,18 +69,77 @@ namespace ServiceStack.TripThruGateway
 		    GatewayService.TripThruPartner = new TripThru.Partner(configuration.Partner.Name, configuration.Partner.ClientId, configuration.Partner.AccessToken, configuration.TripThruUrl, fleets);
 
             MapTools.WriteGeoData();
-            Logger.OpenLog("TripThruSimulation.log", true);
-            Logger.Log("Sim Configuration");
+
+		    var sim = new SimulationThread(GatewayService.TripThruPartner, configuration.SimInterval);
 
 			return new InitPartnersResponse();
 		}
 	}
+
+    public class SimulationThread : IDisposable
+    {
+        private TripThru.Partner _partner;
+        private int _simInterval;
+        private Thread _worker;
+        private volatile bool _workerTerminateSignal = false;
+
+        public SimulationThread(TripThru.Partner partner, int simInterval)
+        {
+            this._partner = partner;
+            this._simInterval = simInterval;
+            _worker = new Thread(StartSimulation);
+            _worker.Start();
+        }
+
+        private void StartSimulation()
+        {
+            while (!_workerTerminateSignal)
+            {
+                Logger.OpenLog("TripThruSimulation.log", true);
+                Logger.Log("Sim Configuration");
+                Logger.Tab();
+                _partner.Log();
+                Logger.Untab();
+
+                Logger.Log("Simulation started at " + DateTime.UtcNow);
+                Logger.Tab();
+                var interval = new TimeSpan(0, 0, _simInterval);
+                while (true)
+                {
+                    Logger.Log("Time = " + DateTime.UtcNow);
+                    Logger.Tab();
+                    lock (_partner)
+                    {
+                        _partner.Simulate(DateTime.UtcNow + interval);
+                    }
+                    MapTools.WriteGeoData();
+                    System.Threading.Thread.Sleep(interval);
+                    Logger.Untab();
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_worker != null)
+            {
+                _workerTerminateSignal = true;
+                if (!_worker.Join(TimeSpan.FromMinutes(1)))
+                {
+                    Console.WriteLine("Worker busy, aborting the simulation thread.");
+                    _worker.Abort();
+                }
+                _worker = null;
+            }
+        }
+    }
 
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }
         public List<Fleet> Fleets { get; set; }
         public string TripThruUrl { get; set; }
+        public int SimInterval { get; set; }
 
         public class ConfigPartner
         {

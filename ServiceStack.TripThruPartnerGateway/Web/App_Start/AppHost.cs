@@ -22,7 +22,7 @@ namespace TripThru.Gateway.App_Start
 		/// <summary>
 		///     Initializes a new instance of your ServiceStack application, with the specified name and assembly containing the services.
 		/// </summary>
-		public AppHost() : base("TripThru gateway v1", typeof (GatewayService).Assembly)
+		public AppHost() : base("TripThru partner gateway v1", typeof (GatewayService).Assembly)
 		{
 		}
 

@@ -43,7 +43,7 @@ namespace ServiceStack.TripThruGateway
             var partnerLuxor = new Partner
             {
                 Name = "Luxor Cab",
-                CallbackUrl = "http://www.luxorcab.com/gateway/v1/",
+                CallbackUrl = "http://localhost:17188/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerLuxor);
@@ -159,7 +159,11 @@ namespace ServiceStack.TripThruGateway
                 ));
 
             Logger.OpenLog("TripThruSimulation.log", true);
-            Logger.Log("Sim Configuration");
+            Logger.Log("Starting partners " + DateTime.UtcNow);
+            Logger.Tab();
+            foreach (TripThru.TripThru.Partner p in GatewayService.TripThru.partners)
+                p.Log();
+            Logger.Untab();
 
 			return new InitPartnersResponse();
 		}

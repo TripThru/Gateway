@@ -17,6 +17,11 @@ namespace ServiceStack.TripThruGateway.TripThru
                 this.ID = clientId;
                 this.PartnerGateway = new PartnerGateway(callbackUrl, name, clientId, accessToken);
             }
+
+            public void Log()
+            {
+                Logger.Log("Partner = " + name + " with client id = "+ID);
+            }
         }
         public List<Partner> partners;
         public Dictionary<string, Partner> partnersByID;

@@ -209,7 +209,7 @@ namespace ServiceStack.TripThruGateway
         }
 
         [Api("Use POST to create search for quotes meeting the filter criteria.")]
-        [Route("/trip/quotes", "POST")]
+        [Route("/quotes", "POST")]
         public class Quotes : IReturn<QuotesResponse>
         {
             public string PassengerId { get; set; }
@@ -295,7 +295,7 @@ namespace ServiceStack.TripThruGateway
         }
 
         [Api("Use POST to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
-        [Route("/trip/dispatch", "POST")]
+        [Route("/dispatch", "POST")]
         public class Dispatch : IReturn<DispatchResponse>
         {
             public string ForeignId { get; set; }

@@ -265,7 +265,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
 
             var response = Client.Execute(request);
-            return response.Content;
+            return response == null ? null : response.Content;
         }
 
         

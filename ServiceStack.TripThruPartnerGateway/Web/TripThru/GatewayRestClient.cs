@@ -20,13 +20,14 @@ namespace ServiceStack.TripThruGateway.TripThru
         {
             AccessToken = accessToken;
             RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl+"/";
+            Client = new RestClient(RootUrl);
         }
 
         public Gateway.GetPartnerInfo.Response GetPartnerInfo()
         {
             var r= Request("GET", "partners", null);
 
-            if (r!= null)
+            if (r != null && !r.Equals(""))
             {
                 var response = JsonSerializer.DeserializeFromString<GatewayService.PartnersResponse>(r);
                 if (response.ResultCode == Gateway.Result.OK)
@@ -71,9 +72,9 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Waypoints = request.waypoints
             });
 
-            var r = Request("POST", "trip/dispatch", partnerRequest);
+            var r = Request("POST", "dispatch", partnerRequest);
 
-            if (r!= null)
+            if (r != null && !r.Equals(""))
             {
                 var response = JsonSerializer.DeserializeFromString<GatewayService.DispatchResponse>(r);
 
@@ -118,9 +119,9 @@ namespace ServiceStack.TripThruGateway.TripThru
                 WayPoints = request.waypoints,
             });
 
-            var r = Request("POST", "trip/quotes", partnerRequest);
+            var r = Request("POST", "quotes", partnerRequest);
 
-            if (r!= null)
+            if (r!= null && !r.Equals(""))
             {
                 var response = JsonSerializer.DeserializeFromString<GatewayService.QuotesResponse>(r);
 
@@ -150,7 +151,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         {
             var r = Request("GET", "trip/" + request.tripID + "/status", null);
 
-            if (r != null)
+            if (r != null && !r.Equals(""))
             {
                 var response = JsonSerializer.DeserializeFromString<GatewayService.TripResponse>(r);
 
@@ -196,7 +197,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             
             var r = Request("PUT", "trip/" + request.tripID + "/status", partnerRequest);
 
-            if (r != null)
+            if (r != null && !r.Equals(""))
             {
                 var response = JsonSerializer.DeserializeFromString<GatewayService.TripResponse>(r);
 
@@ -265,7 +266,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
 
             var response = Client.Execute(request);
-            return response.Content;
+            return response == null ? null : response.Content;
         }
 
         
