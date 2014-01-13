@@ -2,6 +2,7 @@
 using System.Linq;
 using ServiceStack.Common;
 using ServiceStack.TripThruGateway.TripThru;
+using EnumerableExtensions = ServiceStack.Common.Extensions.EnumerableExtensions;
 
 namespace ServiceStack.TripThruGateway
 {
@@ -69,7 +70,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /partner called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("POST /partner called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new PartnerResponse
                 {
                     Result = "Failed",
@@ -161,7 +162,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /partners called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("POST /partners called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -198,7 +199,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("GET /partners called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("GET /partners called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -284,7 +285,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /trip/quotes called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("POST /quotes called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new QuotesResponse
                 {
                     Result = "Failed",
@@ -372,7 +373,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /trip/dispatch called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("POST /dispatch called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new DispatchResponse
                 {
                     Result = "Failed",
@@ -452,7 +453,7 @@ namespace ServiceStack.TripThruGateway
 
                 }
 
-                Logger.Log("GET /trip//status called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("GET /trip//status called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new TripResponse
                 {
                     Result = "Failed",
@@ -489,7 +490,7 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("PUT /trip//status called with access token " + Request.RemoteIp + ": Response = Authentication failed");
+                Logger.Log("PUT /trip//status called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
                 return new TripResponse
                 {
                     Result = "Failed",
@@ -506,6 +507,33 @@ namespace ServiceStack.TripThruGateway
             //        ResultCode = Gateway.Result.InvalidParameters
             //    };
             //}
+        }
+
+        [Api("GET latest log entries")]
+        [Route("/log", "GET")]
+        public class Log : IReturn<LogResponse>
+        {
+            
+        }
+
+        public class LogResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+            public List<Tuple<DateTime, int, string>> LogList { get; set; } 
+        }
+
+        public class LogService : Service
+        {
+            public LogResponse Get(Log request)
+            {
+                return new LogResponse
+                {
+                    Result = "OK",
+                    ResultCode = Gateway.Result.OK,
+                    LogList = Logger.LogQueue.Queue.ToList()
+                };
+            }
         }
     }
 }

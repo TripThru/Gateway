@@ -638,6 +638,9 @@ namespace ServiceStack.TripThruGateway.TripThru
         public static string filePath = "~/App_Data/".MapHostAbsolutePath();
         static int on;
         static System.IO.StreamWriter logFile;
+
+        public static FixedSizeQueue<Pair<DateTime,string>> LogQueue;
+
         //        [Conditional("DEBUG")]
         static public void Tab() { tab++; }
         //        [Conditional("DEBUG")]
@@ -647,7 +650,6 @@ namespace ServiceStack.TripThruGateway.TripThru
             string tabs = "";
             for (int n = 0; n < tab; n++)
                 tabs += '\t';
-            //                tabs += "-----";
             return tabs;
         }
         static public void Off()
@@ -674,6 +676,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         [Conditional("DEBUG")]
         static public void Log(string msg)
         {
+            LogQueue.Enqueue(new Tuple<DateTime, int, string>(DateTime.UtcNow, tab * 40, msg));
             {
                 if (logFile == null)
                     return;
@@ -693,15 +696,40 @@ namespace ServiceStack.TripThruGateway.TripThru
                 enabled = enabled_;
             }
             enabledMethods = new LinkedList<string>();
-            logFile = new System.IO.StreamWriter("~/App_Data/".MapHostAbsolutePath() + filename);
-            //logFile = new System.IO.StreamWriter(filePath + filename, append);
+            LogQueue = new FixedSizeQueue<Pair<DateTime,string>>(300);
+            //logFile = new System.IO.StreamWriter("~/App_Data/".MapHostAbsolutePath() + filename);
         }
 
         static public void CloseLog()
         {
-            logFile.Close();
+            if(logFile != null)
+                logFile.Close();
             logFile = null;
+            LogQueue.Queue.Clear();
         }
         static public LinkedList<string> enabledMethods;
+    }
+
+    public class FixedSizeQueue<T>
+    {
+        public Queue<Tuple<DateTime, int, string>> Queue { get; set; }
+
+        public FixedSizeQueue(int limit)
+        {
+            this.Limit = limit;
+            Queue = new Queue<Tuple<DateTime, int, string>>();
+        }
+
+        public int Limit { get; set; }
+        public void Enqueue(Tuple<DateTime, int, string> obj)
+        {
+            Queue.Enqueue(obj);
+            var expired = DateTime.UtcNow - new TimeSpan(0, 0, 30, 0);
+            lock (this)
+            {
+                while (Queue.Peek().Item1 < expired )
+                    Queue.Dequeue();
+            }
+        }
     }
 }

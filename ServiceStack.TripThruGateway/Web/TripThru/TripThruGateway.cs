@@ -79,8 +79,12 @@ namespace ServiceStack.TripThruGateway.TripThru
                 foreach (Partner p in tripthru.partners)
                 {
                     Response response = p.PartnerGateway.getPartnerInfo.Get(r);
-                    fleets.AddRange(response.fleets);
-                    vehicleTypes.AddRange(response.vehicleTypes);
+                    if (response.result == Result.OK)
+                    {
+                        fleets.AddRange(response.fleets);
+                        vehicleTypes.AddRange(response.vehicleTypes);
+                    }
+                    Logger.Log("GetPartnerInfo called on " + p.name + ", Response = " + response);
                 }
                 Response resp = new Response(fleets, vehicleTypes);
                 Logger.Log("GetPartnerInfo called on TripThru, Response: " + resp);
@@ -128,6 +132,11 @@ namespace ServiceStack.TripThruGateway.TripThru
                         Logger.Log("No partners are available");
                         return new Response(result: Result.Rejected);
                     }
+                    else if (response.result != Result.OK)
+                    {
+                        Logger.Log("QuoteTrip call failed, Response = "+response);
+                        return new Response(result : response.result);
+                    }
                     else
                     {
                         Quote bestQuote = null;
@@ -161,7 +170,13 @@ namespace ServiceStack.TripThruGateway.TripThru
                     r.clientID = tripthru.ID;
                     response1 = partner.PartnerGateway.dispatchTrip.Post(r);
                     if (response1.result == Result.OK)
+                    {
                         response1.tripID += ":" + partner.ID;
+                    }
+                    else
+                    {
+                        Logger.Log("DispatchTrip call to "+partner.name+" failed, Response = "+response1);
+                    }
                 }
                 else
                     response1 = new Response(result: Result.Rejected);
@@ -190,9 +205,12 @@ namespace ServiceStack.TripThruGateway.TripThru
                     if (p.ID == clientID)
                         continue;
                     Response response = p.PartnerGateway.quoteTrip.Get(r);
-                    if (response.quotes != null)
-                        quotes.AddRange(response.quotes);
-
+                    if (response.result == Result.OK)
+                    {
+                        if (response.quotes != null)
+                            quotes.AddRange(response.quotes);
+                    }
+                    Logger.Log("QuoteTrip called on "+p.name+", Response = "+response.result);
                 }
                 Response response1 = new Response(quotes);
                 Logger.Untab();
@@ -220,8 +238,12 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Partner partner = tripthru.partnersByID[partnerID];
                 r.clientID = tripthru.ID;
                 Response response = partner.PartnerGateway.getTripStatus.Get(r);
-                response.partnerID = partner.ID;
-                response.partnerName = partner.name;
+                if (response.result == Result.OK)
+                {
+                    response.partnerID = partner.ID;
+                    response.partnerName = partner.name;
+                }
+                Logger.Log("GetTripStatus called on "+partner.name+", Response = "+response.result);
                 Logger.Untab();
                 return response;
             }
@@ -243,6 +265,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Partner partner = tripthru.partnersByID[partnerID];
                 r.clientID = tripthru.ID;
                 Response response = partner.PartnerGateway.updateTripStatus.Post(r);
+                Logger.Log("UpdateTripStatus called on " + partner.name + ", Response = " + response.result);
                 Logger.Untab();
                 return response;
             }

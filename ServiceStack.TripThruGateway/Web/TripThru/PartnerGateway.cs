@@ -43,16 +43,19 @@ namespace ServiceStack.TripThruGateway.TripThru
                 var fleets = new List<Fleet>();
 
                 var response = PartnerGateway.GatewayClient.GetPartnerInfo();
-                fleets.AddRange(response.fleets);
-                foreach (var fleet in fleets)
+                if (response.result == Result.OK)
                 {
-                    fleet.PartnerId = PartnerGateway.ClientId;
-                    fleet.PartnerName = PartnerGateway.Name;
+                    fleets.AddRange(response.fleets);
+                    foreach (var fleet in fleets)
+                    {
+                        fleet.PartnerId = PartnerGateway.ClientId;
+                        fleet.PartnerName = PartnerGateway.Name;
+                    }
+                    vehicleTypes.AddRange(response.vehicleTypes);
+                    return new Response(fleets, vehicleTypes);
                 }
-                vehicleTypes.AddRange(response.vehicleTypes);
-
                 Logger.Log("GetPartnerInfo called on " + PartnerGateway.Name + ": Response = " + response);
-                return new Response(fleets, vehicleTypes);
+                return new Response(result: response.result);
             }
         }
 
@@ -83,12 +86,16 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 List<Quote> quotes = new List<Quote>();
                 Response response = PartnerGateway.GatewayClient.QuoteTrip(r);
-                if (response.quotes != null)
-                    quotes.AddRange(response.quotes);
+                if (response.result == Result.OK)
+                {
+                    if (response.quotes != null)
+                        quotes.AddRange(response.quotes);
 
-                Response response1 = new Response(quotes);
+                    Response response1 = new Response(quotes);
+                    return response1;
+                }
                 Logger.Log("QuoteTrip called on " + PartnerGateway.Name + ": Response = " + response);
-                return response1;
+                return new Response(result: response.result);
             }
         }
 
@@ -102,10 +109,14 @@ namespace ServiceStack.TripThruGateway.TripThru
             public override Response Get(Request r)
             {
                 Response response = PartnerGateway.GatewayClient.GetTripStatus(r);
-                response.partnerID = PartnerGateway.ClientId;
-                response.partnerName = PartnerGateway.Name;
+                if (response.result == Result.OK)
+                {
+                    response.partnerID = PartnerGateway.ClientId;
+                    response.partnerName = PartnerGateway.Name;
+                    return response;
+                }
                 Logger.Log("GetTripStatus called on " + PartnerGateway.Name + ": Response = " + response);
-                return response;
+                return new Response(result: response.result);
             }
         }
 

@@ -1,10 +1,10 @@
 ﻿{
-  "tripThruUrl" : "http://localhost:17187/json/asynconeway/",
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/json/asynconeway/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
-      "accessToken" : "23noiasdn2123",
+      "accessToken" : "luxor23noiasdn2123",
   },
   "fleets" : [
     {

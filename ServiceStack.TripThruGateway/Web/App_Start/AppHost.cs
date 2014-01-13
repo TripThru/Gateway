@@ -1,5 +1,6 @@
 using System;
 using System.Net.Mime;
+using ServiceStack.Razor;
 using ServiceStack.ServiceHost;
 using ServiceStack.TripThruGateway;
 using ServiceStack.WebHost.Endpoints.Extensions;
@@ -33,21 +34,13 @@ namespace TripThru.Gateway.App_Start
 			JsConfig.EmitCamelCaseNames = true;
 
 			container.Register<IDbConnectionFactory>(
-				c => new OrmLiteConnectionFactory("Server=127.0.0.1; Database=GatewaySandbox; Uid=root; Pwd=;", MySqlDialect.Provider));
+                c => new OrmLiteConnectionFactory("Server=127.0.0.1; Database=GatewaySandbox; Uid=tripservice; Pwd=Tr1PServ1Ce@MySqL;", MySqlDialect.Provider));
 				
 			//container.Register<IDbConnectionFactory>(
 			//	c => new OrmLiteConnectionFactory("~/db.sqlite".MapHostAbsolutePath(), SqliteDialect.Provider));
 
 			Plugins.Add(new CorsFeature()); //Enable CORS
-
-            this.RequestFilters.Add((req, res, requestDto) =>
-            {
-                var par = req.GetRequestParams();
-                foreach (var p in par)
-                {
-                    Console.WriteLine(p);
-                }
-            });
+            Plugins.Add(new RazorFormat());
             
 			SetConfig(new EndpointHostConfig
 				          {

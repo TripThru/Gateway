@@ -30,7 +30,6 @@ C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\s
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.MovieRest.dll.config
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.MovieRest.dll
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.MovieRest.pdb
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\Newtonsoft.Json.dll
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\RestSharp.xml
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.xml
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.Common.xml
@@ -40,3 +39,6 @@ C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\S
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\obj\Debug\ServiceStack.TripThruGateway.csprojResolveAssemblyReference.cache
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\obj\Debug\ServiceStack.MovieRest.dll
 C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\obj\Debug\ServiceStack.MovieRest.pdb
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\ServiceStack.Razor.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\System.Web.Razor.Unofficial.dll
+C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\Web\bin\System.Web.Razor.Unofficial.pdb

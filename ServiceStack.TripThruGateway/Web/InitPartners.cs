@@ -34,7 +34,7 @@ namespace ServiceStack.TripThruGateway
 		        UserName = "Luxor Cab",
 		        Password = "password",
 		        Email = "partner1@tripthru.com",
-		        AccessToken = "23noiasdn2123",
+		        AccessToken = "luxor23noiasdn2123",
 		        RefreshToken = "23noiasdn2123",
 		        ClientId = "luxor@tripthru.com",
 		        ClientSecret = "23noiasdn2123"
@@ -43,7 +43,7 @@ namespace ServiceStack.TripThruGateway
             var partnerLuxor = new Partner
             {
                 Name = "Luxor Cab",
-                CallbackUrl = "http://localhost:17188/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.LuxorCab/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerLuxor);
@@ -60,7 +60,7 @@ namespace ServiceStack.TripThruGateway
 		        UserName = "Yellow Cab",
 		        Password = "password",
 		        Email = "yellowcab@tripthru.com",
-		        AccessToken = "12ondazazxx21",
+		        AccessToken = "yellow12ondazazxx21",
 		        RefreshToken = "12ondazazxx21",
 		        ClientId = "yellow@tripthru.com",
 		        ClientSecret = "12ondazazxx21"
@@ -69,7 +69,7 @@ namespace ServiceStack.TripThruGateway
             var partnerYellow = new Partner
             {
                 Name = "Yellow Cab",
-                CallbackUrl = "http://www.yellowcab.com/gateway/v1/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.YellowCab/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerYellow);
@@ -86,7 +86,7 @@ namespace ServiceStack.TripThruGateway
 		        UserName = "Metro Cab of Boston",
 		        Password = "password",
 		        Email = "metro@tripthru.com",
-		        AccessToken = "12ondazazxx21",
+		        AccessToken = "metro12ondazazxx21",
 		        RefreshToken = "12ondazazxx21",
 		        ClientId = "metro@tripthru.com",
 		        ClientSecret = "12ondazazxx21"
@@ -95,7 +95,7 @@ namespace ServiceStack.TripThruGateway
             var partnerMetro = new Partner
             {
                 Name = "Metro Cab of Boston",
-                CallbackUrl = "http://www.metrocabofboston.com/gateway/v1/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.MetroCab/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerMetro);
@@ -112,7 +112,7 @@ namespace ServiceStack.TripThruGateway
 		        UserName = "Les Taxi Blues",
 		        Password = "password",
 		        Email = "lestaxi@tripthru.com",
-		        AccessToken = "12ondazazxx21",
+		        AccessToken = "les12ondazazxx21",
 		        RefreshToken = "12ondazazxx21",
 		        ClientId = "les@tripthru.com",
 		        ClientSecret = "12ondazazxx21"
@@ -121,7 +121,7 @@ namespace ServiceStack.TripThruGateway
             var partnerLes = new Partner
             {
                 Name = "Les Taxi Blues",
-                CallbackUrl = "http://www.lestaxiblues.com/gateway/v1/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.LesTaxiBlues/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerLes);
@@ -138,7 +138,7 @@ namespace ServiceStack.TripThruGateway
 		        UserName = "Dubai Taxi Corporation",
 		        Password = "password",
 		        Email = "dubaitaxicorp@tripthru.com",
-		        AccessToken = "12ondazazxx21",
+		        AccessToken = "dubai12ondazazxx21",
 		        RefreshToken = "12ondazazxx21",
 		        ClientId = "dubai@tripthru.com",
 		        ClientSecret = "12ondazazxx21"
@@ -147,7 +147,7 @@ namespace ServiceStack.TripThruGateway
             var partnerDubai = new Partner
             {
                 Name = "Dubai Taxi Corporation",
-                CallbackUrl = "http://www.dubaitaxicorporation.com/gateway/v1/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.DubaiTaxi/json/asynconeway/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerDubai);

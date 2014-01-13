@@ -13,10 +13,22 @@ Sim Configuration
 					Michelle Phieffer
 					Zong Zi Yi
 					Mickey Rourke
-Simulation started at 10/01/2014 03:02:36 a. m.
-	Time = 10/01/2014 03:02:36 a. m.
+Simulation started at 13/01/2014 08:31:26 a. m.
+	Time = 13/01/2014 08:31:26 a. m.
 		Luxor Cab - SF
-			Pickup request: Zong Zi Yi requests to be picked up at 286 Harvard Street, Brookline, MA 02446, USA on 10/01/2014 03:02:36 a. m. and dropped off at 970-1114 Soldiers Field Road, Boston, MA 02163, USA
-				Queueing Trip11, Status = Queued, Origination/Service = Local, PickupLocation = 286 Harvard Street, Brookline, MA 02446, USA, PickupTime = 10/01/2014 03:02:36 a. m., Passenger = Zong Zi Yi, DropoffLocation = 970-1114 Soldiers Field Road, Boston, MA 02163, USA
-			Ready for dispatch: Trip11, Status = Queued, Origination/Service = Local, PickupLocation = 286 Harvard Street, Brookline, MA 02446, USA, PickupTime = 10/01/2014 03:02:36 a. m., Passenger = Zong Zi Yi, DropoffLocation = 970-1114 Soldiers Field Road, Boston, MA 02163, USA
-				Pickup location 286 Harvard Street, Brookline, MA 02446, USA is outside of coverage area
+	Time = 13/01/2014 08:31:36 a. m.
+		Luxor Cab - SF
+	Time = 13/01/2014 08:31:46 a. m.
+		Luxor Cab - SF
+	Time = 13/01/2014 08:31:56 a. m.
+		Luxor Cab - SF
+			Pickup request: John Riggins requests to be picked up at Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil on 13/01/2014 08:31:56 a. m. and dropped off at Rua Visconde de Niterói, 1338-1406 - Benfica, Rio - Rio de Janeiro, Brazil
+				Queueing Trip11, Status = Queued, Origination/Service = Local, PickupLocation = Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil, PickupTime = 13/01/2014 08:31:56 a. m., Passenger = John Riggins, DropoffLocation = Rua Visconde de Niterói, 1338-1406 - Benfica, Rio - Rio de Janeiro, Brazil
+			Ready for dispatch: Trip11, Status = Queued, Origination/Service = Local, PickupLocation = Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil, PickupTime = 13/01/2014 08:31:56 a. m., Passenger = John Riggins, DropoffLocation = Rua Visconde de Niterói, 1338-1406 - Benfica, Rio - Rio de Janeiro, Brazil
+				Pickup location Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil is outside of coverage area
+					Trip was rejected by TripThru
+	Time = 13/01/2014 08:32:09 a. m.
+		Luxor Cab - SF
+			Ready for dispatch: Trip11, Status = Queued, Origination/Service = Local, PickupLocation = Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil, PickupTime = 13/01/2014 08:31:56 a. m., Passenger = John Riggins, DropoffLocation = Rua Visconde de Niterói, 1338-1406 - Benfica, Rio - Rio de Janeiro, Brazil
+				Pickup location Rua Elpídio Boamorte, 157-191 - Praça da Bandeira, Rio - Rio de Janeiro, 20270-170, Brazil is outside of coverage area
+					Trip was rejected by TripThru

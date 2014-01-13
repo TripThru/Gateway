@@ -1,0 +1,14 @@
+﻿@inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
+
+@if (Model.LogList.Count == 0)
+{
+    <h1>No recent log entries</h1>
+}
+
+@foreach (var entry in Model.LogList)
+{
+    <p style="white-space: nowrap;"> 
+        <span>@entry.Item1.ToString() |</span>
+        <span style="padding-left: @entry.Item2.ToString()px;">@entry.Item3 </span>
+    </p>
+}

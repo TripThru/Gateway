@@ -19,7 +19,8 @@ namespace ServiceStack.TripThruGateway.TripThru
         public GatewayRestClient(string accessToken, string rootUrl)
         {
             AccessToken = accessToken;
-            RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl+"/";
+            RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
+            Client = new RestClient(RootUrl);
         }
 
         public Gateway.GetPartnerInfo.Response GetPartnerInfo()
@@ -265,7 +266,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
 
             var response = Client.Execute(request);
-            return response == null ? null : response.Content;
+            return (response == null || response.Content == null || response.Content.Equals("") || !response.ContentType.Equals("application/json")) ? null : response.Content;
         }
 
         
