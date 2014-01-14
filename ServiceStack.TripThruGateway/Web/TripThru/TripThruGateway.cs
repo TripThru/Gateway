@@ -84,7 +84,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                         fleets.AddRange(response.fleets);
                         vehicleTypes.AddRange(response.vehicleTypes);
                     }
-                    Logger.Log("GetPartnerInfo called on " + p.name + ", Response = " + response);
                 }
                 Response resp = new Response(fleets, vehicleTypes);
                 Logger.Log("GetPartnerInfo called on TripThru, Response: " + resp);
@@ -210,7 +209,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                         if (response.quotes != null)
                             quotes.AddRange(response.quotes);
                     }
-                    Logger.Log("QuoteTrip called on "+p.name+", Response = "+response.result);
                 }
                 Response response1 = new Response(quotes);
                 Logger.Untab();
@@ -243,7 +241,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                     response.partnerID = partner.ID;
                     response.partnerName = partner.name;
                 }
-                Logger.Log("GetTripStatus called on "+partner.name+", Response = "+response.result);
                 Logger.Untab();
                 return response;
             }
@@ -265,7 +262,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Partner partner = tripthru.partnersByID[partnerID];
                 r.clientID = tripthru.ID;
                 Response response = partner.PartnerGateway.updateTripStatus.Post(r);
-                Logger.Log("UpdateTripStatus called on " + partner.name + ", Response = " + response.result);
                 Logger.Untab();
                 return response;
             }

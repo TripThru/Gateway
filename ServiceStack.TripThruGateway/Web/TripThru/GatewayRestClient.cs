@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
@@ -25,7 +26,7 @@ namespace ServiceStack.TripThruGateway.TripThru
 
         public Gateway.GetPartnerInfo.Response GetPartnerInfo()
         {
-            var r= Request("GET", "partner", null);
+            var r= Request("GET", "partners", null);
 
             if (r!= null)
             {
@@ -119,7 +120,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 WayPoints = request.waypoints,
             });
 
-            var r = Request("POST", "quote", partnerRequest);
+            var r = Request("POST", "quotes", partnerRequest);
 
             if (r!= null)
             {
@@ -266,7 +267,8 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
 
             var response = Client.Execute(request);
-            return (response == null || response.Content == null || response.Content.Equals("") || !response.ContentType.Equals("application/json")) ? null : response.Content;
+
+            return (response == null || response.Content == null || response.Content.Equals("") || !response.ContentType.Contains("application/json")) ? null : response.Content;
         }
 
         
