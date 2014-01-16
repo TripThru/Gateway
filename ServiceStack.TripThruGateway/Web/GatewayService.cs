@@ -70,7 +70,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /partner called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "POST /partner called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new PartnerResponse
                 {
                     Result = "Failed",
@@ -162,7 +164,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /partners called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -199,7 +203,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("GET /partners called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "GET /partners called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -285,7 +291,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /quotes called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new QuotesResponse
                 {
                     Result = "Failed",
@@ -373,7 +381,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("POST /dispatch called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new DispatchResponse
                 {
                     Result = "Failed",
@@ -453,7 +463,9 @@ namespace ServiceStack.TripThruGateway
 
                 }
 
-                Logger.Log("GET /trip//status called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new TripResponse
                 {
                     Result = "Failed",
@@ -490,7 +502,9 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
 
-                Logger.Log("PUT /trip//status called with invalid access token, ip: " + Request.RemoteIp + ", Response = Authentication failed");
+                string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
                 return new TripResponse
                 {
                     Result = "Failed",
