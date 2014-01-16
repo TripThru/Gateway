@@ -58,9 +58,9 @@ namespace ServiceStack.TripThruGateway
                     drivers: drivers,
                     vehicleTypes: vehicleTypes,
                     possibleTrips: trips,
-                    baseCost: 3.00,
-                    costPerMile: 2.70,
-                    tripsPerHour: 200,
+                    baseCost: partnerFleet.BaseCost,
+                    costPerMile: partnerFleet.CostPerMile,
+                    tripsPerHour: partnerFleet.TripsPerHour,
                     passengers: passengers);
 
                 fleets.Add(fleet);
