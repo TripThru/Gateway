@@ -29,8 +29,7 @@ namespace TripThru.Gateway.App_Start
 
 		public override void Configure(Container container)
 		{
-			//JsConfig.DateHandler = JsonDateHandler.ISO8601;
-
+			JsConfig.DateHandler = JsonDateHandler.ISO8601;
 			JsConfig.EmitCamelCaseNames = true;
 
 			container.Register<IDbConnectionFactory>(

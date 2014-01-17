@@ -165,12 +165,12 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Response response1;
                 if (partner != null)
                 {
-                    r.foreignID += ":" + r.clientID;
+                    r.foreignID += "=" + r.clientID;
                     r.clientID = tripthru.ID;
                     response1 = partner.PartnerGateway.dispatchTrip.Post(r);
                     if (response1.result == Result.OK)
                     {
-                        response1.tripID += ":" + partner.ID;
+                        response1.tripID += "=" + partner.ID;
                     }
                     else
                     {
@@ -231,8 +231,8 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 Logger.Log("GetTripStatus called on TripThru -- Request: " + r);
                 Logger.Tab();
-                string partnerID = r.tripID.Substring(r.tripID.LastIndexOf(':') + 1);
-                r.tripID = r.tripID.Substring(0, r.tripID.LastIndexOf(':'));
+                string partnerID = r.tripID.Substring(r.tripID.LastIndexOf('=') + 1);
+                r.tripID = r.tripID.Substring(0, r.tripID.LastIndexOf('='));
                 Partner partner = tripthru.partnersByID[partnerID];
                 r.clientID = tripthru.ID;
                 Response response = partner.PartnerGateway.getTripStatus.Get(r);
@@ -257,8 +257,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Logger.Log("UpdateTripStatus called on TripThru -- Request: " + r);
                 Logger.Tab();
                 // Note: GetTrip populates the foreignTripID
-                string partnerID = r.tripID.Substring(r.tripID.LastIndexOf(':') + 1);
-                r.tripID = r.tripID.Substring(0, r.tripID.LastIndexOf(':'));
+                string partnerID = r.tripID.Substring(r.tripID.LastIndexOf('=') + 1);
+                r.tripID = r.tripID.Substring(0, r.tripID.LastIndexOf('='));
                 Partner partner = tripthru.partnersByID[partnerID];
                 r.clientID = tripthru.ID;
                 Response response = partner.PartnerGateway.updateTripStatus.Post(r);

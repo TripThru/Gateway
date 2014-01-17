@@ -151,6 +151,9 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Get(Request r)
             {
+                if (!partner.tripsByLocalID.ContainsKey(r.tripID) || partner.tripsByLocalID[r.tripID].driver == null)
+                    return new Response(result: Result.NotFound);
+
                 Trip t = partner.tripsByLocalID[r.tripID];
                 DateTime? ETA = null;
                 if (t.status == Status.Dispatched)
@@ -186,6 +189,8 @@ namespace ServiceStack.TripThruGateway.TripThru
             public override Response Post(Request r)
             {
                 // Note: GetTrip populates the foreignTripID
+                if (!partner.tripsByLocalID.ContainsKey(r.tripID) || partner.tripsByLocalID[r.tripID].driver == null)
+                    return new Response(result: Result.NotFound);
                 Trip t = partner.tripsByLocalID[r.tripID];
                 Response response = new Response();
                 Logger.Log("UpdateTripStatus called on " + partner.name + ", Response: " + response);

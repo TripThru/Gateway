@@ -286,8 +286,8 @@ namespace ServiceStack.TripThruGateway
         }
 
         [Api("Use GET /trip/{Id}/status for trip status and PUT /trip/{Id}/status to update a trip status. Use POST /trip/{Id}/rating to rate a trip.")]
-        [Route("/trip/{Id}/status", "GET, PUT")]
-        [Route("/trip/{Id}/rating", "POST")]
+        [Route("/trip/status/{TripId}", "GET, PUT")]
+        [Route("/trip/rating/{TripId}", "POST")]
         public class Trip : IReturn<TripResponse>
         {
             public string TripId { get; set; }

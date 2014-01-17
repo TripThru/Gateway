@@ -150,7 +150,7 @@ namespace ServiceStack.TripThruGateway.TripThru
 
         public Gateway.GetTripStatus.Response GetTripStatus(Gateway.GetTripStatus.Request request)
         {
-            var r = Request("GET", "trip/" + request.tripID + "/status", null);
+            var r = Request("GET", "trip/status/" + request.tripID, null);
 
             if (r != null)
             {
@@ -195,8 +195,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Status = request.status,
                 TripId = request.tripID
             });
-            
-            var r = Request("PUT", "trip/" + request.tripID + "/status", partnerRequest);
+
+            var r = Request("PUT", "trip/status/" + request.tripID, partnerRequest);
 
             if (r != null)
             {
@@ -265,6 +265,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                     }
                 }
             }
+
+            request.AddHeader("content-type", "application/json");
 
             var response = Client.Execute(request);
 

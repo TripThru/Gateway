@@ -43,7 +43,7 @@ namespace ServiceStack.TripThruGateway
             var partnerLuxor = new Partner
             {
                 Name = "Luxor Cab",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.LuxorCab/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.LuxorCab/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerLuxor);
@@ -69,7 +69,7 @@ namespace ServiceStack.TripThruGateway
             var partnerYellow = new Partner
             {
                 Name = "Yellow Cab",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.YellowCab/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.YellowCab/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerYellow);
@@ -95,7 +95,7 @@ namespace ServiceStack.TripThruGateway
             var partnerMetro = new Partner
             {
                 Name = "Metro Cab of Boston",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.MetroCab/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.MetroCab/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerMetro);
@@ -121,7 +121,7 @@ namespace ServiceStack.TripThruGateway
             var partnerLes = new Partner
             {
                 Name = "Les Taxi Blues",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.LesTaxiBlues/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.LesTaxiBlues/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerLes);
@@ -147,7 +147,7 @@ namespace ServiceStack.TripThruGateway
             var partnerDubai = new Partner
             {
                 Name = "Dubai Taxi Corporation",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.DubaiTaxi/json/asynconeway/",
+                CallbackUrl = "http://54.201.134.194/ServiceStack.DubaiTaxi/",
                 UserId = (Int32)Db.GetLastInsertId()
             };
             Db.Insert(partnerDubai);
