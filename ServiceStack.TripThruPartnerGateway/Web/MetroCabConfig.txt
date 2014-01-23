@@ -1,17 +1,18 @@
 {
-  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/json/asynconeway/",
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Metro Cab of Boston",
       "clientId" : "metro@tripthru.com",
       "accessToken" : "metro12ondazazxx21",
+      "callbackUrl" : "http://54.201.134.194/ServiceStack.MetroCab/"
   },
   "fleets" : [
     {
         "name" : "Metro Cab of Boston",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 20,
+        "tripsPerHour" : 5,
 		"location" : {
 			"lat" : 42.356217,
             "lng" : -71.137512

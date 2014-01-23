@@ -17,22 +17,35 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Get(Request request)
             {
-                List<VehicleType> vehicleTypes = new List<VehicleType>();
-                foreach (PartnerFleet f in partner.PartnerFleets.Values)
-                    vehicleTypes.AddRange(f.vehicleTypes);
-                List<Fleet> PartnerFleets = new List<Fleet>();
-                foreach (PartnerFleet f in partner.PartnerFleets.Values)
-                    PartnerFleets.Add(new Fleet
-                    {
-                        FleetId = f.ID,
-                        FleetName = f.name,
-                        PartnerId = this.partner.ID,
-                        PartnerName = this.partner.name,
-                        Zone = f.coverage
-                    });
-                Response response = new Response(PartnerFleets, vehicleTypes);
-                Logger.Log("GetPartnerInfo called on " + partner.name + ": Response = " + response);
-                return response;
+                int tab = Logger.tab;
+                try
+                {
+                    partner.requests++;
+                    List<VehicleType> vehicleTypes = new List<VehicleType>();
+                    foreach (PartnerFleet f in partner.PartnerFleets.Values)
+                        vehicleTypes.AddRange(f.vehicleTypes);
+                    List<Fleet> PartnerFleets = new List<Fleet>();
+                    foreach (PartnerFleet f in partner.PartnerFleets.Values)
+                        PartnerFleets.Add(new Fleet
+                        {
+                            FleetId = f.ID,
+                            FleetName = f.name,
+                            PartnerId = this.partner.ID,
+                            PartnerName = this.partner.name,
+                            Zone = f.coverage
+                        });
+                    Response response = new Response(PartnerFleets, vehicleTypes);
+                    Logger.tab = tab;
+                    Logger.Log("GetPartnerInfo called on " + partner.name + ": Response = " + response);
+                    return response;
+                }
+                catch (Exception e)
+                {
+                    Logger.tab = tab;
+                    partner.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
+                }
             }
         }
         public new class DispatchTrip : Gateway.DispatchTrip
@@ -42,18 +55,19 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 return new Trip(
                     partner: partner,
-                    pickupLocation: r.pickupLocation, 
-                    pickupTime: r.pickupTime, 
-                    paymentMethod: r.paymentMethod, 
-                    foreignID: r.foreignID,
-                    passengerID: r.passengerID, 
-                    passengerName: r.passengerName, 
+                    ID: r.tripID,
+                    origination: Trip.Origination.Foreign,
+                    pickupLocation: r.pickupLocation,
+                    pickupTime: r.pickupTime,
+                    paymentMethod: r.paymentMethod,
+                    passengerID: r.passengerID,
+                    passengerName: r.passengerName,
                     dropoffLocation: r.dropoffLocation,
-                    waypoints: r.waypoints, 
-                    vehicleType: r.vehicleType, 
-                    maxPrice: r.maxPrice, 
-                    minRating: r.minRating, 
-                    PartnerFleet: r.fleetID == null ? null : partner.PartnerFleets[r.fleetID], 
+                    waypoints: r.waypoints,
+                    vehicleType: r.vehicleType,
+                    maxPrice: r.maxPrice,
+                    minRating: r.minRating,
+                    fleet: r.fleetID == null ? null : partner.PartnerFleets[r.fleetID],
                     driver: r.driverID == null ? null : partner.PartnerFleets[r.fleetID].drivers[r.driverID]);
             }
             public DispatchTrip(Partner partner)
@@ -62,38 +76,55 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Post(Request r)
             {
-                if (r.fleetID != null)
+
+                int tab = Logger.tab;
+                try
                 {
-                    PartnerFleet f = partner.PartnerFleets[r.fleetID];
-                    if (f.Serves(r.pickupLocation))
+                    partner.requests++;
+                    if (r.fleetID != null)
                     {
+                        PartnerFleet f = partner.PartnerFleets[r.fleetID];
+                        if (f.Serves(r.pickupLocation))
+                        {
+                            Trip trip = GetTrip(r);
+                            if (f.QueueTrip(trip))
+                            {
+                                Response response = new Response();
+                                Logger.Log("DispatchTrip successful on " + partner.name + ", Response: " + response);
+                                return response;
+                            }
+                        }
+                        return new Response(result: Result.Rejected);
+                    }
+                    // Note: GetTrip populates the foreignTripID
+                    foreach (PartnerFleet f in partner.PartnerFleets.Values)
+                    {
+                        if (!f.Serves(r.pickupLocation))
+                            continue;
                         Trip trip = GetTrip(r);
                         if (f.QueueTrip(trip))
                         {
-                            Response response = new Response(trip.ID);
+                            Logger.tab = tab;
+                            Response response = new Response();
                             Logger.Log("DispatchTrip successful on " + partner.name + ", Response: " + response);
                             return response;
                         }
                     }
-                    return new Response(result: Result.Rejected);
-                }
-                // Note: GetTrip populates the foreignTripID
-                foreach (PartnerFleet f in partner.PartnerFleets.Values)
-                {
-                    if (!f.Serves(r.pickupLocation))
-                        continue;
-                    Trip trip = GetTrip(r);
-                    if (f.QueueTrip(trip))
                     {
-                        Response response = new Response(trip.ID);
-                        Logger.Log("DispatchTrip successful on " + partner.name + ", Response: " + response);
+                        Response response = new Response(result: Result.Rejected);
+                        Logger.Log("DispatchTrip rejected on " + partner.name + ", no available drivers -- Response: " + response);
                         return response;
                     }
                 }
+                catch (Exception e)
                 {
-                    Response response = new Response(result: Result.Rejected);
-                    Logger.Log("DispatchTrip rejected on " + partner.name + ", no available drivers -- Response: " + response);
-                    return response;
+
+
+
+                    Logger.tab = tab;
+                    partner.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
                 }
             }
         }
@@ -101,7 +132,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         {
             public Trip GetTrip(Request r)
             {
-                return new Trip(partner, r.pickupLocation, r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation,
+                return new Trip(partner, null, Trip.Origination.Foreign, r.pickupLocation, r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation,
                     null, r.waypoints, r.vehicleType, r.maxPrice, r.minRating, r.fleetID == null ? null : partner.PartnerFleets[r.fleetID], r.driverID == null ? null : partner.PartnerFleets[r.fleetID].drivers[r.driverID]);
             }
             public Partner partner;
@@ -111,35 +142,47 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Get(Request r)
             {
-                List<Quote> quotes = new List<Quote>();
-                bool pickupLocationNotServed = true;
-                foreach (PartnerFleet f in partner.PartnerFleets.Values)
+                int tab = Logger.tab;
+                try
                 {
-                    if (!f.Serves(r.pickupLocation))
-                        continue;
-                    pickupLocationNotServed = false;
-                    foreach (VehicleType vehicleType in f.vehicleTypes)
+                    partner.requests++;
+                    List<Quote> quotes = new List<Quote>();
+                    bool pickupLocationNotServed = true;
+                    foreach (PartnerFleet f in partner.PartnerFleets.Values)
                     {
-                        if (r.vehicleType == vehicleType || r.vehicleType == null)
+                        if (!f.Serves(r.pickupLocation))
+                            continue;
+                        pickupLocationNotServed = false;
+                        foreach (VehicleType vehicleType in f.vehicleTypes)
                         {
-                            Trip trip = GetTrip(r);
-                            trip.vehicleType = vehicleType;
-                            quotes.Add(new Quote(
-                                partnerID: partner.ID, 
-                                partnerName: partner.name, 
-                                fleetID: f.ID, 
-                                fleetName: f.name, 
-                                vehicleType: vehicleType, 
-                                price: f.GetPrice(trip), 
-                                distance: f.GetDistance(trip),
-                                duration: trip.duration, 
-                                ETA: f.GetETA(trip)));
+                            if (r.vehicleType == vehicleType || r.vehicleType == null)
+                            {
+                                Trip trip = GetTrip(r);
+                                trip.vehicleType = vehicleType;
+                                quotes.Add(new Quote(
+                                    partnerID: partner.ID,
+                                    partnerName: partner.name,
+                                    fleetID: f.ID, fleetName: f.name,
+                                    vehicleType: vehicleType,
+                                    price: f.GetPrice(trip),
+                                    distance: f.GetDistance(trip),
+                                    duration: trip.duration,
+                                    ETA: f.GetETA(trip)));
+                            }
                         }
                     }
+                    Logger.tab = tab;
+                    Response response = quotes.Count > 0 ? new Response(quotes) : new Response(result: Result.Rejected);
+                    Logger.Log("QuoteTrip called on " + partner.name + ", Response: " + response + (pickupLocationNotServed ? " -- Pickup location is outside of coverage area" : ""));
+                    return response;
                 }
-                Response response = quotes.Count > 0 ? new Response(quotes) : new Response(result: Result.Rejected);
-                Logger.Log("QuoteTrip called on " + partner.name + ", Response: " + response + (pickupLocationNotServed ? " -- Pickup location is outside of coverage area" : ""));
-                return response;
+                catch (Exception e)
+                {
+                    Logger.tab = tab;
+                    partner.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
+                }
             }
         }
         public new class GetTripStatus : Gateway.GetTripStatus
@@ -151,32 +194,62 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Get(Request r)
             {
-                if (!partner.tripsByLocalID.ContainsKey(r.tripID) || partner.tripsByLocalID[r.tripID].driver == null)
-                    return new Response(result: Result.NotFound);
+                int tab = Logger.tab;
+                try
+                {
+                    partner.requests++;
+                    if (!partner.tripsByID.ContainsKey(r.tripID))
+                        return new Response(result: Result.NotFound);
 
-                Trip t = partner.tripsByLocalID[r.tripID];
-                DateTime? ETA = null;
-                if (t.status == Status.Dispatched)
-                    ETA = t.pickupTime;
-                else if (t.status == Status.PickedUp)
-                    ETA = t.pickupTime + new TimeSpan(0, 5, 0); // TODO: for now lets assume every trip takes 5 mins.
-                DateTime? pickupTime = null;
-                if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
-                    pickupTime = t.pickupTime; // Only if trip has been pickedup.
-                Response response = new Response(
-                    partnerID: partner.ID, 
-                    partnerName: partner.name, 
-                    fleetID: t.PartnerFleet.ID, 
-                    fleetName: t.PartnerFleet.name,
-                    pickupTime: pickupTime,
-                    driverID: t.driver.ID, 
-                    driverName: t.driver.name, 
-                    driverLocation: t.driver.location, 
-                    dropoffTime: t.dropoffTime,
-                    vehicleType: t.vehicleType,
-                    ETA: ETA);
-                Logger.Log("GetTripStatus called on " + partner.name + ", Response: " + response);
-                return response;
+                    Trip t = partner.tripsByID[r.tripID];
+                    DateTime? pickupTime = null;
+                    if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
+                        pickupTime = t.pickupTime; // Only if trip has been pickedup.
+
+                    Response response;
+                    if (t.driver != null && t.PartnerFleet != null)
+                    {
+                        if (t.price == null)
+                            t.price = t.PartnerFleet.GetPrice(t);
+                        DateTime? ETA = t.PartnerFleet.GetETA(t);
+                        double? distance = t.PartnerFleet.GetDistance(t);
+                        response = new Response(
+                            partnerID: partner.ID, 
+                            partnerName: partner.name, 
+                            fleetID: t.PartnerFleet.ID, 
+                            fleetName: t.PartnerFleet.name,
+                            pickupTime: pickupTime,
+                            driverID: t.driver.ID, 
+                            driverName: t.driver.name, 
+                            driverLocation: t.driver.location, 
+                            dropoffTime: t.dropoffTime,
+                            vehicleType: t.vehicleType,
+                            ETA: ETA,
+                            distance: distance,
+                            price: t.price,
+                            status: t.status
+                            );
+                    }
+                    else
+                    {
+                        response = new Response(
+                            partnerID: partner.ID,
+                            partnerName: partner.name,
+                            pickupTime: pickupTime,
+                            status: t.status
+                            );
+                    }
+                    Logger.tab = tab;
+                    Logger.Log("GetTripStatus called on " + partner.name + ", Response: " + response);
+                    return response;
+                }
+                catch (Exception e)
+                {
+                    Logger.tab = tab;
+                    partner.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
+                }
             }
         }
         public new class UpdateTripStatus : Gateway.UpdateTripStatus
@@ -188,23 +261,35 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public override Response Post(Request r)
             {
-                // Note: GetTrip populates the foreignTripID
-                if (!partner.tripsByLocalID.ContainsKey(r.tripID) || partner.tripsByLocalID[r.tripID].driver == null)
-                    return new Response(result: Result.NotFound);
-                Trip t = partner.tripsByLocalID[r.tripID];
-                Response response = new Response();
-                Logger.Log("UpdateTripStatus called on " + partner.name + ", Response: " + response);
-                Logger.Tab();
-                t.SetStatus(r.status, notifyPartner: false);
-                Logger.Untab();
-                return response;
+                int tab = Logger.tab;
+                try
+                {
+                    // Note: GetTrip populates the foreignTripID
+                    partner.requests++;
+                    if (!partner.tripsByID.ContainsKey(r.tripID))
+                        return new Response(result: Result.NotFound);
+                    Trip t = partner.tripsByID[r.tripID];
+                    Response response = new Response();
+                    Logger.Log("UpdateTripStatus called on " + partner.name + ", Response: " + response);
+                    Logger.Tab();
+                    t.SetStatus(r.status, notifyPartner: false);
+                    Logger.Untab();
+                    Logger.tab = tab;
+                    return response;
+                }
+                catch (Exception e)
+                {
+                    Logger.tab = tab;
+                    partner.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
+                }
             }
         }
         public string ID;
         public string name;
         public Dictionary<string, PartnerFleet> PartnerFleets;
-        public Dictionary<string, Trip> tripsByforeignID;
-        public Dictionary<string, Trip> tripsByLocalID;
+        public Dictionary<string, Trip> tripsByID;
         public DateTime lastSim;
         public GatewayRestClient tripthru;
         // Configuration parameters
@@ -212,7 +297,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
 
         static long nextID = 0;
-        static public string GenerateUniqueID() { nextID++; return nextID.ToString(); }
+        public string GenerateUniqueID() { nextID++; return nextID.ToString() + "@" + ID; }
 
 
         public Partner(string name, string clientId, string accessToken, string tripthruURL, List<PartnerFleet> PartnerFleets = null)
@@ -227,8 +312,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     AddPartnerFleet(f);
             }
 
-            tripsByforeignID = new Dictionary<string, Trip>();
-            tripsByLocalID = new Dictionary<string, Trip>();
+            tripsByID = new Dictionary<string, Trip>();
 
             getPartnerInfo = new GetPartnerInfo(this);
             dispatchTrip = new DispatchTrip(this);
@@ -253,23 +337,24 @@ namespace ServiceStack.TripThruGateway.TripThru
             PartnerFleets.Add(f.ID, f);
         }
         // speed is miles per hour
-        public void GetTripStatusFromForeignServiceProvider(Trip t)
+        public void GetTripStatusFromForeignServiceProvider(Trip trip, bool force = false)
         {
-            if (DateTime.UtcNow > t.lastUpdate + updateInterval)
+            if (force || DateTime.UtcNow > trip.lastUpdate + updateInterval)
             {
-                Logger.Log("Getting (Foreign) status of " + t);
+                Logger.Log("Getting (Foreign) status of " + trip);
                 Logger.Tab();
-                Gateway.GetTripStatus.Request request = new Gateway.GetTripStatus.Request(clientID: ID, tripID: t.foreignID);
+                Gateway.GetTripStatus.Request request = new Gateway.GetTripStatus.Request(clientID: ID, tripID: trip.ID);
                 Gateway.GetTripStatus.Response response = tripthru.GetTripStatus(request);
                 if (response.status != null)
-                    t.SetStatus((Status)response.status, notifyPartner: false);
+                    trip.SetStatus((Status)response.status, notifyPartner: false);
                 if (response.driverName != null)
-                    t.driver = new Driver(name: response.driverName, location: response.driverLocation);
+                    trip.driver = new Driver(name: response.driverName, location: response.driverLocation);
                 if (response.dropoffTime != null)
-                    t.dropoffTime = response.dropoffTime;
+                    trip.dropoffTime = response.dropoffTime;
                 if (response.vehicleType != null)
-                    t.vehicleType = response.vehicleType;
+                    trip.vehicleType = response.vehicleType;
                 Logger.Untab();
+                trip.lastUpdate = DateTime.UtcNow;
             }
         }
 
@@ -291,17 +376,30 @@ namespace ServiceStack.TripThruGateway.TripThru
         public enum Origination { Local, Foreign };
         public void SetStatus(Status value, bool notifyPartner = true)
         {
+            if (value == Status.Complete)
+            {
+                if (service == Origination.Foreign)
+                {
+                    Gateway.GetTripStatus.Response resp = partner.tripthru.GetTripStatus(new Gateway.GetTripStatus.Request(partner.ID, ID));
+                    partner.DeactivateTrip(ID, Status.Complete, resp.price, resp.distance);
+                }
+                else
+                    partner.DeactivateTrip(ID, Status.Complete, PartnerFleet.GetPrice(this), PartnerFleet.GetDistance(this));
+            }
+            else if (value == Status.Cancelled || value == Status.Rejected)
+                partner.DeactivateTrip(ID, value);
             if (_status != value)
             {
                 Logger.Log("Trip status changed from " + _status + " to " + value);
                 _status = value;
-                if (foreignID != null && notifyPartner)
+                if ((origination == Origination.Foreign || service == Origination.Foreign) && notifyPartner)
                 {
                     Logger.Log("Since trip originated elsewhere, notify originating partner through TripThru");
                     Logger.Tab();
                     Gateway.UpdateTripStatus.Request request = new Gateway.UpdateTripStatus.Request(
                         clientID: partner.ID,
-                        tripID: foreignID,
+
+                        tripID: ID,
                         status: value);
                     partner.tripthru.UpdateTripStatus(request);
                     Logger.Untab();
@@ -312,8 +410,8 @@ namespace ServiceStack.TripThruGateway.TripThru
         private Status _status;
         public string passengerID;
         public string passengerName;
-        public string foreignID;
         public Origination origination;
+        public Origination service;
         public int? luggage;
         public int? persons;
         public Location pickupLocation;
@@ -324,6 +422,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         public List<Location> waypoints;
         public PaymentMethod? paymentMethod;
         public VehicleType? vehicleType;
+        public double? price;
         public double? maxPrice;
         public int? minRating;
         public PartnerFleet PartnerFleet;
@@ -335,8 +434,8 @@ namespace ServiceStack.TripThruGateway.TripThru
             this.ID = t.ID;
             this.passengerID = t.passengerID;
             this.passengerName = t.passengerName;
-            this.foreignID = t.foreignID;
             this.origination = t.origination;
+            this.service = t.service;
             this.luggage = t.luggage;
             this.persons = t.persons;
             this.pickupLocation = t.pickupLocation;
@@ -347,6 +446,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             this.waypoints = t.waypoints;
             this.paymentMethod = t.paymentMethod;
             this.vehicleType = t.vehicleType;
+            this.price = t.price;
             this.maxPrice = t.maxPrice;
             this.minRating = t.minRating;
             this.PartnerFleet = t.PartnerFleet;
@@ -359,15 +459,8 @@ namespace ServiceStack.TripThruGateway.TripThru
         {
             string s = "Trip" + ID;
             s += ", Status = " + status;
-            if (foreignID != null)
-            {
-                if (origination == Origination.Local)
-                    s += ", Origination = Local, Service = Foreign (ID = " + foreignID + ")";
-                else if (origination == Origination.Foreign)
-                    s += ", Origination = Foreign (ID = " + foreignID + "), Service = Local";
-            }
-            else
-                s += ", Origination/Service = Local";
+            s += ", Origination = " + origination;
+            s += ", Service = " + service;
             s += ", PickupLocation = " + pickupLocation;
             s += ", PickupTime = " + pickupTime;
             if (passengerName != null)
@@ -376,24 +469,21 @@ namespace ServiceStack.TripThruGateway.TripThru
                 s += ", DropoffLocation = " + dropoffLocation;
             if (dropoffTime != null)
                 s += ", DropoffTime = " + dropoffTime;
+            if (price != null)
+                s += ", Price = " + price;
             if (PartnerFleet != null)
-                s += ", PartnerFleet = " + PartnerFleet.name;
+                s += ", Fleet = " + PartnerFleet.name;
             if (driver != null)
                 s += ", Driver = " + driver;
 
             return s;
         }
-        public Trip(Partner partner, Location pickupLocation, DateTime pickupTime, PaymentMethod? paymentMethod = null, string passengerID = null, string passengerName = null, Location dropoffLocation = null,
-            DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet PartnerFleet = null, Driver driver = null, string foreignID = null, TimeSpan? duration = null)
+        public Trip(Partner partner, string ID, Origination origination, Location pickupLocation, DateTime pickupTime, PaymentMethod? paymentMethod = null, string passengerID = null, string passengerName = null, Location dropoffLocation = null,
+           DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, string foreignID = null, TimeSpan? duration = null, double? price = null)
         {
-            this.ID = GenerateUniqueID();
-            if (foreignID != null)
-            {
-                this.foreignID = foreignID;
-                this.origination = Origination.Foreign;
-            }
-            else
-                this.origination = Origination.Local;
+            this.ID = ID;
+            this.origination = origination;
+            this.service = Origination.Local;
             this.partner = partner;
             this.passengerID = passengerID;
             this.passengerName = passengerName;
@@ -407,8 +497,9 @@ namespace ServiceStack.TripThruGateway.TripThru
             this.vehicleType = vehicleType;
             this.maxPrice = maxPrice;
             this.minRating = minRating;
-            this.PartnerFleet = PartnerFleet;
+            this.PartnerFleet = fleet;
             this.driver = driver;
+            this.price = price;
             this.SetStatus(Status.Queued, notifyPartner: false);
         }
     }
@@ -431,6 +522,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         public Location location; // For this sim, we don't care about initial location.  Driver's can magically get where they need to be.
         public DateTime routeStartTime;
         public Route route;
+        public DateTime lastUpdate;
         public Driver(string name, PartnerFleet PartnerFleet = null, Location location = null)
             : base(name)
         {
@@ -438,6 +530,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 PartnerFleet.AddDriver(this);
             this.PartnerFleet = PartnerFleet;
             this.location = location;
+            lastUpdate = DateTime.UtcNow;
         }
         public override string ToString()
         {
@@ -563,6 +656,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         public void CompleteTrip(Trip t)
         {
             returningDrivers.AddLast(t.driver);
+            availableDrivers.AddLast(t.driver);
             t.driver.routeStartTime = DateTime.UtcNow;
             t.driver.route = GetDriverRoute(t.dropoffLocation, location);
         }
@@ -608,41 +702,38 @@ namespace ServiceStack.TripThruGateway.TripThru
                 Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
                 Route route = GetTripRoute(fromTo.First, fromTo.Second);
                 DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
-                Logger.Log("Pickup request: " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
+                Logger.Log("Pickup request (" + name + ") " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
                 Logger.Tab();
                 Trip trip = new Trip(
                     partner: this.partner,
-                    passengerID: passenger.ID,
-                    passengerName: passenger.name,
+                    ID: Trip.GenerateUniqueID(this.partner.ID),
+                    origination: Trip.Origination.Local,
                     pickupLocation: route.start,
                     pickupTime: pickupTime,
+                    passengerID: passenger.ID,
+                    passengerName: passenger.name,
                     dropoffLocation: route.end,
                     paymentMethod: PaymentMethod.Cash);
+                partner.requests++;
                 QueueTrip(trip);
                 Logger.Untab();
             }
         }
         public bool QueueTrip(Trip t)
         {
-            if (availableDrivers.Count == 0 && t.foreignID != null)
+            if (availableDrivers.Count == 0 && t.origination == Trip.Origination.Foreign)
                 return false; // don't except from parters if no available drivers
             Logger.Log("Queueing " + t);
             queue.AddLast(t);
-            if (t.foreignID != null)
-                partner.tripsByforeignID.Add(t.foreignID, t);
-            partner.tripsByLocalID.Add(t.ID, t);
+            partner.tripsByID.Add(t.ID, t);
             return true;
         }
         public void RemoveTrip(Trip t)
         {
-            if (t.foreignID != null)
-                partner.tripsByforeignID.Remove(t.foreignID);
             queue.Remove(queue.Find(t));
         }
         public void Simulate(DateTime until)
         {
-            Logger.Log(name);
-            Logger.Tab();
             GenerateTrips();
             ProcessQueue();
             LinkedListNode<Driver> next = null;
@@ -656,18 +747,15 @@ namespace ServiceStack.TripThruGateway.TripThru
                 {
                     Logger.Log("Driver " + driver.name + " has reached the home office ");
                     returningDrivers.Remove(node);
-                    availableDrivers.AddLast(driver);
                 }
+                else if (DateTime.UtcNow > driver.lastUpdate + updateInterval)
+                    Logger.Log("Driver update: " + driver);
             }
-            Logger.Untab();
-
         }
 
         public void RemoveTrip(LinkedListNode<Trip> t)
         {
-            if (t.Value.foreignID != null)
-                partner.tripsByforeignID.Remove(t.Value.foreignID);
-            partner.tripsByLocalID.Remove(t.Value.ID);
+            partner.tripsByID.Remove(t.Value.ID);
             queue.Remove(t);
         }
         public void ProcessQueue()
@@ -681,7 +769,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 {
                     case Status.Queued:
                         {
-                            if (t.origination != Trip.Origination.Foreign)
+                            if (t.origination == Trip.Origination.Local)
                             {
                                 if (DateTime.UtcNow > t.pickupTime + missedPeriod)
                                 {
@@ -691,7 +779,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                                     Logger.Untab();
                                     break;
                                 }
-                                if (t.foreignID != null) // means serviced through partner
+                                if (t.service == Trip.Origination.Foreign) // means serviced through partner
                                     break;
                             }
                             // If origination is foreign, then it means we're servicing the trip so we have to process it.
@@ -700,14 +788,14 @@ namespace ServiceStack.TripThruGateway.TripThru
                             Logger.Log("Ready for dispatch: " + t);
                             Logger.Tab();
 
-                            if (!Dispatch(t))
+                            if (!Dispatch(t) && t.origination == Trip.Origination.Local)
                             {
                                 Logger.Tab();
                                 Gateway.DispatchTrip.Request request = new Gateway.DispatchTrip.Request(
                                     clientID: partner.ID,
+                                    tripID: t.ID,
                                     pickupLocation: t.pickupLocation,
                                     pickupTime: t.pickupTime,
-                                    foreignID: t.ID,
                                     passengerID: t.passengerID,
                                     passengerName: t.passengerName,
                                     luggage: t.luggage,
@@ -721,27 +809,28 @@ namespace ServiceStack.TripThruGateway.TripThru
                                 Gateway.DispatchTrip.Response response = partner.tripthru.DispatchTrip(request);
                                 if (response.result == Gateway.Result.OK)
                                 {
-                                    t.foreignID = response.tripID;
                                     // Actually, at this point its just in the partner's queue, until its dispatch to the partner's drivers -- so no status update. 
-                                    Logger.Log("Trip was successfully dispatched through TripThru: ForeignID = " + t.foreignID);
+                                    t.service = Trip.Origination.Foreign;
+                                    Logger.Log("Trip was successfully dispatched through TripThru");
+
                                 }
                                 else
                                     Logger.Log("Trip was rejected by TripThru");
                                 Logger.Untab();
+
                             }
                             Logger.Untab();
                             break;
                         }
                     case Status.Dispatched:
                         {
-                            if (t.foreignID != null && t.origination != Trip.Origination.Foreign)
+                            if (t.service == Trip.Origination.Foreign)
                                 partner.GetTripStatusFromForeignServiceProvider(t);
-
-                            else if (DateTime.UtcNow >= t.pickupTime - t.PartnerFleet.GetDriverRoute(location, t.pickupLocation).duration)
+                            else if (DateTime.UtcNow >= t.pickupTime - t.PartnerFleet.GetDriverRoute(t.driver.location, t.pickupLocation).duration)
                             {
                                 Logger.Log("Driver is now enroute: " + t);
                                 Logger.Tab();
-                                t.driver.route = GetDriverRoute(location, t.pickupLocation);
+                                t.driver.route = GetDriverRoute(t.driver.location, t.pickupLocation);
                                 if (t.driver.route == null)
                                     throw new Exception("fatal error");
                                 t.driver.routeStartTime = DateTime.UtcNow;
@@ -749,12 +838,15 @@ namespace ServiceStack.TripThruGateway.TripThru
                                 Logger.Untab();
                             }
                             else if (DateTime.UtcNow > t.lastUpdate + updateInterval)
+                            {
                                 Logger.Log("Getting status of: " + t);
+                                t.lastUpdate = DateTime.UtcNow;
+                            }
                             break;
                         }
                     case Status.Enroute:
                         {
-                            if (t.foreignID != null && t.origination != Trip.Origination.Foreign)
+                            if (t.service == Trip.Origination.Foreign)
                                 partner.GetTripStatusFromForeignServiceProvider(t);
                             else
                             {
@@ -769,13 +861,16 @@ namespace ServiceStack.TripThruGateway.TripThru
                                     Logger.Untab();
                                 }
                                 else if (DateTime.UtcNow > t.lastUpdate + updateInterval)
+                                {
                                     Logger.Log("Getting status of: " + t);
+                                    t.lastUpdate = DateTime.UtcNow;
+                                }
                             }
                             break;
                         }
                     case Status.PickedUp:
                         {
-                            if (t.foreignID != null && t.origination != Trip.Origination.Foreign)
+                            if (t.service == Trip.Origination.Foreign)
                                 partner.GetTripStatusFromForeignServiceProvider(t);
                             else
                             {
@@ -791,8 +886,10 @@ namespace ServiceStack.TripThruGateway.TripThru
                                     Logger.Untab();
                                 }
                                 else if (DateTime.UtcNow > t.lastUpdate + updateInterval)
+                                {
                                     Logger.Log("Getting status of: " + t);
-
+                                    t.lastUpdate = DateTime.UtcNow;
+                                }
                             }
                             break;
                         }
@@ -809,7 +906,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     case Status.Complete:
                         {
                             if (t.dropoffTime == null)
-                                partner.GetTripStatusFromForeignServiceProvider(t);
+                                partner.GetTripStatusFromForeignServiceProvider(t, true);
                             TimeSpan age = DateTime.UtcNow - (DateTime)t.dropoffTime;
                             if (age > removalAge) // for now we use 1 minute.
                             {
@@ -846,11 +943,17 @@ namespace ServiceStack.TripThruGateway.TripThru
         }
         public DateTime GetETA(Trip trip)
         {
-            DateTime ETA = DateTime.UtcNow + GetDriverRoute(location, trip.pickupLocation).duration;
+            DateTime ETA;
+            if (trip.status == Status.PickedUp)
+                ETA = DateTime.UtcNow + GetDriverRoute(location, trip.dropoffLocation).duration;
+            else
+            {
+                ETA = DateTime.UtcNow + GetDriverRoute(location, trip.pickupLocation).duration;
+                if (trip.pickupTime > ETA)
+                    ETA = trip.pickupTime;
+            }
             if (availableDrivers.Count == 0)
                 ETA += new TimeSpan(3, 0, 0); // if there are no drivers avaialble we add 3 hrs.  TODO: make this more realistic
-            if (trip.pickupTime > ETA)
-                ETA = trip.pickupTime;
             return ETA; // TODO: for now all trips are picked up on time
         }
     }

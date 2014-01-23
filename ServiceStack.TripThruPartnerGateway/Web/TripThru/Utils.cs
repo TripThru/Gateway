@@ -385,6 +385,7 @@ namespace ServiceStack.TripThruGateway.TripThru
 
         static long nextID = 0;
         static public string GenerateUniqueID() { nextID++; return nextID.ToString(); }
+        static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
     }
 
     class MapTools
@@ -631,7 +632,7 @@ namespace ServiceStack.TripThruGateway.TripThru
 
     public class Logger
     {
-        static int tab;
+        public static int tab;
         public static int logLine;
         public static bool enabled { get; set; }
         public static bool forceOn { get; set; }

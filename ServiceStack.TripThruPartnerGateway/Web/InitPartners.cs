@@ -70,7 +70,7 @@ namespace ServiceStack.TripThruGateway
 
             MapTools.WriteGeoData();
 
-		    var sim = new SimulationThread(GatewayService.TripThruPartner, configuration.SimInterval);
+		    var sim = new SimulationThread(GatewayService.TripThruPartner, configuration);
 
 			return new InitPartnersResponse();
 		}
@@ -79,22 +79,23 @@ namespace ServiceStack.TripThruGateway
     public class SimulationThread : IDisposable
     {
         private TripThru.Partner _partner;
-        private int _simInterval;
+        private PartnerConfiguration _configuration;
         private Thread _worker;
         private volatile bool _workerTerminateSignal = false;
 
-        public SimulationThread(TripThru.Partner partner, int simInterval)
+        public SimulationThread(TripThru.Partner partner, PartnerConfiguration configuration)
         {
             this._partner = partner;
-            this._simInterval = simInterval;
+            this._configuration = configuration;
             _worker = new Thread(StartSimulation);
             _worker.Start();
         }
 
         private void StartSimulation()
         {
-            while (!_workerTerminateSignal)
+            try
             {
+                Console.WriteLine(_partner.name + ": sim start");
                 Logger.OpenLog("TripThruSimulation.log", true);
                 Logger.Log("Sim Configuration");
                 Logger.Tab();
@@ -103,34 +104,31 @@ namespace ServiceStack.TripThruGateway
 
                 Logger.Log("Simulation started at " + DateTime.UtcNow);
                 Logger.Tab();
-                var interval = new TimeSpan(0, 0, _simInterval);
+                var interval = new TimeSpan(0, 0, _configuration.SimInterval);
+
+                GatewayService.TripThruPartner.tripthru.RegisterPartner(
+                    new Gateway.RegisterPartner.Request(_configuration.Partner.ClientId, _configuration.Partner.Name,
+                        _configuration.Partner.CallbackUrl, _configuration.Partner.AccessToken));
+
                 while (true)
                 {
-                    Logger.Log("Time = " + DateTime.UtcNow);
-                    Logger.Tab();
                     lock (_partner)
                     {
                         _partner.Simulate(DateTime.UtcNow + interval);
                     }
                     MapTools.WriteGeoData();
                     System.Threading.Thread.Sleep(interval);
-                    Logger.Untab();
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(_partner.name+", error :"+e.Message);
             }
         }
 
         public void Dispose()
         {
-            if (_worker != null)
-            {
-                _workerTerminateSignal = true;
-                if (!_worker.Join(TimeSpan.FromMinutes(1)))
-                {
-                    Console.WriteLine("Worker busy, aborting the simulation thread.");
-                    _worker.Abort();
-                }
-                _worker = null;
-            }
+            Console.WriteLine(_partner.name+": simulation ended");
         }
     }
 
@@ -146,6 +144,7 @@ namespace ServiceStack.TripThruGateway
             public string Name { get; set; }
             public string ClientId { get; set; }
             public string AccessToken { get; set; }
+            public string CallbackUrl { get; set; }
         }
 
         public class Fleet

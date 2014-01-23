@@ -70,7 +70,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                 PartnerId = request.partnerID,
                 FleetId = request.fleetID,
                 DriverId = request.driverID,
-                Waypoints = request.waypoints
+                Waypoints = request.waypoints,
+                TripId = request.tripID
             });
 
             var r = Request("POST", "dispatch", partnerRequest);
@@ -83,8 +84,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 {
                     return new Gateway.DispatchTrip.Response
                     {
-                        result = Gateway.Result.OK, 
-                        tripID = response.TripId
+                        result = Gateway.Result.OK
                     };
                 }
 

@@ -1,17 +1,18 @@
 {
-  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/json/asynconeway/",
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Dubai Taxi Corporation",
       "clientId" : "dubai@tripthru.com",
       "accessToken" : "dubai12ondazazxx21",
+      "callbackUrl" : "http://54.201.134.194/ServiceStack.DubaiTaxi/"
   },
   "fleets" : [
     {
         "name" : "Dubai Taxi Corporation",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 20,
+        "tripsPerHour" : 5,
 		"location" : {
 			"lat" : 25.271139,
             "lng" : 55.307485

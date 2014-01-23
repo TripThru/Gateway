@@ -128,9 +128,9 @@ namespace ServiceStack.TripThruGateway.TripThru
         {
             string s = "Partner = " + (PartnerName == null ? PartnerId : PartnerName);
             if (FleetName != null)
-                s += ", Fleet = " + FleetName;
+                s += ", FleetName = " + FleetName;
             else if (FleetId != null)
-                s += ", Fleet = " + FleetId;
+                s += ", FleetID = " + FleetId;
             if (VehicleType != null)
                 s += ", VehicleType = " + VehicleType;
             if (Price != null)
@@ -155,6 +155,234 @@ namespace ServiceStack.TripThruGateway.TripThru
     {
         public enum Result { OK = 100, MethodNotSupported = 200, Rejected = 300, UnknownError = 400, InvalidParameters = 500, NotFound = 600, AuthenticationError = 700 };
 
+        public class Stat
+        {
+            public class Counter
+            {
+                TimeSpan maxAge;
+                Queue<Pair<DateTime, double>> counts;
+                double count;
+                public static implicit operator int(Counter c)
+                {
+                    return (int)c.count;
+                }
+                public static implicit operator long(Counter c)
+                {
+                    return (long)c.count;
+                }
+                public static implicit operator double(Counter c)
+                {
+                    return (int)c.count;
+                }
+                public Counter(TimeSpan maxAge)
+                {
+                    this.maxAge = maxAge;
+                    counts = new Queue<Pair<DateTime, double>>();
+                }
+                void Cleanup()
+                {
+                    while (counts.Count > 0 && DateTime.UtcNow - counts.Peek().First > maxAge)
+                    {
+                        count -= counts.Peek().Second;
+                        counts.Dequeue();
+                    }
+                }
+
+                public static Counter operator ++(Counter c)
+                {
+                    // Increment this widget.
+                    c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, 1));
+                    c.count += 1;
+                    c.Cleanup();
+                    return c;
+                }
+                public static Counter operator +(Counter c, double d)
+                {
+                    // Increment this widget.
+                    c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, d));
+                    c.count += d;
+                    c.Cleanup();
+                    return c;
+                }
+                public override string ToString()
+                {
+                    return count.ToString();
+                }
+            }
+            public double allTime;
+            public Counter last24Hrs;
+            public Counter lastHour;
+            public Stat()
+            {
+                last24Hrs = new Counter(new TimeSpan(24, 0, 0));
+                lastHour = new Counter(new TimeSpan(1, 0, 0));
+            }
+            public static Stat operator ++(Stat s)
+            {
+                // Increment this widget.
+                s.allTime++;
+                s.last24Hrs++;
+                s.lastHour++;
+                return s;
+            }
+            public static Stat operator +(Stat s, double d)
+            {
+                // Increment this widget.
+                s.allTime += d;
+                s.last24Hrs += d;
+                s.lastHour += d;
+                return s;
+            }
+            public override string ToString()
+            {
+                return "AllTime = " + allTime + ", Last24Hrs = " + ((long)last24Hrs) + ", LastHour = " + ((long)lastHour);
+            }
+        }
+        public class GarbageCleanup<T>
+        {
+            TimeSpan maxAge;
+            Queue<Pair<DateTime, T>> garbage;
+            Action<T> cleanup;
+            public GarbageCleanup(TimeSpan maxAge, Action<T> cleanup)
+            {
+                this.maxAge = maxAge;
+                garbage = new Queue<Pair<DateTime, T>>();
+                this.cleanup = cleanup;
+            }
+            public void Add(T item)
+            {
+                // Increment this widget.
+                garbage.Enqueue(new Pair<DateTime, T>(DateTime.UtcNow, item));
+                while (garbage.Count > 0 && DateTime.UtcNow - garbage.Peek().First > maxAge)
+                {
+                    cleanup.Invoke(garbage.Peek().Second);
+                    garbage.Dequeue();
+                }
+            }
+        }
+        public Stat exceptions;
+        public Stat requests;
+        public Stat rejects;
+        public Stat cancels;
+        public Stat distance;
+        public Stat completes;
+        public Stat fare;
+        public HashSet<string> activeTrips;
+        public GarbageCleanup<string> garbageCleanup;
+        public string name;
+        public class GetGatewayStats
+        {
+            public class Request
+            {
+                public string clientID;  // TODO: TripThru needs to know who's making the call
+                public Request(string clientID)
+                {
+                    this.clientID = clientID;
+                }
+                public override string ToString()
+                {
+                    return "ClientID = " + clientID;
+                }
+            }
+            public class Response
+            {
+                public Result result;
+                public long activeTrips;
+                public long rejectsAllTime;
+                public long rejectsLast24Hrs;
+                public long rejectsLastHour;
+                public long cancelsAllTime;
+                public long cancelsLast24Hrs;
+                public long cancelsLastHour;
+                public long requestsAllTime;
+                public long requestsLast24Hrs;
+                public long requestsLastHour;
+                public double exceptionsAllTime;
+                public double exceptionsLast24Hrs;
+                public double exceptionsLastHour;
+                public long tripsAllTime;
+                public double distanceAllTime;
+                public double fareAllTime;
+                public long tripsLast24Hrs;
+                public double distanceLast24Hrs;
+                public double fareLast24Hrs;
+                public long tripsLastHour;
+                public double distanceLastHour;
+                public double fareLastHour;
+                public Response(long activeTrips,
+                    long requestsAllTime, long requestsLast24Hrs, long requestsLastHour,
+                    long rejectsAllTime, long rejectsLast24Hrs, long rejectsLastHour,
+                    long cancelsAllTime, long cancelsLast24Hrs, long cancelsLastHour,
+                    double exceptionsAllTime, long exceptionsLast24Hrs, long exceptionsLastHour,
+                    long tripsAllTime, long tripsLast24Hrs, long tripsLastHour,
+                    double distanceAllTime, double distanceLast24Hours, double distanceLastHour,
+                    double fareAllTime, double fareLast24Hrs, double fareLastHour,
+                    Result result = Result.OK)
+                {
+                    this.activeTrips = activeTrips;
+                    this.requestsAllTime = requestsAllTime;
+                    this.requestsLast24Hrs = requestsLast24Hrs;
+                    this.requestsLastHour = requestsLastHour;
+                    this.rejectsAllTime = rejectsAllTime;
+                    this.rejectsLast24Hrs = rejectsLast24Hrs;
+                    this.rejectsLastHour = rejectsLastHour;
+                    this.cancelsAllTime = cancelsAllTime;
+                    this.cancelsLast24Hrs = cancelsLast24Hrs;
+                    this.cancelsLastHour = cancelsLastHour;
+                    this.exceptionsAllTime = exceptionsAllTime;
+                    this.exceptionsLast24Hrs = exceptionsLast24Hrs;
+                    this.exceptionsLastHour = exceptionsLastHour;
+                    this.tripsAllTime = tripsAllTime;
+                    this.tripsLast24Hrs = tripsLast24Hrs;
+                    this.tripsLastHour = tripsLastHour;
+                    this.distanceAllTime = distanceAllTime;
+                    this.distanceLast24Hrs = distanceLast24Hours;
+                    this.distanceLastHour = distanceLastHour;
+                    this.fareAllTime = fareAllTime;
+                    this.fareLast24Hrs = fareLast24Hrs;
+                    this.fareLastHour = fareLastHour;
+                    this.result = result;
+                }
+                public Response(Result result = Result.UnknownError)
+                {
+                    this.result = result;
+                }
+                public override string ToString()
+                {
+                    return "Result = " + result;
+                }
+            }
+            public Gateway parent;
+            public GetGatewayStats(Gateway parent)
+            {
+
+                this.parent = parent;
+            }
+            public Response Get(Request r)
+            {
+                int tab = Logger.tab;
+                try
+                {
+                    Response resp = new Response(
+                        activeTrips: parent.activeTrips.Count,
+                        requestsAllTime: (long)parent.requests.allTime, requestsLast24Hrs: parent.requests.last24Hrs, requestsLastHour: parent.requests.lastHour,
+                        rejectsAllTime: (long)parent.rejects.allTime, rejectsLast24Hrs: parent.rejects.last24Hrs, rejectsLastHour: parent.rejects.lastHour,
+                        cancelsAllTime: (long)parent.cancels.allTime, cancelsLast24Hrs: parent.cancels.last24Hrs, cancelsLastHour: parent.cancels.lastHour,
+                        exceptionsAllTime: (long)parent.exceptions.allTime, exceptionsLast24Hrs: parent.exceptions.last24Hrs, exceptionsLastHour: parent.exceptions.lastHour,
+                        tripsAllTime: (long)parent.completes.allTime, tripsLast24Hrs: parent.completes.last24Hrs, tripsLastHour: parent.completes.lastHour,
+                        distanceAllTime: parent.distance.allTime, distanceLast24Hours: parent.distance.last24Hrs, distanceLastHour: parent.distance.lastHour,
+                        fareAllTime: parent.fare.allTime, fareLast24Hrs: parent.fare.last24Hrs, fareLastHour: parent.fare.lastHour);
+                    return resp;
+                }
+                catch (Exception e)
+                {
+                    Logger.tab = tab;
+                    parent.exceptions++;
+                    Logger.Log("Exception :" + e.Message);
+                    return new Response(result: Result.UnknownError);
+                }
+            }
+        }
         public class RegisterPartner
         {
             public class Request
@@ -239,7 +467,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 }
                 public override string ToString()
                 {
-                    return "Fleets = " + fleets + ", Result = " + result;
+                    return "Result = " + result;
                 }
             }
             public virtual Response Get(Request request)
@@ -265,14 +493,16 @@ namespace ServiceStack.TripThruGateway.TripThru
                 public VehicleType? vehicleType;
                 public double? maxPrice;
                 public int? minRating;
+                public string tripID;
                 public string partnerID;
                 public string fleetID;
                 public string driverID;
-                public Request(string clientID, Location pickupLocation, DateTime pickupTime, string foreignID = null, string passengerID = null, string passengerName = null,
+                public Request(string clientID, string tripID, Location pickupLocation, DateTime pickupTime, string foreignID = null, string passengerID = null, string passengerName = null,
                     int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
                     PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
                     string fleetID = null, string driverID = null)
                 {
+                    this.tripID = tripID;
                     this.clientID = clientID;
                     this.passengerID = passengerID;
                     this.passengerName = passengerName;
@@ -291,25 +521,20 @@ namespace ServiceStack.TripThruGateway.TripThru
                 }
                 public override string ToString()
                 {
-                    return "ClientID = " + clientID;
+                    return "ClientID = " + clientID + ", TripID = " + tripID;
                 }
             }
             public class Response
             {
-                public Response(string tripID = null, Result result = Result.OK)
+                public Response(Result result = Result.OK)
                 {
-                    this.tripID = tripID;
                     this.result = result;
                 }
                 public override string ToString()
                 {
-                    if (result == Result.OK)
-                        return "TripID = " + tripID + ", Result = " + result;
-                    else
-                        return "Result = " + result;
+                    return "Result = " + result;
                 }
                 public Result result;
-                public string tripID;
             }
             public virtual Response Post(Request request)
             {
@@ -381,6 +606,41 @@ namespace ServiceStack.TripThruGateway.TripThru
                 throw new Exception("Not supported");
             }
         }
+        public class GetTrips
+        {
+            public class Request
+            {
+                public string clientID;  // TODO: TripThru needs to know who's making the call
+                public Status? status;
+                public Request(string clientID, Status? status = null)
+                {
+                    this.clientID = clientID;
+                    this.status = status;
+                }
+                public override string ToString()
+                {
+                    return "ClientID = " + clientID + ", Status = " + status;
+                }
+            }
+            public class Response
+            {
+                public Result result;
+                public List<string> tripIDs;
+                public Response(List<string> tripIDs, Result result = Result.OK)
+                {
+                    this.tripIDs = tripIDs;
+                }
+                public override string ToString()
+                {
+                    string s = "Result = " + result;
+                    return s;
+                }
+            }
+            public virtual Response Get(Request r)
+            {
+                throw new Exception("Not supported");
+            }
+        }
         public class GetTripStatus
         {
             public class Request
@@ -412,9 +672,11 @@ namespace ServiceStack.TripThruGateway.TripThru
                 public VehicleType? vehicleType;
                 public Status? status;
                 public DateTime? ETA; // in minutes;
+                public double? price;
+                public double? distance;
                 public Response(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null,
                     string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null,
-                    DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, DateTime? dropoffTime = null, Result result = Result.OK)
+                    DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, DateTime? dropoffTime = null, double? price = null, double? distance = null, Result result = Result.OK)
                 {
                     this.partnerID = partnerID;
                     this.partnerName = partnerName;
@@ -427,6 +689,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                     this.ETA = ETA;
                     this.pickupTime = pickupTime;
                     this.dropoffTime = dropoffTime;
+                    this.price = price;
+                    this.distance = distance;
                     this.result = result;
                     this.status = status;
                 }
@@ -445,6 +709,10 @@ namespace ServiceStack.TripThruGateway.TripThru
                         s += ", DriverLocation = " + driverLocation;
                     if (dropoffTime != null)
                         s += ", DropoffTime = " + dropoffTime;
+                    if (price != null)
+                        s += ", Price = " + dropoffTime;
+                    if (distance != null)
+                        s += ", Distance = " + distance;
                     return s;
                 }
             }
@@ -488,16 +756,72 @@ namespace ServiceStack.TripThruGateway.TripThru
                 throw new Exception("Not supported");
             }
         }
+        TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
+        DateTime lastGetGatewayStats = DateTime.UtcNow;
+        public Gateway()
+        {
+            exceptions = new Stat();
+            rejects = new Stat();
+            requests = new Stat();
+            cancels = new Stat();
+            fare = new Stat();
+            completes = new Stat();
+            distance = new Stat();
+            activeTrips = new HashSet<string>();
+            getGatewayStats = new GetGatewayStats(this);
+        }
+        public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
+        {
+            if (!activeTrips.Contains(tripID))
+                return;
+            Logger.Log("Deactivate trip" + tripID);
+            activeTrips.Remove(tripID);
+            switch (status)
+            {
+                case Status.Complete:
+                    {
+                        completes++;
+                        fare += (double)price;
+                        this.distance += (double)distance;
+                        break;
+                    }
+                case Status.Cancelled: cancels++; break;
+                case Status.Rejected: rejects++; break;
+            }
+            if (garbageCleanup != null)
+                garbageCleanup.Add(tripID);
+        }
+        public void LogStats()
+        {
+            if ((DateTime.UtcNow - lastGetGatewayStats) > getGatewayStatsInterval)
+            {
+                Gateway.GetGatewayStats.Response r = getGatewayStats.Get(new Gateway.GetGatewayStats.Request(null));
+                Logger.Log(name + " Stats: ActiveTrips = " + r.activeTrips);
+                Logger.Tab();
+                Logger.Log("Requests: AllTime = " + r.requestsAllTime + ", Last24Hrs = " + r.requestsLast24Hrs + ", LastHour = " + r.requestsLastHour);
+                Logger.Log("Reject: AllTime = " + r.rejectsAllTime + ", Last24Hrs = " + r.rejectsLast24Hrs + ", LastHour = " + r.rejectsLastHour);
+                Logger.Log("Cancel: AllTime = " + r.cancelsAllTime + ", Last24Hrs = " + r.cancelsLast24Hrs + ", LastHour = " + r.cancelsLastHour);
+                Logger.Log("Exceptions: AllTime = " + r.exceptionsAllTime + ", Last24Hrs = " + r.exceptionsLast24Hrs + ", LastHour = " + r.exceptionsLastHour);
+                Logger.Log("Completes: AllTime = " + r.tripsAllTime + ", Last24Hrs = " + r.tripsLast24Hrs + ", LastHour = " + r.tripsLastHour);
+                Logger.Log("Distance: AllTime = " + r.distanceAllTime + ", Last24Hrs = " + r.distanceLast24Hrs + ", LastHour = " + r.distanceLastHour);
+                Logger.Log("Fare: AllTime = " + r.fareAllTime + ", Last24Hrs = " + r.fareLast24Hrs + ", LastHour = " + r.fareLastHour);
+                Logger.Log("Per Trip Averages: Distance = " + r.distanceAllTime / r.tripsAllTime + ", Fare = " + r.fareAllTime / r.tripsAllTime);
+                Logger.Untab();
+                lastGetGatewayStats = DateTime.UtcNow;
+            }
+        }
         public virtual void Simulate(DateTime until)
         {
             throw new Exception("Not supported");
         }
 
         public RegisterPartner registerPartner;
+        public GetGatewayStats getGatewayStats;
         public GetPartnerInfo getPartnerInfo;
         public DispatchTrip dispatchTrip;
         public QuoteTrip quoteTrip;
         public GetTripStatus getTripStatus;
         public UpdateTripStatus updateTripStatus;
+        public GetTrips getTrips;
     }
 }

@@ -38,17 +38,7 @@ namespace TripThru.Gateway.App_Start
 			//container.Register<IDbConnectionFactory>(
 			//	c => new OrmLiteConnectionFactory("~/db.sqlite".MapHostAbsolutePath(), SqliteDialect.Provider));
 
-            Plugins.Add(new CorsFeature()); //Enable CORS
             Plugins.Add(new RazorFormat());
-
-            this.RequestFilters.Add((req, res, requestDto) =>
-            {
-                var par = req.GetRequestParams();
-                foreach (var p in par)
-                {
-                    Console.WriteLine(p);
-                }
-            });
             
 			SetConfig(new EndpointHostConfig
 				          {

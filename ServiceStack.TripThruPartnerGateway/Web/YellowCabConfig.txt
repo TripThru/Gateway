@@ -1,17 +1,18 @@
 {
-  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/json/asynconeway/",
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Yellow Cab",
       "clientId" : "yellow@tripthru.com",
       "accessToken" : "yellow12ondazazxx21",
+    "callbackUrl" : "http://54.201.134.194/ServiceStack.YellowCab/"
   },
   "fleets" : [
     {
         "name" : "Yellow Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 20,
+        "tripsPerHour" : 5,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127

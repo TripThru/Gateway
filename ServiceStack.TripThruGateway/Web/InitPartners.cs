@@ -40,19 +40,6 @@ namespace ServiceStack.TripThruGateway
 		        ClientSecret = "23noiasdn2123"
 		    };
             Db.Insert(luxor);
-            var partnerLuxor = new Partner
-            {
-                Name = "Luxor Cab",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.LuxorCab/",
-                UserId = (Int32)Db.GetLastInsertId()
-            };
-            Db.Insert(partnerLuxor);
-            GatewayService.TripThru.AddPartner(new TripThru.TripThru.Partner(
-                    partnerLuxor.Name,
-                    partnerLuxor.CallbackUrl,
-                    luxor.ClientId,
-                    "jaosid1201231" //Made up for now
-                ));
 
 
 		    var yellow = new User
@@ -66,19 +53,6 @@ namespace ServiceStack.TripThruGateway
 		        ClientSecret = "12ondazazxx21"
 		    };
             Db.Insert(yellow);
-            var partnerYellow = new Partner
-            {
-                Name = "Yellow Cab",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.YellowCab/",
-                UserId = (Int32)Db.GetLastInsertId()
-            };
-            Db.Insert(partnerYellow);
-            GatewayService.TripThru.AddPartner(new TripThru.TripThru.Partner(
-                    partnerYellow.Name,
-                    partnerYellow.CallbackUrl,
-                    yellow.ClientId,
-                    "jaosid1201231" //Made up for now
-                ));
 
 
 		    var metro = new User
@@ -92,20 +66,6 @@ namespace ServiceStack.TripThruGateway
 		        ClientSecret = "12ondazazxx21"
 		    };
             Db.Insert(metro);
-            var partnerMetro = new Partner
-            {
-                Name = "Metro Cab of Boston",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.MetroCab/",
-                UserId = (Int32)Db.GetLastInsertId()
-            };
-            Db.Insert(partnerMetro);
-            GatewayService.TripThru.AddPartner(new TripThru.TripThru.Partner(
-                    partnerMetro.Name,
-                    partnerMetro.CallbackUrl,
-                    metro.ClientId,
-                    "jaosid1201231" //Made up for now
-                ));
-
 
 		    var les = new User
 		    {
@@ -118,19 +78,6 @@ namespace ServiceStack.TripThruGateway
 		        ClientSecret = "12ondazazxx21"
 		    };
             Db.Insert(les);
-            var partnerLes = new Partner
-            {
-                Name = "Les Taxi Blues",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.LesTaxiBlues/",
-                UserId = (Int32)Db.GetLastInsertId()
-            };
-            Db.Insert(partnerLes);
-            GatewayService.TripThru.AddPartner(new TripThru.TripThru.Partner(
-                    partnerLes.Name,
-                    partnerLes.CallbackUrl,
-                    les.ClientId,
-                    "jaosid1201231" //Made up for now
-                ));
 
 
 		    var dubai = new User
@@ -144,27 +91,20 @@ namespace ServiceStack.TripThruGateway
 		        ClientSecret = "12ondazazxx21"
 		    };
             Db.Insert(dubai);
-            var partnerDubai = new Partner
+
+            var tripthruweb = new User
             {
-                Name = "Dubai Taxi Corporation",
-                CallbackUrl = "http://54.201.134.194/ServiceStack.DubaiTaxi/",
-                UserId = (Int32)Db.GetLastInsertId()
+                UserName = "Tripthru Web",
+                Password = "password",
+                Email = "web@tripthru.com",
+                AccessToken = "web12ondazazxx21",
+                RefreshToken = "12ondazazxx21",
+                ClientId = "web@tripthru.com",
+                ClientSecret = "12ondazazxx21"
             };
-            Db.Insert(partnerDubai);
-            GatewayService.TripThru.AddPartner(new TripThru.TripThru.Partner(
-                    partnerDubai.Name,
-                    partnerDubai.CallbackUrl,
-                    dubai.ClientId,
-                    "jaosid1201231" //Made up for now
-                ));
+            Db.Insert(tripthruweb);
 
             Logger.OpenLog("TripThruSimulation.log", true);
-            Logger.Log("Starting partners " + DateTime.UtcNow);
-            Logger.Tab();
-            foreach (TripThru.TripThru.Partner p in GatewayService.TripThru.partners)
-                p.Log();
-            Logger.Untab();
-
 			return new InitPartnersResponse();
 		}
 	}

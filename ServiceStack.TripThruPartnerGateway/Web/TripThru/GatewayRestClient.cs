@@ -23,6 +23,41 @@ namespace ServiceStack.TripThruGateway.TripThru
             Client = new RestClient(RootUrl);
         }
 
+        public Gateway.RegisterPartner.Response RegisterPartner(Gateway.RegisterPartner.Request request)
+        {
+            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.PartnerRequest()
+            {
+                Name = request.name,
+                CallbackUrl = request.callback_url
+            });
+
+            var r = Request("POST", "partner", partnerRequest);
+
+            if (r != null && !r.Equals(""))
+            {
+                var response = JsonSerializer.DeserializeFromString<GatewayService.PartnerResponse>(r);
+
+                if (response.ResultCode == Gateway.Result.OK)
+                {
+                    return new Gateway.RegisterPartner.Response
+                    {
+                        result = Gateway.Result.OK
+                    };
+                }
+
+                return new Gateway.RegisterPartner.Response
+                {
+                    result = response.ResultCode
+                };
+            }
+
+            return new Gateway.RegisterPartner.Response
+            {
+                result = Gateway.Result.UnknownError
+            };
+
+        }
+
         public Gateway.GetPartnerInfo.Response GetPartnerInfo()
         {
             var r= Request("GET", "partners", null);
@@ -69,7 +104,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                 PartnerId = request.partnerID,
                 FleetId = request.fleetID,
                 DriverId = request.driverID,
-                Waypoints = request.waypoints
+                Waypoints = request.waypoints,
+                TripId = request.tripID
             });
 
             var r = Request("POST", "dispatch", partnerRequest);
@@ -82,8 +118,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 {
                     return new Gateway.DispatchTrip.Response
                     {
-                        result = Gateway.Result.OK, 
-                        tripID = response.TripId
+                        result = Gateway.Result.OK
                     };
                 }
 

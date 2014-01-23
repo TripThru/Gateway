@@ -45,14 +45,14 @@ namespace ServiceStack.TripThruGateway
                         {
                             UserId = u.First().Id,
                             Name = request.Name,
-                            CallbackUrl = request.CallbackUrl + "/gateway/v1/",
+                            CallbackUrl = request.CallbackUrl,
                         });
 
-                        TripThru.AddPartner(new TripThru.TripThru.Partner(
+                        TripThru.registerPartner.Post(new Gateway.RegisterPartner.Request(
+                            u.First().ClientId,
                             request.Name,
                             request.CallbackUrl,
-                            u.First().ClientId,
-                            "klmaspdo1p2om" //We need to authenticate with the partner
+                            "jaosid1201231"
                             ));
 
                         return new PartnerResponse
@@ -215,8 +215,8 @@ namespace ServiceStack.TripThruGateway
 
         }
 
-        [Api("Use POST to create search for quotes meeting the filter criteria.")]
-        [Route("/quotes", "POST")]
+        [Api("Use POST or GET to create search for quotes meeting the filter criteria.")]
+        [Route("/quotes", "POST, GET")]
         public class Quotes : IReturn<QuotesResponse>
         {
             public string PassengerId { get; set; }
@@ -301,10 +301,64 @@ namespace ServiceStack.TripThruGateway
                 };
             }
 
+            public QuotesResponse Get(Quotes request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                if (u.Count > 0)
+                {
+                    var user = u.First();
+                    var response = TripThru.quoteTrip.Get(new Gateway.QuoteTrip.Request(
+                        user.ClientId,
+                        request.PickupLocation,
+                        request.PickupTime,
+                        request.PassengerId,
+                        request.PassengerName,
+                        request.Luggage,
+                        request.Persons,
+                        request.DropoffLocation,
+                        request.WayPoints,
+                        request.PaymentMethod,
+                        request.VehicleType,
+                        request.MaxPrice,
+                        request.MinRating,
+                        request.PartnerId,
+                        request.FleetId,
+                        request.DriverId
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new QuotesResponse
+                        {
+                            Count = response.quotes.Count,
+                            Quotes = response.quotes,
+                            ResultCode = response.result,
+                            Result = "OK"
+                        };
+                    }
+
+                    return new QuotesResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+                }
+
+                string msg = "GET /quotes called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new QuotesResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+            }
+
         }
 
-        [Api("Use POST to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
-        [Route("/dispatch", "POST")]
+        [Api("Use POST or GET to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
+        [Route("/dispatch", "POST, GET")]
         public class Dispatch : IReturn<DispatchResponse>
         {
             public string ForeignId { get; set; }
@@ -320,12 +374,10 @@ namespace ServiceStack.TripThruGateway
             public VehicleType? VehicleType { get; set; }
             public double? MaxPrice { get; set; }
             public int? MinRating { get; set; }
+            public string TripId { get; set; }
             public string PartnerId { get; set; }
             public string FleetId { get; set; }
             public string DriverId { get; set; }
-            public string QuoteId { get; set; }
-            public string ExtraInstructions { get; set; }
-            public string QuotedPrice { get; set; }
         }
 
         public class DispatchResponse
@@ -346,6 +398,7 @@ namespace ServiceStack.TripThruGateway
                     var user = u.First();
                     var response = TripThru.dispatchTrip.Post(new Gateway.DispatchTrip.Request(
                         user.ClientId,
+                        request.TripId,
                         request.PickupLocation,
                         request.PickupTime,
                         request.ForeignId,
@@ -369,8 +422,7 @@ namespace ServiceStack.TripThruGateway
                         return new DispatchResponse
                         {
                             Result = "OK",
-                            ResultCode = response.result,
-                            TripId = response.tripID
+                            ResultCode = response.result
                         };
                     }
 
@@ -382,6 +434,60 @@ namespace ServiceStack.TripThruGateway
                 }
 
                 string msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new DispatchResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+            }
+
+            public DispatchResponse Get(Dispatch request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                if (u.Count > 0)
+                {
+                    var user = u.First();
+                    var response = TripThru.dispatchTrip.Post(new Gateway.DispatchTrip.Request(
+                        user.ClientId,
+                        request.TripId,
+                        request.PickupLocation,
+                        request.PickupTime,
+                        request.ForeignId,
+                        request.PassengerId,
+                        request.PassengerName,
+                        request.Luggage,
+                        request.Persons,
+                        request.DropoffLocation,
+                        request.Waypoints,
+                        request.PaymentMethod,
+                        request.VehicleType,
+                        request.MaxPrice,
+                        request.MinRating,
+                        request.PartnerId,
+                        request.FleetId,
+                        request.DriverId
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new DispatchResponse
+                        {
+                            Result = "OK",
+                            ResultCode = response.result
+                        };
+                    }
+
+                    return new DispatchResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+                }
+
+                string msg = "GET /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
                 Logger.Log(msg);
                 return new DispatchResponse
@@ -418,6 +524,8 @@ namespace ServiceStack.TripThruGateway
             public VehicleType? VehicleType { get; set; }
             public Status? Status { get; set; }
             public DateTime? ETA { get; set; } // in minutes;
+            public double? Price { get; set; }
+            public double? Distance { get; set; }
         }
 
         public class TripService : Service
@@ -451,7 +559,9 @@ namespace ServiceStack.TripThruGateway
                             VehicleType = response.vehicleType,
                             Result = "OK",
                             ResultCode = response.result,
-                            Status = response.status
+                            Status = response.status,
+                            Price = response.price,
+                            Distance = response.distance
                         };
                     }
 
@@ -494,7 +604,7 @@ namespace ServiceStack.TripThruGateway
                             ResultCode = response.result
                         };
                     }
-
+                    
                     return new TripResponse
                     {
                         Result = "Failed",
@@ -541,11 +651,167 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
+                var x = TripThru;
                 return new LogResponse
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK,
                     LogList = Logger.LogQueue.Queue.ToList()
+                };
+            }
+        }
+
+        [Api("Use GET /stats")]
+        [Route("/stats", "GET")]
+        public class Stats : IReturn<StatsResponse>
+        {
+
+        }
+
+        public class StatsResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+            public long ActiveTrips { get; set; }
+            public long RejectsAllTime { get; set; }
+            public long RejectsLast24Hrs { get; set; }
+            public long RejectsLastHour { get; set; }
+            public long CancelsAllTime { get; set; }
+            public long CancelsLast24Hrs { get; set; }
+            public long CancelsLastHour { get; set; }
+            public long RequestsAllTime { get; set; }
+            public long RequestsLast24Hrs { get; set; }
+            public long RequestsLastHour { get; set; }
+            public double ExceptionsAllTime { get; set; }
+            public double ExceptionsLast24Hrs { get; set; }
+            public double ExceptionsLastHour { get; set; }
+            public long TripsAllTime { get; set; }
+            public double DistanceAllTime { get; set; }
+            public double FareAllTime { get; set; }
+            public long TripsLast24Hrs { get; set; }
+            public double DistanceLast24Hrs { get; set; }
+            public double FareLast24Hrs { get; set; }
+            public long TripsLastHour { get; set; }
+            public double DistanceLastHour { get; set; }
+            public double FareLastHour { get; set; }
+        }
+
+        public class StatsService : Service
+        {
+            public StatsResponse Get(Stats request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                if (u.Count > 0)
+                {
+                    var user = u.First();
+                    var response = TripThru.getGatewayStats.Get(new Gateway.GetGatewayStats.Request(
+                        user.ClientId
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new StatsResponse
+                        {
+                            Result = "OK",
+                            ResultCode = response.result,
+                            ActiveTrips = response.activeTrips,
+                            CancelsAllTime = response.cancelsAllTime,
+                            CancelsLast24Hrs = response.cancelsLast24Hrs,
+                            CancelsLastHour = response.cancelsLastHour,
+                            DistanceAllTime = response.distanceAllTime,
+                            DistanceLast24Hrs = response.distanceLast24Hrs,
+                            DistanceLastHour = response.distanceLastHour,
+                            ExceptionsAllTime = response.exceptionsAllTime,
+                            ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
+                            ExceptionsLastHour = response.exceptionsLastHour,
+                            FareAllTime = response.fareAllTime,
+                            FareLast24Hrs = response.fareLast24Hrs,
+                            FareLastHour = response.fareLastHour,
+                            RejectsAllTime = response.rejectsAllTime,
+                            RejectsLast24Hrs = response.rejectsLast24Hrs,
+                            RejectsLastHour = response.rejectsLastHour,
+                            RequestsAllTime = response.requestsAllTime,
+                            RequestsLast24Hrs = response.requestsLast24Hrs,
+                            RequestsLastHour = response.requestsLastHour,
+                            TripsAllTime = response.tripsAllTime,
+                            TripsLast24Hrs = response.tripsLast24Hrs,
+                            TripsLastHour = response.tripsLastHour
+                        };
+                    }
+
+                    return new StatsResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+
+                }
+
+                string msg = "GET /stats called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new StatsResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+            }
+        }
+
+        [Api("Use GET /trips")]
+        [Route("/trips", "GET")]
+        public class Trips : IReturn<TripsResponse>
+        {
+            public Status? Status { get; set; }
+        }
+
+        public class TripsResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+            public List<string> TripsIDs { get; set; }
+        }
+
+        public class TripsService : Service
+        {
+            public TripsResponse Get(Trips request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                if (u.Count > 0)
+                {
+                    var user = u.First();
+                    var response = TripThru.getTrips.Get(new Gateway.GetTrips.Request(
+                        user.ClientId,
+                        request.Status
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new TripsResponse
+                        {
+                            Result = "OK",
+                            ResultCode = response.result,
+                            TripsIDs = response.tripIDs
+                        };
+                    }
+
+                    return new TripsResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+
+                }
+
+                string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new TripsResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
                 };
             }
         }
