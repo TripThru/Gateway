@@ -557,5 +557,156 @@ namespace ServiceStack.TripThruGateway
                 };
             }
         }
+
+        [Api("Use GET /stats")]
+        [Route("/stats", "GET")]
+        public class Stats : IReturn<StatsResponse>
+        {
+
+        }
+
+        public class StatsResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+            public long ActiveTrips { get; set; }
+            public long RejectsAllTime { get; set; }
+            public long RejectsLast24Hrs { get; set; }
+            public long RejectsLastHour { get; set; }
+            public long CancelsAllTime { get; set; }
+            public long CancelsLast24Hrs { get; set; }
+            public long CancelsLastHour { get; set; }
+            public long RequestsAllTime { get; set; }
+            public long RequestsLast24Hrs { get; set; }
+            public long RequestsLastHour { get; set; }
+            public double ExceptionsAllTime { get; set; }
+            public double ExceptionsLast24Hrs { get; set; }
+            public double ExceptionsLastHour { get; set; }
+            public long TripsAllTime { get; set; }
+            public double DistanceAllTime { get; set; }
+            public double FareAllTime { get; set; }
+            public long TripsLast24Hrs { get; set; }
+            public double DistanceLast24Hrs { get; set; }
+            public double FareLast24Hrs { get; set; }
+            public long TripsLastHour { get; set; }
+            public double DistanceLastHour { get; set; }
+            public double FareLastHour { get; set; }
+        }
+
+        public class StatsService : Service
+        {
+            public StatsResponse Get(Stats request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                if (accessToken.Equals(TripThruAccessToken))
+                {
+                    var response = TripThruPartner.getGatewayStats.Get(new Gateway.GetGatewayStats.Request(
+                        TripThruId
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new StatsResponse
+                        {
+                            Result = "OK",
+                            ResultCode = response.result,
+                            ActiveTrips = response.activeTrips,
+                            CancelsAllTime = response.cancelsAllTime,
+                            CancelsLast24Hrs = response.cancelsLast24Hrs,
+                            CancelsLastHour = response.cancelsLastHour,
+                            DistanceAllTime = response.distanceAllTime,
+                            DistanceLast24Hrs = response.distanceLast24Hrs,
+                            DistanceLastHour = response.distanceLastHour,
+                            ExceptionsAllTime = response.exceptionsAllTime,
+                            ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
+                            ExceptionsLastHour = response.exceptionsLastHour,
+                            FareAllTime = response.fareAllTime,
+                            FareLast24Hrs = response.fareLast24Hrs,
+                            FareLastHour = response.fareLastHour,
+                            RejectsAllTime = response.rejectsAllTime,
+                            RejectsLast24Hrs = response.rejectsLast24Hrs,
+                            RejectsLastHour = response.rejectsLastHour,
+                            RequestsAllTime = response.requestsAllTime,
+                            RequestsLast24Hrs = response.requestsLast24Hrs,
+                            RequestsLastHour = response.requestsLastHour,
+                            TripsAllTime = response.tripsAllTime,
+                            TripsLast24Hrs = response.tripsLast24Hrs,
+                            TripsLastHour = response.tripsLastHour
+                        };
+                    }
+
+                    return new StatsResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+
+                }
+
+                string msg = "GET /stats called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new StatsResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+            }
+        }
+
+        [Api("Use GET /trips")]
+        [Route("/trips", "GET")]
+        public class Trips : IReturn<TripsResponse>
+        {
+            public Status? Status { get; set; }
+        }
+
+        public class TripsResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+            public List<string> TripsIDs { get; set; }
+        }
+
+        public class TripsService : Service
+        {
+            public TripsResponse Get(Trips request)
+            {
+                var accessToken = this.Request.QueryString.Get("access_token");
+                if (accessToken.Equals(TripThruAccessToken))
+                {
+                    var response = TripThruPartner.getTrips.Get(new Gateway.GetTrips.Request(
+                        TripThruId,
+                        request.Status
+                        ));
+
+                    if (response.result == Gateway.Result.OK)
+                    {
+                        return new TripsResponse
+                        {
+                            Result = "OK",
+                            ResultCode = response.result,
+                            TripsIDs = response.tripIDs
+                        };
+                    }
+
+                    return new TripsResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = response.result
+                    };
+
+                }
+
+                string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                Logger.Log(msg);
+                return new TripsResponse
+                {
+                    Result = "Failed",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+            }
+        }
     }
 }

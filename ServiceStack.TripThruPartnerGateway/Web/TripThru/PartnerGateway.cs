@@ -749,7 +749,10 @@ namespace ServiceStack.TripThruGateway.TripThru
                     returningDrivers.Remove(node);
                 }
                 else if (DateTime.UtcNow > driver.lastUpdate + updateInterval)
+                {
                     Logger.Log("Driver update: " + driver);
+                    driver.lastUpdate = DateTime.UtcNow;
+                }
             }
         }
 

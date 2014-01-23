@@ -370,6 +370,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                         Logger.tab = tab;
                         return response;
                     }
+                    Logger.Untab();
+                    Logger.tab = tab;
                     return new Response(result: Result.NotFound);
                 }
                 catch (Exception e)
@@ -417,6 +419,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                         Logger.Untab();
                         return response;
                     }
+                    Logger.Untab();
                     return new Response(result: Result.NotFound);
                 }
                 catch (Exception e)
