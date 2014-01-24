@@ -78,7 +78,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -115,7 +115,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /partners called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new PartnersResponse
                 {
                     Result = "Failed",
@@ -201,7 +201,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new QuotesResponse
                 {
                     Result = "Failed",
@@ -253,7 +253,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /quotes called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new QuotesResponse
                 {
                     Result = "Failed",
@@ -339,7 +339,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new DispatchResponse
                 {
                     Result = "Failed",
@@ -391,7 +391,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new DispatchResponse
                 {
                     Result = "Failed",
@@ -475,7 +475,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new TripResponse
                 {
                     Result = "Failed",
@@ -512,7 +512,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new TripResponse
                 {
                     Result = "Failed",
@@ -542,7 +542,7 @@ namespace ServiceStack.TripThruGateway
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
-            public List<Tuple<DateTime, int, string>> LogList { get; set; }
+            public List<RequestLog> LogList { get; set; }
         }
 
         public class LogService : Service
@@ -645,7 +645,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /stats called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new StatsResponse
                 {
                     Result = "Failed",
@@ -700,7 +700,7 @@ namespace ServiceStack.TripThruGateway
 
                 string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
                              ", Response = Authentication failed";
-                Logger.Log(msg);
+                Logger.Log(Logger.CreateNewRequestLog(msg));
                 return new TripsResponse
                 {
                     Result = "Failed",

@@ -1,14 +1,156 @@
-﻿@inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
+﻿@using System.CodeDom
+@inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
 
-@if (Model.LogList.Count == 0)
-{
-    <h1>No recent log entries</h1>
-}
 
-@foreach (var entry in Model.LogList)
-{
-    <p style="white-space: nowrap;"> 
-        <span>@entry.Item1.ToString() |</span>
-        <span style="padding-left: @entry.Item2.ToString()px;">@entry.Item3 </span>
-    </p>
-}
+<html>
+
+<head>
+    <title>Log</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+</head>
+
+
+<body>
+
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        h1 {
+            font-family: Arial;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding-bottom: 0.5em;
+            padding-left: 1.5em;
+        }
+
+        .handle {
+            background: transparent url(/images/books/jquery-1-7/spacer.png);
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            display: block;
+            float: left;
+            width: 10px;
+            height: 11px;
+        }
+
+        .collapsed {
+            background: transparent url(/content/images/arrow_collapsed.gif);
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .expanded {
+            background: transparent url(/content/images/arrow_expanded.gif);
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+        }
+    </style>
+
+    @if (Model.LogList.Count == 0)
+    {
+        <h1>No recent log entries</h1>
+    }
+    else
+    {
+        <h1>Recent activity</h1>
+    }
+
+    <ul id="tree">
+        @foreach (var entry in Model.LogList)
+        {
+            if (entry.Calls.Count > 0)
+            {
+                
+                <li><span>@entry.Time |</span><span style="padding-left: 40px;">@entry.Calls.First().Second</span>
+                    @if(entry.Calls.Count > 1)
+                    {
+                        var tab = @entry.Calls.GetRange(1, 1).First().First;
+                        var count = 0;
+                        <ul>
+                            @for (int i = 1; i < entry.Calls.Count; i++)
+                            {
+                                var log = entry.Calls.ElementAt(i);
+                                if (tab == log.First && (tab == entry.MaxTab || i == entry.Calls.Count-1)) //if terminal node
+                                {
+                                    <li><p style="white-space: nowrap;">@log.Second</p></li>
+                                }
+                                else if (tab == log.First) //if has children
+                                {
+                                    if (i < entry.Calls.Count - 1 && entry.Calls.ElementAt(i + 1).First > log.First)
+                                    {
+                                        count++;
+                                        @:<li><p style="white-space: nowrap;">@log.Second</p>
+                                        @:<ul>
+                                    }
+                                    else
+                                    {
+                                        <li><p style="white-space: nowrap;">@log.Second</p></li>
+                                    }
+                                }
+                                else if(tab < log.First && log.First == entry.MaxTab)
+                                {
+                                    tab = log.First;
+                                    <li><p style="white-space: nowrap;">@log.Second</p></li>
+                                    if(i == entry.Calls.Count-1)
+                                    {
+                                        @:</ul>
+                                        @:</li>
+                                        count--;
+                                    }
+                                }
+                                else if(tab < log.First)
+                                {
+                                    count++;
+                                    tab = log.First;
+                                    @:<li><p style="white-space: nowrap;">@log.Second</p>
+                                    @:<ul>
+                                }
+                                else if (tab > log.First)
+                                {
+                                    tab = log.First;
+                                    if (count > 0)
+                                    {
+                                        @:</ul>
+                                        @:</li>
+                                        count--;
+                                    }
+                                    i--;
+                                }
+                            }
+                            
+                            @while (count > 0)
+                            {
+                                    @:</ul>
+                                @:</li>    
+                                count--;
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        }
+    </ul>
+
+    <script>
+        $(document).ready(function () {
+            jQuery("#tree ul").hide();
+            jQuery("#tree li").prepend("<span class='handle'></span>");
+            jQuery("#tree li:has(ul)").children(":first-child").addClass("collapsed").click(function () {
+                jQuery(this).toggleClass("collapsed expanded").siblings("ul").toggle();
+            });
+        });
+    </script>
+
+</body>
+</html>

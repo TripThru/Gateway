@@ -767,105 +767,85 @@ namespace ServiceStack.TripThruGateway.TripThru
 
     public class Logger
     {
-        public static int tab;
-        public static int logLine;
-        public static bool enabled { get; set; }
-        public static bool forceOn { get; set; }
-        public static string filePath = "~/App_Data/".MapHostAbsolutePath();
-        static int on;
-        static System.IO.StreamWriter logFile;
+        public static FixedSizeQueue LogQueue;
 
-        public static FixedSizeQueue<Pair<DateTime,string>> LogQueue;
-
-        //        [Conditional("DEBUG")]
-        static public void Tab() { tab++; }
-        //        [Conditional("DEBUG")]
-        static public void Untab() { tab--; }
-        static public string GetTab()
+        static public void Log(RequestLog requestLog)
         {
-            string tabs = "";
-            for (int n = 0; n < tab; n++)
-                tabs += '\t';
-            return tabs;
-        }
-        static public void Off()
-        {
-            on--;
-        }
-        static public void On()
-        {
-            on++;
-        }
-
-        static public void Log(string msg, string filename)
-        {
-            if (filename.Length == 0)
-            {
-                Log(msg);
-                return;
-            }
-            OpenLog(filename, true, true);
-            logFile.WriteLine(GetTab() + msg);
-            logFile.Flush();
-            CloseLog();
-        }
-        [Conditional("DEBUG")]
-        static public void Log(string msg)
-        {
-            LogQueue.Enqueue(new Tuple<DateTime, int, string>(DateTime.UtcNow, tab * 40, msg));
-            {
-                if (logFile == null)
-                    return;
-                if (!enabled && !forceOn)
-                    return;
-            }
-            logFile.WriteLine(GetTab() + msg);
-            logFile.Flush();
+            LogQueue.Enqueue(requestLog);
         }
         static public void OpenLog(string filename, bool enabled_, bool append = false)
         {
-            if (!append)
-            {
-                tab = 0;
-                logLine = 0;
-                forceOn = false;
-                enabled = enabled_;
-            }
-            enabledMethods = new LinkedList<string>();
-            LogQueue = new FixedSizeQueue<Pair<DateTime,string>>(300);
-            //logFile = new System.IO.StreamWriter("~/App_Data/".MapHostAbsolutePath() + filename);
+            LogQueue = new FixedSizeQueue(300);
         }
 
         static public void CloseLog()
         {
-            if(logFile != null)
-                logFile.Close();
-            logFile = null;
             LogQueue.Queue.Clear();
         }
-        static public LinkedList<string> enabledMethods;
+
+        static public RequestLog CreateNewRequestLog(string message = null)
+        {
+            return new RequestLog(message);
+        }
     }
 
-    public class FixedSizeQueue<T>
+    public class FixedSizeQueue
     {
-        public Queue<Tuple<DateTime, int, string>> Queue { get; set; }
+        public Queue<RequestLog> Queue { get; set; }
 
         public FixedSizeQueue(int limit)
         {
             this.Limit = limit;
-            Queue = new Queue<Tuple<DateTime, int, string>>();
+            Queue = new Queue<RequestLog>();
         }
 
         public int Limit { get; set; }
-        public void Enqueue(Tuple<DateTime, int, string> obj)
+        public void Enqueue(RequestLog obj)
         {
             Queue.Enqueue(obj);
             var expired = DateTime.UtcNow - new TimeSpan(0, 0, 30, 0);
             lock (this)
             {
-                while (Queue.Peek().Item1 < expired )
+                while (Queue.Peek().Time < expired )
                     Queue.Dequeue();
             }
+        }
+    }
+
+    public class RequestLog
+    {
+        public DateTime Time;
+        public List<Pair<int, string>> Calls;
+        public int _Tab;
+        public int MaxTab;
+        
+        public RequestLog(string message = null)
+        {
+            Time = DateTime.UtcNow;
+            Calls = new List<Pair<int, string>>();
+            _Tab = 0;
+            MaxTab = 0;
+
+            if (message != null)
+                Log(message);
+        }
+
+        public void Log(string message)
+        {
+            Calls.Add(new Pair<int, string>(_Tab,message));
+        }
+
+        public void Tab()
+        {
+            _Tab++;
+            if (_Tab > MaxTab)
+                MaxTab = _Tab;
+        }
+
+        public void Untab()
+        {
+            if(_Tab > 0)
+                _Tab--;
         }
     }
 }

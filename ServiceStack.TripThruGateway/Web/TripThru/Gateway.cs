@@ -360,7 +360,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             public Response Get(Request r)
             {
-                int tab = Logger.tab;
+                var log = Logger.CreateNewRequestLog();
                 try
                 {
                     Response resp = new Response(
@@ -376,9 +376,8 @@ namespace ServiceStack.TripThruGateway.TripThru
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     parent.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    Logger.Log(Logger.CreateNewRequestLog("Exception :" + e.Message));
                     return new Response(result: Result.UnknownError);
                 }
             }
@@ -421,7 +420,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 public Result result;
                 public string partnerID;
             }
-            public virtual Response Post(Request r)
+            public virtual Response Post(Request r, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -470,7 +469,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     return "Result = " + result;
                 }
             }
-            public virtual Response Get(Request request)
+            public virtual Response Get(Request request, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -536,7 +535,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                 }
                 public Result result;
             }
-            public virtual Response Post(Request request)
+            public virtual Response Post(Request request, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -601,7 +600,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     return "Result = " + result;
                 }
             }
-            public virtual Response Get(Request r)
+            public virtual Response Get(Request r, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -636,7 +635,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     return s;
                 }
             }
-            public virtual Response Get(Request r)
+            public virtual Response Get(Request r, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -716,7 +715,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     return s;
                 }
             }
-            public virtual Response Get(Request r)
+            public virtual Response Get(Request r, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -751,7 +750,7 @@ namespace ServiceStack.TripThruGateway.TripThru
                     return "Result = " + result;
                 }
             }
-            public virtual Response Post(Request r)
+            public virtual Response Post(Request r, RequestLog log = null)
             {
                 throw new Exception("Not supported");
             }
@@ -770,11 +769,12 @@ namespace ServiceStack.TripThruGateway.TripThru
             activeTrips = new HashSet<string>();
             getGatewayStats = new GetGatewayStats(this);
         }
-        public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
+        public void DeactivateTrip(string tripID, Status status, RequestLog log, double? price = null, double? distance = null)
         {
             if (!activeTrips.Contains(tripID))
                 return;
-            Logger.Log("Deactivate trip" + tripID);
+
+            log.Log("Deactivate trip" + tripID);
             activeTrips.Remove(tripID);
             switch (status)
             {
@@ -790,25 +790,6 @@ namespace ServiceStack.TripThruGateway.TripThru
             }
             if (garbageCleanup != null)
                 garbageCleanup.Add(tripID);
-        }
-        public void LogStats()
-        {
-            if ((DateTime.UtcNow - lastGetGatewayStats) > getGatewayStatsInterval)
-            {
-                Gateway.GetGatewayStats.Response r = getGatewayStats.Get(new Gateway.GetGatewayStats.Request(null));
-                Logger.Log(name + " Stats: ActiveTrips = " + r.activeTrips);
-                Logger.Tab();
-                Logger.Log("Requests: AllTime = " + r.requestsAllTime + ", Last24Hrs = " + r.requestsLast24Hrs + ", LastHour = " + r.requestsLastHour);
-                Logger.Log("Reject: AllTime = " + r.rejectsAllTime + ", Last24Hrs = " + r.rejectsLast24Hrs + ", LastHour = " + r.rejectsLastHour);
-                Logger.Log("Cancel: AllTime = " + r.cancelsAllTime + ", Last24Hrs = " + r.cancelsLast24Hrs + ", LastHour = " + r.cancelsLastHour);
-                Logger.Log("Exceptions: AllTime = " + r.exceptionsAllTime + ", Last24Hrs = " + r.exceptionsLast24Hrs + ", LastHour = " + r.exceptionsLastHour);
-                Logger.Log("Completes: AllTime = " + r.tripsAllTime + ", Last24Hrs = " + r.tripsLast24Hrs + ", LastHour = " + r.tripsLastHour);
-                Logger.Log("Distance: AllTime = " + r.distanceAllTime + ", Last24Hrs = " + r.distanceLast24Hrs + ", LastHour = " + r.distanceLastHour);
-                Logger.Log("Fare: AllTime = " + r.fareAllTime + ", Last24Hrs = " + r.fareLast24Hrs + ", LastHour = " + r.fareLastHour);
-                Logger.Log("Per Trip Averages: Distance = " + r.distanceAllTime / r.tripsAllTime + ", Fare = " + r.fareAllTime / r.tripsAllTime);
-                Logger.Untab();
-                lastGetGatewayStats = DateTime.UtcNow;
-            }
         }
         public virtual void Simulate(DateTime until)
         {

@@ -12,7 +12,7 @@
         "name" : "Dubai Taxi Corporation",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 5,
+        "tripsPerHour" : 10,
 		"location" : {
 			"lat" : 25.271139,
             "lng" : 55.307485

@@ -19,11 +19,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                 this.ID = clientId;
                 this.PartnerGateway = new PartnerGateway(callbackUrl, name, clientId, accessToken);
             }
-
-            public void Log()
-            {
-                Logger.Log("Partner = " + name + " with client id = "+ID);
-            }
         }
 
         void CleanUpTrip(string tripID)
@@ -43,6 +38,7 @@ namespace ServiceStack.TripThruGateway.TripThru
         public TripThru()
         {
             ID = "TripThru";
+            name = "TripThru";
             partnersByID = new Dictionary<string, Partner>();
             originatingPartnerByTrip = new Dictionary<string, Partner>();
             servicingPartnerByTrip = new Dictionary<string, Partner>();
@@ -87,24 +83,25 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Post(Request r)
+            public override Response Post(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     tripthru.requests++;
                     Partner partner = new Partner(r.name, r.callback_url, r.clientID, r.accessToken);
                     tripthru.AddPartner(partner);
                     Response response = new Response(partner.ID);
-                    Logger.Log("Registering partner: " + partner.name + " with TripThru, Response: " + response);
+                    log.Log("Registering partner: " + partner.name + " with TripThru, Response: " + response);
                     new GetPartnerCoverageThread(partner, tripthru.ID, tripthru.partnerCoverage);
+                    Logger.Log(log);
                     return response;
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
             }
@@ -116,9 +113,9 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
@@ -129,23 +126,25 @@ namespace ServiceStack.TripThruGateway.TripThru
                     r.clientID = tripthru.ID;
                     foreach (Partner p in tripthru.partners)
                     {
-                        Response response = p.PartnerGateway.getPartnerInfo.Get(r);
+                        log.Tab();
+                        Response response = p.PartnerGateway.getPartnerInfo.Get(r, log);
                         if (response.result == Result.OK)
                         {
                             fleets.AddRange(response.fleets);
                             vehicleTypes.AddRange(response.vehicleTypes);
                         }
+                        log.Untab();
                     }
-                    Logger.tab = tab;
                     Response resp = new Response(fleets, vehicleTypes);
-                    Logger.Log("GetPartnerInfo called on TripThru, Response: " + resp);
+                    log.Log("GetPartnerInfo called on TripThru, Response: " + resp);
+                    Logger.Log(log);
                     return resp;
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
 
@@ -158,20 +157,20 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Post(Request r)
+            public override Response Post(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     tripthru.requests++;
                     // Note: GetTrip populates the foreignTripID
-                    Logger.Log("DispatchTrip called on TripThru -- Request: " + r);
-                    Logger.Tab();
+                    log.Log("DispatchTrip called on TripThru -- Request: " + r);
+                    log.Tab();
                     Partner partner = null;
                     if (r.partnerID == null)
                     {
-                        Logger.Log("DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners");
-                        Logger.Tab();
+                        log.Log("DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners");
+                        log.Tab();
                         // Dispatch to partner with shortest ETA
                         QuoteTrip.Response response = tripthru.quoteTrip.Get(new QuoteTrip.Request(
                             clientID: r.clientID, // TODO: Daniel, fix this when you add authentication
@@ -192,13 +191,15 @@ namespace ServiceStack.TripThruGateway.TripThru
                             driverID: r.driverID));
                         if (response.result == Result.Rejected)
                         {
-                            Logger.Log("No partners are available");
+                            log.Log("No partners are available");
+                            Logger.Log(log);
                             tripthru.rejects++;
                             return new Response(result: Result.Rejected);
                         }
                         else if (response.result != Result.OK)
                         {
-                            Logger.Log("QuoteTrip call failed, Response = " + response);
+                            log.Log("QuoteTrip call failed, Response = " + response);
+                            Logger.Log(log);
                             tripthru.rejects++;
                             return new Response(result: response.result);
                         }
@@ -219,13 +220,13 @@ namespace ServiceStack.TripThruGateway.TripThru
                             {
                                 partner = tripthru.partnersByID[bestQuote.PartnerId];
                                 r.fleetID = bestQuote.FleetId;
-                                Logger.Log("Best quote " + bestQuote + " from " + partner.name);
+                                log.Log("Best quote " + bestQuote + " from " + partner.name);
                             }
                             else
-                                Logger.Log("There are no partners to handle this trip");
+                                log.Log("There are no partners to handle this trip");
 
                         }
-                        Logger.Untab();
+                        log.Untab();
                     }
                     else
                         partner = tripthru.partnersByID[r.partnerID];
@@ -236,11 +237,11 @@ namespace ServiceStack.TripThruGateway.TripThru
                         tripthru.originatingPartnerByTrip.Add(r.tripID, client);
                         tripthru.servicingPartnerByTrip.Add(r.tripID, partner);
                         r.clientID = tripthru.ID;
-                        response1 = partner.PartnerGateway.dispatchTrip.Post(r); 
-                        tripthru.activeTrips.Add(r.tripID);
+                        response1 = partner.PartnerGateway.dispatchTrip.Post(r, log); 
                         if (response1.result != Result.OK)
                         {
-                            Logger.Log("DispatchTrip call to " + partner.name + " failed, Response = " + response1);
+                            tripthru.activeTrips.Add(r.tripID);
+                            log.Log("DispatchTrip call to " + partner.name + " failed, Response = " + response1);
                         }
                     }
                     else
@@ -248,16 +249,17 @@ namespace ServiceStack.TripThruGateway.TripThru
                         tripthru.rejects++;
                         response1 = new Response(result: Result.Rejected);
                     }
-                    Logger.Untab();
-                    Logger.tab = tab;
-                    Logger.Log("Response: " + response1);
+                    log.Untab();
+                    log.Log("Response: " + response1);
+                    Logger.Log(log);
                     return response1;
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Untab();
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
             }
@@ -269,14 +271,14 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     tripthru.requests++;
-                    Logger.Log("QuoteTrip called on TripThru -- Request: " + r);
-                    Logger.Tab();
+                    log.Log("QuoteTrip called on TripThru -- Request: " + r);
+                    log.Tab();
                     var quotes = new List<Quote>();
                     string clientID = r.clientID;
                     r.clientID = tripthru.ID;
@@ -298,7 +300,7 @@ namespace ServiceStack.TripThruGateway.TripThru
 
                         if (covered)
                         {
-                            Response response = p.PartnerGateway.quoteTrip.Get(r);
+                            Response response = p.PartnerGateway.quoteTrip.Get(r, log);
                             if (response.result == Result.OK)
                             {
                                 if (response.quotes != null)
@@ -307,20 +309,19 @@ namespace ServiceStack.TripThruGateway.TripThru
                         }
                     }
                     Response response1 = new Response(quotes);
-                    Logger.Untab();
-                    Logger.Log("Response: " + response1);
-                    Logger.Tab();
+                    log.Log("Response: " + response1);
                     foreach (Quote q in quotes)
-                        Logger.Log(q.ToString());
-                    Logger.Untab();
-                    Logger.tab = tab;
+                        log.Log(q.ToString());
+                    log.Untab();
+                    Logger.Log(log);
                     return response1;
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Untab();
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
             }
@@ -332,7 +333,7 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.parent = parent;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
                 parent.requests++;
                 return new Response(new List<string>(parent.originatingPartnerByTrip.Keys));
@@ -345,40 +346,41 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     tripthru.requests++;
-                    Logger.Log("GetTripStatus called on TripThru -- Request: " + r);
-                    Logger.Tab();
+                    log.Log("GetTripStatus called on TripThru -- Request: " + r);
+                    log.Tab();
                     Partner partner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
                     if (partner != null)
                     {
                         r.clientID = tripthru.ID;
-                        Response response = partner.PartnerGateway.getTripStatus.Get(r);
+                        Response response = partner.PartnerGateway.getTripStatus.Get(r, log);
                         if (response.result == Result.OK)
                         {
                             if (response.status == Status.Complete || response.status == Status.Cancelled || response.status == Status.Rejected)
-                                tripthru.DeactivateTrip(r.tripID, (Status)response.status, response.price, response.distance);
+                                tripthru.DeactivateTrip(r.tripID, (Status)response.status, log, response.price, response.distance);
                     
                             response.partnerID = partner.ID;
                             response.partnerName = partner.name;
                         }
-                        Logger.Untab();
-                        Logger.tab = tab;
+                        log.Untab();
+                        Logger.Log(log);
                         return response;
                     }
-                    Logger.Untab();
-                    Logger.tab = tab;
+                    log.Untab();
+                    Logger.Log(log);
                     return new Response(result: Result.NotFound);
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Untab();
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
             }
@@ -390,19 +392,19 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 this.tripthru = tripthru;
             }
-            public override Response Post(Request r)
+            public override Response Post(Request r, RequestLog log = null)
             {
-                int tab = Logger.tab;
+                log = Logger.CreateNewRequestLog();
                 try
                 {
                     tripthru.requests++;
-                    Logger.Log("UpdateTripStatus called on TripThru -- Request: " + r);
-                    Logger.Tab();
+                    log.Log("UpdateTripStatus called on TripThru -- Request: " + r);
+                    log.Tab();
                     Partner destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
                     if (destPartner != null)
                     {
                         r.clientID = tripthru.ID;
-                        Response response = destPartner.PartnerGateway.updateTripStatus.Post(r);
+                        Response response = destPartner.PartnerGateway.updateTripStatus.Post(r, log);
                         if (response.result == Result.OK)
                         {
                             if (r.status == Status.Complete)
@@ -410,23 +412,26 @@ namespace ServiceStack.TripThruGateway.TripThru
                                 Partner origPartner = tripthru.partnersByID[r.clientID];
                                 GetTripStatus.Response resp =
                                     origPartner.PartnerGateway.getTripStatus.Get(new GetTripStatus.Request(r.clientID,
-                                        r.tripID));
-                                tripthru.DeactivateTrip(r.tripID, Status.Complete, resp.price, resp.distance);
+                                        r.tripID), log);
+                                tripthru.DeactivateTrip(r.tripID, Status.Complete, log, resp.price, resp.distance);
                             }
                             else if (r.status == Status.Cancelled || r.status == Status.Rejected)
-                                tripthru.DeactivateTrip(r.tripID, r.status);
+                                tripthru.DeactivateTrip(r.tripID, r.status, log);
                         }
-                        Logger.Untab();
+                        log.Untab();
+                        Logger.Log(log);
                         return response;
                     }
-                    Logger.Untab();
+                    log.Untab();
+                    Logger.Log(log);
                     return new Response(result: Result.NotFound);
                 }
                 catch (Exception e)
                 {
-                    Logger.tab = tab;
                     tripthru.exceptions++;
-                    Logger.Log("Exception :" + e.Message);
+                    log.Untab();
+                    log.Log("Exception :" + e.Message);
+                    Logger.Log(log);
                     return new Response(result: Result.UnknownError);
                 }
             }

@@ -37,12 +37,14 @@ namespace ServiceStack.TripThruGateway.TripThru
                 PartnerGateway = partnerGateway;
             }
 
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
                 var vehicleTypes = new List<VehicleType>();
                 var fleets = new List<Fleet>();
 
                 var response = PartnerGateway.GatewayClient.GetPartnerInfo();
+                if(log != null)
+                    log.Log("GetPartnerInfo called on " + PartnerGateway.Name + ": Response = " + response);
                 if (response.result == Result.OK)
                 {
                     fleets.AddRange(response.fleets);
@@ -54,7 +56,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                     vehicleTypes.AddRange(response.vehicleTypes);
                     return new Response(fleets, vehicleTypes);
                 }
-                Logger.Log("GetPartnerInfo called on " + PartnerGateway.Name + ": Response = " + response);
                 return new Response(result: response.result);
             }
         }
@@ -67,10 +68,11 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 PartnerGateway = partnerGateway;
             }
-            public override Response Post(Request r)
+            public override Response Post(Request r, RequestLog log = null)
             {
                 var response = PartnerGateway.GatewayClient.DispatchTrip(r);
-                Logger.Log("DispatchTrip called on " + PartnerGateway.Name + ": Response = " + response);
+                if (log != null)
+                    log.Log("DispatchTrip called on " + PartnerGateway.Name + ": Response = " + response);
                 return response;
             }
         }
@@ -82,10 +84,12 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 PartnerGateway = partnerGateway;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
                 List<Quote> quotes = new List<Quote>();
                 Response response = PartnerGateway.GatewayClient.QuoteTrip(r);
+                if (log != null)
+                    log.Log("QuoteTrip called on " + PartnerGateway.Name + ": Response = " + response);
                 if (response.result == Result.OK)
                 {
                     if (response.quotes != null)
@@ -94,7 +98,6 @@ namespace ServiceStack.TripThruGateway.TripThru
                     Response response1 = new Response(quotes);
                     return response1;
                 }
-                Logger.Log("QuoteTrip called on " + PartnerGateway.Name + ": Response = " + response);
                 return new Response(result: response.result);
             }
         }
@@ -106,16 +109,17 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 PartnerGateway = partnerGateway;
             }
-            public override Response Get(Request r)
+            public override Response Get(Request r, RequestLog log = null)
             {
                 Response response = PartnerGateway.GatewayClient.GetTripStatus(r);
+                if (log != null)
+                    log.Log("GetTripStatus called on " + PartnerGateway.Name + ": Response = " + response);
                 if (response.result == Result.OK)
                 {
                     response.partnerID = PartnerGateway.ClientId;
                     response.partnerName = PartnerGateway.Name;
                     return response;
                 }
-                Logger.Log("GetTripStatus called on " + PartnerGateway.Name + ": Response = " + response);
                 return new Response(result: response.result);
             }
         }
@@ -127,10 +131,11 @@ namespace ServiceStack.TripThruGateway.TripThru
             {
                 PartnerGateway = partnerGateway;
             }
-            public override Response Post(Request r)
+            public override Response Post(Request r, RequestLog log = null)
             {
                 var response = PartnerGateway.GatewayClient.UpdateTripStatus(r);
-                Logger.Log("UpdateTripStatus called on " + PartnerGateway.Name + ": Response = " + response);
+                if (log != null)
+                    log.Log("UpdateTripStatus called on " + PartnerGateway.Name + ": Response = " + response);
                 return response;
             }
         }

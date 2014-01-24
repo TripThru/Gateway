@@ -97,13 +97,14 @@ namespace ServiceStack.TripThruGateway
             {
                 Console.WriteLine(_partner.name + ": sim start");
                 Logger.OpenLog("TripThruSimulation.log", true);
-                Logger.Log("Sim Configuration");
-                Logger.Tab();
-                _partner.Log();
-                Logger.Untab();
+                var log = Logger.CreateNewRequestLog();
+                log.Log("Sim Configuration");
+                log.Tab();
+                _partner.Log(log);
+                log.Untab();
 
-                Logger.Log("Simulation started at " + DateTime.UtcNow);
-                Logger.Tab();
+                log.Log("Simulation started at " + DateTime.UtcNow);
+                Logger.Log(log);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
 
                 GatewayService.TripThruPartner.tripthru.RegisterPartner(
