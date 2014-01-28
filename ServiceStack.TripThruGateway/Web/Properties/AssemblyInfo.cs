@@ -6,12 +6,12 @@ using System.Runtime.Serialization;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ServiceStack.MovieRest")]
+[assembly: AssemblyTitle("ServiceStack.TripThruGateway")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ServiceStack.MovieRest")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyProduct("ServiceStack.TripThruGateway")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -36,5 +36,5 @@ using System.Runtime.Serialization;
 [assembly: AssemblyFileVersion("1.1.1205.1037")]
 
 [assembly: ContractNamespace("http://schemas.servicestack.net/types",
-	ClrNamespace = "ServiceStack.MovieRest")]
+	ClrNamespace = "ServiceStack.TripThruGateway")]
 

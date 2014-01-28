@@ -1,0 +1,5 @@
+C:\Users\Edward\Documents\Visual Studio 2010\Projects\FleetSim\FleetSim\obj\x86\Debug\FleetSim.csprojResolveAssemblyReference.cache
+C:\Users\Edward\Documents\Visual Studio 2010\Projects\FleetSim\FleetSim\bin\Debug\TaxiSim.exe
+C:\Users\Edward\Documents\Visual Studio 2010\Projects\FleetSim\FleetSim\bin\Debug\TaxiSim.pdb
+C:\Users\Edward\Documents\Visual Studio 2010\Projects\FleetSim\FleetSim\obj\x86\Debug\TaxiSim.exe
+C:\Users\Edward\Documents\Visual Studio 2010\Projects\FleetSim\FleetSim\obj\x86\Debug\TaxiSim.pdb

@@ -7,6 +7,7 @@
 <head>
     <title>Log</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" ></script>
 </head>
 
 
@@ -14,11 +15,17 @@
 
     <style>
         body {
-            font-family: Arial;
+            font-family: 'Open Sans',sans-serif;
+            background: #f8f8f8;
+            color: #555;
+            font-size: 16px;
+            font-weight: 300;
         }
 
         h1 {
-            font-family: Arial;
+            font-weight: 300;
+            color: #525252;
+            margin: 0 0 20px 0;
         }
 
         ul {
@@ -28,8 +35,20 @@
         }
 
         li {
-            padding-bottom: 0.5em;
+            font-weight: 300;
             padding-left: 1.5em;
+        }
+
+        .request_list {
+        }
+
+        .request_block {
+            padding-left: 0em;
+            border: 1px solid #eee;
+            background: white;
+            font-weight: bold;
+            margin-top: 1.0em;
+            margin-bottom: 1.0em;
         }
 
         .handle {
@@ -66,77 +85,37 @@
         <h1>Recent activity</h1>
     }
 
-    <ul id="tree">
+    <ul class="request_list tree">
         @foreach (var entry in Model.LogList)
         {
-            if (entry.Calls.Count > 0)
+            if (entry.Messages.Count > 0)
             {
-                
-                <li><span>@entry.Time |</span><span style="padding-left: 40px;">@entry.Calls.First().Second</span>
-                    @if(entry.Calls.Count > 1)
-                    {
-                        var tab = @entry.Calls.GetRange(1, 1).First().First;
-                        var count = 0;
-                        <ul>
-                            @for (int i = 1; i < entry.Calls.Count; i++)
+                <li class="request_block">@entry.Time | @entry.Messages.First().Second
+                    <ul>
+                        <li>Json request
+                            <ul>
+                                <li><pre class="prettyprint language-java">@entry.Request</pre></li>
+                            </ul>
+                        </li>
+                        @if (entry.Messages.Count > 1)
+                        {
+                            for (int i = 1; i < entry.Messages.Count; i++)
                             {
-                                var log = entry.Calls.ElementAt(i);
-                                if (tab == log.First && (tab == entry.MaxTab || i == entry.Calls.Count-1)) //if terminal node
-                                {
-                                    <li><p style="white-space: nowrap;">@log.Second</p></li>
-                                }
-                                else if (tab == log.First) //if has children
-                                {
-                                    if (i < entry.Calls.Count - 1 && entry.Calls.ElementAt(i + 1).First > log.First)
-                                    {
-                                        count++;
-                                        @:<li><p style="white-space: nowrap;">@log.Second</p>
-                                        @:<ul>
-                                    }
-                                    else
-                                    {
-                                        <li><p style="white-space: nowrap;">@log.Second</p></li>
-                                    }
-                                }
-                                else if(tab < log.First && log.First == entry.MaxTab)
-                                {
-                                    tab = log.First;
-                                    <li><p style="white-space: nowrap;">@log.Second</p></li>
-                                    if(i == entry.Calls.Count-1)
-                                    {
-                                        @:</ul>
-                                        @:</li>
-                                        count--;
-                                    }
-                                }
-                                else if(tab < log.First)
-                                {
-                                    count++;
-                                    tab = log.First;
-                                    @:<li><p style="white-space: nowrap;">@log.Second</p>
-                                    @:<ul>
-                                }
-                                else if (tab > log.First)
-                                {
-                                    tab = log.First;
-                                    if (count > 0)
-                                    {
-                                        @:</ul>
-                                        @:</li>
-                                        count--;
-                                    }
-                                    i--;
-                                }
+                                var log = entry.Messages.ElementAt(i);
+                                <li>
+                                    <p style="white-space: nowrap;">
+                                        <span style="padding-left: @log.First.ToString()px;">@log.Second</span>
+                                    </p>
+                                </li>
                             }
-                            
-                            @while (count > 0)
-                            {
-                                    @:</ul>
-                                @:</li>    
-                                count--;
-                            }
-                        </ul>
-                    }
+                        } 
+                        <li>
+                            Json response
+                            <ul>
+                                <li><pre class="prettyprint language-java">@entry.Response</pre></li>
+                            </ul>
+                        </li>  
+                    </ul>
                 </li>
             }
         }
@@ -144,10 +123,10 @@
 
     <script>
         $(document).ready(function () {
-            jQuery("#tree ul").hide();
-            jQuery("#tree li").prepend("<span class='handle'></span>");
-            jQuery("#tree li:has(ul)").children(":first-child").addClass("collapsed").click(function () {
-                jQuery(this).toggleClass("collapsed expanded").siblings("ul").toggle();
+            //jQuery(".tree ul").hide();
+            jQuery(".tree li").prepend("<span class='handle'></span>");
+            jQuery(".tree li:has(ul)").children(":first-child").addClass("expanded").click(function () {
+                jQuery(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
             });
         });
     </script>

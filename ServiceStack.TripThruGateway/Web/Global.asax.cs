@@ -1,16 +1,15 @@
 ﻿using System;
+using System.Web;
 using TripThru.Gateway.App_Start;
 
-namespace TripThru.Gateway
+namespace ServiceStack.TripThruGateway
 {
-	using System.Web;
-
-	public class Global : HttpApplication
+    public class Global : HttpApplication
 	{
         protected void Application_Start(object sender, EventArgs e)
         {
             //Initialize your application
-            (new AppHost()).Init();
+            (new TripThruGatewayHost()).Init();
         }
 	}
 }

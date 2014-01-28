@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="TripThru.Gateway.Global" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="ServiceStack.TripThruGateway.Global" Language="C#" %>

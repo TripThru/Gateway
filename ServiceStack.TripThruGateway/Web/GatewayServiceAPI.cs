@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ServiceStack.DataAnnotations;
-using ServiceStack.TripThruGateway.TripThru;
 
 namespace ServiceStack.TripThruGateway
 {
