@@ -9,6 +9,133 @@ namespace Utils
 {
     public class Logger
     {
+        public class SplunkClient
+        {
+            private RestClient restClient;
+            private string requestUrl;
+            private Queue<RequestLog> queue;
+            private ManualResetEvent sendEvent;
+            private Thread sendThread;
+
+            public string Host = "api.g8ck-fsze.data.splunkstorm.com";
+
+            public string ProjectId = "66e6f24286c111e386ab123139018851";
+
+            public string AccessToken = "X6DK4PaBNp9x3neWuFVfmrFPMXJQTWSEtQX5R8sprvMoRiiqXCyg2cDV6gvogFYWOgaEHqQPHfw=";
+
+            public string Source = "syslog";
+
+            public int MaxQueueItems;
+
+            public string TZ = "America/Los_Angeles";
+
+
+
+            public SplunkClient()
+            {
+                this.MaxQueueItems = 10000;
+
+                this.queue = new Queue<RequestLog>(MaxQueueItems);
+                this.sendEvent = new ManualResetEvent(false);
+                this.sendThread = new Thread(new ThreadStart(SendThread));
+
+                string baseUrl = string.Format("https://{0}", Host);
+                this.restClient = new RestClient
+                {
+                    BaseUrl = baseUrl,
+                    Authenticator = new HttpBasicAuthenticator("x", AccessToken),
+                    Timeout = 15000
+                };
+
+                this.requestUrl = string.Format("1/inputs/http?index={0}&sourcetype=json_predefined_timestamp&host={1}&source={2}",
+                    ProjectId,
+                    Environment.MachineName,
+                    Source);
+
+                if (!string.IsNullOrEmpty(TZ))
+                    this.requestUrl += "&tz=" + TZ;
+
+                System.Net.ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, certificate, chain, sslPolicyErrors) =>
+                    {
+                        if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateNameMismatch)
+                        {
+                            if (certificate.Subject.StartsWith("CN=*.splunkstorm.com,"))
+                                return true;
+                        }
+
+                        return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
+                    };
+
+                this.sendThread.Start();
+            }
+
+            private void SendThread()
+            {
+                System.Threading.Thread.CurrentThread.IsBackground = true;
+
+                while (true)
+                {
+                    try
+                    {
+                        if (queue.Count > 0)
+                        {
+                            var logEntries = new List<string>();
+                            lock (queue)
+                            {
+                                RequestLog requestLog = this.queue.Dequeue();
+                                foreach (Pair<int, string> msg in requestLog.Messages)
+                                    logEntries.Add(msg.Second);
+                            }
+
+                            if (logEntries.Any())
+                            {
+                                var sb = new StringBuilder();
+
+                                foreach (var logEntry in logEntries)
+                                    sb.Append(logEntry + "\n");
+
+                                RestRequest request = new RestRequest(this.requestUrl, Method.POST);
+                                request.AddParameter("application/json", sb.ToString(), ParameterType.RequestBody);
+                                request.AddHeader("content-type", "application/json");
+                                restClient.ExecuteAsync(request, response =>
+                                {
+                                    //Todo: put response validations if necessary
+                                });
+                            }
+                            else
+                            {
+                                if (this.sendEvent.WaitOne(10000))
+                                    this.sendEvent.Reset();
+                            }
+                        }
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        // Ignore
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Splunk exception: " + ex);
+                        Console.WriteLine("Splunk exception: " + ex);
+                    }
+                }
+            }
+
+            public void Close()
+            {
+                this.sendThread.Abort();
+            }
+
+
+            public void Enqueue(RequestLog log)
+            {
+                lock (queue)
+                {
+                    this.queue.Enqueue(log);
+                }
+            }
+        }
         public class FixedSizeQueue : Queue<RequestLog>
         {
             public FixedSizeQueue(int limit)
@@ -61,6 +188,7 @@ namespace Utils
         public static Dictionary<object, RequestLog> requestLog;
         public static string filePath = "c:\\Users\\Edward\\";
         static System.IO.StreamWriter file;
+        static SplunkClient splunkClient;
         static RestRequest restReq;
         static int numBegunRequests = 0;
         public static void BeginRequest(string msg, object request)
@@ -96,6 +224,7 @@ namespace Utils
                 if (response != null)
                     json = restReq.JsonSerializer.Serialize(response);
                 requestLog[thread].Response = json;
+                splunkClient.Enqueue(requestLog[thread]);
                 if (file == null)
                     Queue.Enqueue(requestLog[thread]);
                 requestLog.Remove(thread);
@@ -120,6 +249,8 @@ namespace Utils
             requestLog = new Dictionary<object, RequestLog>();
             Queue = new FixedSizeQueue(300);
             restReq = new RestRequest();
+            // Create new Service object
+            splunkClient = new SplunkClient();
         }
         static public void OpenLog(string filename)
         {
@@ -129,6 +260,8 @@ namespace Utils
             //file = new System.IO.StreamWriter(("~/App_Data/" + filename).MapHostAbsolutePath());
             file = new System.IO.StreamWriter(filePath + filename);
             restReq = new RestRequest();
+            // Create new Service object
+            splunkClient = new SplunkClient();
         }
 
         public static void CloseLog()
@@ -139,6 +272,7 @@ namespace Utils
                 file = null;
             }
             Queue.Clear();
+            splunkClient.Close();
         }
 
         public static void Tab()

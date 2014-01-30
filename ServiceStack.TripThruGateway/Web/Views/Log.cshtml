@@ -1,4 +1,5 @@
 ﻿@using System.CodeDom
+@using ServiceStack.Common
 @inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
 
 
@@ -92,29 +93,35 @@
             {
                 <li class="request_block">@entry.Time | @entry.Messages.First().Second
                     <ul>
-                        <li>Json request
-                            <ul>
-                                <li><pre class="prettyprint language-java">@entry.Request</pre></li>
-                            </ul>
-                        </li>
+                        @if (!entry.Request.IsNullOrEmpty())
+                        {
+                            <li>Json request
+                                <ul>
+                                    <li><pre class="prettyprint language-java">@entry.Request</pre></li>
+                                </ul>
+                            </li>
+                        }
                         @if (entry.Messages.Count > 1)
                         {
                             for (int i = 1; i < entry.Messages.Count; i++)
                             {
                                 var log = entry.Messages.ElementAt(i);
                                 <li>
-                                    <p style="white-space: nowrap;">
-                                        <span style="padding-left: @log.First.ToString()px;">@log.Second</span>
+                                    <p style="padding-left: @log.First.ToString()px;">
+                                        @log.Second
                                     </p>
                                 </li>
                             }
                         } 
-                        <li>
-                            Json response
-                            <ul>
-                                <li><pre class="prettyprint language-java">@entry.Response</pre></li>
-                            </ul>
-                        </li>  
+                        @if (!entry.Response.IsNullOrEmpty())
+                        {
+                            <li>
+                                Json response
+                                <ul>
+                                    <li><pre class="prettyprint language-java">@entry.Response</pre></li>
+                                </ul>
+                            </li>
+                        }
                     </ul>
                 </li>
             }
