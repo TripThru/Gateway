@@ -55,25 +55,13 @@ namespace Utils
                 if (!string.IsNullOrEmpty(TZ))
                     this.requestUrl += "&tz=" + TZ;
 
-                System.Net.ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, certificate, chain, sslPolicyErrors) =>
-                    {
-                        if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateNameMismatch)
-                        {
-                            if (certificate.Subject.StartsWith("CN=*.splunkstorm.com,"))
-                                return true;
-                        }
-
-                        return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
-                    };
-
                 this.sendThread.Start();
             }
 
             private void SendThread()
             {
                 System.Threading.Thread.CurrentThread.IsBackground = true;
-
+                var interval = new TimeSpan(0, 0, 10);
                 while (true)
                 {
                     try
@@ -100,7 +88,8 @@ namespace Utils
                                 request.AddHeader("content-type", "application/json");
                                 restClient.ExecuteAsync(request, response =>
                                 {
-                                    //Todo: put response validations if necessary
+                                    if (response.ErrorMessage != null) 
+                                        Console.WriteLine("Splunk message error: "+response.ErrorMessage);
                                 });
                             }
                             else
@@ -119,6 +108,7 @@ namespace Utils
                         System.Diagnostics.Debug.WriteLine("Splunk exception: " + ex);
                         Console.WriteLine("Splunk exception: " + ex);
                     }
+                    Thread.Sleep(interval);
                 }
             }
 

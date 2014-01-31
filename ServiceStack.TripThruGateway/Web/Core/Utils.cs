@@ -21,6 +21,7 @@ using ServiceStack.TripThruGateway;
 
 namespace Utils
 {
+
     public class Pair<T, U>
     {
         public Pair()
