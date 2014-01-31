@@ -23,7 +23,7 @@ namespace Utils
 
             public string AccessToken = "X6DK4PaBNp9x3neWuFVfmrFPMXJQTWSEtQX5R8sprvMoRiiqXCyg2cDV6gvogFYWOgaEHqQPHfw=";
 
-            public string Source = "syslog";
+            public string Source { get; set; }
 
             public int MaxQueueItems;
 
@@ -33,6 +33,7 @@ namespace Utils
 
             public SplunkClient()
             {
+                this.Source = "default";
                 this.MaxQueueItems = 10000;
 
                 this.queue = new Queue<RequestLog>(MaxQueueItems);
@@ -56,6 +57,17 @@ namespace Utils
                     this.requestUrl += "&tz=" + TZ;
 
                 this.sendThread.Start();
+            }
+
+            public void SetSource(string source)
+            {
+                Source = source;
+                this.requestUrl = string.Format("1/inputs/http?index={0}&sourcetype=json_predefined_timestamp&host={1}&source={2}",
+                    ProjectId,
+                    Environment.MachineName,
+                    source);
+                if (!string.IsNullOrEmpty(TZ))
+                    this.requestUrl += "&tz=" + TZ;
             }
 
             private void SendThread()
@@ -241,6 +253,10 @@ namespace Utils
             restReq = new RestRequest();
             // Create new Service object
             splunkClient = new SplunkClient();
+        }
+        public static void SetLogId(string id)
+        {
+            splunkClient.SetSource(id);
         }
         static public void OpenLog(string filename)
         {

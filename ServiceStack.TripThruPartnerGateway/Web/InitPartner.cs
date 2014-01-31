@@ -84,6 +84,7 @@ namespace ServiceStack.TripThruPartnerGateway
             {
                 Console.WriteLine(_partner.name + ": sim start");
                 Logger.OpenLog();
+                Logger.SetLogId(_partner.name);
                 Logger.BeginRequest("Simulation started at " + DateTime.UtcNow, null);
                 Logger.Log("Sim Configuration");
                 _partner.Log();
