@@ -1,4 +1,5 @@
 using Funq;
+using ServiceStack.Common.Utils;
 using ServiceStack.OrmLite;
 using ServiceStack.Razor;
 using ServiceStack.Text;
@@ -25,9 +26,6 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
 
 			container.Register<IDbConnectionFactory>(
 				c => new OrmLiteConnectionFactory("Server=127.0.0.1; Database=GatewaySandboxPartner; Uid=tripservice; Pwd=Tr1PServ1Ce@MySqL;", MySqlDialect.Provider));
-				
-			//container.Register<IDbConnectionFactory>(
-			//	c => new OrmLiteConnectionFactory("~/db.sqlite".MapHostAbsolutePath(), SqliteDialect.Provider));
 
             Plugins.Add(new RazorFormat());
             
@@ -44,16 +42,6 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
                           });
 
             container.RegisterAutoWiredAs<TripThruPartnerGateway.InitPartnerService, InitPartnerService>();
-
-            /**
-             * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain
-             * than to add them manually to the deployment server
-            */
-            System.Net.ServicePointManager.ServerCertificateValidationCallback =
-                (sender, certificate, chain, sslPolicyErrors) =>
-                {
-                    return true; //Todo: fix this to actually validate the certificates
-                };
 
             //Init
             using (var initPartners = container.Resolve<InitPartnerService>())

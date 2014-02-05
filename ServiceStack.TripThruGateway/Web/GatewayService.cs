@@ -3,6 +3,7 @@ using System.Linq;
 using ServiceStack.Common;
 using EnumerableExtensions = ServiceStack.Common.Extensions.EnumerableExtensions;
 using Utils;
+using TripThruCore;
 
 namespace ServiceStack.TripThruGateway
 {
@@ -89,7 +90,7 @@ namespace ServiceStack.TripThruGateway
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.getGatewayStats.Get(new Gateway.GetGatewayStats.Request(
+                    var response = gateway.GetGatewayStats(new Gateway.GetGatewayStatsRequest(
                         user.ClientId
                         ));
 
@@ -161,7 +162,7 @@ namespace ServiceStack.TripThruGateway
         {
             public PartnerResponse Post(PartnerRequest request)
             {
-                Logger.BeginRequest("RegisterPartner received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | RegisterPartner received", request);
                 PartnerResponse partnerResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -177,12 +178,7 @@ namespace ServiceStack.TripThruGateway
                             CallbackUrl = request.CallbackUrl,
                         });
 
-                        gateway.registerPartner.Post(new Gateway.RegisterPartner.Request(
-                            u.First().ClientId,
-                            request.Name,
-                            request.CallbackUrl,
-                            "jaosid1201231"
-                            ));
+                        gateway.RegisterPartner(new GatewayClient(u.First().ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
 
                         partnerResponse = new PartnerResponse
                         {
@@ -211,13 +207,14 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=RegisterPartner");
                 Logger.EndRequest(partnerResponse);
                 return partnerResponse;
             }
 
             public PartnerResponse Get(PartnerRequest request)
             {
-                Logger.BeginRequest("GetPartnerInfo received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
                 PartnerResponse partnerResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -226,6 +223,7 @@ namespace ServiceStack.TripThruGateway
                     Result = "InvalidParameters",
                     ResultCode = Gateway.Result.InvalidParameters
                 };
+                Logger.Log("RequestType=RegisterPartner");
                 Logger.EndRequest(partnerResponse);
                 return partnerResponse;
             }
@@ -252,14 +250,14 @@ namespace ServiceStack.TripThruGateway
 
             public PartnersResponse Post(Partners request)
             {
-                Logger.BeginRequest("GetPartnerInfo received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
                 PartnersResponse partnersResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.getPartnerInfo.Get(new Gateway.GetPartnerInfo.Request(
+                    var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
                             user.ClientId
                         ));
 
@@ -294,20 +292,21 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=GetPartnerInfo");
                 Logger.EndRequest(partnersResponse);
                 return partnersResponse;
             }
 
             public PartnersResponse Get(Partners request)
             {
-                Logger.BeginRequest("GetPartnerInfo received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
                 PartnersResponse partnersResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.getPartnerInfo.Get(new Gateway.GetPartnerInfo.Request(
+                    var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
                             user.ClientId
                         ));
 
@@ -341,6 +340,7 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=GetPartnerInfo");
                 Logger.EndRequest(partnersResponse);
                 return partnersResponse;
             }
@@ -381,14 +381,14 @@ namespace ServiceStack.TripThruGateway
 
             public QuotesResponse Post(Quotes request)
             {
-                Logger.BeginRequest("QuoteTrip received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | QuoteTrip received", request);
                 QuotesResponse quotesResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.quoteTrip.Get(new Gateway.QuoteTrip.Request(
+                    var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
                         user.ClientId,
                         request.PickupLocation,
                         request.PickupTime,
@@ -438,20 +438,21 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=QuoteTrip");
                 Logger.EndRequest(quotesResponse);
                 return quotesResponse;
             }
 
             public QuotesResponse Get(Quotes request)
             {
-                Logger.BeginRequest("QuoteTrip received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | QuoteTrip received", request);
                 QuotesResponse quotesResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.quoteTrip.Get(new Gateway.QuoteTrip.Request(
+                    var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
                         user.ClientId,
                         request.PickupLocation,
                         request.PickupTime,
@@ -502,6 +503,7 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=QuoteTrip");
                 Logger.EndRequest(quotesResponse);
                 return quotesResponse;
             }
@@ -512,7 +514,6 @@ namespace ServiceStack.TripThruGateway
         [Route("/dispatch", "POST, GET")]
         public class Dispatch : IReturn<DispatchResponse>
         {
-            public string ForeignId { get; set; }
             public string PassengerId { get; set; }
             public string PassengerName { get; set; }
             public int? Luggage { get; set; }
@@ -542,19 +543,18 @@ namespace ServiceStack.TripThruGateway
         {
             public DispatchResponse Post(Dispatch request)
             {
-                Logger.BeginRequest("DispatchTrip received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | DispatchTrip received", request);
                 DispatchResponse dispatchResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.dispatchTrip.Post(new Gateway.DispatchTrip.Request(
+                    var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
                         user.ClientId,
                         request.TripId,
                         request.PickupLocation,
                         request.PickupTime,
-                        request.ForeignId,
                         request.PassengerId,
                         request.PassengerName,
                         request.Luggage,
@@ -599,25 +599,25 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=DispatchTrip");
                 Logger.EndRequest(dispatchResponse);
                 return dispatchResponse;
             }
 
             public DispatchResponse Get(Dispatch request)
             {
-                Logger.BeginRequest("DispatchTrip received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | DispatchTrip received", request);
                 DispatchResponse dispatchResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.dispatchTrip.Post(new Gateway.DispatchTrip.Request(
+                    var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
                         user.ClientId,
                         request.TripId,
                         request.PickupLocation,
                         request.PickupTime,
-                        request.ForeignId,
                         request.PassengerId,
                         request.PassengerName,
                         request.Luggage,
@@ -661,6 +661,8 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=DispatchTrip");
+                Logger.EndRequest(dispatchResponse);
                 return dispatchResponse;
             }
         }
@@ -699,14 +701,14 @@ namespace ServiceStack.TripThruGateway
         {
             public TripResponse Get(Trip request)
             {
-                Logger.BeginRequest("GetTripStatus received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetTripStatus received", request);
                 TripResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.getTripStatus.Get(new Gateway.GetTripStatus.Request(
+                    var response = gateway.GetTripStatus(new Gateway.GetTripStatusRequest(
                         user.ClientId,
                         request.TripId
                         ));
@@ -753,20 +755,21 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=GetTripStatus");
                 Logger.EndRequest(tripResponse);
                 return tripResponse;
             }
 
             public TripResponse Put(Trip request)
             {
-                Logger.BeginRequest("UpdateTripStatus received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | UpdateTripStatus received", request);
                 TripResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.updateTripStatus.Post(new Gateway.UpdateTripStatus.Request(
+                    var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
                         user.ClientId,
                         request.TripId,
                         request.Status
@@ -802,6 +805,7 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                Logger.Log("RequestType=UpdateTripStatus");
                 Logger.EndRequest(tripResponse);
                 return tripResponse;
             }
@@ -825,14 +829,14 @@ namespace ServiceStack.TripThruGateway
         {
             public TripsResponse Get(Trips request)
             {
-                Logger.BeginRequest("GetTrips received", request);
+                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetTrips received", request);
                 TripsResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 if (u.Count > 0)
                 {
                     var user = u.First();
-                    var response = gateway.getTrips.Get(new Gateway.GetTrips.Request(user.ClientId, request.Status));
+                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(user.ClientId, request.Status));
 
                     if (response.result == Gateway.Result.OK)
                     {
@@ -853,14 +857,19 @@ namespace ServiceStack.TripThruGateway
                     }
 
                 }
-
-                string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
-                             ", Response = Authentication failed";
-                return new TripsResponse
+                else
                 {
-                    Result = "Failed",
-                    ResultCode = Gateway.Result.AuthenticationError
-                };
+                    string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
+                             ", Response = Authentication failed";
+                    tripResponse = new TripsResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.AuthenticationError
+                    };
+                }
+                Logger.Log("RequestType=GetTrips");
+                Logger.EndRequest(tripResponse);
+                return tripResponse;
             }
         }
 

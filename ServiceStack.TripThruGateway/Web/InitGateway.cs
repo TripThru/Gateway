@@ -1,5 +1,7 @@
 using ServiceStack.TripThruGateway;
 using Utils;
+using TripThruCore;
+
 namespace ServiceStack.TripThruGateway
 {
 	using System;
@@ -19,13 +21,9 @@ namespace ServiceStack.TripThruGateway
     public class InitGatewayService : Service
 	{
 
-        GatewayClient GetGatewayClient(string accessToken, string callbackURL)
-        {
-            return new GatewayRestClient(accessToken, callbackURL);
-        }
         public object Any(InitGateway request)
         {
-            GatewayService.gateway = new TripThru(GetGatewayClient);
+            GatewayService.gateway = new TripThru();
 
             Db.CreateTableIfNotExists<Partner>();
             Db.CreateTableIfNotExists<User>();
@@ -108,7 +106,6 @@ namespace ServiceStack.TripThruGateway
             Db.Insert(tripthruweb);
 
             Logger.OpenLog();
-            Logger.SetLogId("gateway");
             return new InitGatewayResponse();
 		}
 	}

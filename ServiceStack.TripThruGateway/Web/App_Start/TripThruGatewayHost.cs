@@ -4,15 +4,13 @@ using ServiceStack.Razor;
 using ServiceStack.ServiceHost;
 using ServiceStack.TripThruGateway;
 using ServiceStack.WebHost.Endpoints.Extensions;
-using TripThru.Gateway.App_Start;
 using ContentType = ServiceStack.Common.Web.ContentType;
 
-namespace TripThru.Gateway.App_Start
+namespace ServiceStack.TripThruGateway
 {
 	using Funq;
 	using ServiceStack.Common.Utils;
 	using ServiceStack.OrmLite;
-	using ServiceStack.OrmLite.Sqlite;
 	using ServiceStack.ServiceInterface.Cors;
 	using ServiceStack.Text;
 	using ServiceStack.WebHost.Endpoints;
@@ -32,11 +30,8 @@ namespace TripThru.Gateway.App_Start
 			JsConfig.DateHandler = JsonDateHandler.ISO8601;
 			JsConfig.EmitCamelCaseNames = true;
 
-			container.Register<IDbConnectionFactory>(
+            container.Register<IDbConnectionFactory>(
                 c => new OrmLiteConnectionFactory("Server=127.0.0.1; Database=GatewaySandbox; Uid=tripservice; Pwd=Tr1PServ1Ce@MySqL;", MySqlDialect.Provider));
-				
-			//container.Register<IDbConnectionFactory>(
-			//	c => new OrmLiteConnectionFactory("~/db.sqlite".MapHostAbsolutePath(), SqliteDialect.Provider));
 
             Plugins.Add(new RazorFormat());
             
@@ -51,16 +46,6 @@ namespace TripThru.Gateway.App_Start
                             DefaultContentType = ContentType.Json,
                             AllowJsonpRequests = true
                           });
-
-            /**
-             * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain
-             * than to add them manually to the deployment server
-            */
-            System.Net.ServicePointManager.ServerCertificateValidationCallback =
-                (sender, certificate, chain, sslPolicyErrors) =>
-                {
-                    return true; //Todo: fix this to actually validate the certificates
-                };
 
             //Init
             using (var initPartners = container.Resolve<InitGatewayService>())

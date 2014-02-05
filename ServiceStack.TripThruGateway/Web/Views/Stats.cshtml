@@ -1,0 +1,470 @@
+﻿@using System.CodeDom
+@using ServiceStack.Common
+@inherits ServiceStack.Razor.ViewPage<ServiceStack.TripThruGateway.GatewayService.StatsResponse>
+
+
+<html>
+
+<head>
+    <title>Tripthru</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript" src="http://code.highcharts.com/highcharts-more.js"></script>
+</head>
+
+
+<body>
+
+    <style>
+        body {
+            font-family: 'Open Sans',sans-serif;
+            background: #f8f8f8;
+            color: #555;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        h1 {
+            font-weight: 300;
+            color: #525252;
+            margin: 0 0 20px 0;
+        }
+
+        h2 {
+            font-weight: 100;
+            color: #525252;
+            margin: 0 0 20px 0;
+        }
+
+        .chart_container {
+            width: 1000px;
+            height: 350px;
+            margin: 0 auto;
+            padding: 20px;
+            display: block;
+        }
+
+        .counters_container {
+            background: #fff;
+            width: 333px;
+            height: 350px;
+            text-align: center;
+            float: left;
+        }
+
+        .counters_title {
+            font-weight: 200;
+            color: #525252;
+            padding: 10px;
+            font-size: 19px;
+        }
+
+        counter_label {
+            vertical-align: center;
+        }
+
+        .counter {
+            font-size: 50px;
+            font-weight: bold;
+            color: #403C66;
+        }
+    </style>
+
+    <h1>Gateway stats</h1>
+    <div id="activeTrips" class="chart_container"></div>
+    <div id="stats" class="chart_container"></div>
+    <div class="chart_container">
+        <div class="counters_container">
+            <p class="counters_title">
+                Trips
+            </p>
+            <div class="counter_label">Last hour</div>
+            <div id="tripsLastHour" class="counter">0</div>
+            <div class="counter_label">Last 24 hours</div>
+            <div id="tripsLast24Hrs" class="counter">0</div>
+            <div class="counter_label">All time</div>
+            <div id="tripsAllTime" class="counter">0</div>
+        </div>
+        <div class="counters_container">
+            <p class="counters_title">
+                Distance
+            </p>
+            <div class="counter_label">Last hour</div>
+            <div id="distanceLastHour" class="counter">0 km</div>
+            <div class="counter_label">Last 24 hours</div>
+            <div id="distanceLast24Hrs" class="counter">0 km</div>
+            <div class="counter_label">All time</div>
+            <div id="distanceAllTime" class="counter">0 km</div>
+        </div>
+        <div class="counters_container">
+            <p class="counters_title">
+                Fare
+            </p>
+            <div class="counter_label">Last hour</div>
+            <div id="fareLastHour" class="counter">$ 0</div>
+            <div class="counter_label">Last 24 hours</div>
+            <div id="fareLast24Hrs" class="counter">$ 0</div>
+            <div class="counter_label">All time</div>
+            <div id="fareAllTime" class="counter">$ 0</div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var stats = null;
+            var activeTripsChart = null;
+            var activeTrips = [];
+            $.get('http://54.201.134.194/ServiceStack.TripThruGateway/stats', function (data) {
+                if (data.result == "OK") {
+                    stats = new Highcharts.Chart({
+                        chart: {
+                            renderTo: 'stats',
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false
+                        },
+                        exporting: { enabled: false },
+                        title: {
+                            text: 'Requests, rejections and cancellations'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: <b>{point.y}</b>'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: false
+                                },
+                                showInLegend: true
+                            }
+                        },
+                        labels: {
+                            items: [{
+                                html: 'Last hour',
+                                style: {
+                                    left: '220',
+                                    top: '20',
+                                    color: '#525252'
+                                }
+                            },
+                                    {
+                                        html: 'Last 24 hours',
+                                        style: {
+                                            left: '450',
+                                            top: '20',
+                                            color: '#525252'
+                                        }
+                                    },
+                                    {
+                                        html: 'All time',
+                                        style: {
+                                            left: '700',
+                                            top: '20',
+                                            color: '#525252'
+                                        }
+                                    }
+                            ]
+                        },
+                        series: [{
+                            center: ['25%', '50%'],
+                            size: '50%',
+                            showInLegend: true,
+                            type: 'pie',
+                            name: 'Count',
+                            data: [
+                                {
+                                    name: 'Requests',
+                                    y: data.requestsLastHour - data.cancelsLastHour - data.rejectsLastHour,
+                                    sliced: true,
+                                    selected: true,
+                                    color: '#75C944'
+                                },
+                                {
+                                    name: 'Rejects',
+                                    y: data.rejectsLastHour,
+                                    color: '#46456B'
+                                },
+                                {
+                                    name: 'Cancellations',
+                                    y: data.cancelsLastHour,
+                                    color: '#E35D5D'
+                                },
+                                {
+                                    name: 'Exceptions',
+                                    y: data.exceptionsLastHour
+                                }
+                            ]
+                        }, {
+                            center: ['50%', '50%'],
+                            size: '50%',
+                            showInLegend: false,
+                            type: 'pie',
+                            name: 'Count',
+                            data: [
+                                {
+                                    name: 'Requests',
+                                    y: data.requestsLast24Hrs - data.cancelsLast24Hrs - data.rejectsLast24Hrs,
+                                    sliced: true,
+                                    selected: true,
+                                    color: '#75C944'
+                                },
+                                {
+                                    name: 'Rejects',
+                                    y: data.rejectsLast24Hrs,
+                                    color: '#46456B'
+                                },
+                                {
+                                    name: 'Cancellations',
+                                    y: data.cancelsLast24Hrs,
+                                    color: '#E35D5D'
+                                },
+                                {
+                                    name: 'Exceptions',
+                                    y: data.exceptionsLast24Hrs
+                                }
+                            ]
+                        },
+                        {
+                            center: ['75%', '50%'],
+                            size: '50%',
+                            showInLegend: false,
+                            type: 'pie',
+                            name: 'Count',
+                            data: [
+                                {
+                                    name: 'Requests',
+                                    y: data.requestsAllTime - data.cancelsAllTime - data.rejectsAllTime,
+                                    sliced: true,
+                                    selected: true,
+                                    color: '#75C944'
+                                },
+                                {
+                                    name: 'Rejects',
+                                    y: data.rejectsAllTime,
+                                    color: '#46456B'
+                                },
+                                {
+                                    name: 'Cancellations',
+                                    y: data.cancelsAllTime,
+                                    color: '#E35D5D'
+                                },
+                                {
+                                    name: 'Exceptions',
+                                    y: data.exceptionsAllTime
+                                }
+                            ]
+                        }
+                        ]
+                    }, function (chart) {
+                        $(chart.series[0].data).each(function (i, e) {
+                            e.legendItem.on('click', function (event) {
+                                var legendItem = e.name;
+
+                                event.stopPropagation();
+
+                                $(chart.series).each(function (j, f) {
+                                    $(this.data).each(function (k, z) {
+                                        if (z.name == legendItem) {
+                                            if (z.visible) {
+                                                z.setVisible(false);
+                                            }
+                                            else {
+                                                z.setVisible(true);
+                                            }
+                                        }
+                                    });
+                                });
+
+                            });
+                        });
+                    });
+
+                    activeTrips.push(data.activeTrips);
+                    activeTripsChart = new Highcharts.Chart({
+                        chart: {
+                            renderTo: 'activeTrips',
+                            type: 'gauge',
+                            plotBackgroundColor: null,
+                            plotBackgroundImage: null,
+                            plotBorderWidth: 0,
+                            plotShadow: false
+                        },
+                        exporting: { enabled: false },
+                        title: {
+                            text: 'Active trips'
+                        },
+                        pane: {
+                            startAngle: -150,
+                            endAngle: 150,
+                            background: [{
+                                backgroundColor: {
+                                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                    stops: [
+                                        [0, '#FFF'],
+                                        [1, '#333']
+                                    ]
+                                },
+                                borderWidth: 0,
+                                outerRadius: '109%'
+                            }, {
+                                backgroundColor: {
+                                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                    stops: [
+                                        [0, '#333'],
+                                        [1, '#FFF']
+                                    ]
+                                },
+                                borderWidth: 1,
+                                outerRadius: '107%'
+                            }, {
+                                // default background
+                            }, {
+                                backgroundColor: '#DDD',
+                                borderWidth: 0,
+                                outerRadius: '105%',
+                                innerRadius: '103%'
+                            }]
+                        },
+
+                        // the value axis
+                        yAxis: {
+                            min: 0,
+                            max: (data.activeTrips < 10) ? 10 : data.activeTrips * 1.4,
+
+                            minorTickInterval: 'auto',
+                            minorTickWidth: 0,
+                            minorTickLength: 10,
+                            minorTickPosition: 'inside',
+                            minorTickColor: '#FFF',
+
+                            tickPixelInterval: 30,
+                            tickWidth: 0,
+                            tickPosition: 'inside',
+                            tickLength: 10,
+                            tickColor: '#FFF',
+                            labels: {
+                                step: 2,
+                                rotation: 'auto'
+                            },
+                            title: {
+                                text: 'trips'
+                            },
+                            plotBands: [{
+                                from: 0,
+                                to: 30,
+                                color: '#55BF3B'
+                            }]
+                        },
+
+                        series: [{
+                            name: 'Active trips',
+                            data: [data.activeTrips],
+                            tooltip: {
+                                valueSuffix: ' trips'
+                            }
+                        }]
+
+                    });
+
+                    $('#tripsLastHour').hide().html(data.tripsLastHour).fadeIn(1000);
+                    $('#tripsLast24Hrs').hide().html(data.tripsLast24Hrs).fadeIn(1000);
+                    $('#tripsAllTime').hide().html(data.tripsAllTime).fadeIn(1000);
+
+                    $('#distanceLastHour').hide().html(data.distanceLastHour + ' km').fadeIn(1000);
+                    $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs + ' km').fadeIn(1000);
+                    $('#distanceAllTime').hide().html(data.distanceAllTime + ' km').fadeIn(1000);
+
+                    $('#fareLastHour').hide().html('$ ' + data.fareLastHour).fadeIn(1000);
+                    $('#fareLast24Hrs').hide().html('$ ' + data.fareLast24Hrs).fadeIn(1000);
+                    $('#fareAllTime').hide().html('$ ' + data.fareAllTime).fadeIn(1000);
+                }
+            });
+
+
+            setInterval(function () {
+                $.get('http://54.201.134.194/ServiceStack.TripThruGateway/stats', function (data) {
+                    if (data.result == "OK" && activeTripsChart != null) {
+                        stats.series[2].data[3].update(data.exceptionsAllTime, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[2].data[2].update(data.cancelsAllTime, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[2].data[1].update(data.rejectsAllTime, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[2].data[0].update(data.requestsAllTime - data.cancelsAllTime - data.rejectsAllTime, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+
+                        stats.series[1].data[3].update(data.exceptionsLast24Hrs, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[1].data[2].update(data.cancelsLast24Hrs, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[1].data[1].update(data.rejectsLast24Hrs, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[1].data[0].update(data.requestsLast24Hrs - data.cancelsLast24Hrs - data.rejectsLast24Hrs, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+
+                        stats.series[0].data[3].update(data.exceptionsLastHour, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[0].data[2].update(data.cancelsLastHour, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[0].data[1].update(data.rejectsLastHour, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+                        stats.series[0].data[0].update(data.requestsLastHour - data.cancelsLastHour - data.rejectsLastHour, false, {
+                            duration: 1500,
+                            easing: 'swing'
+                        });
+
+                        activeTrips.push(data.activeTrips);
+                        var max = 0;
+                        $.each(activeTrips, function () {
+                            if (max < this) {
+                                max = this;
+                            }
+                        });
+                        max = (max < 10) ? 10 : max * 1.4;
+                        activeTripsChart.yAxis[0].setExtremes(0, max); activeTripsChart.series[0].points[0].update(data.activeTrips);
+
+                        stats.redraw();
+                        activeTripsChart.redraw();
+                        $('#tripsLastHour').hide().html(data.tripsLastHour).fadeIn(1000);
+                        $('#tripsLast24Hrs').hide().html(data.tripsLast24Hrs).fadeIn(1000);
+                        $('#tripsAllTime').hide().html(data.tripsAllTime).fadeIn(1000);
+
+                        $('#distanceLastHour').hide().html(data.distanceLastHour + ' km').fadeIn(1000);
+                        $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs + ' km').fadeIn(1000);
+                        $('#distanceAllTime').hide().html(data.distanceAllTime + ' km').fadeIn(1000);
+
+                        $('#fareLastHour').hide().html('$ ' + data.fareLastHour).fadeIn(1000);
+                        $('#fareLast24Hrs').hide().html('$ ' + data.fareLast24Hrs).fadeIn(1000);
+                        $('#fareAllTime').hide().html('$ ' + data.fareAllTime).fadeIn(1000);
+                    }
+                });
+            }, 10000);
+        });
+    </script>
+
+</body>
+</html>

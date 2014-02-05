@@ -1,5 +1,6 @@
-﻿@inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
+﻿@using System.CodeDom
 @using ServiceStack.Common
+@inherits ServiceStack.Razor.ViewPage<GatewayService.LogResponse>
 
 
 <html>
@@ -90,7 +91,7 @@
         {
             if (entry.Messages.Count > 0)
             {
-                <li class="request_block">@entry.Time | @entry.Messages.First().Second
+                <li class="request_block">@entry.Messages.First().Second
                     <ul>
                         @if (!entry.Request.IsNullOrEmpty())
                         {
@@ -106,7 +107,7 @@
                             {
                                 var log = entry.Messages.ElementAt(i);
                                 <li>
-                                    <p style ="padding-left: @log.First.ToString()px;">
+                                    <p style="padding-left: @log.First.ToString()px;">
                                         @log.Second
                                     </p>
                                 </li>

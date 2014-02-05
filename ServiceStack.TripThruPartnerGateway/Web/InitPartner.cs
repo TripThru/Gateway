@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ServiceStack.Common.Utils;
 using ServiceStack.Text;
 using ServiceStack.TripThruGateway;
+using TripThruCore;
 using Utils;
 
 namespace ServiceStack.TripThruPartnerGateway
@@ -25,18 +26,13 @@ namespace ServiceStack.TripThruPartnerGateway
 
 	public class InitPartnerService : Service
 	{
-        GatewayClient GetGatewayClient(string accessToken, string callbackURL)
-        {
-            return new GatewayRestClient(accessToken, callbackURL);
-        }
-
         public object Any(IReturn<InitPartner> request)
 		{
-            MapTools.LoadGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath());
+            MapTools.LoadGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
             MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath());
-            PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
+            PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
-            Partner partner = new Partner(GetGatewayClient, configuration.Partner.Name, configuration.Partner.ClientId, configuration.Partner.AccessToken, configuration.TripThruUrl, configuration.partnerFleets);
+            TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets);
 
             GatewayService.gateway = partner;
 
@@ -65,12 +61,12 @@ namespace ServiceStack.TripThruPartnerGateway
 
     public class SimulationThread : IDisposable
     {
-        private Partner _partner;
+        private TripThruCore.Partner _partner;
         private PartnerConfiguration _configuration;
         private Thread _worker;
         private volatile bool _workerTerminateSignal = false;
 
-        public SimulationThread(Partner partner, PartnerConfiguration configuration)
+        public SimulationThread(TripThruCore.Partner partner, PartnerConfiguration configuration)
         {
             this._partner = partner;
             this._configuration = configuration;
@@ -84,16 +80,14 @@ namespace ServiceStack.TripThruPartnerGateway
             {
                 Console.WriteLine(_partner.name + ": sim start");
                 Logger.OpenLog();
-                Logger.SetLogId(_partner.name);
-                Logger.BeginRequest("Simulation started at " + DateTime.UtcNow, null);
                 Logger.Log("Sim Configuration");
                 _partner.Log();
-                Logger.EndRequest(null);
+
+                Logger.Log("Simulation started at " + DateTime.UtcNow);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
 
                 _partner.tripthru.RegisterPartner(
-                    new Gateway.RegisterPartner.Request(_configuration.Partner.ClientId, _configuration.Partner.Name,
-                        _configuration.Partner.CallbackUrl, _configuration.Partner.AccessToken));
+                    new GatewayClient(_configuration.Partner.ClientId, _configuration.Partner.Name, _configuration.Partner.AccessToken, _configuration.Partner.CallbackUrl));
 
                 while (true)
                 {
@@ -114,44 +108,6 @@ namespace ServiceStack.TripThruPartnerGateway
         public void Dispose()
         {
             Console.WriteLine(_partner.name+": simulation ended");
-        }
-    }
-
-    public class PartnerConfiguration
-    {
-        public ConfigPartner Partner { get; set; }
-        public List<Fleet> Fleets { get; set; }
-        public string TripThruUrl { get; set; }
-        public int SimInterval { get; set; }
-        public List<PartnerFleet> partnerFleets;
-
-        public class ConfigPartner
-        {
-            public string Name { get; set; }
-            public string ClientId { get; set; }
-            public string AccessToken { get; set; }
-            public string CallbackUrl { get; set; }
-        }
-
-        public class Fleet
-        {
-            public string Name { get; set; }
-            public Double BaseCost { get; set; }
-            public Double CostPerMile { get; set; }
-            public int TripsPerHour { get; set; }
-            public List<Trip> PossibleTrips { get; set; }
-            public List<VehicleType> VehicleTypes { get; set; }
-            public List<string> Drivers { get; set; }
-            public List<string> Passengers { get; set; }
-            public Location Location { get; set; }
-            public List<Zone> Coverage { get; set; }
-
-        }
-
-        public class Trip
-        {
-            public Location Start { get; set; }
-            public Location End { get; set; }
         }
     }
 }

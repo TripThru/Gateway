@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Web;
-using TripThru.Gateway.App_Start;
 
 namespace ServiceStack.TripThruGateway
 {
