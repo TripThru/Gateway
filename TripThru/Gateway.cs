@@ -213,14 +213,9 @@ namespace TripThruCore
         }
         public class GetGatewayStatsRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public GetGatewayStatsRequest(string clientID)
-            {
-                this.clientID = clientID;
-            }
             public override string ToString()
             {
-                return "ClientID = " + clientID;
+                return "stats";
             }
         }
         public class GetGatewayStatsResponse
@@ -809,7 +804,7 @@ namespace TripThruCore
             Logger.BeginRequest("", null);
             if ((DateTime.UtcNow - lastGetGatewayStats) > getGatewayStatsInterval)
             {
-                Gateway.GetGatewayStatsResponse r = GetGatewayStats(new Gateway.GetGatewayStatsRequest(null));
+                Gateway.GetGatewayStatsResponse r = GetGatewayStats(new Gateway.GetGatewayStatsRequest());
                 Logger.Log(name + " Stats: ActiveTrips = " + r.activeTrips);
                 Logger.Tab();
                 Logger.Log("Requests: AllTime = " + r.requestsAllTime + ", Last24Hrs = " + r.requestsLast24Hrs + ", LastHour = " + r.requestsLastHour);

@@ -43,6 +43,16 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
 
             container.RegisterAutoWiredAs<TripThruPartnerGateway.InitPartnerService, InitPartnerService>();
 
+            /**
+             * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain
+             * than to add them manually to the deployment server
+            */
+            System.Net.ServicePointManager.ServerCertificateValidationCallback =
+                (sender, certificate, chain, sslPolicyErrors) =>
+                {
+                    return true; //Todo: fix this to actually validate the certificates
+                };
+
             //Init
             using (var initPartners = container.Resolve<InitPartnerService>())
             {

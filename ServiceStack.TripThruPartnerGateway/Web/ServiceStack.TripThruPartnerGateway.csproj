@@ -128,6 +128,9 @@
     <Content Include="Content\Images\bg-body-1024.png" />
     <Content Include="Content\Images\btn-github.png" />
     <Content Include="packages.config" />
+    <Content Include="App_Data\Geo-Location-Addresses.csv" />
+    <Content Include="App_Data\Geo-Location-Names.csv" />
+    <Content Include="App_Data\Geo-Routes.csv" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="PartnerConfiguration.txt" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -156,9 +159,7 @@
       <Name>TripThru</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

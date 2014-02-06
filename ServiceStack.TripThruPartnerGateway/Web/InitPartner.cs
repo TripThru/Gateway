@@ -29,14 +29,14 @@ namespace ServiceStack.TripThruPartnerGateway
         public object Any(IReturn<InitPartner> request)
 		{
             MapTools.LoadGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath());
+            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
             TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets);
 
             GatewayService.gateway = partner;
 
-            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath());
+            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
 
             Db.CreateTableIfNotExists<User>();
             Db.DeleteAll<User>();
@@ -80,14 +80,17 @@ namespace ServiceStack.TripThruPartnerGateway
             {
                 Console.WriteLine(_partner.name + ": sim start");
                 Logger.OpenLog();
+                Logger.SetLogId(_partner.name);
+                Logger.BeginRequest("Simulation started", null);
                 Logger.Log("Sim Configuration");
                 _partner.Log();
-
                 Logger.Log("Simulation started at " + DateTime.UtcNow);
+                Logger.EndRequest(null);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
 
                 _partner.tripthru.RegisterPartner(
-                    new GatewayClient(_configuration.Partner.ClientId, _configuration.Partner.Name, _configuration.Partner.AccessToken, _configuration.Partner.CallbackUrl));
+                    new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
+                        _configuration.Partner.CallbackUrl, _configuration.Partner.AccessToken));
 
                 while (true)
                 {
@@ -95,7 +98,7 @@ namespace ServiceStack.TripThruPartnerGateway
                     {
                         _partner.Simulate(DateTime.UtcNow + interval);
                     }
-                    MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath());
+                    MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
                     System.Threading.Thread.Sleep(interval);
                 }
             }

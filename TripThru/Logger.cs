@@ -203,13 +203,13 @@ namespace Utils
                 if(request != null)
                     json = restReq.JsonSerializer.Serialize(request);
                 requestLog[thread] = new RequestLog(json);
-                numBegunRequests[thread] = 1;
+                numBegunRequests[thread] = 0;
             }
             numBegunRequests[thread] = numBegunRequests[thread]+1;
             if (request != null)
                 msg += ": Request = " + restReq.JsonSerializer.Serialize(request);
             if (msg.Length > 0)
-                Logger.Log(msg);
+                Logger.Log(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg);
             if (request != null)
                 Logger.Tab();
         }
@@ -253,6 +253,7 @@ namespace Utils
         {
             requestLog = new Dictionary<object, RequestLog>();
             Queue = new FixedSizeQueue(300);
+            numBegunRequests = new Dictionary<object, int>();
             restReq = new RestRequest();
             // Create new Service object
             splunkClient = new SplunkClient();
@@ -266,6 +267,7 @@ namespace Utils
             requestLog = new Dictionary<object, RequestLog>();
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             requestLog[thread] = new RequestLog(null);
+            numBegunRequests = new Dictionary<object, int>();
             //file = new System.IO.StreamWriter(("~/App_Data/" + filename).MapHostAbsolutePath());
             file = new System.IO.StreamWriter(filePath + filename);
             restReq = new RestRequest();

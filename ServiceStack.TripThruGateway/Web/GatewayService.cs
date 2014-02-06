@@ -36,7 +36,7 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
-
+                var l = Logger.Queue.ToList();
                 return new LogResponse
                 {
                     Result = "OK",
@@ -85,60 +85,43 @@ namespace ServiceStack.TripThruGateway
         {
             public StatsResponse Get(Stats request)
             {
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                if (u.Count > 0)
+                var response = gateway.GetGatewayStats(new Gateway.GetGatewayStatsRequest());
+
+                if (response.result == Gateway.Result.OK)
                 {
-                    var user = u.First();
-                    var response = gateway.GetGatewayStats(new Gateway.GetGatewayStatsRequest(
-                        user.ClientId
-                        ));
-
-                    if (response.result == Gateway.Result.OK)
-                    {
-                        return new StatsResponse
-                        {
-                            Result = "OK",
-                            ResultCode = response.result,
-                            ActiveTrips = response.activeTrips,
-                            CancelsAllTime = response.cancelsAllTime,
-                            CancelsLast24Hrs = response.cancelsLast24Hrs,
-                            CancelsLastHour = response.cancelsLastHour,
-                            DistanceAllTime = response.distanceAllTime,
-                            DistanceLast24Hrs = response.distanceLast24Hrs,
-                            DistanceLastHour = response.distanceLastHour,
-                            ExceptionsAllTime = response.exceptionsAllTime,
-                            ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
-                            ExceptionsLastHour = response.exceptionsLastHour,
-                            FareAllTime = response.fareAllTime,
-                            FareLast24Hrs = response.fareLast24Hrs,
-                            FareLastHour = response.fareLastHour,
-                            RejectsAllTime = response.rejectsAllTime,
-                            RejectsLast24Hrs = response.rejectsLast24Hrs,
-                            RejectsLastHour = response.rejectsLastHour,
-                            RequestsAllTime = response.requestsAllTime,
-                            RequestsLast24Hrs = response.requestsLast24Hrs,
-                            RequestsLastHour = response.requestsLastHour,
-                            TripsAllTime = response.tripsAllTime,
-                            TripsLast24Hrs = response.tripsLast24Hrs,
-                            TripsLastHour = response.tripsLastHour
-                        };
-                    }
-
                     return new StatsResponse
                     {
-                        Result = "Failed",
-                        ResultCode = response.result
+                        Result = "OK",
+                        ResultCode = response.result,
+                        ActiveTrips = response.activeTrips,
+                        CancelsAllTime = response.cancelsAllTime,
+                        CancelsLast24Hrs = response.cancelsLast24Hrs,
+                        CancelsLastHour = response.cancelsLastHour,
+                        DistanceAllTime = response.distanceAllTime,
+                        DistanceLast24Hrs = response.distanceLast24Hrs,
+                        DistanceLastHour = response.distanceLastHour,
+                        ExceptionsAllTime = response.exceptionsAllTime,
+                        ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
+                        ExceptionsLastHour = response.exceptionsLastHour,
+                        FareAllTime = response.fareAllTime,
+                        FareLast24Hrs = response.fareLast24Hrs,
+                        FareLastHour = response.fareLastHour,
+                        RejectsAllTime = response.rejectsAllTime,
+                        RejectsLast24Hrs = response.rejectsLast24Hrs,
+                        RejectsLastHour = response.rejectsLastHour,
+                        RequestsAllTime = response.requestsAllTime,
+                        RequestsLast24Hrs = response.requestsLast24Hrs,
+                        RequestsLastHour = response.requestsLastHour,
+                        TripsAllTime = response.tripsAllTime,
+                        TripsLast24Hrs = response.tripsLast24Hrs,
+                        TripsLastHour = response.tripsLastHour
                     };
-
                 }
 
-                string msg = "GET /stats called with invalid access token, ip: " + Request.RemoteIp +
-                             ", Response = Authentication failed";
                 return new StatsResponse
                 {
                     Result = "Failed",
-                    ResultCode = Gateway.Result.AuthenticationError
+                    ResultCode = response.result
                 };
             }
         }
@@ -162,7 +145,7 @@ namespace ServiceStack.TripThruGateway
         {
             public PartnerResponse Post(PartnerRequest request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | RegisterPartner received", request);
+                Logger.BeginRequest("RegisterPartner received", request);
                 PartnerResponse partnerResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -214,7 +197,7 @@ namespace ServiceStack.TripThruGateway
 
             public PartnerResponse Get(PartnerRequest request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
+                Logger.BeginRequest("GetPartnerInfo received", request);
                 PartnerResponse partnerResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -250,7 +233,7 @@ namespace ServiceStack.TripThruGateway
 
             public PartnersResponse Post(Partners request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
+                Logger.BeginRequest("GetPartnerInfo received", request);
                 PartnersResponse partnersResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -299,7 +282,7 @@ namespace ServiceStack.TripThruGateway
 
             public PartnersResponse Get(Partners request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetPartnerInfo received", request);
+                Logger.BeginRequest("GetPartnerInfo received", request);
                 PartnersResponse partnersResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -381,7 +364,7 @@ namespace ServiceStack.TripThruGateway
 
             public QuotesResponse Post(Quotes request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | QuoteTrip received", request);
+                Logger.BeginRequest("QuoteTrip received", request);
                 QuotesResponse quotesResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -445,7 +428,7 @@ namespace ServiceStack.TripThruGateway
 
             public QuotesResponse Get(Quotes request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | QuoteTrip received", request);
+                Logger.BeginRequest("QuoteTrip received", request);
                 QuotesResponse quotesResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -543,7 +526,7 @@ namespace ServiceStack.TripThruGateway
         {
             public DispatchResponse Post(Dispatch request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | DispatchTrip received", request);
+                Logger.BeginRequest("DispatchTrip received", request);
                 DispatchResponse dispatchResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -606,7 +589,7 @@ namespace ServiceStack.TripThruGateway
 
             public DispatchResponse Get(Dispatch request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | DispatchTrip received", request);
+                Logger.BeginRequest("DispatchTrip received", request);
                 DispatchResponse dispatchResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -701,7 +684,7 @@ namespace ServiceStack.TripThruGateway
         {
             public TripResponse Get(Trip request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetTripStatus received", request);
+                Logger.BeginRequest("GetTripStatus received", request);
                 TripResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -762,7 +745,7 @@ namespace ServiceStack.TripThruGateway
 
             public TripResponse Put(Trip request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | UpdateTripStatus received", request);
+                Logger.BeginRequest("UpdateTripStatus received", request);
                 TripResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
@@ -829,7 +812,7 @@ namespace ServiceStack.TripThruGateway
         {
             public TripsResponse Get(Trips request)
             {
-                Logger.BeginRequest(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | GetTrips received", request);
+                Logger.BeginRequest("GetTrips received", request);
                 TripsResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);

@@ -363,29 +363,39 @@ namespace TripThruCore
 
         public void LoadTDispatchIntegrations()
         {
-
             string officeConfigsStr = File.ReadAllText("~/Custom Integrations/TDispatchOffices.txt".MapHostAbsolutePath());
-            TDispatchOfficeConfigs config = JsonSerializer.DeserializeFromString<TDispatchOfficeConfigs>(officeConfigsStr);
-
-            foreach (Office o in config.offices)
+            TDispatchOfficeConfigs config = null;
+            try
             {
+                config = JsonSerializer.DeserializeFromString<TDispatchOfficeConfigs>(officeConfigsStr);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("TDispatch integration not available");
+            }
+            if (config != null)
+            {
+                foreach (Office o in config.offices)
+                {
+                    List<Fleet> fleets = new List<Fleet>();
+                    List<Zone> coverage = o.coverage;
+                    fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
 
-                List<Fleet> fleets = new List<Fleet>();
-                List<Zone> coverage = o.coverage;
-                fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
-
-                TDispatchIntegration partner = new TDispatchIntegration(this, apiKey: o.api_key, 
-                    fleetAuth: o.fleetAuthorizationCode, fleetAccessToken: o.fleetAccessToken, fleetRefreshToken: o.fleetRefreshToken,
-                    passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken, passengerRefreshToken: o.passengerRefreshToken, 
-                    passengerProxyPK: o.passengerProxyPK, fleets: fleets);
-                o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
-                o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
-                o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
-                o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
-                o.ID = partner.ID;
-                o.name = partner.name;
-                partners.Add(partner);
-                RegisterPartner(partner);
+                    TDispatchIntegration partner = new TDispatchIntegration(this, apiKey: o.api_key,
+                        fleetAuth: o.fleetAuthorizationCode, fleetAccessToken: o.fleetAccessToken,
+                        fleetRefreshToken: o.fleetRefreshToken,
+                        passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
+                        passengerRefreshToken: o.passengerRefreshToken,
+                        passengerProxyPK: o.passengerProxyPK, fleets: fleets);
+                    o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
+                    o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
+                    o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
+                    o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
+                    o.ID = partner.ID;
+                    o.name = partner.name;
+                    partners.Add(partner);
+                    RegisterPartner(partner);
+                }
             }
 
             //string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);

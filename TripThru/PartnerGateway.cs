@@ -332,7 +332,7 @@ namespace TripThruCore
         {
             if (DateTime.UtcNow < lastSim + simInterval)
                 return;
-            Logger.BeginRequest("", null);
+            Logger.BeginRequest("Sim cycle", null);
 
             foreach (PartnerFleet f in PartnerFleets.Values)
                 f.Simulate(until);

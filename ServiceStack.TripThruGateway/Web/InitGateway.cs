@@ -106,6 +106,7 @@ namespace ServiceStack.TripThruGateway
             Db.Insert(tripthruweb);
 
             Logger.OpenLog();
+            Logger.SetLogId("TripThruGateway");
             return new InitGatewayResponse();
 		}
 	}
