@@ -222,7 +222,9 @@ namespace Utils
                 Logger.Log("EndRequest: Response = " + restReq.JsonSerializer.Serialize(response));
             
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            numBegunRequests[thread] = numBegunRequests[thread]-1;
+            numBegunRequests[thread] = numBegunRequests[thread] - 1;
+            if(file == null)
+                splunkClient.Enqueue(requestLog[thread]);
             if (numBegunRequests[thread] == 0)
             {
                 var json = "";
@@ -246,7 +248,7 @@ namespace Utils
                 file.WriteLine(str);
                 file.Flush();
             }
-            requestLog[thread].Messages.Add(new Pair<int, string>(requestLog[thread].Tab*40, str));
+            requestLog[thread].Messages.Add(new Pair<int, string>(requestLog[thread].Tab * 40, str));
         }
 
         public static void OpenLog()
@@ -256,7 +258,8 @@ namespace Utils
             numBegunRequests = new Dictionary<object, int>();
             restReq = new RestRequest();
             // Create new Service object
-            splunkClient = new SplunkClient();
+            if (file == null)
+                splunkClient = new SplunkClient();
         }
         public static void SetLogId(string id)
         {
@@ -272,7 +275,8 @@ namespace Utils
             file = new System.IO.StreamWriter(filePath + filename);
             restReq = new RestRequest();
             // Create new Service object
-            splunkClient = new SplunkClient();
+            if (file == null)
+                splunkClient = new SplunkClient();
         }
 
         public static void CloseLog()
@@ -283,7 +287,8 @@ namespace Utils
                 file = null;
             }
             Queue.Clear();
-            splunkClient.Close();
+            if (file == null)
+                splunkClient.Close();
         }
 
         public static void Tab()
