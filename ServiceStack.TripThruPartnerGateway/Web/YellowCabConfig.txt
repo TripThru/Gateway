@@ -30,7 +30,11 @@
         "drivers" : [
             "Eduardo Lozano",
             "Edward Hamilton",
-			"Steven Thompson"
+            "Steven Thompson",
+            "Bartomeu Astor",
+            "Matthias Randulf",
+            "Ahoth Achab",
+            "Mattias Ohannes"
         ],
         "passengers" : [
             "George Washington",

@@ -33,7 +33,12 @@
         ],
         "drivers" : [
             "Slyvian Reubele",
-            "Wassem Mohammed"
+            "Wassem Mohammed",
+            "Rhodri Cnaeus",
+            "Tigernach Ouri",
+            "Jaylin Phoebus",
+            "Sandy Omar",
+            "Noga Fintan"
         ],
         "passengers" : [
             "Daniel Corona"

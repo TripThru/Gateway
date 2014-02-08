@@ -159,6 +159,7 @@ namespace ServiceStack.TripThruGateway
                 FleetId = request.fleetID,
                 DriverId = request.driverID,
                 WayPoints = request.waypoints,
+                PartnerId = request.partnerID
             });
 
             var r = Request("POST", "quotes", partnerRequest);
@@ -213,7 +214,9 @@ namespace ServiceStack.TripThruGateway
                         status = response.Status,
                         partnerName = response.PartnerName,
                         partnerID = response.PartnerId,
-                        pickupTime = response.PickupTime
+                        pickupTime = response.PickupTime,
+                        distance = response.Distance,
+                        price = response.Price
                     };
                 }
 

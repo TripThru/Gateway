@@ -667,7 +667,7 @@ namespace TripThruCore
                 }
                 public static implicit operator double(Counter c)
                 {
-                    return (int)c.count;
+                    return (double)c.count;
                 }
                 public Counter(TimeSpan maxAge)
                 {
@@ -780,6 +780,7 @@ namespace TripThruCore
         }
         public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
         {
+            Logger.Log("Deactivating "+tripID+", Status="+status+", Price="+price+", Distance="+distance);
             if (!activeTrips.Contains(tripID))
                 return;
 

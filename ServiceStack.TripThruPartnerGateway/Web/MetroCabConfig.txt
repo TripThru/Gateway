@@ -33,7 +33,12 @@
         ],
         "drivers" : [
             "Joanna Glennon",
-            "Ofer Matan"
+            "Ofer Matan",
+            "Ignas Thucydides",
+            "Clyde Hariwini",
+            "Flavio Ragnvald",
+            "Kenaniah Sergei",
+            "Ezra Adilet"
         ],
         "passengers" : [
             "Michael Glennon",

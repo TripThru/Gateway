@@ -58,7 +58,10 @@
         "drivers" : [
             "Alex Goldman",
             "Jason Fama",
-            "Simon Shvarts"
+            "Simon Shvarts",
+            "Bob Toni",
+            "Velimir Erebos",
+            "Maximillian Constantin"
         ],
         "passengers" : [
             "Elvis Presley",

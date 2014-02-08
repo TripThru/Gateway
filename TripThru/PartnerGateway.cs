@@ -87,7 +87,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception :" + e.Message);
-                throw e;
+                return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
         public Trip GetTrip(DispatchTripRequest r)
@@ -153,7 +153,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception :" + e.Message);
-                throw e;
+                return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
         public Trip GetTrip(QuoteTripRequest r)
@@ -198,7 +198,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception :" + e.Message);
-                throw e;
+                return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
@@ -207,7 +207,10 @@ namespace TripThruCore
             {
                 requests++;
                 if (!tripsByID.ContainsKey(r.tripID))
+                {
+                    Logger.Log("Trip "+r.tripID+" not found");
                     return new GetTripStatusResponse(result: Result.NotFound);
+                }
 
                 Trip t = tripsByID[r.tripID];
                 DateTime? pickupTime = null;
@@ -253,7 +256,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception :" + e.Message);
-                throw e;
+                return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
@@ -273,7 +276,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception :" + e.Message);
-                throw e;
+                return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
 
@@ -428,7 +431,7 @@ namespace TripThruCore
         }
         public override string ToString()
         {
-            string s = "Trip" + ID;
+            string s = "Trip " + ID;
             s += ", Status = " + status;
             s += ", Origination = " + origination;
             s += ", Service = " + service;

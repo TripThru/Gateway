@@ -29,7 +29,11 @@
         ],
         "drivers" : [
             "Hussean Widobe",
-            "Omar Sharief"
+            "Omar Sharief",
+            "Sheikh Hamdan",
+            "Mohammed Hamdan",
+            "Rashid Al Maktoum",
+            "Hamdan Widobe"
         ],
         "passengers" : [
             "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"

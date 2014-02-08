@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -94,17 +95,26 @@ namespace ServiceStack.TripThruPartnerGateway
 
                 while (true)
                 {
-                    lock (_partner)
+                    try
                     {
-                        _partner.Simulate(DateTime.UtcNow + interval);
+                        lock (_partner)
+                        {
+                            _partner.Simulate(DateTime.UtcNow + interval);
+                        }
+                        MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(),
+                            "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(),
+                            "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+                        System.Threading.Thread.Sleep(interval);
                     }
-                    MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-                    System.Threading.Thread.Sleep(interval);
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(_partner.name + ", simulation cycle error :" + e.Message);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(_partner.name+", error :"+e.Message);
+                Console.WriteLine(_partner.name+", simulation start error :"+e.Message);
             }
         }
 

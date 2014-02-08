@@ -63,10 +63,6 @@ namespace TripThruCore
                 {
                     partner = servicingPartnerByTrip[tripID];
                 }
-                else
-                {
-                    return null;
-                }
                 return partner;
             }
             return null;
@@ -90,7 +86,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new RegisterPartnerResponse(result: Result.UnknownError);
             }
         }
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest r)
@@ -121,7 +117,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
@@ -201,13 +197,18 @@ namespace TripThruCore
                 {
                     Gateway client = partnersByID[r.clientID];
                     originatingPartnerByTrip.Add(r.tripID, client);
+                    Logger.Log("Originating from="+client.name);
                     servicingPartnerByTrip.Add(r.tripID, partner);
+                    Logger.Log("Dispatching to="+partner.name);
                     r.clientID = ID;
                     response1 = partner.DispatchTrip(r);
                     if (response1.result != Result.OK)
                     {
-                        activeTrips.Add(r.tripID);
                         Logger.Log("DispatchTrip to " + partner.name + " failed");
+                    }
+                    else
+                    {
+                        activeTrips.Add(r.tripID);
                     }
                 }
                 else
@@ -221,7 +222,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
@@ -266,7 +267,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
         public override GetTripsResponse GetTrips(GetTripsRequest r)
@@ -282,6 +283,7 @@ namespace TripThruCore
                 Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
                 if (partner != null)
                 {
+                    Logger.Log("Destination partner=" + partner.name);
                     r.clientID = ID;
                     GetTripStatusResponse response = partner.GetTripStatus(r);
                     if (response.result == Result.OK)
@@ -292,16 +294,21 @@ namespace TripThruCore
                         response.partnerID = partner.ID;
                         response.partnerName = partner.name;
                     }
+                    else
+                    {
+                        Logger.Log("Request to destination partner failed, Result=" + response.result);
+                    }
                     Logger.Untab();
                     return response;
                 }
+                Logger.Log("Destination partner trip not found, ClientId=" + r.clientID);
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
             catch (Exception e)
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
@@ -312,13 +319,16 @@ namespace TripThruCore
                 Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
                 if (destPartner != null)
                 {
+                    Logger.Log("Destination partner=" + destPartner.name);
+                    var originatingId = r.clientID;
                     r.clientID = ID;
                     UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
                     if (response.result == Result.OK)
                     {
                         if (r.status == Status.Complete)
                         {
-                            Gateway origPartner = partnersByID[r.clientID];
+                            Gateway origPartner = partnersByID[originatingId];
+                            Logger.Log("Originating partner="+origPartner.name);
                             GetTripStatusResponse resp =
                                 origPartner.GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
                             DeactivateTrip(r.tripID, Status.Complete, resp.price, resp.distance);
@@ -326,16 +336,21 @@ namespace TripThruCore
                         else if (r.status == Status.Cancelled || r.status == Status.Rejected)
                             DeactivateTrip(r.tripID, r.status);
                     }
+                    else
+                    {
+                        Logger.Log("Request to destination partner failed, Result="+response.result);
+                    }
                     Logger.Untab();
                     return response;
                 }
+                Logger.Log("Destination partner trip not found, ClientId="+r.clientID);
                 return new UpdateTripStatusResponse(result: Result.NotFound);
             }
             catch (Exception e)
             {
                 exceptions++;
                 Logger.Log("Exception: " + e.Message);
-                throw e;
+                return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
 

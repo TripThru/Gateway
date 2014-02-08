@@ -368,13 +368,13 @@
                     $('#tripsLast24Hrs').hide().html(data.tripsLast24Hrs).fadeIn(1000);
                     $('#tripsAllTime').hide().html(data.tripsAllTime).fadeIn(1000);
 
-                    $('#distanceLastHour').hide().html(data.distanceLastHour + ' km').fadeIn(1000);
-                    $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs + ' km').fadeIn(1000);
-                    $('#distanceAllTime').hide().html(data.distanceAllTime + ' km').fadeIn(1000);
+                    $('#distanceLastHour').hide().html(data.distanceLastHour.toFixed(2)).fadeIn(1000);
+                    $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs.toFixed(2)).fadeIn(1000);
+                    $('#distanceAllTime').hide().html(data.distanceAllTime.toFixed(2)).fadeIn(1000);
 
-                    $('#fareLastHour').hide().html('$ ' + data.fareLastHour).fadeIn(1000);
-                    $('#fareLast24Hrs').hide().html('$ ' + data.fareLast24Hrs).fadeIn(1000);
-                    $('#fareAllTime').hide().html('$ ' + data.fareAllTime).fadeIn(1000);
+                    $('#fareLastHour').hide().html('$ ' + data.fareLastHour.toFixed(2)).fadeIn(1000);
+                    $('#fareLast24Hrs').hide().html('$ ' + data.fareLast24Hrs.toFixed(2)).fadeIn(1000);
+                    $('#fareAllTime').hide().html('$ ' + data.fareAllTime.toFixed(2)).fadeIn(1000);
                 }
             });
 
@@ -449,13 +449,13 @@
                         $('#tripsLast24Hrs').hide().html(data.tripsLast24Hrs).fadeIn(1000);
                         $('#tripsAllTime').hide().html(data.tripsAllTime).fadeIn(1000);
 
-                        $('#distanceLastHour').hide().html(data.distanceLastHour + ' km').fadeIn(1000);
-                        $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs + ' km').fadeIn(1000);
-                        $('#distanceAllTime').hide().html(data.distanceAllTime + ' km').fadeIn(1000);
+                        $('#distanceLastHour').hide().html(data.distanceLastHour.toFixed(2)).fadeIn(1000);
+                        $('#distanceLast24Hrs').hide().html(data.distanceLast24Hrs.toFixed(2)).fadeIn(1000);
+                        $('#distanceAllTime').hide().html(data.distanceAllTime.toFixed(2)).fadeIn(1000);
 
-                        $('#fareLastHour').hide().html('$ ' + data.fareLastHour).fadeIn(1000);
-                        $('#fareLast24Hrs').hide().html('$ ' + data.fareLast24Hrs).fadeIn(1000);
-                        $('#fareAllTime').hide().html('$ ' + data.fareAllTime).fadeIn(1000);
+                        $('#fareLastHour').hide().html(data.fareLastHour.toFixed(2)).fadeIn(1000);
+                        $('#fareLast24Hrs').hide().html(data.fareLast24Hrs.toFixed(2)).fadeIn(1000);
+                        $('#fareAllTime').hide().html(data.fareAllTime.toFixed(2)).fadeIn(1000);
                     }
                 });
             }, 10000);
