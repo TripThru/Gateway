@@ -3,6 +3,7 @@ using ServiceStack.Common.Utils;
 using ServiceStack.OrmLite;
 using ServiceStack.Razor;
 using ServiceStack.Text;
+using ServiceStack.TripThruGateway;
 using ServiceStack.WebHost.Endpoints;
 using ContentType = ServiceStack.Common.Web.ContentType;
 
@@ -54,11 +55,10 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
                 };
 
             //Init
-            using (var initPartners = container.Resolve<InitPartnerService>())
-            {
-                initPartners.Any(null);
-            }
-
+		    using (var initPartners = container.Resolve<InitPartnerService>())
+		    {
+		        initPartners.Any(null);
+		    }
 		}
 	}
 }

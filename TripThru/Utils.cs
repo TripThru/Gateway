@@ -635,10 +635,18 @@ namespace Utils
             }
             if (!(element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT"))
             {
+                var streetNumberNode =
+                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
+                string street_number = streetNumberNode != null ?  streetNumberNode.InnerText : "";
 
-                string street_number = doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name").InnerText;
-                string route = doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"route\"]/short_name").InnerText;
-                string postal_code = doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name").InnerText;
+                var routeNode =
+                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"route\"]/short_name");
+                string route = routeNode != null ? routeNode.InnerText : "";
+
+                var postalCodeNode =
+                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name");
+                string postal_code = postalCodeNode != null ? postalCodeNode.InnerText : "";
+
                 address =  new Pair<string, string>(street_number + " " + route, postal_code);
                 locationAddresses.Add(location.getID(), address);
                 return address;

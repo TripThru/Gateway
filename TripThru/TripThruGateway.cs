@@ -54,18 +54,34 @@ namespace TripThruCore
 
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
         }
+        public override string GetName(string clientID)
+        {
+            return partnersByID[clientID].name;
+        }
+        public Gateway GetDestinationPartner(string tripID)
+        {
+            if (servicingPartnerByTrip.ContainsKey(tripID))
+                return servicingPartnerByTrip[tripID];
+            return null;
+        }
         public Gateway GetDestinationPartner(string clientID, string tripID)
         {
             if (originatingPartnerByTrip.ContainsKey(tripID))
             {
                 Gateway partner = originatingPartnerByTrip[tripID];
-                if (partner.ID == clientID && servicingPartnerByTrip.ContainsKey(tripID))
+                if (partner.ID == clientID) // who's asking?
                 {
-                    partner = servicingPartnerByTrip[tripID];
+                    // the originating partner is asking.
+                    if (servicingPartnerByTrip.ContainsKey(tripID))
+                        return servicingPartnerByTrip[tripID];
+                    else
+                        throw new Exception("Fatal Error: destination could not be found");
                 }
+                // the servicing partner must be asking.
                 return partner;
             }
-            return null;
+            throw new Exception("Fatal Error: destination could not be found");
+
         }
         public void AddPartner(Gateway partner)
         {
@@ -85,7 +101,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new RegisterPartnerResponse(result: Result.UnknownError);
             }
         }
@@ -116,7 +133,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -153,7 +171,6 @@ namespace TripThruCore
                     {
                         Logger.Log("No partners are available that cover that area");
                         Logger.Untab();
-                        Logger.Untab();
                         rejects++;
                         return new DispatchTripResponse(result: Result.Rejected);
                     }
@@ -161,14 +178,13 @@ namespace TripThruCore
                     {
                         Logger.Log("QuoteTrip call failed");
                         Logger.Untab();
-                        Logger.Untab();
                         rejects++;
                         return new DispatchTripResponse(result: response.result);
                     }
                     else
                     {
                         Quote bestQuote = null;
-                        DateTime bestETA = r.pickupTime + missedBookingPeriod;
+                        DateTime bestETA = TimeZoneInfo.ConvertTimeToUtc(r.pickupTime) + missedBookingPeriod;
                         // not more than 30 minues late
                         foreach (Quote q in response.quotes)
                         {
@@ -197,9 +213,9 @@ namespace TripThruCore
                 {
                     Gateway client = partnersByID[r.clientID];
                     originatingPartnerByTrip.Add(r.tripID, client);
-                    Logger.Log("Originating from="+client.name);
+                    Logger.Log("Origination="+client.name);
                     servicingPartnerByTrip.Add(r.tripID, partner);
-                    Logger.Log("Dispatching to="+partner.name);
+                    Logger.Log("Dispatch="+partner.name);
                     r.clientID = ID;
                     response1 = partner.DispatchTrip(r);
                     if (response1.result != Result.OK)
@@ -221,7 +237,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -266,7 +283,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
@@ -298,7 +316,6 @@ namespace TripThruCore
                     {
                         Logger.Log("Request to destination partner failed, Result=" + response.result);
                     }
-                    Logger.Untab();
                     return response;
                 }
                 Logger.Log("Destination partner trip not found, ClientId=" + r.clientID);
@@ -307,7 +324,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -320,17 +338,17 @@ namespace TripThruCore
                 if (destPartner != null)
                 {
                     Logger.Log("Destination partner=" + destPartner.name);
-                    var originatingId = r.clientID;
+                    string clientID = r.clientID;
                     r.clientID = ID;
                     UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
+                    r.clientID = clientID;
                     if (response.result == Result.OK)
                     {
                         if (r.status == Status.Complete)
                         {
-                            Gateway origPartner = partnersByID[originatingId];
-                            Logger.Log("Originating partner="+origPartner.name);
-                            GetTripStatusResponse resp =
-                                origPartner.GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
+                            Gateway origPartner = partnersByID[r.clientID];
+                            GetTripStatusResponse resp = origPartner.GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
+                            r.clientID = clientID;
                             DeactivateTrip(r.tripID, Status.Complete, resp.price, resp.distance);
                         }
                         else if (r.status == Status.Cancelled || r.status == Status.Rejected)
@@ -340,7 +358,6 @@ namespace TripThruCore
                     {
                         Logger.Log("Request to destination partner failed, Result="+response.result);
                     }
-                    Logger.Untab();
                     return response;
                 }
                 Logger.Log("Destination partner trip not found, ClientId="+r.clientID);
@@ -349,7 +366,8 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception: " + e.Message);
+                Logger.Log("Exception=" + e.Message);
+                Console.WriteLine(e.StackTrace);
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -390,31 +408,31 @@ namespace TripThruCore
             }
             if (config != null)
             {
+                Gateway tripThru = new GatewayLocalClient(new GatewayLocalServer(this));
                 foreach (Office o in config.offices)
                 {
                     List<Fleet> fleets = new List<Fleet>();
                     List<Zone> coverage = o.coverage;
                     fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
+                    List<VehicleType> vehicleTypes = new List<VehicleType>();
 
-                    TDispatchIntegration partner = new TDispatchIntegration(this, apiKey: o.api_key,
+                    TDispatchIntegration partner = new TDispatchIntegration(tripThru, apiKey: o.api_key,
                         fleetAuth: o.fleetAuthorizationCode, fleetAccessToken: o.fleetAccessToken,
                         fleetRefreshToken: o.fleetRefreshToken,
                         passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
                         passengerRefreshToken: o.passengerRefreshToken,
-                        passengerProxyPK: o.passengerProxyPK, fleets: fleets);
+                        passengerProxyPK: o.passengerProxyPK, fleets: fleets, vehicleTypes: vehicleTypes);
                     o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
                     o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
                     o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
                     o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
                     o.ID = partner.ID;
                     o.name = partner.name;
-                    partners.Add(partner);
                     RegisterPartner(partner);
                 }
+                string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);
+                File.WriteAllText("~/Custom Integrations/TDispatchOffices.txt".MapHostAbsolutePath(), configStr);   // We don't need this while testing.  The main purpose is to save the tokens so token reresh not constantly needed
             }
-
-            //string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);
-            //File.WriteAllText("../../Custom Integrations/TDispatchOffices.txt", configStr);   // We don't need this while testing.  The main purpose is to save the tokens so token reresh not constantly needed
 
             //TDispatchIntegration sanFranOffice = (TDispatchIntegration) partnersByID["52b4053948efcb7ac1137d41"];
             //DispatchTripResponse response = sanFranOffice.DispatchTrip(new DispatchTripRequest(clientID: "test",
@@ -423,6 +441,140 @@ namespace TripThruCore
 
             //TDispatchAPI.Booking booking = sanFranOffice.activeTrips["test"];
             //sanFranOffice.api.RejectBooking(booking.pk);
+        }
+        public override void Update()
+        {
+            foreach (Gateway p in partners)
+                p.Update();
+        }
+    }
+
+    public class GatewayLocalClient : Gateway
+    {
+        Gateway server;
+
+        public GatewayLocalClient(Gateway server)
+            : base(server.ID, server.name)
+        {
+            this.server = server;
+        }
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
+        {
+            return server.RegisterPartner(request);
+        }
+
+        public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
+        {
+            Logger.BeginRequest("GetPartnerInfo sent to " + server.name, request);
+            Gateway.GetPartnerInfoResponse response = server.GetPartnerInfo(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
+        {
+            Logger.BeginRequest("DispatchTrip sent to " + server.name, request);
+            Gateway.DispatchTripResponse response = server.DispatchTrip(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
+        {
+            Logger.BeginRequest("QuoteTrip sent to " + server.name, request);
+            Gateway.QuoteTripResponse response = server.QuoteTrip(request);
+            Logger.EndRequest(response);
+            return response;
+
+        }
+
+        public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
+        {
+            Logger.BeginRequest("GetTripStatus sent to " + server.name, request);
+            Gateway.GetTripStatusResponse response = server.GetTripStatus(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
+        {
+            Logger.BeginRequest("UpdateTripStatus sent to " + server.name, request);
+            UpdateTripStatusResponse response = server.UpdateTripStatus(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+        public override void Update()
+        {
+            server.Update();
+        }
+        public override void Log()
+        {
+            server.Log();
+        }
+    }
+
+
+    public class GatewayLocalServer : Gateway
+    {
+        Gateway gateway;
+
+        public GatewayLocalServer(Gateway gateway)
+            : base(gateway.ID, gateway.name)
+        {
+            this.gateway = gateway;
+        }
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
+        {
+            return gateway.RegisterPartner(request);
+        }
+
+        public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
+        {
+            Logger.BeginRequest("GetPartnerInfo received from " + gateway.GetName(request.clientID), request);
+            Gateway.GetPartnerInfoResponse response = gateway.GetPartnerInfo(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
+        {
+            Logger.BeginRequest("DispatchTrip received from " + gateway.GetName(request.clientID), request);
+            Gateway.DispatchTripResponse response = gateway.DispatchTrip(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
+        {
+            Logger.BeginRequest("QuoteTrip received from " + gateway.GetName(request.clientID), request);
+            Gateway.QuoteTripResponse response = gateway.QuoteTrip(request);
+            Logger.EndRequest(response);
+            return response;
+
+        }
+
+        public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
+        {
+            Logger.BeginRequest("GetTripStatus received from " + gateway.GetName(request.clientID), request);
+            Gateway.GetTripStatusResponse response = gateway.GetTripStatus(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+
+        public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
+        {
+            Logger.BeginRequest("UpdateTripStatus received from " + gateway.GetName(request.clientID), request);
+            UpdateTripStatusResponse response = gateway.UpdateTripStatus(request);
+            Logger.EndRequest(response);
+            return response;
+        }
+        public override void Update()
+        {
+            gateway.Update();
+        }
+        public override void Log()
+        {
+            gateway.Log();
         }
     }
 }

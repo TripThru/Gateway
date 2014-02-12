@@ -21,7 +21,10 @@ namespace TripThruCore
 
         static long nextID = 0;
         public string GenerateUniqueID() { nextID++; return nextID.ToString() + "@" + ID; }
-
+        public override string GetName(string clientID)
+        {
+            return tripthru.name;
+        }
         static public PartnerConfiguration LoadPartnerConfigurationFromJsonFile(string filename)
         {
             string partnerConfiguration = File.ReadAllText(filename);
@@ -41,8 +44,12 @@ namespace TripThruCore
 
                 var location = partnerFleet.Location;
                 var coverage = partnerFleet.Coverage;
-                var drivers = partnerFleet.Drivers.Select(driver => new Driver(driver)).ToList();
+                var drivers = partnerFleet.Drivers != null ? partnerFleet.Drivers.Select(driver => new Driver(driver)).ToList() : new List<Driver>();
                 var passengers = partnerFleet.Passengers.Select(passenger => new Passenger(passenger)).ToList();
+                if (coverage == null)
+                    coverage = new List<Zone>();
+                if (vehicleTypes == null)
+                    vehicleTypes = new List<VehicleType>();
 
                 var fleet = new PartnerFleet(
                     name: partnerFleet.Name,
@@ -86,7 +93,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -152,7 +159,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -197,7 +204,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
@@ -255,7 +262,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -275,7 +282,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -293,7 +300,7 @@ namespace TripThruCore
             tripsByID = new Dictionary<string, Trip>();
 
         }
-        public void Log()
+        public override void Log()
         {
             Logger.Log("Partner = " + name + ": SimRate = " + simInterval + ", StatusUpdateRate = " + updateInterval);
             Logger.Tab();
@@ -331,14 +338,14 @@ namespace TripThruCore
             }
         }
 
-        public override void Simulate(DateTime until)
+        public override void Update()
         {
             if (DateTime.UtcNow < lastSim + simInterval)
                 return;
             Logger.BeginRequest("Sim cycle", null);
 
             foreach (PartnerFleet f in PartnerFleets.Values)
-                f.Simulate(until);
+                f.Simulate();
             lastSim = DateTime.UtcNow;
             Logger.EndRequest(null);
         }
@@ -538,7 +545,7 @@ namespace TripThruCore
         public TimeSpan missedPeriod = new TimeSpan(0, 1, 0);
         public TimeSpan criticalPeriod = new TimeSpan(0, 1, 0);
         public TimeSpan removalAge = new TimeSpan(0, 5, 0);
-
+        public int maxActiveTrips = 2;
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
             List<Pair<Location, Location>> possibleTrips, double costPerMile, double baseCost, double tripsPerHour, List<Passenger> passengers, Partner partner = null)
@@ -657,7 +664,7 @@ namespace TripThruCore
         }
         public void GenerateTrips()
         {
-            if (queue.Count > 100)
+            if (queue.Count > maxActiveTrips)
                 return; // lets not let the queue get too big
             int numTripsToGenerate = (int)Math.Floor(simInterval.TotalHours * tripsPerHour);
             {
@@ -666,6 +673,8 @@ namespace TripThruCore
                 if (d > random.NextDouble())
                     numTripsToGenerate++;
             }
+            if (numTripsToGenerate > maxActiveTrips)
+                numTripsToGenerate = maxActiveTrips;
             if (numTripsToGenerate == 0)
                 return;
             DateTime now = DateTime.UtcNow;
@@ -706,7 +715,7 @@ namespace TripThruCore
         {
             queue.Remove(queue.Find(t));
         }
-        public void Simulate(DateTime until)
+        public void Simulate()
         {
             GenerateTrips();
             ProcessQueue();
@@ -870,6 +879,7 @@ namespace TripThruCore
                         break;
                     }
                     case Status.Cancelled:
+                    case Status.Rejected:
                     {
                         TimeSpan age = DateTime.UtcNow - (DateTime)t.pickupTime;
                         if (age > removalAge) // for now we use 1 minute.
@@ -882,7 +892,8 @@ namespace TripThruCore
                     case Status.Complete:
                     {
                         if (t.dropoffTime == null)
-                            partner.GetTripStatusFromForeignServiceProvider(t, true);
+
+                            t.dropoffTime = DateTime.UtcNow;
                         TimeSpan age = DateTime.UtcNow - (DateTime)t.dropoffTime;
                         if (age > removalAge) // for now we use 1 minute.
                         {

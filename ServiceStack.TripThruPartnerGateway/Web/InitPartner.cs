@@ -33,6 +33,7 @@ namespace ServiceStack.TripThruPartnerGateway
             MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
+            
             TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets);
 
             GatewayService.gateway = partner;
@@ -99,7 +100,7 @@ namespace ServiceStack.TripThruPartnerGateway
                     {
                         lock (_partner)
                         {
-                            _partner.Simulate(DateTime.UtcNow + interval);
+                            _partner.Update();
                         }
                         MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(),
                             "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(),

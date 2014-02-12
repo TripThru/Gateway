@@ -81,9 +81,10 @@ namespace Utils
                         if (queue.Count > 0)
                         {
                             var logEntries = new List<string>();
+                            RequestLog requestLog = null;
                             lock (queue)
                             {
-                                RequestLog requestLog = this.queue.Dequeue();
+                                requestLog = this.queue.Dequeue();
                                 foreach (Pair<int, string> msg in requestLog.Messages)
                                     logEntries.Add(msg.Second);
                             }
@@ -100,8 +101,14 @@ namespace Utils
                                 request.AddHeader("content-type", "application/json");
                                 restClient.ExecuteAsync(request, response =>
                                 {
-                                    if (response.ErrorMessage != null) 
-                                        Console.WriteLine("Splunk message error: "+response.ErrorMessage);
+                                    if (response.ErrorMessage != null)
+                                    {
+                                        Console.WriteLine("Splunk error: " + response.ErrorMessage + ", for: "+logEntries.First());
+                                        if (response.ErrorMessage.Contains("SendFailure"))
+                                        {
+                                            this.Enqueue(requestLog);
+                                        }
+                                    }
                                 });
                             }
                             else
@@ -189,41 +196,46 @@ namespace Utils
 
         public static FixedSizeQueue Queue;
         public static Dictionary<object, RequestLog> requestLog;
-        public static string filePath = "c:\\Users\\Edward\\";
+        public static string filePath = "c:\\Users\\DanielErnesto\\";
         static System.IO.StreamWriter file;
         static SplunkClient splunkClient;
         static RestRequest restReq;
-        static Dictionary<object, int> numBegunRequests; 
+        static Dictionary<object, int> numBegunRequests;
         public static void BeginRequest(string msg, object request)
         {
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (!requestLog.ContainsKey(thread))
             {
                 var json = "";
-                if(request != null)
+                if (request != null)
                     json = restReq.JsonSerializer.Serialize(request);
                 requestLog[thread] = new RequestLog(json);
                 numBegunRequests[thread] = 0;
             }
-            numBegunRequests[thread] = numBegunRequests[thread]+1;
+            else if (!numBegunRequests.ContainsKey(thread))
+                numBegunRequests[thread] = 0;
+            numBegunRequests[thread] = numBegunRequests[thread] + 1;
             if (request != null)
                 msg += ": Request = " + restReq.JsonSerializer.Serialize(request);
-            if (msg.Length > 0)
+            if (numBegunRequests[thread] == 1)
                 Logger.Log(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg);
-            if (request != null)
-                Logger.Tab();
+            else
+                Logger.Log(msg);
+            Logger.Tab();
         }
 
         public static void EndRequest(object response)
         {
-            if (response != null)
-                Logger.Untab();
+
+            Logger.Untab();
             if (response != null)
                 Logger.Log("EndRequest: Response = " + restReq.JsonSerializer.Serialize(response));
-            
+            else
+                Logger.Log("End");
+
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             numBegunRequests[thread] = numBegunRequests[thread] - 1;
-            if(file == null)
+            if (file == null)
                 splunkClient.Enqueue(requestLog[thread]);
             if (numBegunRequests[thread] == 0)
             {
@@ -237,6 +249,12 @@ namespace Utils
                 numBegunRequests.Remove(thread);
             }
         }
+
+        public static void Log(string message, object o)
+        {
+            Log(message + " -- " + restReq.JsonSerializer.Serialize(o));
+        }
+
         public static void Log(string message)
         {
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -295,7 +313,8 @@ namespace Utils
         {
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             var r = requestLog[thread];
-            r.Tab++;
+            if (r.Tab < 50)
+                r.Tab++;
             if (r.MaxTab < r.Tab)
                 r.MaxTab = r.Tab;
         }
@@ -303,7 +322,8 @@ namespace Utils
         public static void Untab()
         {
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            requestLog[thread].Tab--;
+            if (requestLog[thread].Tab > 0)
+                requestLog[thread].Tab--;
         }
     }
 

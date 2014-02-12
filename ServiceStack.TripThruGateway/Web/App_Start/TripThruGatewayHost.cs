@@ -58,11 +58,10 @@ namespace ServiceStack.TripThruGateway
                 };
 
             //Init
-            using (var initPartners = container.Resolve<InitGatewayService>())
-            {
-                initPartners.Any(null);
-            }
-
+		    using (var initPartners = container.Resolve<InitGatewayService>())
+		    {
+		        initPartners.Any(null);
+		    }
 		}
 	}
 }

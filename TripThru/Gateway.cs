@@ -645,6 +645,17 @@ namespace TripThruCore
         {
             throw new Exception("Not supported");
         }
+        virtual public void Update()
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public string GetName(string clientID)
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public void Log()
+        {
+        }
     }
 
     public class GatewayServer : Gateway
@@ -760,7 +771,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception :" + e.Message);
+                Logger.Log("Exception=" + e.Message);
                 return new GetGatewayStatsResponse(result: Result.UnknownError);
             }
         }
@@ -802,12 +813,11 @@ namespace TripThruCore
         }
         public void LogStats()
         {
-            Logger.BeginRequest("", null);
             if ((DateTime.UtcNow - lastGetGatewayStats) > getGatewayStatsInterval)
             {
                 Gateway.GetGatewayStatsResponse r = GetGatewayStats(new Gateway.GetGatewayStatsRequest());
-                Logger.Log(name + " Stats: ActiveTrips = " + r.activeTrips);
-                Logger.Tab();
+                Logger.BeginRequest(name + " Stats: ActiveTrips = " + r.activeTrips, null);
+
                 Logger.Log("Requests: AllTime = " + r.requestsAllTime + ", Last24Hrs = " + r.requestsLast24Hrs + ", LastHour = " + r.requestsLastHour);
                 Logger.Log("Reject: AllTime = " + r.rejectsAllTime + ", Last24Hrs = " + r.rejectsLast24Hrs + ", LastHour = " + r.rejectsLastHour);
                 Logger.Log("Cancel: AllTime = " + r.cancelsAllTime + ", Last24Hrs = " + r.cancelsLast24Hrs + ", LastHour = " + r.cancelsLastHour);
@@ -816,14 +826,10 @@ namespace TripThruCore
                 Logger.Log("Distance: AllTime = " + r.distanceAllTime + ", Last24Hrs = " + r.distanceLast24Hrs + ", LastHour = " + r.distanceLastHour);
                 Logger.Log("Fare: AllTime = " + r.fareAllTime + ", Last24Hrs = " + r.fareLast24Hrs + ", LastHour = " + r.fareLastHour);
                 Logger.Log("Per Trip Averages: Distance = " + r.distanceAllTime / r.tripsAllTime + ", Fare = " + r.fareAllTime / r.tripsAllTime);
-                Logger.Untab();
+
                 lastGetGatewayStats = DateTime.UtcNow;
+                Logger.EndRequest(null);
             }
-            Logger.EndRequest(null);
-        }
-        public virtual void Simulate(DateTime until)
-        {
-            throw new Exception("Not supported");
         }
     }
 }

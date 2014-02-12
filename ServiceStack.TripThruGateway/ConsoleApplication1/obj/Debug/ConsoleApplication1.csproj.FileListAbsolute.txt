@@ -1,5 +1,0 @@
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
-C:\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThruGateway\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb

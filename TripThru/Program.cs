@@ -28,15 +28,19 @@ namespace Program
             tripthru = new TripThru();
 
 
-            List<Partner> partners = new List<Partner>();
+            List<Gateway> partners = new List<Gateway>();
             tripthru = new TripThru();
 
             foreach (string filename in filePaths)
             {
-                PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
-                Partner partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru, configuration.partnerFleets);
-                partners.Add(partner);
-                tripthru.RegisterPartner(partner);
+                if (filename.Contains("Luxor"))
+                {
+                    PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
+                    Partner partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru,
+                        configuration.partnerFleets);
+                    partners.Add(new GatewayLocalClient(partner));
+                    tripthru.RegisterPartner(partner);
+                }
             }
             MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
 
@@ -45,13 +49,13 @@ namespace Program
             Simulate(partners, DateTime.UtcNow + new TimeSpan(2, 30, 0));
             MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
         }
-        public static void Simulate(List<Partner> partners, DateTime until)
+        public static void Simulate(List<Gateway> partners, DateTime until)
         {
 
             Logger.BeginRequest("", null);
             Logger.Log("Sim Configuration");
             Logger.Tab();
-            foreach (Partner p in partners)
+            foreach (Gateway p in partners)
                 p.Log();
             Logger.Untab();
             Logger.EndRequest(null);
@@ -59,8 +63,9 @@ namespace Program
             TimeSpan simInterval = new TimeSpan(0, 0, 10);
             while (DateTime.UtcNow < until)
             {
-                foreach (Partner p in partners)
-                    p.Simulate(until);
+                Logger.BeginRequest("Heartbeat", null);
+                tripthru.Update();
+                Logger.EndRequest(null);
                 MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
                 System.Threading.Thread.Sleep(simInterval);
                 tripthru.LogStats();
