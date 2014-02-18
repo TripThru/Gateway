@@ -34,7 +34,7 @@ namespace ServiceStack.TripThruPartnerGateway
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
             
-            TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets);
+            TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets, configuration.preferedPartnerId);
 
             GatewayService.gateway = partner;
 
@@ -105,23 +105,23 @@ namespace ServiceStack.TripThruPartnerGateway
                         MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(),
                             "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(),
                             "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-                        System.Threading.Thread.Sleep(interval);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(_partner.name + ", simulation cycle error :" + e.Message);
+                        Logger.LogDebug(_partner.name + ", simulation cycle error :" + e.Message, e.StackTrace);
                     }
+                    System.Threading.Thread.Sleep(interval);
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(_partner.name+", simulation start error :"+e.Message);
+                Logger.LogDebug(_partner.name + ", simulation start error :" + e.Message, e.StackTrace);
             }
         }
 
         public void Dispose()
         {
-            Console.WriteLine(_partner.name+": simulation ended");
+            Logger.LogDebug(_partner.name + ": simulation ended");
         }
     }
 }

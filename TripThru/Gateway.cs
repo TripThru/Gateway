@@ -13,6 +13,7 @@ namespace TripThruCore
         public string TripThruUrl { get; set; }
         public int SimInterval { get; set; }
         public List<PartnerFleet> partnerFleets;
+        public string preferedPartnerId { get; set; }
 
         public class ConfigPartner
         {

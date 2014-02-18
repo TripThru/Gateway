@@ -97,13 +97,13 @@ namespace ServiceStack.TripThruGateway
 
                 var tripthruweb = new User
                 {
-                    UserName = "Tripthru Web",
+                    UserName = "Test TDispatch",
                     Password = "password",
-                    Email = "web@tripthru.com",
-                    AccessToken = "web12ondazazxx21",
-                    RefreshToken = "12ondazazxx21",
-                    ClientId = "web@tripthru.com",
-                    ClientSecret = "12ondazazxx21"
+                    Email = "test_tdispatch@tripthru.com",
+                    AccessToken = "test_tdispatch12ondazazxx21",
+                    RefreshToken = "test_tdispatch12ondazazxx21",
+                    ClientId = "test_tdispatch@tripthru.com",
+                    ClientSecret = "test_tdispatch12ondazazxx21"
                 };
                 Db.Insert(tripthruweb);
 

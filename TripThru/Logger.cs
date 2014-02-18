@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Threading;
 using System.Text;
 using Utils;
@@ -104,7 +105,7 @@ namespace Utils
                                     if (response.ErrorMessage != null)
                                     {
                                         Console.WriteLine("Splunk error: " + response.ErrorMessage + ", for: "+logEntries.First());
-                                        if (response.ErrorMessage.Contains("SendFailure"))
+                                        if (response.ErrorMessage.Contains("SendFailure") || response.ErrorMessage.Contains("ReceiveFailure"))
                                         {
                                             this.Enqueue(requestLog);
                                         }
@@ -226,7 +227,6 @@ namespace Utils
 
         public static void EndRequest(object response)
         {
-
             Logger.Untab();
             if (response != null)
                 Logger.Log("EndRequest: Response = " + restReq.JsonSerializer.Serialize(response));
@@ -236,18 +236,34 @@ namespace Utils
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             numBegunRequests[thread] = numBegunRequests[thread] - 1;
             if (file == null)
-                splunkClient.Enqueue(requestLog[thread]);
+                
             if (numBegunRequests[thread] == 0)
             {
+                Logger.Log("Type=INFO");
                 var json = "";
                 if (response != null)
                     json = restReq.JsonSerializer.Serialize(response);
                 requestLog[thread].Response = json;
                 if (file == null)
+                {
+                    splunkClient.Enqueue(requestLog[thread]);
                     Queue.Enqueue(requestLog[thread]);
+                }
                 requestLog.Remove(thread);
                 numBegunRequests.Remove(thread);
             }
+        }
+
+        public static void LogDebug(string message, string detailed = null)
+        {
+            RequestLog error = new RequestLog("");
+            error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + message));
+            if (detailed != null)
+                error.Messages.Add(new Pair<int, string>(40, detailed));
+            error.Messages.Add(new Pair<int, string>(40, "Type=DEBUG"));
+            error.Messages.Add(new Pair<int, string>(0, "End"));
+            error.Response = "";
+            splunkClient.Enqueue(error);
         }
 
         public static void Log(string message, object o)

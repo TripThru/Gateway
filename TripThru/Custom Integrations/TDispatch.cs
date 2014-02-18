@@ -528,34 +528,61 @@ namespace CustomIntegrations
             if (DateTime.UtcNow < lastCheckStatus + checkStatusInterval)
                 return;
             List<string> checkTrips = new List<string>(activeTrips.Keys);
+
             foreach (string tripID in checkTrips)
             {
-                string bookingPK;
-                bookingPK = activeTrips[tripID].pk;
-
-                TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
-
-                TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
-
-                bool update = false;
-                update = activeTrips[tripID].status != getBookingStatusResponse.booking.status;
-                if (getBookingResponse.booking.pk == null)
-                    getBookingResponse.booking.pk = bookingPK;
-                if (!update)
-                    continue;
-                Logger.Log("BookingStatus changed ", getBookingStatusResponse.booking);
-                activeTrips[tripID] = getBookingResponse.booking;
-                Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
-                    clientID: ID,
-                    tripID: tripID,
-                    status: ConvertTDispatchStatusToTripThruStatus(getBookingStatusResponse.booking.status));
-                tripthru.UpdateTripStatus(request);
-                if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" || activeTrips[tripID].status == "rejected" || activeTrips[tripID].status == "missed")
-                    activeTrips.Remove(tripID);
+                try
+                {
+                    string bookingPK = activeTrips[tripID].pk;
+                    TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
+                    TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
+                    UpdateBooking(tripID, getBookingResponse.booking);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("TDispatchUpdate=" + e.Message, e.StackTrace);
+                }
             }
+
             lastCheckStatus = DateTime.UtcNow;
 
         }
+
+        public void UpdateBooking(string tripID, TDispatchAPI.Booking value)
+        {
+            if (activeTrips[tripID].status == value.status)
+                return;
+
+            Logger.BeginRequest("TDispatch trip "+tripID+" update", null);
+            try
+            {
+                string bookingPK = activeTrips[tripID].pk;
+                if (value.pk == null)
+                    value.pk = bookingPK;
+
+                activeTrips[tripID] = value;
+
+                Logger.Log("BookingStatus changed ", value);
+                Logger.Log("Notify originating partner through TripThru");
+                Logger.Tab();
+                Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
+                    clientID: ID,
+                    tripID: tripID,
+                    status: ConvertTDispatchStatusToTripThruStatus(value.status));
+                tripthru.UpdateTripStatus(request);
+                Logger.Untab();
+                if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" ||
+                            activeTrips[tripID].status == "rejected" || activeTrips[tripID].status == "missed")
+                    activeTrips.Remove(tripID);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("TDispatch trip "+tripID+" update=" + e.Message, e.StackTrace);
+                Logger.Log("Exception=" + e.Message);
+            }
+            Logger.EndRequest(null);
+        }
+
         Status ConvertTDispatchStatusToTripThruStatus(string value)
         {
             switch (value)
@@ -570,23 +597,6 @@ namespace CustomIntegrations
                 case "active": return Status.Enroute;
                 default: throw new Exception("fatal error");
             }
-        }
-
-
-        public void UpdateBooking(string tripID, TDispatchAPI.Booking value)
-        {
-            if (activeTrips[tripID].status == value.status)
-                return;
-            Logger.Log("Notify originating partner through TripThru");
-            Logger.Tab();
-            Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
-                clientID: ID,
-                tripID: tripID,
-                status: ConvertTDispatchStatusToTripThruStatus(value.status));
-            tripthru.UpdateTripStatus(request);
-            Logger.Untab();
-            if (value.status == "Complete")
-                activeTrips.Remove(tripID);
         }
 
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest request)
@@ -642,7 +652,6 @@ namespace CustomIntegrations
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
             Logger.BeginRequest("QuoteTrip received from " + tripthru.name, request);
-
             Gateway.QuoteTripResponse response = null;
             {
 
@@ -676,37 +685,56 @@ namespace CustomIntegrations
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
             Logger.BeginRequest("GetTripStatus received from " + tripthru.name, request);
-            string bookingPK = activeTrips[request.tripID].pk;
-
-            TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
-
-            TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
-
-            TDispatchAPI.Booking booking = getBookingStatusResponse.booking;
-            booking.Merge(getBookingResponse.booking);
-
-            TDispatchAPI.GetFareResponse fare = api.GetFare(new TDispatchAPI.GetFareRequest
+            Gateway.GetTripStatusResponse response = null;
+            if (activeTrips.ContainsKey(request.tripID))
             {
-                way_points = booking.way_points,
-                pickup_time = booking.pickup_time != null ? ((DateTime)booking.pickup_time).ToString("yyyy-MM-dd'T'HH:mm:ssK", DateTimeFormatInfo.InvariantInfo) : null,
-                pickup_location = booking.pickup_Location.location,
-                dropoff_location = booking.dropoff_Location.location,
-                dropoff_time = booking.dropoff_time != null ? ((DateTime)booking.dropoff_time).ToString("yyyy-MM-dd'T'HH:mm:ssK", DateTimeFormatInfo.InvariantInfo) : null,
-                payment_method = booking.payment_method
-            });
+                string bookingPK = activeTrips[request.tripID].pk;
 
-            Gateway.GetTripStatusResponse response = new Gateway.GetTripStatusResponse(
-                partnerID: ID, partnerName: name,
-                fleetID: booking.office.slug, fleetName: booking.office.name,
-                driverID: booking.driver != null ? booking.driver.pk : null,
-                driverName: booking.driver != null ? booking.driver.name : null,
-                driverLocation: booking.driver != null ? new Location((double)booking.driver.location.lat,
-                    (double)booking.driver.location.lng) : null, price: booking.cost.value, distance: fare.fare.distance.km,
-                    result: Result.OK, status:this.ConvertTDispatchStatusToTripThruStatus(booking.status)
+                TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
+
+                TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
+
+                TDispatchAPI.Booking booking = getBookingStatusResponse.booking;
+                booking.Merge(getBookingResponse.booking);
+
+                TDispatchAPI.GetFareResponse fare = api.GetFare(new TDispatchAPI.GetFareRequest
+                {
+                    way_points = booking.way_points,
+                    pickup_time =
+                        booking.pickup_time != null
+                            ? ((DateTime) booking.pickup_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
+                                DateTimeFormatInfo.InvariantInfo)
+                            : null,
+                    pickup_location = booking.pickup_Location.location,
+                    dropoff_location = booking.dropoff_Location.location,
+                    dropoff_time =
+                        booking.dropoff_time != null
+                            ? ((DateTime) booking.dropoff_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
+                                DateTimeFormatInfo.InvariantInfo)
+                            : null,
+                    payment_method = booking.payment_method
+                });
+
+                response = new Gateway.GetTripStatusResponse(
+                    partnerID: ID, partnerName: name,
+                    fleetID: booking.office.slug, fleetName: booking.office.name,
+                    driverID: booking.driver != null ? booking.driver.pk : null,
+                    driverName: booking.driver != null ? booking.driver.name : null,
+                    driverLocation: booking.driver != null
+                        ? new Location((double) booking.driver.location.lat,
+                            (double) booking.driver.location.lng)
+                        : null, price: booking.cost.value, distance: fare.fare.distance.km,
+                    result: Result.OK, status: this.ConvertTDispatchStatusToTripThruStatus(booking.status)
                     );
-            if (booking.pk == null)
-                booking.pk = bookingPK;
-            activeTrips[request.tripID] = booking;
+                if (booking.pk == null)
+                    booking.pk = bookingPK;
+                activeTrips[request.tripID] = booking;
+            }
+            else
+            {
+                Logger.Log("Trip " + request.tripID + " not found");
+                response = new GetTripStatusResponse(result: Result.NotFound);
+            }
             Logger.EndRequest(response);
             return response;
         }
@@ -716,11 +744,14 @@ namespace CustomIntegrations
             Gateway.UpdateTripStatusResponse response;
             if (request.status == Status.Cancelled)
             {
-                TDispatchAPI.CancelBookingResponse resp = api.CancelBooking(activeTrips[request.tripID].pk, new TDispatchAPI.CancelBookingRequest { description = "abandoned" });
+                TDispatchAPI.CancelBookingResponse resp = api.CancelBooking(activeTrips[request.tripID].pk,
+                    new TDispatchAPI.CancelBookingRequest {description = "abandoned"});
                 response = new Gateway.UpdateTripStatusResponse(result: Result.OK);
             }
             else
+            {
                 response = new Gateway.UpdateTripStatusResponse(result: Result.MethodNotSupported);
+            }
             Logger.EndRequest(request);
             return response;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Web;
 using RestSharp;
@@ -18,6 +19,7 @@ namespace TripThruCore
         // Configuration parameters
         public TimeSpan simInterval = new TimeSpan(0, 0, 10);
         public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
+        public string preferedPartnerId = null;
 
         static long nextID = 0;
         public string GenerateUniqueID() { nextID++; return nextID.ToString() + "@" + ID; }
@@ -94,6 +96,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -160,6 +163,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -205,6 +209,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
@@ -263,6 +268,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -283,13 +289,15 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
 
-        public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null) : base(ID, name)
+        public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null, string preferedPartnerId = null) : base(ID, name)
         {
             this.tripthru = tripthru;
+            this.preferedPartnerId = preferedPartnerId;
             this.PartnerFleets = new Dictionary<string, PartnerFleet>();
             if (PartnerFleets != null)
             {
@@ -542,9 +550,9 @@ namespace TripThruCore
         public TimeSpan tripMaxAdvancedNotice = new TimeSpan(0, 0, 15); // minutes
         public TimeSpan simInterval = new TimeSpan(0, 0, 10);
         public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
-        public TimeSpan missedPeriod = new TimeSpan(0, 1, 0);
-        public TimeSpan criticalPeriod = new TimeSpan(0, 1, 0);
-        public TimeSpan removalAge = new TimeSpan(0, 5, 0);
+        public TimeSpan missedPeriod = new TimeSpan(0, 5, 0);
+        public TimeSpan criticalPeriod = new TimeSpan(0, 5, 0);
+        public TimeSpan removalAge = new TimeSpan(0, 8, 0);
         public int maxActiveTrips = 2;
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
@@ -790,7 +798,9 @@ namespace TripThruCore
                                 paymentMethod: t.paymentMethod,
                                 vehicleType: t.vehicleType,
                                 maxPrice: t.maxPrice,
-                                minRating: t.minRating);
+                                minRating: t.minRating,
+                                partnerID: partner.preferedPartnerId
+                                );
                             Gateway.DispatchTripResponse response = partner.tripthru.DispatchTrip(request);
                             if (response.result == Gateway.Result.OK)
                             {

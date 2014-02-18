@@ -87,8 +87,9 @@
     }
 
     <ul class="request_list tree">
-        @foreach (var entry in Model.LogList)
+        @for (var j=Model.LogList.Count-1; j >= 0 ; j--)
         {
+            var entry = Model.LogList[j];
             if (entry.Messages.Count > 0)
             {
                 <li class="request_block">@entry.Messages.First().Second

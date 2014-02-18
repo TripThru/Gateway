@@ -51,6 +51,7 @@ namespace TripThruCore
             partners = new List<Gateway>();
 
             LoadTDispatchIntegrations();
+            var thread = new PartnersUpdateThread(partners);
 
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
         }
@@ -102,7 +103,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("RegisterPartner=" + e.Message, e.StackTrace);
                 return new RegisterPartnerResponse(result: Result.UnknownError);
             }
         }
@@ -134,7 +135,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -143,88 +144,97 @@ namespace TripThruCore
             try
             {
                 requests++;
-                // Note: GetTrip populates the foreignTripID
-                Gateway partner = null;
-                if (r.partnerID == null)
+                DispatchTripResponse response1;
+                if (!activeTrips.Contains(r.tripID))
                 {
-                    Logger.Log("Auto mode, so quote trip through all partners");
-                    Logger.Tab();
-                    // Dispatch to partner with shortest ETA
-                    QuoteTripResponse response = QuoteTrip(new QuoteTripRequest(
-                        clientID: r.clientID, // TODO: Daniel, fix this when you add authentication
-                        pickupLocation: r.pickupLocation,
-                        pickupTime: r.pickupTime,
-                        passengerID: r.passengerID,
-                        passengerName: r.passengerName,
-                        luggage: r.luggage,
-                        persons: r.persons,
-                        dropoffLocation: r.dropoffLocation,
-                        waypoints: r.waypoints,
-                        paymentMethod: r.paymentMethod,
-                        vehicleType: r.vehicleType,
-                        maxPrice: r.maxPrice,
-                        minRating: r.minRating,
-                        partnerID: r.partnerID,
-                        fleetID: r.fleetID,
-                        driverID: r.driverID));
-                    if (response.result == Result.Rejected)
+                    // Note: GetTrip populates the foreignTripID
+                    Gateway partner = null;
+                    if (r.partnerID == null)
                     {
-                        Logger.Log("No partners are available that cover that area");
-                        Logger.Untab();
-                        rejects++;
-                        return new DispatchTripResponse(result: Result.Rejected);
-                    }
-                    else if (response.result != Result.OK)
-                    {
-                        Logger.Log("QuoteTrip call failed");
-                        Logger.Untab();
-                        rejects++;
-                        return new DispatchTripResponse(result: response.result);
-                    }
-                    else
-                    {
-                        Quote bestQuote = null;
-                        DateTime bestETA = TimeZoneInfo.ConvertTimeToUtc(r.pickupTime) + missedBookingPeriod;
-                        // not more than 30 minues late
-                        foreach (Quote q in response.quotes)
+                        Logger.Log("Auto mode, so quote trip through all partners");
+                        Logger.Tab();
+                        // Dispatch to partner with shortest ETA
+                        QuoteTripResponse response = QuoteTrip(new QuoteTripRequest(
+                            clientID: r.clientID, // TODO: Daniel, fix this when you add authentication
+                            pickupLocation: r.pickupLocation,
+                            pickupTime: r.pickupTime,
+                            passengerID: r.passengerID,
+                            passengerName: r.passengerName,
+                            luggage: r.luggage,
+                            persons: r.persons,
+                            dropoffLocation: r.dropoffLocation,
+                            waypoints: r.waypoints,
+                            paymentMethod: r.paymentMethod,
+                            vehicleType: r.vehicleType,
+                            maxPrice: r.maxPrice,
+                            minRating: r.minRating,
+                            partnerID: r.partnerID,
+                            fleetID: r.fleetID,
+                            driverID: r.driverID));
+                        if (response.result == Result.Rejected)
                         {
-                            if (q.ETA < bestETA)
-                            {
-                                bestETA = (DateTime)q.ETA;
-                                bestQuote = q;
-                            }
+                            Logger.Log("No partners are available that cover that area");
+                            Logger.Untab();
+                            rejects++;
+                            return new DispatchTripResponse(result: Result.Rejected);
                         }
-                        if (bestQuote != null)
+                        else if (response.result != Result.OK)
                         {
-                            partner = partnersByID[bestQuote.PartnerId];
-                            r.fleetID = bestQuote.FleetId;
-                            Logger.Log("Best quote " + bestQuote + " from " + partner.name);
+                            Logger.Log("QuoteTrip call failed");
+                            Logger.Untab();
+                            rejects++;
+                            return new DispatchTripResponse(result: response.result);
                         }
                         else
-                            Logger.Log("There are no partners to handle this trip within an exceptable service time");
+                        {
+                            Quote bestQuote = null;
+                            DateTime bestETA = TimeZoneInfo.ConvertTimeToUtc(r.pickupTime) + missedBookingPeriod;
+                            // not more than 30 minues late
+                            foreach (Quote q in response.quotes)
+                            {
+                                if (q.ETA < bestETA)
+                                {
+                                    bestETA = (DateTime) q.ETA;
+                                    bestQuote = q;
+                                }
+                            }
+                            if (bestQuote != null)
+                            {
+                                partner = partnersByID[bestQuote.PartnerId];
+                                r.fleetID = bestQuote.FleetId;
+                                Logger.Log("Best quote " + bestQuote + " from " + partner.name);
+                            }
+                            else
+                                Logger.Log("There are no partners to handle this trip within an exceptable service time");
 
+                        }
+                        Logger.Untab();
                     }
-                    Logger.Untab();
-                }
-                else
-                    partner = partnersByID[r.partnerID];
-                DispatchTripResponse response1;
-                if (partner != null)
-                {
-                    Gateway client = partnersByID[r.clientID];
-                    originatingPartnerByTrip.Add(r.tripID, client);
-                    Logger.Log("Origination="+client.name);
-                    servicingPartnerByTrip.Add(r.tripID, partner);
-                    Logger.Log("Dispatch="+partner.name);
-                    r.clientID = ID;
-                    response1 = partner.DispatchTrip(r);
-                    if (response1.result != Result.OK)
+                    else
+                        partner = partnersByID[r.partnerID];
+
+                    if (partner != null)
                     {
-                        Logger.Log("DispatchTrip to " + partner.name + " failed");
+                        Gateway client = partnersByID[r.clientID];
+                        originatingPartnerByTrip.Add(r.tripID, client);
+                        Logger.Log("Origination=" + client.name);
+                        servicingPartnerByTrip.Add(r.tripID, partner);
+                        Logger.Log("Dispatch=" + partner.name);
+                        r.clientID = ID;
+                        response1 = partner.DispatchTrip(r);
+                        if (response1.result != Result.OK)
+                        {
+                            Logger.Log("DispatchTrip to " + partner.name + " failed");
+                        }
+                        else
+                        {
+                            activeTrips.Add(r.tripID);
+                        }
                     }
                     else
                     {
-                        activeTrips.Add(r.tripID);
+                        rejects++;
+                        response1 = new DispatchTripResponse(result: Result.InvalidParameters);
                     }
                 }
                 else
@@ -238,7 +248,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -284,7 +294,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
@@ -325,7 +335,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -367,7 +377,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -433,14 +443,6 @@ namespace TripThruCore
                 string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);
                 File.WriteAllText("~/Custom Integrations/TDispatchOffices.txt".MapHostAbsolutePath(), configStr);   // We don't need this while testing.  The main purpose is to save the tokens so token reresh not constantly needed
             }
-
-            //TDispatchIntegration sanFranOffice = (TDispatchIntegration) partnersByID["52b4053948efcb7ac1137d41"];
-            //DispatchTripResponse response = sanFranOffice.DispatchTrip(new DispatchTripRequest(clientID: "test",
-            //    tripID: "test", pickupLocation: new Location(37.78906, -122.402127), pickupTime: DateTime.UtcNow,
-            //    passengerID: "test", passengerName: "test-ed", luggage: 1, persons: 1, dropoffLocation: new Location(37.78906, -122.402127), vehicleType: VehicleType.Sedan));
-
-            //TDispatchAPI.Booking booking = sanFranOffice.activeTrips["test"];
-            //sanFranOffice.api.RejectBooking(booking.pk);
         }
         public override void Update()
         {
@@ -575,6 +577,65 @@ namespace TripThruCore
         public override void Log()
         {
             gateway.Log();
+        }
+    }
+
+    public class PartnersUpdateThread : IDisposable
+    {
+        private List<Gateway> _partners;
+        private TimeSpan _heartbeat = new TimeSpan(0, 0, 30);
+        private Thread _worker;
+        private volatile bool _workerTerminateSignal = false;
+
+        public PartnersUpdateThread(List<Gateway> partners)
+        {
+            this._partners = partners;
+            _worker = new Thread(StartThread);
+            _worker.Start();
+        }
+
+        private void StartThread()
+        {
+            try
+            {
+                while (true)
+                {
+                    try
+                    {
+                        foreach (var partner in _partners)
+                        {
+                            try
+                            {
+                                lock (partner)
+                                {
+                                    partner.Update();
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                if (e.Message != "Not supported")
+                                {
+                                    Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
+                    }
+                    System.Threading.Thread.Sleep(_heartbeat);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("PartnersUpdateThread initialization error :" + e.Message, e.StackTrace);
+            }
+        }
+
+        public void Dispose()
+        {
+            Logger.LogDebug("PartnersUpdateThread disposed");
         }
     }
 }

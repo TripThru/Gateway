@@ -276,44 +276,57 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 var clientId = "none";
-                if (u.Count > 0)
+                try
                 {
-                    var user = u.First();
-                    clientId = user.ClientId;
-                    Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
-                    var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
-                            user.ClientId
-                        ));
-
-                    if (response.result == Gateway.Result.OK)
+                    if (u.Count > 0)
                     {
-                        partnersResponse = new PartnersResponse
+                        var user = u.First();
+                        clientId = user.ClientId;
+                        Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
+                        var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
+                            user.ClientId
+                            ));
+
+                        if (response.result == Gateway.Result.OK)
                         {
-                            Result = "OK",
-                            ResultCode = Gateway.Result.OK,
-                            Fleets = response.fleets,
-                            VehicleTypes = response.vehicleTypes
-                        };
+                            partnersResponse = new PartnersResponse
+                            {
+                                Result = "OK",
+                                ResultCode = Gateway.Result.OK,
+                                Fleets = response.fleets,
+                                VehicleTypes = response.vehicleTypes
+                            };
+                        }
+                        else
+                        {
+                            partnersResponse = new PartnersResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result
+                            };
+                        }
                     }
                     else
                     {
+                        Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
+                        string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
+                                     ", Response = Authentication failed";
+                        Logger.Log(msg);
                         partnersResponse = new PartnersResponse
                         {
                             Result = "Failed",
-                            ResultCode = response.result
+                            ResultCode = Gateway.Result.AuthenticationError
                         };
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
-                    string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
+                    Logger.LogDebug("GetPartnerInfo="+e.Message, e.StackTrace);
+                    Logger.Log("Exception=" + e.Message);
                     partnersResponse = new PartnersResponse
                     {
                         Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
+                        ResultCode = Gateway.Result.UnknownError
                     };
                 }
                 Logger.Log("RequestType=GetPartnerInfo");
@@ -328,44 +341,57 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 var clientId = "none";
-                if (u.Count > 0)
+                try
                 {
-                    var user = u.First();
-                    clientId = user.ClientId;
-                    Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
-                    var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
-                        user.ClientId
-                        ));
-
-                    if (response.result == Gateway.Result.OK)
+                    if (u.Count > 0)
                     {
-                        partnersResponse = new PartnersResponse
+                        var user = u.First();
+                        clientId = user.ClientId;
+                        Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
+                        var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
+                            user.ClientId
+                            ));
+
+                        if (response.result == Gateway.Result.OK)
                         {
-                            Result = "OK",
-                            ResultCode = Gateway.Result.OK,
-                            Fleets = response.fleets,
-                            VehicleTypes = response.vehicleTypes
-                        };
+                            partnersResponse = new PartnersResponse
+                            {
+                                Result = "OK",
+                                ResultCode = Gateway.Result.OK,
+                                Fleets = response.fleets,
+                                VehicleTypes = response.vehicleTypes
+                            };
+                        }
+                        else
+                        {
+                            partnersResponse = new PartnersResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result
+                            };
+                        }
                     }
                     else
                     {
+                        Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
+                        string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
+                                     ", Response = Authentication failed";
+                        Logger.Log(msg);
                         partnersResponse = new PartnersResponse
                         {
                             Result = "Failed",
-                            ResultCode = response.result
+                            ResultCode = Gateway.Result.AuthenticationError
                         };
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
-                    string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
+                    Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
+                    Logger.Log("Exception=" + e.Message);
                     partnersResponse = new PartnersResponse
                     {
                         Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
+                        ResultCode = Gateway.Result.UnknownError
                     };
                 }
                 Logger.Log("RequestType=GetPartnerInfo");
@@ -473,7 +499,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
                     Logger.Log("Exception="+e.Message);
                     quotesResponse = new QuotesResponse
                     {
@@ -553,7 +579,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
                     Logger.Log("Exception=" + e.Message);
                     quotesResponse = new QuotesResponse
                     {
@@ -594,7 +620,6 @@ namespace ServiceStack.TripThruGateway
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
-            public string TripId { get; set; }
         }
 
         public class DispatchService : Service
@@ -664,7 +689,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
                     Logger.Log("Exception=" + e.Message);
                     dispatchResponse = new DispatchResponse
                     {
@@ -743,7 +768,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
                     Logger.Log("Exception=" + e.Message);
                     dispatchResponse = new DispatchResponse
                     {
@@ -797,57 +822,70 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 var clientId = "none";
-                if (u.Count > 0)
+                try
                 {
-                    var user = u.First();
-                    clientId = user.ClientId;
-                    Logger.BeginRequest("GetTripStatus received from " + gateway.GetName(user.ClientId), request);
-                    var response = gateway.GetTripStatus(new Gateway.GetTripStatusRequest(
-                        user.ClientId,
-                        request.TripId
-                        ));
-
-                    if (response.result == Gateway.Result.OK)
+                    if (u.Count > 0)
                     {
-                        tripResponse = new TripResponse
+                        var user = u.First();
+                        clientId = user.ClientId;
+                        Logger.BeginRequest("GetTripStatus received from " + gateway.GetName(user.ClientId), request);
+                        var response = gateway.GetTripStatus(new Gateway.GetTripStatusRequest(
+                            user.ClientId,
+                            request.TripId
+                            ));
+
+                        if (response.result == Gateway.Result.OK)
                         {
-                            DriverId = response.driverID,
-                            DriverLocation = response.driverLocation,
-                            DriverName = response.driverName,
-                            DropoffTime = response.dropoffTime,
-                            ETA = response.ETA,
-                            FleetId = response.fleetID,
-                            FleetName = response.fleetName,
-                            PartnerId = response.partnerID,
-                            PartnerName = response.partnerName,
-                            PickupTime = response.pickupTime,
-                            VehicleType = response.vehicleType,
-                            Result = "OK",
-                            ResultCode = response.result,
-                            Status = response.status,
-                            Price = response.price,
-                            Distance = response.distance
-                        };
+                            tripResponse = new TripResponse
+                            {
+                                DriverId = response.driverID,
+                                DriverLocation = response.driverLocation,
+                                DriverName = response.driverName,
+                                DropoffTime = response.dropoffTime,
+                                ETA = response.ETA,
+                                FleetId = response.fleetID,
+                                FleetName = response.fleetName,
+                                PartnerId = response.partnerID,
+                                PartnerName = response.partnerName,
+                                PickupTime = response.pickupTime,
+                                VehicleType = response.vehicleType,
+                                Result = "OK",
+                                ResultCode = response.result,
+                                Status = response.status,
+                                Price = response.price,
+                                Distance = response.distance
+                            };
+                        }
+                        else
+                        {
+                            tripResponse = new TripResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result
+                            };
+                        }
                     }
                     else
                     {
+                        Logger.BeginRequest("GetTripStatus received from unknown user", request);
+                        string msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
+                                     ", Response = Authentication failed";
+                        Logger.Log(msg);
                         tripResponse = new TripResponse
                         {
                             Result = "Failed",
-                            ResultCode = response.result
+                            ResultCode = Gateway.Result.AuthenticationError
                         };
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Logger.BeginRequest("GetTripStatus received from unknown user", request);
-                    string msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
+                    Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
+                    Logger.Log("Exception=" + e.Message);
                     tripResponse = new TripResponse
                     {
                         Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
+                        ResultCode = Gateway.Result.UnknownError
                     };
                 }
                 Logger.Log("RequestType=GetTripStatus");
@@ -862,45 +900,58 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = this.Request.QueryString.Get("access_token");
                 var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 var clientId = "none";
-                if (u.Count > 0)
+                try
                 {
-                    var user = u.First();
-                    Logger.BeginRequest("UpdateTripStatus received from " + gateway.GetName(user.ClientId), request);
-                    clientId = user.ClientId;
-                    var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
-                        user.ClientId,
-                        request.TripId,
-                        request.Status
-                        ));
-
-                    if (response.result == Gateway.Result.OK)
+                    if (u.Count > 0)
                     {
-                        tripResponse = new TripResponse
+                        var user = u.First();
+                        Logger.BeginRequest("UpdateTripStatus received from " + gateway.GetName(user.ClientId), request);
+                        clientId = user.ClientId;
+                        var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
+                            user.ClientId,
+                            request.TripId,
+                            request.Status
+                            ));
+
+                        if (response.result == Gateway.Result.OK)
                         {
-                            Result = "OK",
-                            ResultCode = response.result
-                        };
+                            tripResponse = new TripResponse
+                            {
+                                Result = "OK",
+                                ResultCode = response.result
+                            };
+                        }
+                        else
+                        {
+
+                            tripResponse = new TripResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result
+                            };
+                        }
                     }
                     else
                     {
-
+                        Logger.BeginRequest("UpdateTripStatus received from unknown user", request);
+                        string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
+                                     ", Response = Authentication failed";
+                        Logger.Log(msg);
                         tripResponse = new TripResponse
                         {
                             Result = "Failed",
-                            ResultCode = response.result
+                            ResultCode = Gateway.Result.AuthenticationError
                         };
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Logger.BeginRequest("UpdateTripStatus received from unknown user", request);
-                    string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
+                    Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
+                    Logger.Log("Exception=" + e.Message);
                     tripResponse = new TripResponse
                     {
                         Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
+                        ResultCode = Gateway.Result.UnknownError
                     };
                 }
                 Logger.Log("RequestType=UpdateTripStatus");

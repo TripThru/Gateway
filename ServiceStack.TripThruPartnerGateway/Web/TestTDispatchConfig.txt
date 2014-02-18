@@ -1,0 +1,53 @@
+{
+ "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+ "simInterval" : 10,
+ "partner" : {
+     "name" : "Test TDispatch",
+     "clientId" : "test_tdispatch@tripthru.com",
+     "accessToken" : "test_tdispatch12ondazazxx21",
+   "callbackUrl" : "http://54.201.134.194/ServiceStack.TestTDispatch/"
+ },
+ "fleets" : [
+   {
+       "name" : "Test TDispatch",
+       "tripsPerHour" : 120,
+"location" : {
+"lat" : 48.837246,
+           "lng" : 2.347844
+       },
+       "possibleTrips" : [
+           {
+"description" : "Daniel/Rafael - Mexico",
+               "start" : { "lat": 29.114788, "lng": -110.973587},
+               "end"   : { "lat": 29.073987, "lng": -110.97084}
+           },
+           {
+"description" : "Edward - San Jose",
+               "start" : { "lat" : 37.362860, "lng" : -121.761709},
+               "end"   : { "lat" : 37.370637, "lng" : -121.815782}
+           },
+{
+"description" : "Edward - San Jose",
+               "start" : { "lat" : 37.362860, "lng" : -121.761709},
+               "end"   : { "lat" : 37.381140, "lng" : -121.872516}
+           },
+{
+"description" : "James - Arizona",
+               "start" : { "lat" : 33.272495, "lng" : -111.715900},
+               "end"   : { "lat" : 33.283653, "lng" : -111.710428}
+           },
+{
+"description" : "Joanna - Concord",
+               "start" : { "lat" : 42.433292, "lng" : -71.382811},
+               "end"   : { "lat" : 42.454130, "lng" : -71.401522}
+           }
+       ],
+       "passengers" : [
+           "Edward Hamilton",
+           "Patrick Hamilton",
+           "Brian Hamilton",
+           "Ann Hamilton"
+       ]
+   }  
+ ]
+}

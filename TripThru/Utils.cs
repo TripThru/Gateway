@@ -585,111 +585,131 @@ namespace Utils
         // http://code.google.com/apis/maps/documentation/geocoding/#ReverseGeocoding
         public static string GetReverseGeoLoc(Location location)
         {
-            string key = location.getID();
-            if (locationNames.ContainsKey(key))
-                return locationNames[key];
-            //return "Google -- Over query limit";
-
-            XmlDocument doc = new XmlDocument();
+            lock (locationNames)
             {
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
-                if (element.InnerText == "OVER_QUERY_LIMIT")
+                string key = location.getID();
+                if (locationNames.ContainsKey(key))
+                    return locationNames[key];
+                //return "Google -- Over query limit";
+
+                XmlDocument doc = new XmlDocument();
                 {
+                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
+                             location.Lng + "&sensor=false");
+                    XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
+                    if (element.InnerText == "OVER_QUERY_LIMIT")
+                    {
 
-                    System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                    element = doc.SelectSingleNode("//GeocodeResponse/status");
+                        System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
+                        doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
+                                 location.Lng + "&sensor=false");
+                        element = doc.SelectSingleNode("//GeocodeResponse/status");
 
-                }
-                if (element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT")
-                    return "Google -- Over query limit";
-                else
-                {
+                    }
+                    if (element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT")
+                        return "Google -- Over query limit";
+                    else
+                    {
 
-                    element = doc.SelectSingleNode("//GeocodeResponse/result/formatted_address");
-                    locationNames.Add(location.getID(), element.InnerText);
-                    return element.InnerText;
+                        element = doc.SelectSingleNode("//GeocodeResponse/result/formatted_address");
+                        locationNames.Add(location.getID(), element.InnerText);
+                        return element.InnerText;
+                    }
                 }
             }
         }
 
         public static Pair<string, string> GetReverseGeoLocAddress(Location location)
         {
-            Pair<string, string> address = new Pair<string,string>();
-            string key = location.getID();
-            if (locationAddresses.ContainsKey(key))
-                return locationAddresses[key];
-            //return "Google -- Over query limit";
-
-            XmlDocument doc = new XmlDocument();
-            doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-            XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
-            if (element.InnerText == "OVER_QUERY_LIMIT")
+            lock (locationAddresses)
             {
+                Pair<string, string> address = new Pair<string, string>();
+                string key = location.getID();
+                if (locationAddresses.ContainsKey(key))
+                    return locationAddresses[key];
+                //return "Google -- Over query limit";
 
-                System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                element = doc.SelectSingleNode("//GeocodeResponse/status");
+                XmlDocument doc = new XmlDocument();
+                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng +
+                         "&sensor=false");
+                XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
+                if (element.InnerText == "OVER_QUERY_LIMIT")
+                {
 
+                    System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
+                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
+                             location.Lng + "&sensor=false");
+                    element = doc.SelectSingleNode("//GeocodeResponse/status");
+
+                }
+                if (!(element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT"))
+                {
+                    var streetNumberNode =
+                        doc.SelectSingleNode(
+                            "//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
+                    string street_number = streetNumberNode != null ? streetNumberNode.InnerText : "";
+
+                    var routeNode =
+                        doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"route\"]/short_name");
+                    string route = routeNode != null ? routeNode.InnerText : "";
+
+                    var postalCodeNode =
+                        doc.SelectSingleNode(
+                            "//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name");
+                    string postal_code = postalCodeNode != null ? postalCodeNode.InnerText : "";
+
+                    address = new Pair<string, string>(street_number + " " + route, postal_code);
+                    locationAddresses.Add(location.getID(), address);
+                    return address;
+
+                }
+                return null;
             }
-            if (!(element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT"))
-            {
-                var streetNumberNode =
-                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
-                string street_number = streetNumberNode != null ?  streetNumberNode.InnerText : "";
-
-                var routeNode =
-                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"route\"]/short_name");
-                string route = routeNode != null ? routeNode.InnerText : "";
-
-                var postalCodeNode =
-                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name");
-                string postal_code = postalCodeNode != null ? postalCodeNode.InnerText : "";
-
-                address =  new Pair<string, string>(street_number + " " + route, postal_code);
-                locationAddresses.Add(location.getID(), address);
-                return address;
-
-            }
-            return null;
         }
 
         // http://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&sensor=false
         public static Route GetRoute(Location from, Location to)
         {
-            string key = Route.GetKey(from, to);
-            if (routes.ContainsKey(key))
-                return routes[key];
-            double METERS_TO_MILES = 0.000621371192;
-            XmlDocument doc = new XmlDocument();
-            TimeSpan elapse = new TimeSpan(0, 0, 0);
-            double totalDistance = 0;
-            string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false";
-            doc.Load(url);
-            XmlNode status = doc.SelectSingleNode("//DirectionsResponse/status");
-            if (status == null || status.InnerText == "ZERO_RESULTS")
-                return null;
-            List<Waypoint> waypoints = new List<Waypoint>();
-            waypoints.Add(new Waypoint(from, new TimeSpan(0), 0));
-            var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
-            foreach (XmlNode leg in legs)
+            lock (routes)
             {
-                var stepNodes = leg.SelectNodes("step");
-                foreach (XmlNode stepNode in stepNodes)
+                string key = Route.GetKey(from, to);
+                if (routes.ContainsKey(key))
+                    return routes[key];
+                double METERS_TO_MILES = 0.000621371192;
+                XmlDocument doc = new XmlDocument();
+                TimeSpan elapse = new TimeSpan(0, 0, 0);
+                double totalDistance = 0;
+                string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng +
+                             "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false";
+                doc.Load(url);
+                XmlNode status = doc.SelectSingleNode("//DirectionsResponse/status");
+                if (status == null || status.InnerText == "ZERO_RESULTS")
+                    return null;
+                List<Waypoint> waypoints = new List<Waypoint>();
+                waypoints.Add(new Waypoint(from, new TimeSpan(0), 0));
+                var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
+                foreach (XmlNode leg in legs)
                 {
-                    TimeSpan duration = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
-                    Location end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
-                    double distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * METERS_TO_MILES;
-                    totalDistance += distance;
-                    elapse += duration;
-                    waypoints.Add(new Waypoint(end, elapse, totalDistance));
+                    var stepNodes = leg.SelectNodes("step");
+                    foreach (XmlNode stepNode in stepNodes)
+                    {
+                        TimeSpan duration = new TimeSpan(0, 0,
+                            int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
+                        Location end =
+                            new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText),
+                                double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                        double distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText)*
+                                          METERS_TO_MILES;
+                        totalDistance += distance;
+                        elapse += duration;
+                        waypoints.Add(new Waypoint(end, elapse, totalDistance));
+                    }
                 }
+                waypoints.Add(new Waypoint(to, elapse, totalDistance));
+                Route route = new Route(waypoints.ToArray());
+                routes.Add(key, route);
+                return route;
             }
-            waypoints.Add(new Waypoint(to, elapse, totalDistance));
-            Route route = new Route(waypoints.ToArray());
-            routes.Add(key, route);
-            return route;
         }
     }
     public class GarbageCleanup<T>
