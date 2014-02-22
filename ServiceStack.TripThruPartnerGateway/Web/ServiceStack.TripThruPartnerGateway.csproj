@@ -123,6 +123,8 @@
     <Content Include="Content\Css\default.css" />
     <Content Include="Content\Images\arrow_collapsed.gif" />
     <Content Include="Content\Images\arrow_expanded.gif" />
+    <Content Include="Content\Images\loading.gif" />
+    <Content Include="Content\Images\Logo.png" />
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
     <Content Include="Content\Images\bg-body-1024.png" />
@@ -140,6 +142,7 @@
     </Content>
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Log.cshtml" />
+    <Content Include="Views\Stats.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\TripThruPartnerGatewayHost.cs" />

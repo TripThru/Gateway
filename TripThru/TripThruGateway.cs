@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using ServiceStack.Common.Utils;
+using ServiceStack.ServiceInterface;
 using Utils;
 using CustomIntegrations;
 using System.IO;
@@ -70,11 +71,14 @@ namespace TripThruCore
             if (originatingPartnerByTrip.ContainsKey(tripID))
             {
                 Gateway partner = originatingPartnerByTrip[tripID];
-                if (partner.ID == clientID) // who's asking?
+
+                if (partner.ID == clientID || (servicingPartnerByTrip.ContainsKey(tripID) && servicingPartnerByTrip[tripID].ID != clientID)) // who's asking?
                 {
-                    // the originating partner is asking.
+                    // the originating partner or third party is asking.
                     if (servicingPartnerByTrip.ContainsKey(tripID))
-                        return servicingPartnerByTrip[tripID];
+                    {
+                        partner = servicingPartnerByTrip[tripID];
+                    }
                     else
                         throw new Exception("Fatal Error: destination could not be found");
                 }
@@ -145,7 +149,7 @@ namespace TripThruCore
             {
                 requests++;
                 DispatchTripResponse response1;
-                if (!activeTrips.Contains(r.tripID))
+                if (!activeTrips.Keys.Contains(r.tripID))
                 {
                     // Note: GetTrip populates the foreignTripID
                     Gateway partner = null;
@@ -228,7 +232,21 @@ namespace TripThruCore
                         }
                         else
                         {
-                            activeTrips.Add(r.tripID);
+                            var trip = new Trip
+                            {
+                                Id = r.tripID,
+                                OriginatingPartnerName = client.name,
+                                OriginatingPartnerId = client.ID,
+                                ServicingPartnerName = partner.name,
+                                ServicingPartnerId = partner.ID,
+                                Status = Status.Queued,
+                                PickupLocation = r.pickupLocation,
+                                PickupTime = r.pickupTime,
+                                DropoffLocation = r.dropoffLocation,
+                                PassengerName = r.passengerName,
+                                VehicleType = r.vehicleType
+                            };
+                            activeTrips.Add(r.tripID, trip);
                         }
                     }
                     else
@@ -300,8 +318,18 @@ namespace TripThruCore
         }
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
-            requests++;
-            return new GetTripsResponse(new List<string>(originatingPartnerByTrip.Keys));
+            try
+            {
+                requests++;
+                return new GetTripsResponse(new List<Trip>(activeTrips.Values));
+            }
+            catch (Exception e)
+            {
+                exceptions++;
+                Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("GetTrips=" + e.Message, e.StackTrace);
+                return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
+            }
         }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
@@ -316,11 +344,31 @@ namespace TripThruCore
                     GetTripStatusResponse response = partner.GetTripStatus(r);
                     if (response.result == Result.OK)
                     {
-                        if (response.status == Status.Complete || response.status == Status.Cancelled || response.status == Status.Rejected)
-                            DeactivateTrip(r.tripID, (Status)response.status, response.price, response.distance);
+                        if (response.status == Status.Complete || response.status == Status.Cancelled ||
+                            response.status == Status.Rejected)
+                        {
+                            DeactivateTrip(r.tripID, (Status) response.status, response.price, response.distance);
+                        }
+                        else
+                        {
+                            UpdateTrip(new Trip
+                            {
+                                Id = r.tripID,
+                                FleetId = response.fleetID,
+                                FleetName = response.fleetName,
+                                DriverId = response.driverID,
+                                DriverName = response.driverName,
+                                Status = response.status,
+                                ETA = response.ETA,
+                                Price = response.price,
+                                Distance = response.distance
+                            });
+                        }
 
                         response.partnerID = partner.ID;
                         response.partnerName = partner.name;
+                        response.originatingPartnerName = originatingPartnerByTrip[r.tripID].name;
+                        response.servicingPartnerName = servicingPartnerByTrip[r.tripID].name;
                     }
                     else
                     {

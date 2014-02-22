@@ -312,6 +312,7 @@ namespace CustomIntegrations
             public string key { get; set; }
             public Driver driver { get; set; }
             public VehicleType vehicleType { get; set; }
+            public string customerName { get; set; }
             public void Merge(Booking b)
             {
                 if (status == null)
@@ -342,6 +343,8 @@ namespace CustomIntegrations
                     driver = b.driver;
                 if (vehicleType == null)
                     vehicleType = b.vehicleType;
+                if (customerName == null)
+                    customerName = b.customerName;
             }
         }
 
@@ -716,7 +719,9 @@ namespace CustomIntegrations
                 });
 
                 response = new Gateway.GetTripStatusResponse(
-                    partnerID: ID, partnerName: name,
+                    partnerID: ID, partnerName: name, passengerName: booking.customerName,
+                    pickupLocation: new Location((double)booking.pickup_Location.location.lat, (double)booking.pickup_Location.location.lng, booking.pickup_Location.address),
+                    dropoffLocation: new Location((double)booking.dropoff_Location.location.lat, (double)booking.dropoff_Location.location.lng, booking.dropoff_Location.address),
                     fleetID: booking.office.slug, fleetName: booking.office.name,
                     driverID: booking.driver != null ? booking.driver.pk : null,
                     driverName: booking.driver != null ? booking.driver.name : null,

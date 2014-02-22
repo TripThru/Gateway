@@ -25,7 +25,6 @@ namespace ServiceStack.TripThruGateway
         {
             try
             {
-                GatewayService.gateway = new TripThru();
 
                 Db.CreateTableIfNotExists<Partner>();
                 Db.CreateTableIfNotExists<User>();
@@ -95,7 +94,7 @@ namespace ServiceStack.TripThruGateway
                 };
                 Db.Insert(dubai);
 
-                var tripthruweb = new User
+                var testtdispatch = new User
                 {
                     UserName = "Test TDispatch",
                     Password = "password",
@@ -105,8 +104,21 @@ namespace ServiceStack.TripThruGateway
                     ClientId = "test_tdispatch@tripthru.com",
                     ClientSecret = "test_tdispatch12ondazazxx21"
                 };
+                Db.Insert(testtdispatch);
+
+                var tripthruweb = new User
+                {
+                    UserName = "TripThruWeb",
+                    Password = "password",
+                    Email = "web@tripthru.com",
+                    AccessToken = "webondazazxx21",
+                    RefreshToken = "web12ondazazxx21",
+                    ClientId = "web@tripthru.com",
+                    ClientSecret = "web12ondazazxx21"
+                };
                 Db.Insert(tripthruweb);
 
+                GatewayService.gateway = new TripThru();
                 Logger.OpenLog();
                 Logger.SetLogId("TripThruGateway");
             }

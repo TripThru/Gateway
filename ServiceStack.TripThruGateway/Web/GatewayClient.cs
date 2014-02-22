@@ -204,10 +204,12 @@ namespace ServiceStack.TripThruGateway
                     {
                         result = Gateway.Result.OK,
                         ETA = response.ETA,
+                        passengerName = response.PassengerName,
                         driverID = response.DriverId,
                         driverLocation = response.DriverLocation,
                         driverName = response.DriverName,
                         dropoffTime = response.DropoffTime,
+                        dropoffLocation = response.DropoffLocation,
                         fleetName = response.FleetName,
                         fleetID = response.FleetId,
                         vehicleType = response.VehicleType,
@@ -215,6 +217,7 @@ namespace ServiceStack.TripThruGateway
                         partnerName = response.PartnerName,
                         partnerID = response.PartnerId,
                         pickupTime = response.PickupTime,
+                        pickupLocation = response.PickupLocation,
                         distance = response.Distance,
                         price = response.Price
                     };
@@ -234,7 +237,7 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.Trip
+            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.TripRequest
             {
                 Status = request.status,
                 TripId = request.tripID

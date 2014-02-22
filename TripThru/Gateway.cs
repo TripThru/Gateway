@@ -133,6 +133,43 @@ namespace TripThruCore
         }
     }
 
+    public class Trip
+    {
+        public string Id { get; set; }
+        public string OriginatingPartnerName { get; set; }
+        public string OriginatingPartnerId { get; set; }
+        public string ServicingPartnerName { get; set; }
+        public string ServicingPartnerId { get; set; }
+        public string FleetId { get; set; }
+        public string FleetName { get; set; }
+        public string DriverId { get; set; }
+        public string DriverName { get; set; }
+        public string PassengerName { get; set; }
+        public Location DriverLocation { get; set; }
+        public DateTime? PickupTime { get; set; }
+        public DateTime? DropoffTime { get; set; }
+        public VehicleType? VehicleType { get; set; }
+        public Status? Status { get; set; }
+        public DateTime? ETA { get; set; } // in minutes;
+        public double? Price { get; set; }
+        public double? Distance { get; set; }
+        public Location PickupLocation { get; set; }
+        public Location DropoffLocation { get; set; }
+
+        public void Update(Trip trip)
+        {
+            this.FleetId = trip.FleetId;
+            this.FleetName = trip.FleetName;
+            this.DriverId = trip.DriverId;
+            this.DriverName = trip.DriverName;
+            this.DriverLocation = trip.DriverLocation;
+            this.Status = trip.Status;
+            this.ETA = trip.ETA;
+            this.Price = trip.Price;
+            this.Distance = trip.Distance;
+        }
+    }
+
     public class Fleet
     {
         public string PartnerId { get; set; }
@@ -496,10 +533,11 @@ namespace TripThruCore
         public class GetTripsResponse
         {
             public Result result;
-            public List<string> tripIDs;
-            public GetTripsResponse(List<string> tripIDs, Result result = Result.OK)
+            public List<Trip> trips;
+            public GetTripsResponse(List<Trip> trips, Result result = Result.OK)
             {
-                this.tripIDs = tripIDs;
+                this.trips = trips;
+                this.result = result;
             }
             public override string ToString()
             {
@@ -528,35 +566,47 @@ namespace TripThruCore
             public string partnerName;
             public string fleetID;
             public string fleetName;
+            public string passengerName;
             public string driverID;
             public string driverName;
             public Location driverLocation;
             public DateTime? pickupTime;
+            public Location pickupLocation;
             public DateTime? dropoffTime;
+            public Location dropoffLocation;
             public VehicleType? vehicleType;
             public Status? status;
             public DateTime? ETA; // in minutes;
             public double? price;
             public double? distance;
-            public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null,
-                string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null,
-                DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, DateTime? dropoffTime = null, double? price = null, double? distance = null, Result result = Result.OK)
+            public string originatingPartnerName;
+            public string servicingPartnerName;
+            public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null, string originatingPartnerName = null,
+                string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null, string passengerName = null,
+                DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
+                double? price = null, double? distance = null, Result result = Result.OK
+                 )
             {
                 this.partnerID = partnerID;
                 this.partnerName = partnerName;
                 this.fleetID = fleetID;
                 this.fleetName = fleetName;
+                this.passengerName = passengerName;
                 this.driverID = driverID;
                 this.driverName = driverName;
                 this.driverLocation = driverLocation;
                 this.vehicleType = vehicleType;
                 this.ETA = ETA;
                 this.pickupTime = pickupTime;
+                this.pickupLocation = pickupLocation;
+                this.dropoffLocation = dropoffLocation;
                 this.dropoffTime = dropoffTime;
                 this.price = price;
                 this.distance = distance;
                 this.result = result;
                 this.status = status;
+                this.originatingPartnerName = originatingPartnerName;
+                this.servicingPartnerName = servicingPartnerName;
             }
             public override string ToString()
             {
@@ -752,7 +802,7 @@ namespace TripThruCore
         public Stat distance;
         public Stat completes;
         public Stat fare;
-        public HashSet<string> activeTrips;
+        public Dictionary<string, Trip> activeTrips;
         public GarbageCleanup<string> garbageCleanup;
         public override GetGatewayStatsResponse GetGatewayStats(Gateway.GetGatewayStatsRequest request)
         {
@@ -788,12 +838,12 @@ namespace TripThruCore
             fare = new Stat();
             completes = new Stat();
             distance = new Stat();
-            activeTrips = new HashSet<string>();
+            activeTrips = new Dictionary<string, Trip>();
         }
         public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
         {
             Logger.Log("Deactivating "+tripID+", Status="+status+", Price="+price+", Distance="+distance);
-            if (!activeTrips.Contains(tripID))
+            if (!activeTrips.Keys.Contains(tripID))
                 return;
 
             activeTrips.Remove(tripID);
@@ -811,6 +861,21 @@ namespace TripThruCore
             }
             if (garbageCleanup != null)
                 garbageCleanup.Add(tripID);
+        }
+
+        public void UpdateTrip(Trip trip)
+        {
+            if (activeTrips.Keys.Contains(trip.Id))
+            {
+                activeTrips[trip.Id].FleetId = trip.FleetId;
+                activeTrips[trip.Id].FleetName = trip.FleetName;
+                activeTrips[trip.Id].DriverId = trip.DriverId;
+                activeTrips[trip.Id].DriverName = trip.DriverName;
+                activeTrips[trip.Id].Status = trip.Status;
+                activeTrips[trip.Id].ETA = trip.ETA;
+                activeTrips[trip.Id].Price = trip.Price;
+                activeTrips[trip.Id].Distance = trip.Distance;
+            }
         }
         public void LogStats()
         {

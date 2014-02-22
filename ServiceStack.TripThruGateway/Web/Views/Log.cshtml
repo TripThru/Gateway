@@ -18,9 +18,9 @@
         body {
             font-family: 'Open Sans',sans-serif;
             background: #f8f8f8;
-            color: #555;
-            font-size: 16px;
+            color: #525252;
             font-weight: 300;
+            font-size: 16px;
         }
 
         h1 {
@@ -29,18 +29,85 @@
             margin: 0 0 20px 0;
         }
 
+        h2 {
+            font-weight: 100;
+            color: #525252;
+            margin: 0 0 20px 0;
+        }
+
+        /*HEADER STYLE*/
+        .logo {
+            float: left;
+            margin: 12px 55px 11px 11px;
+        }
+
+        .logo a {
+            float: left;
+        }
+
+        #head_nav {
+            float: left;
+            margin: 31px 0px;
+            padding: 0px;
+            list-style: none;
+        }
+
+        #head_nav li {
+            float: left;
+            margin: 0px;
+            padding: 0px 10px;
+        }
+
+        #head_nav li.last {
+            border-right: none;
+        }
+
+        #head_nav li a {
+            float: left;
+            text-decoration: none;
+            color: #727272;
+        }
+
+        #head_nav li a:hover, #head_nav li a.active {
+            color: #0087bc;
+        }
+
+        #header_out {
+            width: 100%;
+            height: 72px;
+            background: #FFF;
+            font-size: 0.85em;
+        }
+
+        #header {
+            width: 960px;
+            height: 70px;
+            margin: 0px auto;
+        }
+        /*HEADER STYLE*/
+
+        .box_container {
+            width: 960px;
+            margin: 0px auto;
+            margin-top: 10px;
+            word-wrap: break-word;
+        }
+
         ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
+            word-wrap: break-word;
         }
 
         li {
             font-weight: 300;
             padding-left: 1.5em;
+            word-wrap: break-word;
         }
 
         .request_list {
+            word-wrap: break-word;
         }
 
         .request_block {
@@ -50,6 +117,8 @@
             font-weight: bold;
             margin-top: 1.0em;
             margin-bottom: 1.0em;
+            font-size: 14px;
+            word-wrap: break-word;
         }
 
         .handle {
@@ -75,60 +144,77 @@
             background-position: center;
             cursor: pointer;
         }
+
+        pre {
+            overflow-x: auto; /* Use horizontal scroller if needed; for Firefox 2, not needed in Firefox 3 */
+            white-space: pre-wrap; /* css-3 */
+            white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+            white-space: -pre-wrap; /* Opera 4-6 */
+            white-space: -o-pre-wrap; /* Opera 7 */
+            /* width: 99%; */
+            word-wrap: break-word; /* Internet Explorer 5.5+ */
+        }
     </style>
 
-    @if (Model.LogList.Count == 0)
-    {
-        <h1>No recent log entries</h1>
-    }
-    else
-    {
-        <h1>Recent activity</h1>
-    }
-
-    <ul class="request_list tree">
-        @for (var j=Model.LogList.Count-1; j >= 0 ; j--)
+    <div id="header_out">
+        <div id="header">
+            <div class="logo"><img src="/content/images/Logo.png" border="0" /></div>
+            <ul id="head_nav">
+                <li><a href="stats">Stats</a></li>
+                <li><a class="active" href="#">Log</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="box_container">
+        @if (Model.LogList.Count == 0)
         {
-            var entry = Model.LogList[j];
-            if (entry.Messages.Count > 0)
+            <h2 style="margin-top: 30px;">No recent log entries</h2>
+        }
+        <ul class="request_list tree">
+            @for (var j = Model.LogList.Count - 1; j >= 0; j--)
             {
-                <li class="request_block">@entry.Messages.First().Second
-                    <ul>
-                        @if (!entry.Request.IsNullOrEmpty())
-                        {
-                            <li>Json request
-                                <ul>
-                                    <li><pre class="prettyprint language-java">@entry.Request</pre></li>
-                                </ul>
-                            </li>
-                        }
-                        @if (entry.Messages.Count > 1)
-                        {
-                            for (int i = 1; i < entry.Messages.Count; i++)
+                var entry = Model.LogList[j];
+                if (entry.Messages.Count > 0)
+                {
+                    <li class="request_block">
+                        @entry.Messages.First().Second
+                        <ul>
+                            @if (!entry.Request.IsNullOrEmpty())
                             {
-                                var log = entry.Messages.ElementAt(i);
                                 <li>
-                                    <p style="padding-left: @log.First.ToString()px;">
-                                        @log.Second
-                                    </p>
+                                    Json request
+                                    <ul>
+                                        <li><pre style=" word-wrap: break-word;" class="prettyprint language-java">@entry.Request</pre></li>
+                                    </ul>
                                 </li>
                             }
-                        } 
-                        @if (!entry.Response.IsNullOrEmpty())
-                        {
-                            <li>
-                                Json response
-                                <ul>
-                                    <li><pre class="prettyprint language-java">@entry.Response</pre></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
-                </li>
+                            @if (entry.Messages.Count > 1)
+                            {
+                                for (int i = 1; i < entry.Messages.Count; i++)
+                                {
+                                    var log = entry.Messages.ElementAt(i);
+                                    <li>
+                                        <p style="padding-left: @log.First.ToString()px;">
+                                            @log.Second
+                                        </p>
+                                    </li>
+                                }
+                            }
+                            @if (!entry.Response.IsNullOrEmpty())
+                            {
+                                <li>
+                                    Json response
+                                    <ul>
+                                        <li><pre style=" word-wrap: break-word;" class="prettyprint language-java">@entry.Response</pre></li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
             }
-        }
-    </ul>
-
+        </ul>
+    </div>
     <script>
         $(document).ready(function () {
             //jQuery(".tree ul").hide();

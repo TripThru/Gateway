@@ -636,7 +636,7 @@ namespace ServiceStack.TripThruGateway
                     {
                         var user = u.First();
                         clientId = user.ClientId;
-                        Logger.BeginRequest("DispatchTrip received from " + gateway.GetName(user.ClientId), request);
+                        Logger.BeginRequest("DispatchTrip received from " + user.UserName, request);
                         var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
                             user.ClientId,
                             request.TripId,
@@ -715,7 +715,7 @@ namespace ServiceStack.TripThruGateway
                     {
                         var user = u.First();
                         clientId = user.ClientId;
-                        Logger.BeginRequest("DispatchTrip received from " + gateway.GetName(user.ClientId), request);
+                        Logger.BeginRequest("DispatchTrip received from " + user.UserName, request);
                         var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
                             user.ClientId,
                             request.TripId,
@@ -786,7 +786,7 @@ namespace ServiceStack.TripThruGateway
         [Api("Use GET /trip/{Id}/status for trip status and PUT /trip/{Id}/status to update a trip status. Use POST /trip/{Id}/rating to rate a trip.")]
         [Route("/trip/status/{TripId}", "GET, PUT")]
         [Route("/trip/rating/{TripId}", "POST")]
-        public class Trip : IReturn<TripResponse>
+        public class TripRequest : IReturn<TripResponse>
         {
             public string TripId { get; set; }
             public Status Status { get; set; }
@@ -803,6 +803,7 @@ namespace ServiceStack.TripThruGateway
             public string FleetName { get; set; }
             public string DriverId { get; set; }
             public string DriverName { get; set; }
+            public string PassengerName { get; set; }
             public Location DriverLocation { get; set; }
             public DateTime? PickupTime { get; set; }
             public DateTime? DropoffTime { get; set; }
@@ -811,11 +812,15 @@ namespace ServiceStack.TripThruGateway
             public DateTime? ETA { get; set; } // in minutes;
             public double? Price { get; set; }
             public double? Distance { get; set; }
+            public Location PickupLocation { get; set; }
+            public Location DropoffLocation { get; set; }
+            public string OriginatingPartnerName { get; set; }
+            public string ServicingPartnerName { get; set; }
         }
 
         public class TripService : Service
         {
-            public TripResponse Get(Trip request)
+            public TripResponse Get(TripRequest request)
             {
                 Logger.BeginRequest("GetTripStatus received", request);
                 TripResponse tripResponse;
@@ -828,7 +833,7 @@ namespace ServiceStack.TripThruGateway
                     {
                         var user = u.First();
                         clientId = user.ClientId;
-                        Logger.BeginRequest("GetTripStatus received from " + gateway.GetName(user.ClientId), request);
+                        Logger.BeginRequest("GetTripStatus received from " + user.UserName, request);
                         var response = gateway.GetTripStatus(new Gateway.GetTripStatusRequest(
                             user.ClientId,
                             request.TripId
@@ -838,22 +843,27 @@ namespace ServiceStack.TripThruGateway
                         {
                             tripResponse = new TripResponse
                             {
+                                PassengerName = response.passengerName,
                                 DriverId = response.driverID,
                                 DriverLocation = response.driverLocation,
                                 DriverName = response.driverName,
                                 DropoffTime = response.dropoffTime,
+                                DropoffLocation = response.dropoffLocation,
                                 ETA = response.ETA,
                                 FleetId = response.fleetID,
                                 FleetName = response.fleetName,
                                 PartnerId = response.partnerID,
                                 PartnerName = response.partnerName,
                                 PickupTime = response.pickupTime,
+                                PickupLocation = response.pickupLocation,
                                 VehicleType = response.vehicleType,
                                 Result = "OK",
                                 ResultCode = response.result,
                                 Status = response.status,
                                 Price = response.price,
-                                Distance = response.distance
+                                Distance = response.distance,
+                                OriginatingPartnerName = response.originatingPartnerName,
+                                ServicingPartnerName = response.servicingPartnerName
                             };
                         }
                         else
@@ -894,7 +904,7 @@ namespace ServiceStack.TripThruGateway
                 return tripResponse;
             }
 
-            public TripResponse Put(Trip request)
+            public TripResponse Put(TripRequest request)
             {
                 TripResponse tripResponse;
                 var accessToken = this.Request.QueryString.Get("access_token");
@@ -905,7 +915,7 @@ namespace ServiceStack.TripThruGateway
                     if (u.Count > 0)
                     {
                         var user = u.First();
-                        Logger.BeginRequest("UpdateTripStatus received from " + gateway.GetName(user.ClientId), request);
+                        Logger.BeginRequest("UpdateTripStatus received from " + user.UserName, request);
                         clientId = user.ClientId;
                         var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
                             user.ClientId,
@@ -965,30 +975,25 @@ namespace ServiceStack.TripThruGateway
         [Route("/trips", "GET")]
         public class Trips : IReturn<TripsResponse>
         {
-            public Status? Status { get; set; }
+            public Status Status { get; set; }
         }
 
         public class TripsResponse
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
-            public List<string> TripsIDs { get; set; }
+            public List<Trip> Trips { get; set; }
         }
 
         public class TripsService : Service
         {
             public TripsResponse Get(Trips request)
             {
+                Logger.BeginRequest("GetTrips received", request);
                 TripsResponse tripResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                var clientId = "none";
-                if (u.Count > 0)
+                try
                 {
-                    var user = u.First();
-                    Logger.BeginRequest("GetTrips received from " + gateway.GetName(user.ClientId), request);
-                    clientId = user.ClientId;
-                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(user.ClientId, request.Status));
+                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, null));
 
                     if (response.result == Gateway.Result.OK)
                     {
@@ -996,7 +1001,7 @@ namespace ServiceStack.TripThruGateway
                         {
                             Result = "OK",
                             ResultCode = response.result,
-                            TripsIDs = response.tripIDs
+                            Trips = response.trips
                         };
                     }
                     else
@@ -1007,21 +1012,19 @@ namespace ServiceStack.TripThruGateway
                             ResultCode = response.result
                         };
                     }
-
                 }
-                else
+                catch (Exception e)
                 {
-                    Logger.BeginRequest("GetTrips received from unknown user", request);
-                    string msg = "GET /trips called with invalid access token, ip: " + Request.RemoteIp +
-                             ", Response = Authentication failed";
+
+                    Logger.LogDebug("GetTrips=" + e.Message, e.StackTrace);
+                    Logger.Log("Exception=" + e.Message);
                     tripResponse = new TripsResponse
                     {
                         Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
+                        ResultCode = Gateway.Result.UnknownError
                     };
                 }
                 Logger.Log("RequestType=GetTrips");
-                Logger.Log("ClientId=" + clientId);
                 Logger.EndRequest(tripResponse);
                 return tripResponse;
             }
