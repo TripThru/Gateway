@@ -1,9 +1,7 @@
 using Funq;
 using ServiceStack.Common.Utils;
-using ServiceStack.OrmLite;
 using ServiceStack.Razor;
 using ServiceStack.Text;
-using ServiceStack.TripThruGateway;
 using ServiceStack.WebHost.Endpoints;
 using ContentType = ServiceStack.Common.Web.ContentType;
 
@@ -24,9 +22,6 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
 		{
 			JsConfig.DateHandler = JsonDateHandler.ISO8601;
 			JsConfig.EmitCamelCaseNames = true;
-
-			container.Register<IDbConnectionFactory>(
-				c => new OrmLiteConnectionFactory("Server=127.0.0.1; Database=GatewaySandboxPartner; Uid=tripservice; Pwd=Tr1PServ1Ce@MySqL;", MySqlDialect.Provider));
 
             Plugins.Add(new RazorFormat());
             
@@ -59,6 +54,7 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
 		    {
 		        initPartners.Any(null);
 		    }
+
 		}
 	}
 }

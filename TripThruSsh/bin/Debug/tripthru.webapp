@@ -1,0 +1,51 @@
+<apps>
+<web-application>
+                                    <name>TripThru.TripThruGateway</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.TripThruGateway</vpath>
+                                    <path>/var/www/ServiceStack.TripThruGateway/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.DubaiTaxiCorporation</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.DubaiTaxiCorporation</vpath>
+                                    <path>/var/www/ServiceStack.DubaiTaxiCorporation/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.LesTaxiBlues</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.LesTaxiBlues</vpath>
+                                    <path>/var/www/ServiceStack.LesTaxiBlues/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.LuxorCab</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.LuxorCab</vpath>
+                                    <path>/var/www/ServiceStack.LuxorCab/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.MetroCabofBoston</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.MetroCabofBoston</vpath>
+                                    <path>/var/www/ServiceStack.MetroCabofBoston/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.TestTDispatch</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.TestTDispatch</vpath>
+                                    <path>/var/www/ServiceStack.TestTDispatch/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.YellowCab</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.YellowCab</vpath>
+                                    <path>/var/www/ServiceStack.YellowCab/Web</path>
+                                 </web-application>
+</apps>

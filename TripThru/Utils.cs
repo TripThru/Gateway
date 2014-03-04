@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
@@ -15,8 +16,10 @@ using System.Xml.Serialization;
 //using ServiceStack.Text;
 //using ServiceStack.Common.Utils;
 //using ServiceStack.Common.Utils;
-using RestSharp;
+//using RestSharp;
 using TripThruCore;
+using ServiceStack.Redis;
+using System.Linq.Expressions;
 
 namespace Utils
 {
@@ -537,7 +540,7 @@ namespace Utils
                                 row.Add(w.Lng.ToString());
                                 row.Add(w.elapse.ToString());
                                 row.Add(w.distance.ToString());
-                                row.Add(w.Name);
+                                row.Add(w.Address);
                                 writer.WriteRow(row);
                             }
                         }
@@ -594,15 +597,13 @@ namespace Utils
 
                 XmlDocument doc = new XmlDocument();
                 {
-                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
-                             location.Lng + "&sensor=false");
+                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                     XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
                     if (element.InnerText == "OVER_QUERY_LIMIT")
                     {
 
                         System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                        doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
-                                 location.Lng + "&sensor=false");
+                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                         element = doc.SelectSingleNode("//GeocodeResponse/status");
 
                     }
@@ -630,23 +631,20 @@ namespace Utils
                 //return "Google -- Over query limit";
 
                 XmlDocument doc = new XmlDocument();
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng +
-                         "&sensor=false");
+            doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                 XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
                 if (element.InnerText == "OVER_QUERY_LIMIT")
                 {
 
                     System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," +
-                             location.Lng + "&sensor=false");
+                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                     element = doc.SelectSingleNode("//GeocodeResponse/status");
 
                 }
                 if (!(element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT"))
                 {
                     var streetNumberNode =
-                        doc.SelectSingleNode(
-                            "//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
+                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
                     string street_number = streetNumberNode != null ? streetNumberNode.InnerText : "";
 
                     var routeNode =
@@ -654,8 +652,7 @@ namespace Utils
                     string route = routeNode != null ? routeNode.InnerText : "";
 
                     var postalCodeNode =
-                        doc.SelectSingleNode(
-                            "//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name");
+                    doc.SelectSingleNode("//GeocodeResponse/result/address_component[type=\"postal_code\"]/short_name");
                     string postal_code = postalCodeNode != null ? postalCodeNode.InnerText : "";
 
                     address = new Pair<string, string>(street_number + " " + route, postal_code);
@@ -679,8 +676,7 @@ namespace Utils
                 XmlDocument doc = new XmlDocument();
                 TimeSpan elapse = new TimeSpan(0, 0, 0);
                 double totalDistance = 0;
-                string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng +
-                             "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false";
+                string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false";
                 doc.Load(url);
                 XmlNode status = doc.SelectSingleNode("//DirectionsResponse/status");
                 if (status == null || status.InnerText == "ZERO_RESULTS")
@@ -693,16 +689,12 @@ namespace Utils
                     var stepNodes = leg.SelectNodes("step");
                     foreach (XmlNode stepNode in stepNodes)
                     {
-                        TimeSpan duration = new TimeSpan(0, 0,
-                            int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
-                        Location end =
-                            new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText),
-                                double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
-                        double distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText)*
-                                          METERS_TO_MILES;
-                        totalDistance += distance;
-                        elapse += duration;
-                        waypoints.Add(new Waypoint(end, elapse, totalDistance));
+                        TimeSpan duration = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
+                        Location end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                        double distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * METERS_TO_MILES;
+                            totalDistance += distance;
+                            elapse += duration;
+                            waypoints.Add(new Waypoint(end, elapse, totalDistance));
                     }
                 }
                 waypoints.Add(new Waypoint(to, elapse, totalDistance));
@@ -732,6 +724,359 @@ namespace Utils
                 cleanup.Invoke(garbage.Peek().Second);
                 garbage.Dequeue();
             }
+        }
+    }
+
+    public static class MemberInfoGetting
+    {
+        public static string GetMemberName<T>(Expression<Func<T>> memberExpression)
+        {
+            MemberExpression expressionBody = (MemberExpression)memberExpression.Body;
+            return expressionBody.Member.Name;
+        }
+    }
+    public class RedisDictionary<K, T> : ConcurrentDictionary<K, T>
+    {
+        public RedisDictionary(RedisClient redis, string id, Expression<Func<T>> member)
+        {
+        }
+        public RedisDictionary(RedisClient redis, string id)
+        {
+        }
+        public T Remove(K key)
+        {
+            T value;
+            TryRemove(key, out value);
+            return value;
+        }
+        public void Add(K key, T value)
+        {
+            TryAdd(key, value);
+        }
+    }
+/*
+    public class RedisDictionary<K, T> : IEnumerable<T>
+    {
+        RedisClient redis;
+        string id;
+        public RedisDictionary(RedisClient redis, string id, Expression<Func<T>> member)
+        {
+            this.redis = redis;
+            this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
+        }
+        public RedisDictionary(RedisClient redis, string id)
+        {
+            this.redis = redis;
+            this.id = id;
+        }
+        public bool ContainsKey(K key)
+        {
+            return redis.As<T>().GetHash<K>(id).ContainsKey(key);
+        }
+        public void Clear()
+        {
+            redis.As<T>().GetHash<K>(id).Clear();
+        }
+        public void Remove(K key)
+        {
+            redis.As<T>().GetHash<K>(id).Remove(key);
+        }
+        public void Add(K key, T item)
+        {
+            this[key] = item;
+        }
+
+        public IEnumerable<K> Keys
+        {
+            get
+            {
+                return redis.As<T>().GetHash<K>(id).Keys;
+            }
+        }
+
+        public IEnumerable<T> Values
+        {
+            get
+            {
+                return redis.As<T>().GetHash<K>(id).Values;
+            }
+        }
+
+        public T this[K key]
+        {
+            get
+            {
+                return redis.As<T>().GetHash<K>(id)[key];
+            }
+            set
+            {
+                redis.As<T>().GetHash<K>(id)[key] = value;
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            // Lets call the generic version here
+            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+        }
+
+        public int Count
+        {
+            get
+            {
+                return redis.As<T>().GetHash<K>(id).Count;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator<T>()
+        {
+            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+        }
+        public IEnumerator<T> GetEnumerator()
+        {
+            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+        }
+    } */
+
+
+    public class RedisExpiryCounter : RedisExpiryList<double>
+    {
+        TimeSpan expiresIn;
+        RedisObject<double> count;
+        public RedisExpiryCounter(RedisClient redis, string id, TimeSpan expiresIn)
+            : base(redis, id)
+        {
+            this.expiresIn = expiresIn;
+            count = new RedisObject<double>(redis, id + ":" + MemberInfoGetting.GetMemberName(() => count));
+        }
+        public static RedisExpiryCounter operator ++(RedisExpiryCounter c)
+        {
+            c.Add(1);
+            return c;
+        }
+        public static RedisExpiryCounter operator +(RedisExpiryCounter c, double d)
+        {
+            c.Add(d);
+            return c;
+        }
+        private void Add(double value)
+        {
+            count += value;
+            base.Add(value, DateTime.UtcNow + expiresIn);
+        }
+        public void ExpirationAction(double value)
+        {
+            count -= value;
+        }
+        public static implicit operator double(RedisExpiryCounter o)
+        {
+            return o.count;
+        }
+    }
+
+    public class RedisExpiryList<T> : IEnumerable<Pair<DateTime, T>>
+    {
+        RedisClient redis;
+        string id;
+        public delegate void ExpirationAction(T item);
+        public ExpirationAction expirationAction;
+        public RedisExpiryList(RedisClient redis, string id, Expression<Func<T>> member, ExpirationAction expirationAction = null)
+        {
+            this.redis = redis;
+            this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
+            this.expirationAction = expirationAction;
+        }
+        public RedisExpiryList(RedisClient redis, string id)
+        {
+            this.redis = redis;
+            this.id = id;
+        }
+//        ServiceStack.Redis.Generic.IRedisList<Pair<DateTime, T>> List { get { return redis.As<Pair<DateTime, T>>().Lists[id]; } }
+        ConcurrentQueue<Pair<DateTime, T>> List = new ConcurrentQueue<Pair<DateTime,T>>();
+        void Cleanup()
+        {
+            while (List.Count > 0)
+            {
+//                    if (List.Count > 0 && List.Last().First <= DateTime.UtcNow)
+                Pair<DateTime, T> end;
+                List.TryPeek(out end);
+                if (List.Count > 0 && end.First <= DateTime.UtcNow)
+                {
+                    if (expirationAction != null)
+                        expirationAction(List.Last().Second);
+                    List.TryDequeue(out end); // RemoveEnd();  // for Redis
+                }
+                else
+                    break;
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                Cleanup();
+                return List.Count;
+            }
+        }
+        public void Clear()
+        {
+            Pair<DateTime, T> end;
+            while (List.Count > 0)
+                List.TryDequeue(out end); // RemoveEnd();  // for Redis
+//            List.Clear();
+        }
+        public void Add(T item, DateTime expireAt)
+        {
+            List.Enqueue(new Pair<DateTime, T>(expireAt, item));
+            //List.Push(new Pair<DateTime, T>(expireAt, item)); for Redis
+        }
+        public void Add(T item, TimeSpan expireIn)
+        {
+            List.Enqueue(new Pair<DateTime, T>(DateTime.UtcNow + expireIn, item));
+            // List.Push(new Pair<DateTime, T>(DateTime.UtcNow + expireIn, item)); for Redis
+        }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            // Lets call the generic version here
+            Cleanup();
+            return List.GetEnumerator();
+        }
+/*        public IEnumerator<Pair<DateTime, T>> GetEnumerator<T>() for Redis?
+        {
+            Cleanup();
+//            return (IEnumerator<Pair<DateTime, T>>)List.GetEnumerator();
+            return (IEnumerator<Pair<DateTime, T>>) List.GetEnumerator();
+        } */
+        public IEnumerator<Pair<DateTime, T>> GetEnumerator()
+        {
+            Cleanup();
+            return List.GetEnumerator();
+        }
+    }
+
+
+    public class RedisObject<T>
+    {
+        readonly RedisClient redis;
+        readonly string id;
+        private T _value; // when disabling redis;
+        private static readonly object valueTypeLock = new object();
+
+        public RedisObject(RedisClient redis, string id, Expression<Func<T>> member)
+        {
+            this.redis = redis;
+            this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
+        }
+        public RedisObject(RedisClient redis, string id)
+        {
+            this.redis = redis;
+            this.id = id;
+        }
+        public static RedisObject<T> operator ++(RedisObject<T> obj)
+        {
+            if (obj.id.Contains("exceptions"))
+                Logger.Log("exception");
+            ((dynamic)obj).value++;
+            return obj;
+        }
+        public static RedisObject<T> operator --(RedisObject<T> obj)
+        {
+            ((dynamic)obj).value--;
+            return obj;
+        }
+        public static RedisObject<T> operator +(RedisObject<T> obj, T value)
+        {
+            if (obj.id.Contains("exceptions"))
+                Logger.Log("exception");
+            ((dynamic)obj).value += value;
+            return obj;
+        }
+        public static RedisObject<T> operator -(RedisObject<T> obj, T value)
+        {
+            ((dynamic)obj).value -= value;
+            return obj;
+        }
+
+        public static implicit operator T(RedisObject<T> o)
+        {
+            lock (valueTypeLock)
+            {
+                return o._value;
+            }
+            //return o.redis.As<T>().GetById(o.id); put back for Redis
+        }
+        public T value
+        {
+            get
+            {
+                lock (valueTypeLock)
+                {
+                    return _value;
+                }
+                //return redis.As<T>().GetValue(id);put back for Redis
+            }
+            set
+            {
+                lock (valueTypeLock)
+                {
+                    _value = value;
+                }
+                //redis.As<T>().SetEntry(id, value);put back for Redis
+            }
+        }
+    }
+
+    public class Counter
+    {
+        TimeSpan maxAge;
+        Queue<Pair<DateTime, double>> counts;
+        double count;
+        public static implicit operator int(Counter c)
+        {
+            return (int)c.count;
+        }
+        public static implicit operator long(Counter c)
+        {
+            return (long)c.count;
+        }
+        public static implicit operator double(Counter c)
+        {
+            return (int)c.count;
+        }
+        public Counter(TimeSpan maxAge)
+        {
+            this.maxAge = maxAge;
+            counts = new Queue<Pair<DateTime, double>>();
+}
+        void Cleanup()
+        {
+            while (counts.Count > 0 && DateTime.UtcNow - counts.Peek().First > maxAge)
+            {
+                count -= counts.Peek().Second;
+                counts.Dequeue();
+            }
+        }
+
+        public static Counter operator ++(Counter c)
+        {
+            // Increment this widget.
+            c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, 1));
+            c.count += 1;
+            c.Cleanup();
+            return c;
+        }
+        public static Counter operator +(Counter c, double d)
+        {
+            // Increment this widget.
+            c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, d));
+            c.count += d;
+            c.Cleanup();
+            return c;
+        }
+        public override string ToString()
+        {
+            return count.ToString();
         }
     }
 

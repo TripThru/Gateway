@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using ServiceStack.Common.Utils;
-using ServiceStack.ServiceInterface;
 using Utils;
 using CustomIntegrations;
 using System.IO;
 using RestSharp;
 using ServiceStack.Text;
+using ServiceStack.Redis;
 
 namespace TripThruCore
 {
@@ -22,62 +21,199 @@ namespace TripThruCore
             originatingPartnerByTrip.Remove(tripID);
             servicingPartnerByTrip.Remove(tripID);
         }
-        public List<Gateway> partners;
-        public Dictionary<string, Gateway> partnersByID;
-        public Dictionary<string, Gateway> originatingPartnerByTrip;
-        public Dictionary<string, Gateway> servicingPartnerByTrip;
-        private Dictionary<string, List<Zone>> _partnerCoverage;
+        public Dictionary<string, Gateway> partners;
+
+        public RedisDictionary<string, string> originatingPartnerByTrip;
+        public RedisDictionary<string, string> servicingPartnerByTrip;
+        private RedisDictionary<string, List<Zone>> partnerCoverage;
+        public readonly TimeSpan missedBookingPeriod = new TimeSpan(0, 30, 0);
 
         List<Zone> GetPartnerCoverage(string partnerID)
         {
-            if (!_partnerCoverage.ContainsKey(partnerID))
+            if (!partnerCoverage.ContainsKey(partnerID))
             {
-                Gateway partner = partnersByID[partnerID];
+
+                Gateway partner = partners[partnerID];
                 Gateway.GetPartnerInfoResponse resp = partner.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(ID));
                 List<Zone> coverage = new List<Zone>();
                 foreach (Fleet f in resp.fleets)
                     coverage.AddRange(f.Coverage);
-                _partnerCoverage.Add(partner.ID, coverage);
+                partnerCoverage.Add(partner.ID, coverage);
             }
-            return _partnerCoverage[partnerID];
+            return partnerCoverage[partnerID];
         }
-        public TimeSpan missedBookingPeriod = new TimeSpan(0, 30, 0);
         public TripThru()
             : base("TripThru", "TripThru")
         {
-            partnersByID = new Dictionary<string, Gateway>();
-            originatingPartnerByTrip = new Dictionary<string, Gateway>();
-            servicingPartnerByTrip = new Dictionary<string, Gateway>();
-            _partnerCoverage = new Dictionary<string, List<Zone>>();
-            partners = new List<Gateway>();
+            //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
+            partners = new Dictionary<string, Gateway>();
+            var redisClient = (RedisClient) redis.GetClient();
+            originatingPartnerByTrip = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => originatingPartnerByTrip));
+            originatingPartnerByTrip.Clear();
+            servicingPartnerByTrip = new RedisDictionary<string, string>(redisClient, ID + "." + MemberInfoGetting.GetMemberName(() => servicingPartnerByTrip));
+            servicingPartnerByTrip.Clear();
+            partnerCoverage = new RedisDictionary<string, List<Zone>>(redisClient, ID + "." + MemberInfoGetting.GetMemberName(() => partnerCoverage));
+            partnerCoverage.Clear();
+            partnerAccounts.Clear();
+            clientIdByAccessToken.Clear();
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "TripThru",
+                    Password = "password",
+                    Email = "tripthru@tripthru.com",
+                    AccessToken = "jaosid1201231",
+                    RefreshToken = "jaosid1201231",
+                    ClientId = "TripThru",
+                    ClientSecret = "23noiasdn2123"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Swagger Test Client",
+                    Password = "password",
+                    Email = "testclient@tripthru.com",
+                    AccessToken = "demo12345",
+                    RefreshToken = "demo12345",
+                    ClientId = "testclient@tripthru.com",
+                    ClientSecret = "demo12345"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Luxor Cab",
+                    Password = "password",
+                    Email = "partner1@tripthru.com",
+                    AccessToken = "luxor23noiasdn2123",
+                    RefreshToken = "23noiasdn2123",
+                    ClientId = "luxor@tripthru.com",
+                    ClientSecret = "23noiasdn2123"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Yellow Cab",
+                    Password = "password",
+                    Email = "yellowcab@tripthru.com",
+                    AccessToken = "yellow12ondazazxx21",
+                    RefreshToken = "12ondazazxx21",
+                    ClientId = "yellow@tripthru.com",
+                    ClientSecret = "12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Metro Cab of Boston",
+                    Password = "password",
+                    Email = "metro@tripthru.com",
+                    AccessToken = "metro12ondazazxx21",
+                    RefreshToken = "12ondazazxx21",
+                    ClientId = "metro@tripthru.com",
+                    ClientSecret = "12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Les Taxi Blues",
+                    Password = "password",
+                    Email = "lestaxi@tripthru.com",
+                    AccessToken = "les12ondazazxx21",
+                    RefreshToken = "12ondazazxx21",
+                    ClientId = "les@tripthru.com",
+                    ClientSecret = "12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Dubai Taxi Corporation",
+                    Password = "password",
+                    Email = "dubaitaxicorp@tripthru.com",
+                    AccessToken = "dubai12ondazazxx21",
+                    RefreshToken = "12ondazazxx21",
+                    ClientId = "dubai@tripthru.com",
+                    ClientSecret = "12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "Test TDispatch",
+                    Password = "password",
+                    Email = "test_tdispatch@tripthru.com",
+                    AccessToken = "test_tdispatch12ondazazxx21",
+                    RefreshToken = "test_tdispatch12ondazazxx21",
+                    ClientId = "test_tdispatch@tripthru.com",
+                    ClientSecret = "test_tdispatch12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "TripThruWeb",
+                    Password = "password",
+                    Email = "web@tripthru.com",
+                    AccessToken = "webondazazxx21",
+                    RefreshToken = "web12ondazazxx21",
+                    ClientId = "web@tripthru.com",
+                    ClientSecret = "web12ondazazxx21"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
 
             LoadTDispatchIntegrations();
-            var thread = new PartnersUpdateThread(partners);
 
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
         }
         public override string GetName(string clientID)
         {
-            return partnersByID[clientID].name;
+            return partners[clientID].name;
         }
         public Gateway GetDestinationPartner(string tripID)
         {
             if (servicingPartnerByTrip.ContainsKey(tripID))
-                return servicingPartnerByTrip[tripID];
+                return partners[servicingPartnerByTrip[tripID]];
             return null;
         }
         public Gateway GetDestinationPartner(string clientID, string tripID)
         {
             if (originatingPartnerByTrip.ContainsKey(tripID))
             {
-                Gateway partner = originatingPartnerByTrip[tripID];
-
-                if (partner.ID == clientID || (servicingPartnerByTrip.ContainsKey(tripID) && servicingPartnerByTrip[tripID].ID != clientID)) // who's asking?
+                Gateway partner = partners[originatingPartnerByTrip[tripID]];
+                if (partner.ID == clientID || (servicingPartnerByTrip.ContainsKey(tripID) && partners[servicingPartnerByTrip[tripID]].ID != clientID)) // who's asking?
                 {
                     // the originating partner or third party is asking.
                     if (servicingPartnerByTrip.ContainsKey(tripID))
                     {
-                        partner = servicingPartnerByTrip[tripID];
+                        return partners[servicingPartnerByTrip[tripID]];
                     }
                     else
                         throw new Exception("Fatal Error: destination could not be found");
@@ -88,18 +224,13 @@ namespace TripThruCore
             throw new Exception("Fatal Error: destination could not be found");
 
         }
-        public void AddPartner(Gateway partner)
-        {
-            partners.Add(partner);
-            partnersByID.Add(partner.ID, partner);
-        }
 
         public override RegisterPartnerResponse RegisterPartner(Gateway partner)
         {
             try
             {
                 requests++;
-                AddPartner(partner);
+                partners.Add(partner.ID, partner);
                 RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
                 return response;
             }
@@ -107,7 +238,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("RegisterPartner=" + e.Message, e.StackTrace);
+                Logger.LogDebug("RegisterPartner=" + e.Message, e.ToString());
                 return new RegisterPartnerResponse(result: Result.UnknownError);
             }
         }
@@ -121,16 +252,14 @@ namespace TripThruCore
                 List<VehicleType> vehicleTypes = new List<VehicleType>();
                 List<Fleet> fleets = new List<Fleet>();
                 r.clientID = ID;
-                foreach (Gateway p in partners)
+                foreach (Gateway p in partners.Values)
                 {
-                    Logger.Tab();
                     GetPartnerInfoResponse response = p.GetPartnerInfo(r);
                     if (response.result == Result.OK)
                     {
                         fleets.AddRange(response.fleets);
                         vehicleTypes.AddRange(response.vehicleTypes);
                     }
-                    Logger.Untab();
                 }
                 GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
                 return resp;
@@ -139,7 +268,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
+                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -175,7 +304,7 @@ namespace TripThruCore
                             partnerID: r.partnerID,
                             fleetID: r.fleetID,
                             driverID: r.driverID));
-                        if (response.result == Result.Rejected)
+                        if (response.result == Result.Rejected || response.quotes.Count == 0)
                         {
                             Logger.Log("No partners are available that cover that area");
                             Logger.Untab();
@@ -192,19 +321,22 @@ namespace TripThruCore
                         else
                         {
                             Quote bestQuote = null;
-                            DateTime bestETA = TimeZoneInfo.ConvertTimeToUtc(r.pickupTime) + missedBookingPeriod;
+                            DateTime bestETA = r.pickupTime + missedBookingPeriod;
                             // not more than 30 minues late
                             foreach (Quote q in response.quotes)
                             {
-                                if (q.ETA < bestETA)
+                                DateTime eta = (DateTime)q.ETA;
+                                if (eta == null) // if no ETA is returned then we assum a certain lateness.
+                                    eta = r.pickupTime + missedBookingPeriod - new TimeSpan(0, 1, 0);
+                                if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
                                 {
-                                    bestETA = (DateTime) q.ETA;
+                                    bestETA = (DateTime)q.ETA;
                                     bestQuote = q;
                                 }
                             }
                             if (bestQuote != null)
                             {
-                                partner = partnersByID[bestQuote.PartnerId];
+                                partner = partners[bestQuote.PartnerId];
                                 r.fleetID = bestQuote.FleetId;
                                 Logger.Log("Best quote " + bestQuote + " from " + partner.name);
                             }
@@ -215,15 +347,15 @@ namespace TripThruCore
                         Logger.Untab();
                     }
                     else
-                        partner = partnersByID[r.partnerID];
+                        partner = partners[r.partnerID];
 
                     if (partner != null)
                     {
-                        Gateway client = partnersByID[r.clientID];
-                        originatingPartnerByTrip.Add(r.tripID, client);
-                        Logger.Log("Origination=" + client.name);
-                        servicingPartnerByTrip.Add(r.tripID, partner);
-                        Logger.Log("Dispatch=" + partner.name);
+                        Gateway client = partners[r.clientID];
+                        originatingPartnerByTrip.Add(r.tripID, r.clientID);
+                        Logger.Log("Originating partner = " + r.clientID);
+                        servicingPartnerByTrip.Add(r.tripID, partner.ID);
+                        Logger.Log("Servicing partner = " + partner.name);
                         r.clientID = ID;
                         response1 = partner.DispatchTrip(r);
                         if (response1.result != Result.OK)
@@ -247,12 +379,16 @@ namespace TripThruCore
                                 VehicleType = r.vehicleType
                             };
                             activeTrips.Add(r.tripID, trip);
+                            Logger.Log("Passenger= " + r.passengerName);
+                            Logger.Log("Pickup time= " + r.pickupTime);
+                            Logger.Log("Pickup location= " + r.pickupLocation);
+                            Logger.Log("Dropoff location= " + r.dropoffLocation);
                         }
                     }
                     else
                     {
                         rejects++;
-                        response1 = new DispatchTripResponse(result: Result.InvalidParameters);
+                        response1 = new DispatchTripResponse(result: Result.Rejected);
                     }
                 }
                 else
@@ -266,7 +402,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
+                Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -277,10 +413,10 @@ namespace TripThruCore
                 requests++;
                 var quotes = new List<Quote>();
 
-                foreach (Gateway p in partners)
+                foreach (Gateway p in partners.Values)
                 {
-                    if (p.ID == r.clientID)
-                        continue;
+                    //if (p.ID == r.clientID)
+                    //    continue;
 
                     bool covered = false;
                     foreach (Zone z in GetPartnerCoverage(p.ID))
@@ -312,7 +448,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
+                Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
         }
@@ -321,13 +457,17 @@ namespace TripThruCore
             try
             {
                 requests++;
-                return new GetTripsResponse(new List<Trip>(activeTrips.Values));
+                var trips = new List<Trip>();
+                if (activeTrips.Count > 0)
+                {
+                    trips.AddRange(activeTrips.Values);
+                }
+                return new GetTripsResponse(trips);
             }
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("GetTrips=" + e.Message, e.StackTrace);
+                Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
                 return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
             }
         }
@@ -365,10 +505,19 @@ namespace TripThruCore
                             });
                         }
 
+                        Logger.Log("Passenger = " + response.passengerName);
+                        Logger.Log("Pickup time = " + response.pickupTime);
+                        Logger.Log("Pickup location = "+response.pickupLocation);
+                        Logger.Log("Dropoff location = " + response.dropoffLocation);
+                        Logger.Log("Status = " + response.status);
+                        Logger.Log("ETA = " + response.ETA);
+
                         response.partnerID = partner.ID;
                         response.partnerName = partner.name;
-                        response.originatingPartnerName = originatingPartnerByTrip[r.tripID].name;
-                        response.servicingPartnerName = servicingPartnerByTrip[r.tripID].name;
+                        response.originatingPartnerName = partners[originatingPartnerByTrip[r.tripID]].name;
+                        response.servicingPartnerName = partners[servicingPartnerByTrip[r.tripID]].name;
+                        Logger.Log("Originating partner = " + response.originatingPartnerName);
+                        Logger.Log("Servicing partner = " + response.servicingPartnerName);
                     }
                     else
                     {
@@ -383,7 +532,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
+                Logger.LogDebug("GetTripStatus = " + e.Message, e.ToString());
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -395,16 +544,17 @@ namespace TripThruCore
                 Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
                 if (destPartner != null)
                 {
-                    Logger.Log("Destination partner=" + destPartner.name);
+                    Logger.Log("Destination partner = " + destPartner.name);
                     string clientID = r.clientID;
                     r.clientID = ID;
                     UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
                     r.clientID = clientID;
                     if (response.result == Result.OK)
                     {
+                        activeTrips[r.tripID].Status = r.status;
                         if (r.status == Status.Complete)
                         {
-                            Gateway origPartner = partnersByID[r.clientID];
+                            Gateway origPartner = partners[r.clientID];
                             GetTripStatusResponse resp = origPartner.GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
                             r.clientID = clientID;
                             DeactivateTrip(r.tripID, Status.Complete, resp.price, resp.distance);
@@ -424,14 +574,15 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
+                Logger.Log("Exception = " + e.Message);
+                Logger.LogDebug("UpdateTripStatus = " + e.Message, e.ToString());
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
 
         public class Office
         {
+            public bool enabled { get; set; }
             public string ID { get; set; }
             public string name { get; set; }
             public string api_key { get; set; }
@@ -469,6 +620,8 @@ namespace TripThruCore
                 Gateway tripThru = new GatewayLocalClient(new GatewayLocalServer(this));
                 foreach (Office o in config.offices)
                 {
+                    if (!o.enabled)
+                        continue;
                     List<Fleet> fleets = new List<Fleet>();
                     List<Zone> coverage = o.coverage;
                     fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
@@ -486,18 +639,30 @@ namespace TripThruCore
                     o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
                     o.ID = partner.ID;
                     o.name = partner.name;
-                    RegisterPartner(partner);
+                    RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
                 }
-                string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);
-                File.WriteAllText("~/Custom Integrations/TDispatchOffices.txt".MapHostAbsolutePath(), configStr);   // We don't need this while testing.  The main purpose is to save the tokens so token reresh not constantly needed
             }
+
+            //string configStr = JsonSerializer.SerializeToString<TDispatchOfficeConfigs>(config);
+            //File.WriteAllText("../../Custom Integrations/TDispatchOffices.txt", configStr);   // We don't need this while testing.  The main purpose is to save the tokens so token reresh not constantly needed
+
+            //TDispatchIntegration sanFranOffice = (TDispatchIntegration) partnersByID["52b4053948efcb7ac1137d41"];
+            //DispatchTripResponse response = sanFranOffice.DispatchTrip(new DispatchTripRequest(clientID: "test",
+            //    tripID: "test", pickupLocation: new Location(37.78906, -122.402127), pickupTime: DateTime.UtcNow,
+            //    passengerID: "test", passengerName: "test-ed", luggage: 1, persons: 1, dropoffLocation: new Location(37.78906, -122.402127), vehicleType: VehicleType.Sedan));
+
+            //TDispatchAPI.Booking booking = sanFranOffice.activeTrips["test"];
+            //sanFranOffice.api.RejectBooking(booking.pk);
         }
+
         public override void Update()
         {
-            foreach (Gateway p in partners)
+            foreach (Gateway p in partners.Values)
                 p.Update();
         }
+
     }
+
 
     public class GatewayLocalClient : Gateway
     {
@@ -625,65 +790,6 @@ namespace TripThruCore
         public override void Log()
         {
             gateway.Log();
-        }
-    }
-
-    public class PartnersUpdateThread : IDisposable
-    {
-        private List<Gateway> _partners;
-        private TimeSpan _heartbeat = new TimeSpan(0, 0, 30);
-        private Thread _worker;
-        private volatile bool _workerTerminateSignal = false;
-
-        public PartnersUpdateThread(List<Gateway> partners)
-        {
-            this._partners = partners;
-            _worker = new Thread(StartThread);
-            _worker.Start();
-        }
-
-        private void StartThread()
-        {
-            try
-            {
-                while (true)
-                {
-                    try
-                    {
-                        foreach (var partner in _partners)
-                        {
-                            try
-                            {
-                                lock (partner)
-                                {
-                                    partner.Update();
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                if (e.Message != "Not supported")
-                                {
-                                    Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
-                    }
-                    System.Threading.Thread.Sleep(_heartbeat);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.LogDebug("PartnersUpdateThread initialization error :" + e.Message, e.StackTrace);
-            }
-        }
-
-        public void Dispose()
-        {
-            Logger.LogDebug("PartnersUpdateThread disposed");
         }
     }
 }

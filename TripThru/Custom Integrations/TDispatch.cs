@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using RestSharp;
 using ServiceStack.ServiceClient.Web;
 using Utils;
 using TripThruCore;
@@ -726,7 +725,7 @@ namespace CustomIntegrations
                     driverID: booking.driver != null ? booking.driver.pk : null,
                     driverName: booking.driver != null ? booking.driver.name : null,
                     driverLocation: booking.driver != null
-                        ? new Location((double) booking.driver.location.lat,
+                        ? new Location((double)booking.driver.location.lat,
                             (double) booking.driver.location.lng)
                         : null, price: booking.cost.value, distance: fare.fare.distance.km,
                     result: Result.OK, status: this.ConvertTDispatchStatusToTripThruStatus(booking.status)

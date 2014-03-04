@@ -1,0 +1,4 @@
+HomeUrl=http://localhost/BookingWebsite/
+RelativeHomeUrl=/BookingWebsite/index.php
+AccessToken=luxor23noiasdn2123
+PartnerName=Luxor

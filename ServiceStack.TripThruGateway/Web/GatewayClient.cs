@@ -4,106 +4,75 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
-using RestSharp;
-using RestSharp.Deserializers;
 using ServiceStack.Text;
 using Utils;
 using TripThruCore;
-
+using ServiceStack.ServiceClient.Web;
+using ServiceStack.ServiceModel;
 namespace ServiceStack.TripThruGateway
 {
     public class GatewayClient : Gateway
     {
 
-        private RestClient Client { get; set; }
-        private string AccessToken { get; set; } //Directly assing access token until authentication is implemented
-        private string RootUrl { get; set; }
+        public string AccessToken { get; set; } //Directly assing access token until authentication is implemented
+        public string RootUrl { get; set; }
 
         public GatewayClient(string ID, string name, string accessToken, string rootUrl) : base(ID, name)
         {
             AccessToken = accessToken;
             RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
-            Client = new RestClient(RootUrl);
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.PartnerRequest()
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.PartnerResponse resp = client.Post<GatewayService.PartnerResponse>(new GatewayService.PartnerRequest
             {
+                access_token = AccessToken,
                 Name = request.name,
                 CallbackUrl = request.callback_url
             });
 
-            var r = Request("POST", "partner", partnerRequest);
-
-            if (r != null && !r.Equals(""))
-            {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.PartnerResponse>(r);
-
-                if (response.ResultCode == Gateway.Result.OK)
-                {
-                    return new Gateway.RegisterPartnerResponse
-                    {
-                        result = Gateway.Result.OK
-                    };
-                }
-
-                return new Gateway.RegisterPartnerResponse
-                {
-                    result = response.ResultCode
-                };
-            }
-
             return new Gateway.RegisterPartnerResponse
             {
-                result = Gateway.Result.UnknownError
+                result = resp.ResultCode
             };
-
         }
 
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.Partners
+            Logger.BeginRequest("GetPartnerInfo sent to " + name, request);
+
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.PartnersResponse resp = client.Get<GatewayService.PartnersResponse>(new GatewayService.Partners
             {
-                VehicleTypes = request.vehicleTypes,
-                Coverage = request.coverage
+                access_token = AccessToken,
             });
 
-            var r = Request("GET", "partners", partnerRequest);
-
-            if (r != null)
+            Gateway.GetPartnerInfoResponse response = new Gateway.GetPartnerInfoResponse
             {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.PartnersResponse>(r);
-                if (response.ResultCode == Gateway.Result.OK)
-                {
-                    return new Gateway.GetPartnerInfoResponse(
-                        response.Fleets,
-                        response.VehicleTypes,
-                        response.ResultCode
-                        );    
-                }
-
-                return new Gateway.GetPartnerInfoResponse(
-                    result : response.ResultCode
-                    );
-            }
-
-            return new Gateway.GetPartnerInfoResponse
-            {
-                result = Gateway.Result.UnknownError
+                fleets = resp.Fleets,
+                vehicleTypes = resp.VehicleTypes,
+                result = resp.ResultCode
             };
+            Logger.EndRequest(response);
+            return response;
         }
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.Dispatch
+            Logger.BeginRequest("DispatchTrip sent to " + name, request);
+            GatewayService.Dispatch dispatch = new GatewayService.Dispatch
             {
+                access_token = AccessToken,
                 PassengerId = request.passengerID,
                 PassengerName = request.passengerName,
                 Luggage = request.luggage,
                 Persons = request.persons,
-                PickupLocation = request.pickupLocation,
+                PickupLat = request.pickupLocation.Lat,
+                PickupLng = request.pickupLocation.Lng,
                 PickupTime = request.pickupTime,
-                DropoffLocation = request.dropoffLocation,
+                DropoffLat = request.dropoffLocation == null ? (double?) null : request.dropoffLocation.Lat,
+                DropoffLng = request.dropoffLocation == null ? (double?) null : request.dropoffLocation.Lng,
                 PaymentMethod = request.paymentMethod,
                 VehicleType = request.vehicleType,
                 MaxPrice = request.maxPrice,
@@ -111,215 +80,114 @@ namespace ServiceStack.TripThruGateway
                 PartnerId = request.partnerID,
                 FleetId = request.fleetID,
                 DriverId = request.driverID,
-                Waypoints = request.waypoints,
                 TripId = request.tripID
-            });
-
-            var r = Request("POST", "dispatch", partnerRequest);
-
-            if (r!= null)
-            {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.DispatchResponse>(r);
-
-                if (response.ResultCode == Gateway.Result.OK)
-                {
-                    return new Gateway.DispatchTripResponse
-                    {
-                        result = Gateway.Result.OK
-                    };
-                }
-
-                return new Gateway.DispatchTripResponse
-                {
-                    result = response.ResultCode
-                };
-            }
-
-            return new Gateway.DispatchTripResponse
-            {
-                result = Gateway.Result.UnknownError
             };
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.DispatchResponse resp = client.Get<GatewayService.DispatchResponse>(dispatch);
+            Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
+            {
+                result = resp.ResultCode,
+            };
+            Logger.EndRequest(response);
+            return response;
         }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.Quotes
+            Logger.BeginRequest("QuoteTrip sent to " + name, request);
+            GatewayService.Quotes quotes = new GatewayService.Quotes
             {
+                access_token = AccessToken,
                 PassengerId = request.passengerID,
                 PassengerName = request.passengerName,
                 Luggage = request.luggage,
                 Persons = request.persons,
-                PickupLocation = request.pickupLocation,
+                PickupLat = request.pickupLocation.Lat,
+                PickupLng = request.pickupLocation.Lng,
                 PickupTime = request.pickupTime,
-                DropoffLocation = request.dropoffLocation,
+                DropoffLat = request.dropoffLocation == null ? (double?) null : request.dropoffLocation.Lat,
+                DropoffLng = request.dropoffLocation == null ? (double?) null : request.dropoffLocation.Lng,
                 PaymentMethod = request.paymentMethod,
                 VehicleType = request.vehicleType,
                 MaxPrice = request.maxPrice,
                 MinRating = request.minRating,
                 FleetId = request.fleetID,
                 DriverId = request.driverID,
-                WayPoints = request.waypoints,
-                PartnerId = request.partnerID
-            });
-
-            var r = Request("POST", "quotes", partnerRequest);
-
-            if (r != null)
-            {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.QuotesResponse>(r);
-
-                if (response.ResultCode == Gateway.Result.OK)
-                {
-                    return new Gateway.QuoteTripResponse
-                    {
-                        result = Gateway.Result.OK, 
-                        quotes = response.Quotes
-                    };
-                }
-
-                return new Gateway.QuoteTripResponse
-                {
-                    result = response.ResultCode
-                };
-            }
-
-            return new Gateway.QuoteTripResponse
-            {
-                result = Gateway.Result.UnknownError
             };
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.QuotesResponse resp = client.Get<GatewayService.QuotesResponse>(quotes);
+            Gateway.QuoteTripResponse response = new Gateway.QuoteTripResponse
+            {
+                result = resp.ResultCode, 
+                quotes = resp.Quotes
+            };
+            Logger.EndRequest(response);
+            return response;
             
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
-            var r = Request("GET", "trip/status/" + request.tripID, null);
-
-            if (r != null)
+            Logger.BeginRequest("GetTripStatus sent to " + name, request);
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.TripStatusResponse resp = client.Get<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.TripResponse>(r);
-
-                if (response.ResultCode == Gateway.Result.OK)
+                access_token = AccessToken,
+                TripId = request.tripID
+            });
+            GetTripStatusResponse response;
+            if (resp.ResultCode == Result.OK)
+            {
+                response = new Gateway.GetTripStatusResponse
                 {
-                    return new Gateway.GetTripStatusResponse
-                    {
-                        result = Gateway.Result.OK,
-                        ETA = response.ETA,
-                        passengerName = response.PassengerName,
-                        driverID = response.DriverId,
-                        driverLocation = response.DriverLocation,
-                        driverName = response.DriverName,
-                        dropoffTime = response.DropoffTime,
-                        dropoffLocation = response.DropoffLocation,
-                        fleetName = response.FleetName,
-                        fleetID = response.FleetId,
-                        vehicleType = response.VehicleType,
-                        status = response.Status,
-                        partnerName = response.PartnerName,
-                        partnerID = response.PartnerId,
-                        pickupTime = response.PickupTime,
-                        pickupLocation = response.PickupLocation,
-                        distance = response.Distance,
-                        price = response.Price
-                    };
-                }
-
-                return new Gateway.GetTripStatusResponse
-                {
-                    result = response.ResultCode
+                    result = Gateway.Result.OK,
+                    ETA = resp.ETA,
+                    passengerName = resp.PassengerName,
+                    driverID = resp.DriverId,
+                    driverLocation = resp.DriverLocation,
+                    driverName = resp.DriverName,
+                    dropoffTime = resp.DropoffTime,
+                    dropoffLocation = resp.DropoffLocation,
+                    fleetName = resp.FleetName,
+                    fleetID = resp.FleetId,
+                    vehicleType = resp.VehicleType,
+                    status = resp.Status,
+                    partnerName = resp.PartnerName,
+                    partnerID = resp.PartnerId,
+                    pickupTime = resp.PickupTime,
+                    pickupLocation = resp.PickupLocation,
+                    distance = resp.Distance,
+                    price = resp.Price
                 };
             }
-
-            return new Gateway.GetTripStatusResponse
+            else
             {
-                result = Gateway.Result.UnknownError
-            };
+                response = new Gateway.GetTripStatusResponse
+                {
+                        result = resp.ResultCode
+                };
+            }
+            Logger.EndRequest(response);
+            return response;
         }
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
-            var partnerRequest = JsonSerializer.SerializeToString(new GatewayService.TripRequest
+            Logger.BeginRequest("UpdateTripStatus sent to " + name, request);
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            GatewayService.TripStatusResponse resp = client.Put<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {
+                access_token = AccessToken,
                 Status = request.status,
                 TripId = request.tripID
             });
-
-            var r = Request("PUT", "trip/status/" + request.tripID, partnerRequest);
-
-            if (r != null)
+            Gateway.UpdateTripStatusResponse response;
+            response = new Gateway.UpdateTripStatusResponse
             {
-                var response = JsonSerializer.DeserializeFromString<GatewayService.TripResponse>(r);
-
-                if (response.ResultCode == Gateway.Result.OK)
-                {
-                    return new Gateway.UpdateTripStatusResponse
-                    {
-                        result = Gateway.Result.OK
-                    };
-                }
-
-                return new Gateway.UpdateTripStatusResponse
-                {
-                    result = response.ResultCode
-                };
-            }
-
-            return new Gateway.UpdateTripStatusResponse
-            {
-                result = Gateway.Result.UnknownError
+                result = resp.ResultCode
             };
+            Logger.EndRequest(response);
+            return response;
         }
-
-        private string Request(String method, String url, String data)
-        {
-            url += "?access_token=" + AccessToken;
-
-            RestRequest request = null;
-            if (method.Equals("POST"))
-            {
-                request = new RestRequest(url, Method.POST);
-                if (data != null)
-                {
-                    request.AddParameter(
-                        "application/json",
-                        data,
-                        ParameterType.RequestBody
-                        );
-                }
-            }
-            else if (method.Equals("PUT"))
-            {
-                request = new RestRequest(url, Method.PUT);
-                if (data != null)
-                {
-                    request.AddParameter(
-                        "application/json",
-                        data,
-                        ParameterType.RequestBody);
-                }
-            }
-            else if (method.Equals("DELETE"))
-            {
-                request = new RestRequest(url, Method.DELETE);
-            }
-            else
-            {
-                request = new RestRequest(url, Method.GET);
-                if (data != null)
-                {
-                    foreach (var entry in JsonSerializer.DeserializeFromString<Dictionary<string,object>>(data))
-                    {
-                        request.AddParameter(entry.Key, entry.Value, ParameterType.UrlSegment);
-                    }
-                }
-            }
-
-            request.AddHeader("content-type", "application/json");
-
-            var response = Client.Execute(request);
-
-            return (response == null || response.Content == null || response.Content.Equals("") || !response.ContentType.Contains("application/json")) ? null : response.Content;
-        }
-
-        
     }
 }

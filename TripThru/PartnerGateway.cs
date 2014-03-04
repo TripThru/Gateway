@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Web;
-using RestSharp;
 using System.IO;
 using ServiceStack.Text;
 using Utils;
+using ServiceStack.Redis;
 
 namespace TripThruCore
 {
     public class Partner : GatewayServer
     {
-        public Dictionary<string, PartnerFleet> PartnerFleets;
-        public Dictionary<string, PartnerTrip> tripsByID;
+        public readonly Dictionary<string, PartnerTrip> tripsByID;
+        public readonly Dictionary<string, PartnerFleet> PartnerFleets;
         public DateTime lastSim;
-        public Gateway tripthru;
+        public readonly Gateway tripthru;
         // Configuration parameters
-        public TimeSpan simInterval = new TimeSpan(0, 0, 10);
-        public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
+        public readonly TimeSpan simInterval = new TimeSpan(0, 0, 10);
+        public readonly TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
         public string preferedPartnerId = null;
 
         static long nextID = 0;
@@ -96,7 +97,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
+                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
         }
@@ -163,7 +164,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
+                Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
         }
@@ -195,8 +196,8 @@ namespace TripThruCore
                                 partnerName: name,
                                 fleetID: f.ID, fleetName: f.name,
                                 vehicleType: vehicleType,
-                                price: f.GetPrice(trip),
-                                distance: f.GetDistance(trip),
+                                price: trip.dropoffLocation == null ? (double?)null : f.GetPrice(trip),
+                                distance: trip.dropoffLocation == null ? (double?) null : f.GetDistance(trip),
                                 duration: trip.duration,
                                 ETA: f.GetETA(trip)));
                         }
@@ -209,8 +210,28 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
+                Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
                 return new QuoteTripResponse(result: Result.UnknownError);
+            }
+        }
+        public override GetTripsResponse GetTrips(GetTripsRequest r)
+        {
+            try
+            {
+                requests++;
+                var trips = new List<Trip>();
+                if (activeTrips.Count > 0)
+                {
+                    trips.AddRange(activeTrips.Values);
+                }
+                return new GetTripsResponse(trips);
+            }
+            catch (Exception e)
+            {
+                exceptions++;
+                Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
+                return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
             }
         }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
@@ -220,7 +241,7 @@ namespace TripThruCore
                 requests++;
                 if (!tripsByID.ContainsKey(r.tripID))
                 {
-                    Logger.Log("Trip "+r.tripID+" not found");
+                    Logger.Log("Trip " + r.tripID + " not found");
                     return new GetTripStatusResponse(result: Result.NotFound);
                 }
 
@@ -275,7 +296,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
+                Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -296,7 +317,7 @@ namespace TripThruCore
             {
                 exceptions++;
                 Logger.Log("Exception=" + e.Message);
-                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
+                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
         }
@@ -313,6 +334,23 @@ namespace TripThruCore
             }
 
             tripsByID = new Dictionary<string, PartnerTrip>();
+
+            partnerAccounts.Clear();
+            clientIdByAccessToken.Clear();
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "TripThru",
+                    Password = "password",
+                    Email = "tripthru@tripthru.com",
+                    AccessToken = "jaosid1201231",
+                    RefreshToken = "jaosid1201231",
+                    ClientId = "TripThru",
+                    ClientSecret = "23noiasdn2123"
+                };
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
 
         }
         public override void Log()
@@ -348,6 +386,10 @@ namespace TripThruCore
                     trip.dropoffTime = response.dropoffTime;
                 if (response.vehicleType != null)
                     trip.vehicleType = response.vehicleType;
+                if (response.ETA != null)
+                    trip.ETA = response.ETA;
+                if (response.distance != null)
+                    trip.distance = response.distance;
                 Logger.Untab();
                 trip.lastUpdate = DateTime.UtcNow;
             }
@@ -357,8 +399,7 @@ namespace TripThruCore
         {
             if (DateTime.UtcNow < lastSim + simInterval)
                 return;
-            Logger.BeginRequest("Sim cycle", null);
-
+            Logger.BeginRequest("", null);
             foreach (PartnerFleet f in PartnerFleets.Values)
                 f.Simulate();
             lastSim = DateTime.UtcNow;
@@ -425,6 +466,8 @@ namespace TripThruCore
         public Driver driver;
         public DateTime lastUpdate;
         public Partner partner;
+        public DateTime? ETA;
+        public double? distance;
         public PartnerTrip(PartnerTrip t)
         {
             this.ID = t.ID;
@@ -554,13 +597,14 @@ namespace TripThruCore
         public double costPerMile; // in local currency
         public double baseCost;
         public Random random;
-        public TimeSpan tripMaxAdvancedNotice = new TimeSpan(0, 0, 15); // minutes
+        public TimeSpan tripMaxAdvancedNotice = new TimeSpan(0, 15, 0); // minutes
         public TimeSpan simInterval = new TimeSpan(0, 0, 10);
         public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
-        public TimeSpan missedPeriod = new TimeSpan(0, 5, 0);
-        public TimeSpan criticalPeriod = new TimeSpan(0, 5, 0);
-        public TimeSpan removalAge = new TimeSpan(0, 8, 0);
+        public TimeSpan missedPeriod = new TimeSpan(0, 15, 0);
+        public TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
+        public TimeSpan removalAge = new TimeSpan(0, 5, 0);
         public int maxActiveTrips = 2;
+
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
             List<Pair<Location, Location>> possibleTrips, double costPerMile, double baseCost, double tripsPerHour, List<Passenger> passengers, Partner partner = null)
@@ -724,6 +768,25 @@ namespace TripThruCore
             Logger.Log("Queueing " + t);
             queue.AddLast(t);
             partner.tripsByID.Add(t.ID, t);
+            partner.activeTrips.Add(t.ID, new Trip
+                {
+                    FleetId = t.PartnerFleet != null ? t.PartnerFleet.ID : null,
+                    FleetName = t.PartnerFleet != null ? t.PartnerFleet.name : null,
+                    DriverId = t.driver != null ? t.driver.ID : null,
+                    DriverLocation = t.driver != null ? t.driver.location : null,
+                    DriverName = t.driver != null ? t.driver.name : null,
+                    DropoffLocation = t.dropoffLocation,
+                    DropoffTime = t.dropoffTime,
+                    Id = t.ID,
+                    OriginatingPartnerId = this.ID,
+                    OriginatingPartnerName = this.name,
+                    PassengerName = t.passengerName,
+                    PickupLocation = t.pickupLocation,
+                    PickupTime = t.pickupTime,
+                    Price = t.price,
+                    Status = t.status,
+                    VehicleType = t.vehicleType
+                });
             return true;
         }
         public void RemoveTrip(PartnerTrip t)
@@ -909,7 +972,6 @@ namespace TripThruCore
                     case Status.Complete:
                     {
                         if (t.dropoffTime == null)
-
                             t.dropoffTime = DateTime.UtcNow;
                         TimeSpan age = DateTime.UtcNow - (DateTime)t.dropoffTime;
                         if (age > removalAge) // for now we use 1 minute.

@@ -5,25 +5,24 @@ using ServiceStack.Messaging.Rcon;
 using EnumerableExtensions = ServiceStack.Common.Extensions.EnumerableExtensions;
 using Utils;
 using TripThruCore;
+using System.Reflection;
+
 
 namespace ServiceStack.TripThruGateway
 {
     using System.Collections.Generic;
-    using ServiceStack.OrmLite;
     using ServiceStack.ServiceHost;
     using ServiceStack.ServiceInterface;
 
     public class GatewayService
     {
-        public static Gateway gateway = null; //gets initialized in InitPartners
-
-
+        public static Gateway gateway; //gets initialized in InitPartners
 
         [Api("GET latest log entries")]
         [Route("/log", "GET")]
         public class Log : IReturn<LogResponse>
         {
-
+            public string tripID { get; set; }
         }
 
         public class LogResponse
@@ -37,12 +36,11 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
-                var l = Logger.Queue.ToList();
                 return new LogResponse
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK,
-                    LogList = Logger.Queue.ToList()
+                    LogList = Logger.Queue.Where(log => log.tripID == null || log.tripID == request.tripID).ToList()
                 };
             }
         }
@@ -126,12 +124,15 @@ namespace ServiceStack.TripThruGateway
                 };
             }
         }
-        
         [Api("Use POST to create a new Partner, GET to retrieve it and PUT to update name or callback url.")]
-        [Route("/partner", "GET, PUT, POST, DELETE")]
+        [Route("/partner", "GET, PUT, POST, DELETE", Summary = "Partners Service", Notes = "Register your network with TripThru")]
         public class PartnerRequest : IReturn<PartnerResponse> 
         {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "Name", Description = "The name of your fleet", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string Name { get; set; }
+            [ApiMember(Name = "CallbackUrl", Description = "This is the callback url where your support of our Gateway API is", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string CallbackUrl { get; set; }
         }
 
@@ -144,41 +145,28 @@ namespace ServiceStack.TripThruGateway
 
         public class PartnerService : Service
         {
+            public PartnerResponse Get(PartnerRequest request) // this
+            {
+                return Post(request);
+            }
             public PartnerResponse Post(PartnerRequest request)
             {
+                var accessToken = request.access_token;
                 PartnerResponse partnerResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                if (u.Count > 0 && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                if (acct != null && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
                 {
-                    Logger.BeginRequest("RegisterPartner received from " + u.First().UserName, request);
-                    var p = Db.Select<Partner>(x => x.UserId == u.First().Id);
-                    if (p.Count == 0)
-                    {
-                        Db.Insert(new Partner
-                        {
-                            UserId = u.First().Id,
-                            Name = request.Name,
-                            CallbackUrl = request.CallbackUrl,
-                        });
+                    Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
+                    acct.Name = request.Name;
+                    acct.CallbackUrl = request.CallbackUrl;
+                    gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
 
-                        gateway.RegisterPartner(new GatewayClient(u.First().ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
-
-                        partnerResponse = new PartnerResponse
-                        {
-                            Result = "OK",
-                            ResultCode = Gateway.Result.OK,
-                            Id = Db.GetLastInsertId()
-                        };
-                    }
-                    else
+                    partnerResponse = new PartnerResponse
                     {
-                        partnerResponse = new PartnerResponse
-                        {
-                            Result = "Failed",
-                            ResultCode = Gateway.Result.Rejected
-                        };
-                    }
+                        Result = "OK",
+                        ResultCode = Gateway.Result.OK,
+                        Id = -1 // what is this used for
+                    };
                 }
                 else
                 {
@@ -197,66 +185,14 @@ namespace ServiceStack.TripThruGateway
                 return partnerResponse;
             }
 
-            public PartnerResponse Get(PartnerRequest request)
-            {
-                PartnerResponse partnerResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                if (u.Count > 0 && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
-                {
-                    Logger.BeginRequest("RegisterPartner received from " + u.First().UserName, request);
-                    var p = Db.Select<Partner>(x => x.UserId == u.First().Id);
-                    if (p.Count == 0)
-                    {
-                        Db.Insert(new Partner
-                        {
-                            UserId = u.First().Id,
-                            Name = request.Name,
-                            CallbackUrl = request.CallbackUrl,
-                        });
-
-                        gateway.RegisterPartner(new GatewayClient(u.First().ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
-
-                        partnerResponse = new PartnerResponse
-                        {
-                            Result = "OK",
-                            ResultCode = Gateway.Result.OK,
-                            Id = Db.GetLastInsertId()
-                        };
-                    }
-                    else
-                    {
-                        partnerResponse = new PartnerResponse
-                        {
-                            Result = "Failed",
-                            ResultCode = Gateway.Result.Rejected
-                        };
-                    }
-                }
-                else
-                {
-                    Logger.BeginRequest("RegisterPartner received from unknown user", request);
-                    string msg = "GET /partner called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
-                    partnerResponse = new PartnerResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
-                    };
-                }
-                Logger.Log("RequestType=RegisterPartner");
-                Logger.EndRequest(partnerResponse);
-                return partnerResponse;
-            }
         }
 
         [Api("Use GET to get a list of partners or POST to create search for partners meeting the filter criteria.")]
         [Route("/partners", "POST, GET")]
         public class Partners : IReturn<PartnersResponse>
         {
-            public List<Zone> Coverage { get; set; }
-            public List<VehicleType> VehicleTypes { get; set; }
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
         }
 
         public class PartnersResponse
@@ -270,86 +206,20 @@ namespace ServiceStack.TripThruGateway
         public class PartnersService : Service
         {
 
-            public PartnersResponse Post(Partners request)
-            {
-                PartnersResponse partnersResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                var clientId = "none";
-                try
-                {
-                    if (u.Count > 0)
-                    {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
-                        var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
-                            user.ClientId
-                            ));
-
-                        if (response.result == Gateway.Result.OK)
-                        {
-                            partnersResponse = new PartnersResponse
-                            {
-                                Result = "OK",
-                                ResultCode = Gateway.Result.OK,
-                                Fleets = response.fleets,
-                                VehicleTypes = response.vehicleTypes
-                            };
-                        }
-                        else
-                        {
-                            partnersResponse = new PartnersResponse
-                            {
-                                Result = "Failed",
-                                ResultCode = response.result
-                            };
-                        }
-                    }
-                    else
-                    {
-                        Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
-                        string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
-                                     ", Response = Authentication failed";
-                        Logger.Log(msg);
-                        partnersResponse = new PartnersResponse
-                        {
-                            Result = "Failed",
-                            ResultCode = Gateway.Result.AuthenticationError
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("GetPartnerInfo="+e.Message, e.StackTrace);
-                    Logger.Log("Exception=" + e.Message);
-                    partnersResponse = new PartnersResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.UnknownError
-                    };
-                }
-                Logger.Log("RequestType=GetPartnerInfo");
-                Logger.Log("ClientId="+clientId);
-                Logger.EndRequest(partnersResponse);
-                return partnersResponse;
-            }
-
             public PartnersResponse Get(Partners request)
             {
+                var accessToken = request.access_token;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 PartnersResponse partnersResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (u.Count > 0)
+                    if (acct != null)
                     {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("GetPartnerInfo received from " + user.UserName, request);
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("GetPartnerInfo received from " + acct.UserName, request);
                         var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
-                            user.ClientId
+                            acct.ClientId
                             ));
 
                         if (response.result == Gateway.Result.OK)
@@ -374,7 +244,7 @@ namespace ServiceStack.TripThruGateway
                     else
                     {
                         Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
-                        string msg = "POST /partners called with invalid access token, ip: " + Request.RemoteIp +
+                        string msg = "GET /partners called with invalid access token, ip: " + Request.RemoteIp +
                                      ", Response = Authentication failed";
                         Logger.Log(msg);
                         partnersResponse = new PartnersResponse
@@ -386,7 +256,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("GetPartnerInfo=" + e.Message, e.StackTrace);
+                    Logger.LogDebug("GetPartnerInfo="+e.Message, e.ToString());
                     Logger.Log("Exception=" + e.Message);
                     partnersResponse = new PartnersResponse
                     {
@@ -395,31 +265,56 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
                 Logger.Log("RequestType=GetPartnerInfo");
-                Logger.Log("ClientId=" + clientId);
+                Logger.Log("ClientId = " + clientId);
                 Logger.EndRequest(partnersResponse);
                 return partnersResponse;
             }
+
         }
 
-        [Api("Use POST or GET to create search for quotes meeting the filter criteria.")]
-        [Route("/quotes", "POST, GET")]
+        [Api(Description = "Use GET to get quotes for a possible trip.")]
+        [Route("/quotes", Verbs = "GET", Summary = @"get quotes for a possible trip", Notes = "The standard usage is to first get quotes for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
         public class Quotes : IReturn<QuotesResponse>
         {
-            public string PassengerId { get; set; }
-            public string PassengerName { get; set; }
-            public int? Luggage { get; set; }
-            public int? Persons { get; set; }
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
             public DateTime PickupTime { get; set; }
-            public Location PickupLocation { get; set; }
-            public Location DropoffLocation { get; set; }
-            public List<Location> WayPoints { get; set; }
+            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double PickupLat { get; set; }
+            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double PickupLng { get; set; }
+            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string PassengerName { get; set; }
+            [ApiAllowableValues("Luggage", "1", "2", "3", "4", "5", "6", "7" )]
+            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false)]
+            public int? Luggage { get; set; }
+            [ApiAllowableValues("Persons", "1", "2", "3", "4", "5", "6", "7")]
+            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false)]
+            public int? Persons { get; set; }
+            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DropoffLat { get; set; }
+            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DropoffLng { get; set; }
+            [ApiAllowableValues("PaymentMethod", typeof(PaymentMethod))]
+            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false)]
             public PaymentMethod? PaymentMethod { get; set; }
+            [ApiAllowableValues("VehicleType", typeof(VehicleType))]
+            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false)]
             public VehicleType? VehicleType { get; set; }
+            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false)]
             public double? MaxPrice { get; set; }
+            [ApiAllowableValues("MinRating", "1", "2", "3", "4", "5", "6", "7")]
+            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false)]
             public int? MinRating { get; set; }
+            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner you wish to receive quotes from.  Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string PartnerId { get; set; }
+            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet you wish to receive quotes from. Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string FleetId { get; set; }
+            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver you wish to receive quotes from. Use this field only if you have a specific driver in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string DriverId { get; set; }
+            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string PassengerId { get; set; }
         }
 
         public class QuotesResponse
@@ -433,36 +328,34 @@ namespace ServiceStack.TripThruGateway
         public class QuotesService : Service
         {
 
-            public QuotesResponse Post(Quotes request)
+            public QuotesResponse Get(Quotes request)
             {
                 QuotesResponse quotesResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                var accessToken = request.access_token;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (u.Count > 0)
+                    if (acct != null)
                     {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("QuoteTrip received from " + user.UserName, request);
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("QuoteTrip received from " + acct.UserName, request);
                         var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
-                            user.ClientId,
-                            request.PickupLocation,
-                            request.PickupTime,
-                            request.PassengerId,
-                            request.PassengerName,
-                            request.Luggage,
-                            request.Persons,
-                            request.DropoffLocation,
-                            request.WayPoints,
-                            request.PaymentMethod,
-                            request.VehicleType,
-                            request.MaxPrice,
-                            request.MinRating,
-                            request.PartnerId,
-                            request.FleetId,
-                            request.DriverId
+                            clientID: acct.ClientId,
+                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
+                            pickupTime: request.PickupTime,
+                            passengerID: request.PassengerId,
+                            passengerName: request.PassengerName,
+                            luggage: request.Luggage,
+                            persons: request.Persons,
+                            dropoffLocation: request.DropoffLat == null ? null : new Location((double)request.DropoffLat, (double)request.DropoffLng),
+                            paymentMethod: request.PaymentMethod,
+                            vehicleType: request.VehicleType,
+                            maxPrice: request.MaxPrice,
+                            minRating: request.MinRating,
+                            partnerID: request.PartnerId,
+                            fleetID: request.FleetId,
+                            driverID: request.DriverId
                             ));
 
                         if (response.result == Gateway.Result.OK)
@@ -477,7 +370,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
-                            return new QuotesResponse
+                            quotesResponse = new QuotesResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result
@@ -499,7 +392,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
+                    Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
                     Logger.Log("Exception="+e.Message);
                     quotesResponse = new QuotesResponse
                     {
@@ -508,112 +401,58 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
                 Logger.Log("RequestType=QuoteTrip");
-                Logger.Log("ClientId="+clientId);
+                Logger.Log("ClientId = " + clientId);
                 Logger.EndRequest(quotesResponse);
                 return quotesResponse;
             }
 
-            public QuotesResponse Get(Quotes request)
-            {
-                QuotesResponse quotesResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                var clientId = "none";
-                try
-                {
-                    if (u.Count > 0)
-                    {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("QuoteTrip received from " + user.UserName, request);
-                        var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
-                            user.ClientId,
-                            request.PickupLocation,
-                            request.PickupTime,
-                            request.PassengerId,
-                            request.PassengerName,
-                            request.Luggage,
-                            request.Persons,
-                            request.DropoffLocation,
-                            request.WayPoints,
-                            request.PaymentMethod,
-                            request.VehicleType,
-                            request.MaxPrice,
-                            request.MinRating,
-                            request.PartnerId,
-                            request.FleetId,
-                            request.DriverId
-                            ));
-
-                        if (response.result == Gateway.Result.OK)
-                        {
-                            quotesResponse = new QuotesResponse
-                            {
-                                Count = response.quotes.Count,
-                                Quotes = response.quotes,
-                                ResultCode = response.result,
-                                Result = "OK"
-                            };
-                        }
-                        else
-                        {
-                            return new QuotesResponse
-                            {
-                                Result = "Failed",
-                                ResultCode = response.result
-                            };
-                        }
-                    }
-                    else
-                    {
-                        Logger.BeginRequest("QuoteTrip received from unknown user", request);
-                        string msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
-                                     ", Response = Authentication failed";
-                        Logger.Log(msg);
-                        quotesResponse = new QuotesResponse
-                        {
-                            Result = "Failed",
-                            ResultCode = Gateway.Result.AuthenticationError
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("QuoteTrip=" + e.Message, e.StackTrace);
-                    Logger.Log("Exception=" + e.Message);
-                    quotesResponse = new QuotesResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.UnknownError
-                    };
-                }
-                Logger.Log("RequestType=QuoteTrip");
-                Logger.Log("ClientId=" + clientId);
-                Logger.EndRequest(quotesResponse);
-                return quotesResponse;
-            }
         }
 
         [Api("Use POST or GET to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
         [Route("/dispatch", "POST, GET")]
         public class Dispatch : IReturn<DispatchResponse>
         {
-            public string PassengerId { get; set; }
-            public string PassengerName { get; set; }
-            public int? Luggage { get; set; }
-            public int? Persons { get; set; }
-            public Location PickupLocation { get; set; }
-            public DateTime PickupTime { get; set; }
-            public Location DropoffLocation { get; set; }
-            public List<Location> Waypoints { get; set; }
-            public PaymentMethod? PaymentMethod { get; set; }
-            public VehicleType? VehicleType { get; set; }
-            public double? MaxPrice { get; set; }
-            public int? MinRating { get; set; }
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "TripId", Description = "Partner scope unique identifier of the trip that you will use to make queries about the trip.  Note: it only has to be unique to you.  TripThru will handle any cross-network uniqueness issues.", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string TripId { get; set; }
+            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
+            public DateTime PickupTime { get; set; }
+            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double PickupLat { get; set; }
+            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double PickupLng { get; set; }
+            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string PassengerName { get; set; }
+            [ApiAllowableValues("Luggage", "1", "2", "3", "4", "5", "6", "7")]
+            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false)]
+            public int? Luggage { get; set; }
+            [ApiAllowableValues("Persons", "1", "2", "3", "4", "5", "6", "7")]
+            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false)]
+            public int? Persons { get; set; }
+            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DropoffLat { get; set; }
+            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DropoffLng { get; set; }
+            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false)]
+            [ApiAllowableValues("PaymentMethod", typeof(PaymentMethod))]
+            public PaymentMethod? PaymentMethod { get; set; }
+            [ApiAllowableValues("VehicleType", typeof(VehicleType))]
+            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false)]
+            public VehicleType? VehicleType { get; set; }
+            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? MaxPrice { get; set; }
+            [ApiAllowableValues("MinRating", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")]
+            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false)]
+            public int? MinRating { get; set; }
+            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner you wish to dispatch to.  If blank then TripThru will select the best option.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string PartnerId { get; set; }
+            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet you wish to dispatch to.  If blank then TripThru will select the best option.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string FleetId { get; set; }
+            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver you wish to dispatch to.  If blank then TripThru will select the best option.", ParameterType = "query", DataType = "string", IsRequired = false)]
             public string DriverId { get; set; }
+            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string PassengerId { get; set; }
         }
 
         public class DispatchResponse
@@ -624,37 +463,39 @@ namespace ServiceStack.TripThruGateway
 
         public class DispatchService : Service
         {
+            public DispatchResponse Get(Dispatch request)
+            {
+                return Post(request);
+            }
             public DispatchResponse Post(Dispatch request)
             {
                 DispatchResponse dispatchResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                var accessToken = request.access_token;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (u.Count > 0)
+                    if (acct != null)
                     {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("DispatchTrip received from " + user.UserName, request);
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("DispatchTrip received from " + acct.UserName, request, request.TripId);
                         var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
-                            user.ClientId,
-                            request.TripId,
-                            request.PickupLocation,
-                            request.PickupTime,
-                            request.PassengerId,
-                            request.PassengerName,
-                            request.Luggage,
-                            request.Persons,
-                            request.DropoffLocation,
-                            request.Waypoints,
-                            request.PaymentMethod,
-                            request.VehicleType,
-                            request.MaxPrice,
-                            request.MinRating,
-                            request.PartnerId,
-                            request.FleetId,
-                            request.DriverId
+                            clientID: acct.ClientId,
+                            tripID : request.TripId,
+                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
+                            pickupTime: request.PickupTime,
+                            passengerID: request.PassengerId,
+                            passengerName: request.PassengerName,
+                            luggage: request.Luggage,
+                            persons: request.Persons,
+                            dropoffLocation: request.DropoffLat == null ? null : new Location((double) request.DropoffLat, (double) request.DropoffLng),
+                            paymentMethod: request.PaymentMethod,
+                            vehicleType: request.VehicleType,
+                            maxPrice: request.MaxPrice,
+                            minRating: request.MinRating,
+                            partnerID: request.PartnerId,
+                            fleetID: request.FleetId,
+                            driverID: request.DriverId
                             ));
 
                         if (response.result == Gateway.Result.OK)
@@ -676,7 +517,7 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("DispatchTrip received from unknown user", request);
+                        Logger.BeginRequest("DispatchTrip received from unknown user", request, request.TripId);
                         string msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                                      ", Response = Authentication failed";
                         Logger.Log(msg);
@@ -689,7 +530,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
+                    Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
                     Logger.Log("Exception=" + e.Message);
                     dispatchResponse = new DispatchResponse
                     {
@@ -702,98 +543,25 @@ namespace ServiceStack.TripThruGateway
                 Logger.EndRequest(dispatchResponse);
                 return dispatchResponse;
             }
-
-            public DispatchResponse Get(Dispatch request)
-            {
-                DispatchResponse dispatchResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
-                var clientId = "none";
-                try
-                {
-                    if (u.Count > 0)
-                    {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("DispatchTrip received from " + user.UserName, request);
-                        var response = gateway.DispatchTrip(new Gateway.DispatchTripRequest(
-                            user.ClientId,
-                            request.TripId,
-                            request.PickupLocation,
-                            request.PickupTime,
-                            request.PassengerId,
-                            request.PassengerName,
-                            request.Luggage,
-                            request.Persons,
-                            request.DropoffLocation,
-                            request.Waypoints,
-                            request.PaymentMethod,
-                            request.VehicleType,
-                            request.MaxPrice,
-                            request.MinRating,
-                            request.PartnerId,
-                            request.FleetId,
-                            request.DriverId
-                            ));
-
-                        if (response.result == Gateway.Result.OK)
-                        {
-                            dispatchResponse = new DispatchResponse
-                            {
-                                Result = "OK",
-                                ResultCode = response.result
-                            };
-                        }
-                        else
-                        {
-                            dispatchResponse = new DispatchResponse
-                            {
-                                Result = "Failed",
-                                ResultCode = response.result
-                            };
-                        }
-                    }
-                    else
-                    {
-                        Logger.BeginRequest("DispatchTrip received from unknown user", request);
-                        string msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
-                                     ", Response = Authentication failed";
-                        Logger.Log(msg);
-                        dispatchResponse = new DispatchResponse
-                        {
-                            Result = "Failed",
-                            ResultCode = Gateway.Result.AuthenticationError
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("DispatchTrip=" + e.Message, e.StackTrace);
-                    Logger.Log("Exception=" + e.Message);
-                    dispatchResponse = new DispatchResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.UnknownError
-                    };
-                }
-                Logger.Log("RequestType=DispatchTrip");
-                Logger.Log("ClientId=" + clientId);
-                Logger.EndRequest(dispatchResponse);
-                return dispatchResponse;
-            }
         }
 
-        [Api("Use GET /trip/{Id}/status for trip status and PUT /trip/{Id}/status to update a trip status. Use POST /trip/{Id}/rating to rate a trip.")]
-        [Route("/trip/status/{TripId}", "GET, PUT")]
-        [Route("/trip/rating/{TripId}", "POST")]
-        public class TripRequest : IReturn<TripResponse>
+        [Api("Use GET /tripstatus to get the trip status and PUT /tripstatus to update a trip status")]
+        [Route("/tripstatus", "GET, PUT")]
+        public class TripStatus : IReturn<TripStatusResponse>
         {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "TripId", Description = "Partner scope unique identifier of the trip (the same as you passed into /dispatch).  Note: it only has to be unique to you.  TripThru will handle any cross-network uniqueness issues.", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string TripId { get; set; }
+            [ApiAllowableValues("Status", typeof(Status))]
+            [ApiMember(Name = "Status", Description = "Trip status code", ParameterType = "query", DataType = "Status", IsRequired = false, Verb = "PUT")]
             public Status Status { get; set; }
+            [ApiAllowableValues("Rating", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")]
+            [ApiMember(Name = "Rating", Description = "Rating of the trip from driver's or passenger's perspective", ParameterType = "query", DataType = "int", IsRequired = false)]
             public int? Rating { get; set; }
         }
 
-        public class TripResponse
+        public class TripStatusResponse
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
@@ -820,28 +588,27 @@ namespace ServiceStack.TripThruGateway
 
         public class TripService : Service
         {
-            public TripResponse Get(TripRequest request)
+            public TripStatusResponse Get(TripStatus request)
             {
                 Logger.BeginRequest("GetTripStatus received", request);
-                TripResponse tripResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                TripStatusResponse tripStatusResponse;
+                var accessToken = request.access_token;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (u.Count > 0)
+                    if (acct != null)
                     {
-                        var user = u.First();
-                        clientId = user.ClientId;
-                        Logger.BeginRequest("GetTripStatus received from " + user.UserName, request);
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("GetTripStatus received from " + acct.UserName, request, request.TripId);
                         var response = gateway.GetTripStatus(new Gateway.GetTripStatusRequest(
-                            user.ClientId,
+                            acct.ClientId,
                             request.TripId
                             ));
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            tripResponse = new TripResponse
+                            tripStatusResponse = new TripStatusResponse
                             {
                                 PassengerName = response.passengerName,
                                 DriverId = response.driverID,
@@ -868,7 +635,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
-                            tripResponse = new TripResponse
+                            tripStatusResponse = new TripStatusResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result
@@ -877,11 +644,11 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("GetTripStatus received from unknown user", request);
+                        Logger.BeginRequest("GetTripStatus received from unknown user", request, request.TripId);
                         string msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                                      ", Response = Authentication failed";
                         Logger.Log(msg);
-                        tripResponse = new TripResponse
+                        tripStatusResponse = new TripStatusResponse
                         {
                             Result = "Failed",
                             ResultCode = Gateway.Result.AuthenticationError
@@ -890,9 +657,9 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("GetTripStatus=" + e.Message, e.StackTrace);
+                    Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
                     Logger.Log("Exception=" + e.Message);
-                    tripResponse = new TripResponse
+                    tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
@@ -900,32 +667,31 @@ namespace ServiceStack.TripThruGateway
                 }
                 Logger.Log("RequestType=GetTripStatus");
                 Logger.Log("ClientId="+clientId);
-                Logger.EndRequest(tripResponse);
-                return tripResponse;
+                Logger.EndRequest(tripStatusResponse);
+                return tripStatusResponse;
             }
 
-            public TripResponse Put(TripRequest request)
+            public TripStatusResponse Put(TripStatus request)
             {
-                TripResponse tripResponse;
-                var accessToken = this.Request.QueryString.Get("access_token");
-                var u = Db.Select<User>(x => x.AccessToken == accessToken);
+                TripStatusResponse tripResponse;
+                var accessToken = request.access_token;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (u.Count > 0)
+                    if (acct != null)
                     {
-                        var user = u.First();
-                        Logger.BeginRequest("UpdateTripStatus received from " + user.UserName, request);
-                        clientId = user.ClientId;
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("UpdateTripStatus received from " + acct.UserName, request, request.TripId);
                         var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
-                            user.ClientId,
+                            acct.ClientId,
                             request.TripId,
                             request.Status
                             ));
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            tripResponse = new TripResponse
+                            tripResponse = new TripStatusResponse
                             {
                                 Result = "OK",
                                 ResultCode = response.result
@@ -934,7 +700,7 @@ namespace ServiceStack.TripThruGateway
                         else
                         {
 
-                            tripResponse = new TripResponse
+                            tripResponse = new TripStatusResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result
@@ -943,11 +709,11 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("UpdateTripStatus received from unknown user", request);
+                        Logger.BeginRequest("UpdateTripStatus received from unknown user", request, request.TripId);
                         string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                                      ", Response = Authentication failed";
                         Logger.Log(msg);
-                        tripResponse = new TripResponse
+                        tripResponse = new TripStatusResponse
                         {
                             Result = "Failed",
                             ResultCode = Gateway.Result.AuthenticationError
@@ -956,9 +722,9 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("UpdateTripStatus=" + e.Message, e.StackTrace);
+                    Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
                     Logger.Log("Exception=" + e.Message);
-                    tripResponse = new TripResponse
+                    tripResponse = new TripStatusResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
@@ -975,7 +741,9 @@ namespace ServiceStack.TripThruGateway
         [Route("/trips", "GET")]
         public class Trips : IReturn<TripsResponse>
         {
-            public Status Status { get; set; }
+            [ApiAllowableValues("Status", typeof(Status))]
+            [ApiMember(Name = "Status", Description = "Get a list of trips with given status", ParameterType = "query", DataType = "Status", IsRequired = false)]
+            public Status? Status { get; set; }
         }
 
         public class TripsResponse
@@ -989,11 +757,12 @@ namespace ServiceStack.TripThruGateway
         {
             public TripsResponse Get(Trips request)
             {
+                Logger.enabled = false;
                 Logger.BeginRequest("GetTrips received", request);
                 TripsResponse tripResponse;
                 try
                 {
-                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, null));
+                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, request.Status));
 
                     if (response.result == Gateway.Result.OK)
                     {
@@ -1015,9 +784,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-
-                    Logger.LogDebug("GetTrips=" + e.Message, e.StackTrace);
-                    Logger.Log("Exception=" + e.Message);
+                    Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
                     tripResponse = new TripsResponse
                     {
                         Result = "Failed",
@@ -1026,6 +793,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 Logger.Log("RequestType=GetTrips");
                 Logger.EndRequest(tripResponse);
+                Logger.enabled = true;
                 return tripResponse;
             }
         }

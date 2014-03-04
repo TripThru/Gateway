@@ -10,6 +10,7 @@ namespace Utils
 {
     public class Logger
     {
+        const bool splunkEnabled = true;
         public class SplunkClient
         {
             private RestClient restClient;
@@ -162,8 +163,11 @@ namespace Utils
                 var expired = DateTime.UtcNow - new TimeSpan(0, 0, 30, 0);
                 lock (this)
                 {
-                    while (Peek().Time < expired)
-                        Dequeue();
+                    if (Count > 0)
+                    {
+                        while (Peek().Time < expired)
+                            Dequeue();
+                    }
                 }
             }
         }
@@ -176,14 +180,16 @@ namespace Utils
             public string Response;
             public int MaxTab;
             public int Tab;
+            public string tripID;
 
-            public RequestLog(string request)
+            public RequestLog(string request, string tripID = null)
             {
                 this.Request = request;
                 Time = DateTime.UtcNow;
-                Messages = new List<Pair<int,string>>();
+                Messages = new List<Pair<int, string>>();
                 MaxTab = 0;
                 Tab = 0;
+                this.tripID = tripID;
             }
             public string GetTab()
             {
@@ -197,29 +203,32 @@ namespace Utils
 
         public static FixedSizeQueue Queue;
         public static Dictionary<object, RequestLog> requestLog;
-        public static string filePath = "c:\\Users\\DanielErnesto\\";
+        public static string filePath = null;
         static System.IO.StreamWriter file;
         static SplunkClient splunkClient;
         static RestRequest restReq;
         static Dictionary<object, int> numBegunRequests;
-        public static void BeginRequest(string msg, object request)
+        public static void BeginRequest(string msg, object request, string tripID = null)
         {
+            if (requestLog == null || !enabled)
+                return;
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (!requestLog.ContainsKey(thread))
             {
                 var json = "";
                 if (request != null)
                     json = restReq.JsonSerializer.Serialize(request);
-                requestLog[thread] = new RequestLog(json);
+                requestLog[thread] = new RequestLog(json, tripID);
                 numBegunRequests[thread] = 0;
             }
             else if (!numBegunRequests.ContainsKey(thread))
                 numBegunRequests[thread] = 0;
             numBegunRequests[thread] = numBegunRequests[thread] + 1;
-            if (request != null)
-                msg += ": Request = " + restReq.JsonSerializer.Serialize(request);
+            //            if (request != null)
+            //                msg += ": Request = " + restReq.JsonSerializer.Serialize(request);
             if (numBegunRequests[thread] == 1)
-                Logger.Log(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg);
+                Logger.Log(DateTime.Now.ToString() + " | " + msg);
+            //                Logger.Log(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg);
             else
                 Logger.Log(msg);
             Logger.Tab();
@@ -227,6 +236,8 @@ namespace Utils
 
         public static void EndRequest(object response)
         {
+            if (requestLog == null || !enabled)
+                return;
             Logger.Untab();
             if (response != null)
                 Logger.Log("EndRequest: Response = " + restReq.JsonSerializer.Serialize(response));
@@ -235,8 +246,8 @@ namespace Utils
 
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             numBegunRequests[thread] = numBegunRequests[thread] - 1;
-            if (file == null)
-                
+            if (splunkEnabled)
+                splunkClient.Enqueue(requestLog[thread]);
             if (numBegunRequests[thread] == 0)
             {
                 Logger.Log("Type=INFO");
@@ -244,7 +255,7 @@ namespace Utils
                 if (response != null)
                     json = restReq.JsonSerializer.Serialize(response);
                 requestLog[thread].Response = json;
-                if (file == null)
+                if (splunkEnabled)
                 {
                     splunkClient.Enqueue(requestLog[thread]);
                     Queue.Enqueue(requestLog[thread]);
@@ -256,8 +267,11 @@ namespace Utils
 
         public static void LogDebug(string message, string detailed = null)
         {
+            if (requestLog == null || !enabled)
+                return;
             RequestLog error = new RequestLog("");
-            error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + message));
+            //error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + message));
+            error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString() + " | " + message));
             if (detailed != null)
                 error.Messages.Add(new Pair<int, string>(40, detailed));
             error.Messages.Add(new Pair<int, string>(40, "Type=DEBUG"));
@@ -268,11 +282,15 @@ namespace Utils
 
         public static void Log(string message, object o)
         {
+            if (requestLog == null || !enabled)
+                return;
             Log(message + " -- " + restReq.JsonSerializer.Serialize(o));
         }
 
         public static void Log(string message)
         {
+            if (requestLog == null || !enabled)
+                return;
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (!requestLog.ContainsKey(thread))
                 throw new Exception("Log with no enclosing request");
@@ -284,49 +302,46 @@ namespace Utils
             }
             requestLog[thread].Messages.Add(new Pair<int, string>(requestLog[thread].Tab * 40, str));
         }
+        public static bool enabled = false;
 
-        public static void OpenLog()
+        public static void OpenLog(string id, string filePath = null)
         {
+            enabled = true;
             requestLog = new Dictionary<object, RequestLog>();
             Queue = new FixedSizeQueue(300);
             numBegunRequests = new Dictionary<object, int>();
             restReq = new RestRequest();
             // Create new Service object
-            if (file == null)
+            if (splunkEnabled)
+            {
                 splunkClient = new SplunkClient();
-        }
-        public static void SetLogId(string id)
-        {
-            splunkClient.SetSource(id);
-        }
-        static public void OpenLog(string filename)
-        {
-            requestLog = new Dictionary<object, RequestLog>();
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            requestLog[thread] = new RequestLog(null);
-            numBegunRequests = new Dictionary<object, int>();
-            //file = new System.IO.StreamWriter(("~/App_Data/" + filename).MapHostAbsolutePath());
-            file = new System.IO.StreamWriter(filePath + filename);
-            restReq = new RestRequest();
-            // Create new Service object
-            if (file == null)
-                splunkClient = new SplunkClient();
+                splunkClient.SetSource(id);
+            }
+            if (filePath != null)
+            {
+                Logger.filePath = filePath;
+                file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
+            }
         }
 
         public static void CloseLog()
         {
+            if (requestLog == null)
+                return;
             if (file != null)
             {
                 file.Close();
                 file = null;
             }
             Queue.Clear();
-            if (file == null)
+            if (splunkEnabled)
                 splunkClient.Close();
         }
 
         public static void Tab()
         {
+            if (requestLog == null)
+                return;
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             var r = requestLog[thread];
             if (r.Tab < 50)
@@ -337,6 +352,8 @@ namespace Utils
 
         public static void Untab()
         {
+            if (requestLog == null)
+                return;
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (requestLog[thread].Tab > 0)
                 requestLog[thread].Tab--;

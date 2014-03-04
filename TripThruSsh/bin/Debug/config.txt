@@ -1,0 +1,4 @@
+HomeUrl=http://54.201.134.194:8080/BookingsYellowCab/
+RelativeHomeUrl=/BookingsYellowCab/index.php
+AccessToken=yellow12ondazazxx21
+PartnerName=YellowCab

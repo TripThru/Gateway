@@ -3,14 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Utils;
-
+using ServiceStack.Redis;
+using ServiceStack;
+using ServiceStack.Text;
+using System.Runtime.Serialization;
+using ServiceStack.ServiceModel;
 namespace TripThruCore
 {
+    public class PartnerAccount
+    {
+        public string Name { get; set; }
+        public string ClientId { get; set; } //Provided by TripThru upon registration
+        public string ClientSecret { get; set; } //Provided by TripThru upon registration
+        public string UserName { get; set; } //For web login
+        public string Password { get; set; } //For web login
+        public string Email { get; set; } //For web login
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+        public string CallbackUrl { get; set; }
+    }
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }
         public List<Fleet> Fleets { get; set; }
         public string TripThruUrl { get; set; }
+        public string TripThruUrlMono { get; set; }
         public int SimInterval { get; set; }
         public List<PartnerFleet> partnerFleets;
         public string preferedPartnerId { get; set; }
@@ -21,6 +38,7 @@ namespace TripThruCore
             public string ClientId { get; set; }
             public string AccessToken { get; set; }
             public string CallbackUrl { get; set; }
+            public string CallbackUrlMono { get; set; }
         }
 
         public class Fleet
@@ -44,7 +62,7 @@ namespace TripThruCore
             public Location End { get; set; }
         }
     }
-    public enum Status { Queued, Dispatched, Enroute, PickedUp, DroppedOff, Complete, Rejected, Cancelled };
+    public enum Status { Queued, Dispatched, Confirmed, Enroute, ArrivedAndWaiting, PickedUp, DroppedOff, Complete, Rejected, Cancelled };
     public enum VehicleType { Compact, Sedan };
     public enum PaymentMethod { Cash, Credit, Account };
     public class Zone
@@ -84,20 +102,28 @@ namespace TripThruCore
     {
         public Double Lat { get; set; }
         public Double Lng { get; set; }
-//        public string StreetAddress { get; set; }
-//        public string PostalCode { get; set; }
-        public string Name { get; set; } // temp until we hookup with a geolocator serviced
+        public string Address { get; set; } // temp until we hookup with a geolocator serviced
         public Location()
         {
         }
-        public Location(double lat, double lng, string name = null)
+        public Location(double lat, double lng, string address = null)
         {
             this.Lng = lng;
             this.Lat = lat;
-            if (name == null)
-                this.Name = MapTools.GetReverseGeoLoc(this);
+            if (address == null)
+                this.Address = MapTools.GetReverseGeoLoc(this);
             else
-                this.Name = name;
+                this.Address = address;
+        }
+        public string getID()
+        {
+            return "<" + Lat + ":" + Lng + ">";
+        }
+        public override string ToString()
+        {
+            if (Address != null)
+                return Address;
+            return "(" + Lat + ", " + Lng + ")";
         }
         public double DegreesToRadians(double angle)
         {
@@ -121,17 +147,8 @@ namespace TripThruCore
             double distance = Math.Sqrt(Math.Pow(l.Lat - Lat, 2) + Math.Pow(l.Lng - Lng, 2));
             return distance < .00001;
         }
-        public string getID()
-        {
-            return "<" + Lat + ":" + Lng + ">";
-        }
-        public override string ToString()
-        {
-            if (Name != null)
-                return Name;
-            return "(" + Lat + ", " + Lng + ")";
-        }
     }
+
 
     public class Trip
     {
@@ -145,7 +162,9 @@ namespace TripThruCore
         public string DriverId { get; set; }
         public string DriverName { get; set; }
         public string PassengerName { get; set; }
-        public Location DriverLocation { get; set; }
+        public Location DriverLocation { get; set; } // no get/set so servicestack will ignore during serialization
+        public Location PickupLocation { get; set; } // no get/set so servicestack will ignore during serialization
+        public Location DropoffLocation { get; set; }  // no get/set so servicestack will ignore during serialization
         public DateTime? PickupTime { get; set; }
         public DateTime? DropoffTime { get; set; }
         public VehicleType? VehicleType { get; set; }
@@ -153,9 +172,6 @@ namespace TripThruCore
         public DateTime? ETA { get; set; } // in minutes;
         public double? Price { get; set; }
         public double? Distance { get; set; }
-        public Location PickupLocation { get; set; }
-        public Location DropoffLocation { get; set; }
-
         public void Update(Trip trip)
         {
             this.FleetId = trip.FleetId;
@@ -241,13 +257,18 @@ namespace TripThruCore
     }
     public class Gateway
     {
-        public string ID;
-        public string name;
+        public string ID { get; set; }
+        public string name { get; set; }
         public enum Result { OK = 100, MethodNotSupported = 200, Rejected = 300, UnknownError = 400, InvalidParameters = 500, NotFound = 600, AuthenticationError = 700 };
         public Gateway(string ID, string name)
         {
             this.ID = ID;
             this.name = name;
+        }
+        virtual public PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            throw new Exception("not supported");
+            return null;
         }
         public class GetGatewayStatsRequest
         {
@@ -711,70 +732,18 @@ namespace TripThruCore
 
     public class GatewayServer : Gateway
     {
-
-        public class Stat
+        public class RedisStat
         {
-            public class Counter
+            public RedisObject<double> allTime;
+            public RedisExpiryCounter last24Hrs;
+            public RedisExpiryCounter lastHour;
+            public RedisStat(RedisClient redis, string id)
             {
-                TimeSpan maxAge;
-                Queue<Pair<DateTime, double>> counts;
-                double count;
-                public static implicit operator int(Counter c)
-                {
-                    return (int)c.count;
-                }
-                public static implicit operator long(Counter c)
-                {
-                    return (long)c.count;
-                }
-                public static implicit operator double(Counter c)
-                {
-                    return (double)c.count;
-                }
-                public Counter(TimeSpan maxAge)
-                {
-                    this.maxAge = maxAge;
-                    counts = new Queue<Pair<DateTime, double>>();
-                }
-                void Cleanup()
-                {
-                    while (counts.Count > 0 && DateTime.UtcNow - counts.Peek().First > maxAge)
-                    {
-                        count -= counts.Peek().Second;
-                        counts.Dequeue();
-                    }
-                }
-
-                public static Counter operator ++(Counter c)
-                {
-                    // Increment this widget.
-                    c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, 1));
-                    c.count += 1;
-                    c.Cleanup();
-                    return c;
-                }
-                public static Counter operator +(Counter c, double d)
-                {
-                    // Increment this widget.
-                    c.counts.Enqueue(new Pair<DateTime, double>(DateTime.UtcNow, d));
-                    c.count += d;
-                    c.Cleanup();
-                    return c;
-                }
-                public override string ToString()
-                {
-                    return count.ToString();
-                }
+                allTime = new RedisObject<double>(redis, id + ":" + MemberInfoGetting.GetMemberName(() => allTime));
+                last24Hrs = new RedisExpiryCounter(redis, id + ":" + MemberInfoGetting.GetMemberName(() => last24Hrs), new TimeSpan(24, 0, 0));
+                lastHour = new RedisExpiryCounter(redis, id + ":" + MemberInfoGetting.GetMemberName(() => lastHour), new TimeSpan(1, 0, 0));
             }
-            public double allTime;
-            public Counter last24Hrs;
-            public Counter lastHour;
-            public Stat()
-            {
-                last24Hrs = new Counter(new TimeSpan(24, 0, 0));
-                lastHour = new Counter(new TimeSpan(1, 0, 0));
-            }
-            public static Stat operator ++(Stat s)
+            public static RedisStat operator ++(RedisStat s)
             {
                 // Increment this widget.
                 s.allTime++;
@@ -782,7 +751,7 @@ namespace TripThruCore
                 s.lastHour++;
                 return s;
             }
-            public static Stat operator +(Stat s, double d)
+            public static RedisStat operator +(RedisStat s, double d)
             {
                 // Increment this widget.
                 s.allTime += d;
@@ -795,55 +764,78 @@ namespace TripThruCore
                 return "AllTime = " + allTime + ", Last24Hrs = " + ((long)last24Hrs) + ", LastHour = " + ((long)lastHour);
             }
         }
-        public Stat exceptions;
-        public Stat requests;
-        public Stat rejects;
-        public Stat cancels;
-        public Stat distance;
-        public Stat completes;
-        public Stat fare;
-        public Dictionary<string, Trip> activeTrips;
+        public RedisStat exceptions;
+        public RedisStat requests;
+        public RedisStat rejects;
+        public RedisStat cancels;
+        public RedisStat distance;
+        public RedisStat completes;
+        public RedisStat fare;
+        public RedisDictionary<string, Trip> activeTrips;
         public GarbageCleanup<string> garbageCleanup;
+        public RedisDictionary<string, string> clientIdByAccessToken;
+        public RedisDictionary<string, PartnerAccount> partnerAccounts;
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            if (accessToken == null) // TODO: this is to get swagger working and is temporary.  We need to add swagger authentication support
+                accessToken = "metro12ondazazxx21";
+            if (!clientIdByAccessToken.ContainsKey(accessToken))
+                return null;
+            string clientID = clientIdByAccessToken[accessToken];
+            return partnerAccounts[clientID];
+        }
+
         public override GetGatewayStatsResponse GetGatewayStats(Gateway.GetGatewayStatsRequest request)
         {
             try
             {
                 GetGatewayStatsResponse resp = new GetGatewayStatsResponse(
                     activeTrips: activeTrips.Count,
-                    requestsAllTime: (long)requests.allTime, requestsLast24Hrs: requests.last24Hrs, requestsLastHour: requests.lastHour,
-                    rejectsAllTime: (long)rejects.allTime, rejectsLast24Hrs: rejects.last24Hrs, rejectsLastHour: rejects.lastHour,
-                    cancelsAllTime: (long)cancels.allTime, cancelsLast24Hrs: cancels.last24Hrs, cancelsLastHour: cancels.lastHour,
-                    exceptionsAllTime: (long)exceptions.allTime, exceptionsLast24Hrs: exceptions.last24Hrs, exceptionsLastHour: exceptions.lastHour,
-                    tripsAllTime: (long)completes.allTime, tripsLast24Hrs: completes.last24Hrs, tripsLastHour: completes.lastHour,
-                    distanceAllTime: distance.allTime, distanceLast24Hours: distance.last24Hrs, distanceLastHour: distance.lastHour,
-                    fareAllTime: fare.allTime, fareLast24Hrs: fare.last24Hrs, fareLastHour: fare.lastHour);
+                    requestsAllTime: (long)requests.allTime.value, requestsLast24Hrs: (long)requests.last24Hrs.Count, requestsLastHour: (long)requests.lastHour.Count,
+                    rejectsAllTime: (long)rejects.allTime.value, rejectsLast24Hrs: (long)rejects.last24Hrs.Count, rejectsLastHour: (long)rejects.lastHour.Count,
+                    cancelsAllTime: (long)cancels.allTime.value, cancelsLast24Hrs: (long)cancels.last24Hrs.Count, cancelsLastHour: (long)cancels.lastHour.Count,
+                    exceptionsAllTime: (long)exceptions.allTime.value, exceptionsLast24Hrs: (long)exceptions.last24Hrs.Count, exceptionsLastHour: (long)exceptions.lastHour.Count,
+                    tripsAllTime: (long)completes.allTime.value, tripsLast24Hrs: (long)completes.last24Hrs.Count, tripsLastHour: (long)completes.lastHour.Count,
+                    distanceAllTime: distance.allTime.value, distanceLast24Hours: distance.last24Hrs.Count, distanceLastHour: distance.lastHour.Count,
+                    fareAllTime: fare.allTime.value, fareLast24Hrs: fare.last24Hrs.Count, fareLastHour: fare.lastHour.Count);
                 return resp;
             }
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
+                Logger.LogDebug("GatewayStats=" + e.Message, e.ToString());
                 return new GetGatewayStatsResponse(result: Result.UnknownError);
             }
         }
         TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
         DateTime lastGetGatewayStats = DateTime.UtcNow;
-
-        public GatewayServer(string ID, string name) : base(ID, name)
+        //public readonly RedisClient redis = new RedisClient("localhost", 6379)
+        public readonly PooledRedisClientManager redis = new PooledRedisClientManager("localhost:6379")
+                                                        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
         {
-            exceptions = new Stat();
-            rejects = new Stat();
-            requests = new Stat();
-            cancels = new Stat();
-            fare = new Stat();
-            completes = new Stat();
-            distance = new Stat();
-            activeTrips = new Dictionary<string, Trip>();
+            ConnectTimeout = 5000,
+            IdleTimeOutSecs = 30000
+        };
+        public GatewayServer(string ID, string name)
+            : base(ID, name)
+        {
+            JsConfig.AssumeUtc = true;
+            var redisClient = (RedisClient) redis.GetClient();
+            exceptions = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => exceptions));
+            rejects = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => rejects));
+            requests = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => requests));
+            cancels = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => cancels));
+            fare = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => fare));
+            completes = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => completes));
+            distance = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => distance));
+            activeTrips = new RedisDictionary<string, Trip>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
+            activeTrips.Clear();
+            partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
+            clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
         public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
         {
-            Logger.Log("Deactivating "+tripID+", Status="+status+", Price="+price+", Distance="+distance);
-            if (!activeTrips.Keys.Contains(tripID))
+            if (!activeTrips.ContainsKey(tripID))
                 return;
 
             activeTrips.Remove(tripID);
@@ -883,7 +875,6 @@ namespace TripThruCore
             {
                 Gateway.GetGatewayStatsResponse r = GetGatewayStats(new Gateway.GetGatewayStatsRequest());
                 Logger.BeginRequest(name + " Stats: ActiveTrips = " + r.activeTrips, null);
-
                 Logger.Log("Requests: AllTime = " + r.requestsAllTime + ", Last24Hrs = " + r.requestsLast24Hrs + ", LastHour = " + r.requestsLastHour);
                 Logger.Log("Reject: AllTime = " + r.rejectsAllTime + ", Last24Hrs = " + r.rejectsLast24Hrs + ", LastHour = " + r.rejectsLastHour);
                 Logger.Log("Cancel: AllTime = " + r.cancelsAllTime + ", Last24Hrs = " + r.cancelsLast24Hrs + ", LastHour = " + r.cancelsLastHour);
@@ -892,7 +883,6 @@ namespace TripThruCore
                 Logger.Log("Distance: AllTime = " + r.distanceAllTime + ", Last24Hrs = " + r.distanceLast24Hrs + ", LastHour = " + r.distanceLastHour);
                 Logger.Log("Fare: AllTime = " + r.fareAllTime + ", Last24Hrs = " + r.fareLast24Hrs + ", LastHour = " + r.fareLastHour);
                 Logger.Log("Per Trip Averages: Distance = " + r.distanceAllTime / r.tripsAllTime + ", Fare = " + r.fareAllTime / r.tripsAllTime);
-
                 lastGetGatewayStats = DateTime.UtcNow;
                 Logger.EndRequest(null);
             }

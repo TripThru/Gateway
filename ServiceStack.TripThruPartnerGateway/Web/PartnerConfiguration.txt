@@ -1,11 +1,11 @@
 ﻿{
-  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+  "tripThruUrl" : "http://localhost:17187/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrl" : "http://54.201.134.194/ServiceStack.LuxorCab/"
+	  "callbackUrl" : "http://localhost:17188/"
   },
   "fleets" : [
     {

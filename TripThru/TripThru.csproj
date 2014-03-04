@@ -59,9 +59,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Common.3.9.71\lib\net35\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.OrmLite">
-      <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.OrmLite.SqlServer">
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.SqlServer.dll</HintPath>
     </Reference>
@@ -80,9 +77,34 @@
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.IO">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.1.1.6\lib\net40\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http, Version=2.2.18.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Net.Http.2.2.18\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Net.Http.2.2.18\lib\net40\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Net.Http.2.2.18\lib\net40\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest, Version=2.2.18.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Net.Http.2.2.18\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Threading.Tasks.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Razor.Unofficial, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\System.Web.Razor.Unofficial.2.0.2\lib\net40\System.Web.Razor.Unofficial.dll</HintPath>
@@ -119,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Custom Integrations\TDispatchOffices.txt" />
+    <Content Include="Partner_Configurations\TestTDispatchConfig.txt" />
     <Content Include="Partner_Configurations\LesTaxiBluesConfig.txt" />
     <Content Include="Partner_Configurations\MetroCabConfig.txt" />
     <Content Include="Partner_Configurations\LuxorCabConfiguration.txt" />
@@ -126,9 +149,15 @@
     <Content Include="Scripts\jquery-2.1.0-vsdoc.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
+    <Content Include="swagger-ui\lib\swagger.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

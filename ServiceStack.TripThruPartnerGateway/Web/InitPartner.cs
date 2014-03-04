@@ -14,7 +14,6 @@ namespace ServiceStack.TripThruPartnerGateway
 {
 	using System;
 	using System.Collections.Generic;
-	using ServiceStack.OrmLite;
 	using ServiceStack.ServiceHost;
 	using ServiceStack.ServiceInterface;
 
@@ -33,27 +32,11 @@ namespace ServiceStack.TripThruPartnerGateway
             MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
-            
-            TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl), configuration.partnerFleets, configuration.preferedPartnerId);
+            TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl ?? configuration.TripThruUrlMono), configuration.partnerFleets);
 
             GatewayService.gateway = partner;
 
             MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-
-            Db.CreateTableIfNotExists<User>();
-            Db.DeleteAll<User>();
-
-            var tripthru = new User
-            {
-                UserName = "TripThru",
-                Password = "password",
-                Email = "tripthru@tripthru.com",
-                AccessToken = "jaosid1201231",
-                RefreshToken = "jaosid1201231",
-                ClientId = "TripThru",
-                ClientSecret = "23noiasdn2123"
-            };
-            Db.Insert(tripthru);
 
 		    var sim = new SimulationThread(partner, configuration);
             return new InitPartnerResponse();
@@ -81,8 +64,8 @@ namespace ServiceStack.TripThruPartnerGateway
             try
             {
                 Console.WriteLine(_partner.name + ": sim start");
-                Logger.OpenLog();
-                Logger.SetLogId(_partner.name);
+                Logger.OpenLog(_partner.name);
+                //Logger.OpenLog(_partner.name, "c:\\Users\\Edward\\");
                 Logger.BeginRequest("Simulation started", null);
                 Logger.Log("Sim Configuration");
                 _partner.Log();
@@ -92,7 +75,7 @@ namespace ServiceStack.TripThruPartnerGateway
 
                 _partner.tripthru.RegisterPartner(
                     new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
-                        _configuration.Partner.CallbackUrl, _configuration.Partner.AccessToken));
+                        _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));
 
                 while (true)
                 {

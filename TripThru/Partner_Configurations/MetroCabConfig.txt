@@ -12,7 +12,7 @@
         "name" : "Metro Cab of Boston",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 10,
+        "tripsPerHour" : 20,
 		"location" : {
 			"lat" : 42.356217,
             "lng" : -71.137512

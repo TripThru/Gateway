@@ -1,0 +1,54 @@
+﻿{
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+  "simInterval" : 10,
+  "partner" : {
+      "name" : "Luxor Cab",
+      "clientId" : "luxor@tripthru.com",
+      "accessToken" : "luxor23noiasdn2123",
+	  "callbackUrl" : "http://54.201.134.194/ServiceStack.LuxorCab/"
+  },
+  "fleets" : [
+    {
+        "name" : "Luxor Cab - SF",
+        "baseCost" : 3.00,
+        "costPerMile" : 2.70,
+        "tripsPerHour" : 100,
+		"location" : {
+			"lat" : 37.78906,
+            "lng" : -122.402127
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 29.114788, "lng" : -110.973587},
+                "end"   : { "lat" : 29.073987, "lng" : -110.97084}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Alex Goldman",
+            "Jason Fama",
+            "Simon Shvarts"
+        ],
+        "passengers" : [
+            "Elvis Presley",
+            "John Riggins",
+            "Bart Star",
+            "Michelle Phieffer",
+            "Zong Zi Yi",
+            "Mickey Rourke"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+                    "lat" : 37.78906,
+                    "lng" : -122.402127
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ]
+}

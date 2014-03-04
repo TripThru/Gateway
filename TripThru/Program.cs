@@ -5,7 +5,8 @@ using System.Text;
 using System.IO;
 using Utils;
 using TripThruCore;
-using CustomIntegrations;
+using ServiceStack.Redis;
+using System.Linq.Expressions;
 
 
 // Local
@@ -17,9 +18,40 @@ namespace Program
     {
         static TripThru tripthru;
 
+        public static class MemberInfoGetting
+        {
+            public static string GetMemberName<T>(Expression<Func<T>> memberExpression)
+            {
+                MemberExpression expressionBody = (MemberExpression)memberExpression.Body;
+                return expressionBody.Member.Name;
+            }
+        }
+
+        public class Test
+        {
+            public string code { get; set; }
+            public string Add()
+            {
+                string s = MemberInfoGetting.GetMemberName(() => this);
+                return s;
+            }
+        }
+
+        public class RedisList<T> : List<T>
+        {
+            RedisClient client;
+            string id;
+            public RedisList(string id)
+            {
+                this.id = id;
+            }
+        }
+
+
         static void Main(string[] args)
         {
-            Logger.OpenLog("TripThruSimulation.log");
+
+            Logger.OpenLog("", "TripThruSimulation.log");
             MapTools.LoadGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
 
             MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
