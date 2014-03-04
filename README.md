@@ -1,4 +1,1 @@
 Gateway
-=======
-
-Servicestack gateway
