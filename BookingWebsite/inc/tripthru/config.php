@@ -24,17 +24,19 @@ class ConfigTT {
 	private static $fleetApiKey	= 'x';
 	private static $apiClientId	= 'x';
 	private static $apiSecret	= 'x';
-	private static $accessToken = null;
+	private static $tripthruAccessToken = null;
+	private static $partnerAccessToken = null;
 
 	private static $homeUrl		= null;	 // URL of your website this scripts are hosted on, i.e. https://yourwebsite.com/
 	private static $relativeHomeUrl = null;
 	private static $partnerName = null;
+	private static $partnerId = null;
 	private static $debug 		= false;
 
 	// ************* NO NEED TO TOUCH ANY CODE BELOW THIS LINE **************************/
 
-	private static $apiBaseUrl 		  = 'http://54.201.134.194/TripThru.TripThruGateway/';
-	//private static $apiBaseUrl 		  = 'http://localhost:17187/';
+	private static $tripthruBaseUrl 		  = '';
+	private static $partnerBaseUrl			  = '';
 	private static $resetPasswordCallbackPage = '';
 
 	public static function load() {
@@ -48,11 +50,23 @@ class ConfigTT {
 				case "RelativeHomeUrl":
 					self::$relativeHomeUrl = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
 					break;
-				case "AccessToken":
-					self::$accessToken = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
+				case "TripThruAccessToken":
+					self::$tripthruAccessToken = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
+					break;
+				case "PartnerAccessToken":
+					self::$partnerAccessToken = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
 					break;
 				case "PartnerName":
 					self::$partnerName = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
+					break;
+				case "PartnerId":
+					self::$partnerId = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
+					break;
+				case "TripThruUrl":
+					self::$tripthruBaseUrl = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
+					break;
+				case "PartnerUrl":
+					self::$partnerBaseUrl = trim(str_replace(array("\n", "\t", "\r"), '', $e[1]));
 					break;
 			}
 		}
@@ -75,13 +89,32 @@ class ConfigTT {
 		if( self::$relativeHomeUrl === null ) {
 			die("Configuration Error: No relativeHomeUrl provided");
 		}
-		if( self::$accessToken === null ) {
-			die("Configuration Error: No accessToken provided");
+		if( self::$tripthruAccessToken === null ) {
+			die("Configuration Error: No TripThruAccessToken provided");
 		}
+		if( self::$partnerAccessToken === null ) {
+			die("Configuration Error: No PartnerAccessToken provided");
+		}
+		if( self::$tripthruBaseUrl === null ) {
+			die("Configuration Error: No tripthru url provided");
+		}
+		if( self::$partnerBaseUrl === null ) {
+			die("Configuration Error: No partner url provided");
+		}
+		if( self::$partnerName === null ) {
+			die("Configuration Error: No partner name provided");
+		}
+		if( self::$partnerId === null ) {
+			die("Configuration Error: No partner id provided");
+		}
+		
 	}
 	
-	public static function getAccessToken() {
-		return self::$accessToken;
+	public static function getTripThruAccessToken() {
+		return self::$tripthruAccessToken;
+	}
+	public static function getPartnerAccessToken() {
+		return self::$partnerAccessToken;
 	}
 	public static function getFleetApiKey() {
 		return self::$fleetApiKey;
@@ -101,8 +134,14 @@ class ConfigTT {
 	public static function getPartnerName() {
 		return self::$partnerName;
 	}
-	public static function getApiBaseUrl() {
-		return self::$apiBaseUrl;
+	public static function getPartnerId() {
+		return self::$partnerId;
+	}
+	public static function getTripThruBaseUrl() {
+		return self::$tripthruBaseUrl;
+	}
+	public static function getPartnerBaseUrl() {
+		return self::$partnerBaseUrl;
 	}
 	public static function getResetPasswordCallbackPage() {
 		return self::$resetPasswordCallbackPage;

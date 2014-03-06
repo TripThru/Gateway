@@ -1,4 +1,8 @@
 HomeUrl=http://localhost/BookingWebsite/
 RelativeHomeUrl=/BookingWebsite/index.php
-AccessToken=luxor23noiasdn2123
+TripThruUrl=http://54.201.134.194/TripThru.TripThruGateway/
+TripThruAccessToken=jaosid1201231
+PartnerUrl=http://54.201.134.194/TripThru.LuxorCab/
+PartnerAccessToken=luxor23noiasdn2123
 PartnerName=Luxor
+PartnerId=luxor@tripthru.com

@@ -20,13 +20,13 @@
 */
 
 
-//$td = new TDispatch();
 function valueReturnForm($key, $number = false) {
+	global $td;
     if (!isset($_SESSION))
         session_start();
     $form_resp = array();
-    if (isset($_SESSION['reacreateform'])) {
-        $form_resp = $_SESSION['reacreateform'];
+    if (isset($_SESSION[$td->partnerId]['reacreateform'])) {
+        $form_resp = $_SESSION[$td->partnerId]['reacreateform'];
     }
     $value = '';
     if (isset($_POST[$key])) {
@@ -72,7 +72,7 @@ if (isset($form_resp)) {
     if (!isset($_SESSION)) {
         session_start();
     }
-    $_SESSION['recreateform'] = $form_resp;
+    $_SESSION[$td->partnerId]['recreateform'] = $form_resp;
 }
 ?>
 <!--HEADER SECTION-->

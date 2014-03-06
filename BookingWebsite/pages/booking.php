@@ -38,11 +38,11 @@ $office_minutes = date('i');
 $office_date = date('d/m/Y');
 
 if (isset($_POST['booking_form_type'])) {
-    $_SESSION['post_booking'] = $_POST;
+    $_SESSION[$td->partnerId]['post_booking'] = $_POST;
     switch ($_POST['booking_form_type']) {
         case 'addposted':
         case 'add':
-            $_SESSION['post_booking']['booking_form_type'] = 'addposted';
+            $_SESSION[$td->partnerId]['post_booking']['booking_form_type'] = 'addposted';
             $booking_form_type = 'addposted';
             $selected_partner_id = $_POST['selected_partner_id'];
             $selected_partner_name = $_POST['selected_partner_name'];
@@ -99,7 +99,7 @@ if (isset($_POST['booking_form_type'])) {
 				
                 $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time, $p_location, $d_location, $selected_partner_id);
                 if ($bk_resp) {
-					$_SESSION['TRIPTHRU']['trips'][] = array(
+					$_SESSION[$td->partnerId]['trips'][] = array(
 						'trip_id' => $trip_id, 
 						'pickup_location' => $pickup_location,
 						'dropoff_location' => $dropoff_location,
@@ -108,8 +108,8 @@ if (isset($_POST['booking_form_type'])) {
                         'partner_name' => $selected_partner_name
 					);
                     unset($_POST);
-                    unset($_SESSION['post_booking']);
-                    $_SESSION['booking_complete'] = $bk_resp['pk'];
+                    unset($_SESSION[$td->partnerId]['post_booking']);
+                    $_SESSION[$td->partnerId]['booking_complete'] = $bk_resp['pk'];
                     //$_SESSION['booking_complete'] = array('bookingPk' => $bk_resp['bookingPk'], 'booking' => json_encode($bk_resp));
                     header('Location:' . $td->getHomeUrl() . '/bookings');
                 } else {
@@ -168,8 +168,8 @@ if (isset($_POST['booking_form_type'])) {
                 $bk_resp = $td->Bookings_update($bookingPk, $customer, $passenger, $pickup_time, $return_pickup_time, $pickup_location, $way_points, $dropoff_location, $vehicle_type, $extra_instructions, $luggage, $passengers, $payment_method, $prepaid, $status, $price_rule, $customFieldBooking);
                 if ($bk_resp) {
                     unset($_POST);
-                    unset($_SESSION['post_booking']);
-                    $_SESSION['booking_complete'] = $bk_resp['pk'];
+                    unset($_SESSION[$td->partnerId]['post_booking']);
+                    $_SESSION[$td->partnerId]['booking_complete'] = $bk_resp['pk'];
                     //$_SESSION['booking_complete'] = array('bookingPk' => $bk_resp['bookingPk'], 'booking' => json_encode($bk_resp));
                     header('Location:' . $td->getHomeUrl() . '/bookings');
                 } else {
@@ -220,9 +220,10 @@ if (isset($_POST['booking_form_type'])) {
 
 function valueReturnBooking($key, $default = '') {
     global $booking_resp;
+	global $td;
     $value = '';
-    if (isset($_SESSION['post_booking'][$key])) {
-        $value = stripslashes($_SESSION['post_booking'][$key]);
+    if (isset($_SESSION[$td->partnerId]['post_booking'][$key])) {
+        $value = stripslashes($_SESSION[$td->partnerId]['post_booking'][$key]);
     } elseif (isset($booking_resp[$key])) {
         $value = $booking_resp[$key];
     } else {
@@ -416,7 +417,7 @@ $fields = '';
             </div>
         <?php endif; ?>
 
-<?php if (!$td->Account_checkLogin() && isset($_SESSION['post_booking']['booking_form_type']) && ( $_SESSION['post_booking']['booking_form_type']) == 'addposted'): ?>
+<?php if (!$td->Account_checkLogin() && isset($_SESSION[$td->partnerId]['post_booking']['booking_form_type']) && ( $_SESSION[$td->partnerId]['post_booking']['booking_form_type']) == 'addposted'): ?>
             <div id="login-option-quote" class="box-container" style="display: block !important;">
                 <p>To complete this booking, please choose one option</p>
                 <a href="javascript:void(0);" id="login_book" class="blue-button">Login</a>
@@ -427,7 +428,7 @@ $fields = '';
                     <div id="map_canvas" class="small_map_canvas" ></div>
                     <div class="journey_map_info">
                         <?php 
-                            if ($td->Account_checkLogin() && isset($_SESSION['post_booking']['booking_form_type']) && ( $_SESSION['post_booking']['booking_form_type']) == 'addposted'){ 
+                            if ($td->Account_checkLogin() && isset($_SESSION[$td->partnerId]['post_booking']['booking_form_type']) && ( $_SESSION[$td->partnerId]['post_booking']['booking_form_type']) == 'addposted'){ 
                                 $bk_submit = 'Confirm'; 
                             }
                         ?>
@@ -557,70 +558,96 @@ $fields = '';
 
         //Draw map function
         function drawMap(data){
-            if(data.status_code == 200 && data.quotes.length > 0){
+            if(data.status_code == 200){
                 var partnersAvailable = false;
                 var b = true;
                 var bestOption;
-
-                // select best option
-                data.quotes.forEach(
-                    function(x){
-                        if(b){
-                            bestOption = x;
-                            b = false;
-                        }
-                        else if(x.price < bestOption.price){
-                            bestOption = x;
-                        }
-                        else if(x.price == bestOption.price && x.eta < bestOption.eta){
-                            bestOption = x;
-                        }
-                        else if(x.price == bestOption.price && x.eta == bestOption.eta && x.vehicleType == "Sedan"){
-                            bestOption = x;
-                        }
-                    }
-                )
+				var hasLocalQuotes = false;
+				var partnerId = "";
 
                 $("#suggested_partner").html('');
-                $("#partner_detail").html('<br><br><h1>Other available partners...</h1>');
-
-                var i = 0;
-                // show available options
-                data.quotes.forEach(
-                    function(x){
-                        //Display cost, destination
-                        partnersAvailable = true;
+				
+				if(data.localQuotes.count > 0){
+					$("#suggested_partner").append('<br><br><h1>With us</h1>');
+					data.localQuotes.quotes.forEach(function(x){
                         var eta = x.eta.split('T');
                         var time = eta[1].split('.');
+						$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+						$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+						$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+						$('#suggested_partner').on('click', '#book'+i, function() {
+							$("#selected_partner_id").val(x.partnerId);
+							$("#selected_partner_name").val(x.partnerName);
+						});
+						partnerId = x.partnerId;
+					});
+					
+					hasLocalQuotes = true;
+				}
+				
+				
 
+                // select best option
+                data.tripthruQuotes.quotes.forEach(
+                    function(x){
+						if(partnerId != x.partnerId){
+							if(b){
+								bestOption = x;
+								b = false;
+							}
+							else if(x.price < bestOption.price){
+								bestOption = x;
+							}
+							else if(x.price == bestOption.price && x.eta < bestOption.eta){
+								bestOption = x;
+							}
+							else if(x.price == bestOption.price && x.eta == bestOption.eta && x.vehicleType == "Sedan"){
+								bestOption = x;
+							}
+						}
+                    }
+                )
+				
+				if(hasLocalQuotes)
+					$("#partner_detail").html('<br><br><h1>Available partners</h1>');
+                var i = 0;
+                // show available options
+                data.tripthruQuotes.quotes.forEach(
+                    function(x){
+						if(partnerId != x.partnerId){
+							//Display cost, destination
+							partnersAvailable = true;
+							var eta = x.eta.split('T');
+							var time = eta[1].split('.');
 
-                        if(x == bestOption){
-                            $("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
-                            $("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-                            $("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-                            $("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-                            $("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-                            $('#suggested_partner').on('click', '#book'+i, function() {
-                                $("#selected_partner_id").val(x.partnerId);
-                                $("#selected_partner_name").val(x.partnerName);
-                            });
-                        }
-                        else{
-                            $("#partner_detail").append('<br><br><div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-                            $("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-                            $("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-                            $("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-                            $('#partner_detail').on('click', '#book'+i, function() {
-                                $("#selected_partner_id").val(x.partnerId);
-                                $("#selected_partner_name").val(x.partnerName);
-                            });
-                        }
-                        i++;
+							if(x == bestOption && !hasLocalQuotes){
+								$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
+								$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+								$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+								$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+								$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+								$('#suggested_partner').on('click', '#book'+i, function() {
+									$("#selected_partner_id").val(x.partnerId);
+									$("#selected_partner_name").val(x.partnerName);
+								});
+							}
+							else{
+								$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+								$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+								$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+								$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+								$('#partner_detail').on('click', '#book'+i, function() {
+									$("#selected_partner_id").val(x.partnerId);
+									$("#selected_partner_name").val(x.partnerName);
+								});
+							}
+							i++;
+						}
                     }
                 )
 
-                if(! partnersAvailable){
-                    $("#partner_detail").html('<div class="map_info_txt"><span></span><label>Sorry, no partners available on this area</label></div>');
+                if(!partnersAvailable && !hasLocalQuotes){
+                    $("#partner_detail").html('<div class="map_info_txt"><span></span><label>Sorry, no service available on this area</label></div>');
                 }
 
                 //Setup map directions

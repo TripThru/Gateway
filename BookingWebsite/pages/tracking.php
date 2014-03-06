@@ -60,6 +60,7 @@ if (!$td->Account_checkLogin()) {
         $(function() {
 
             var pk = getURLParameter("pk");
+			var partnerId = getURLParameter("partnerId");
 			/**
             if($(".vehicle_tracking_page").length){
                 //Read url paramteres
@@ -125,7 +126,8 @@ if (!$td->Account_checkLogin()) {
                 $.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),{
                     JSON:true,
                     TYPE:'getTrack',
-                    bookingPk:pk
+                    bookingPk:pk,
+					partnerId:partnerId
                 },function(data){
 					var stat = '';
 					if(data.resultCode == 'NotFound' || data.status == "Complete") {
@@ -168,7 +170,8 @@ if (!$td->Account_checkLogin()) {
 						$.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),{
 							JSON:true,
 							TYPE:'getTrack',
-							bookingPk:pk
+							bookingPk:pk,
+							partnerId:partnerId
 						},function(data){
 							if(data.resultCode == 'NotFound' || data.status == "Complete") {
 								$('#status').hide().html('<b>Status:</b><span>Completed</span>').fadeIn();

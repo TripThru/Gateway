@@ -50,15 +50,18 @@ class TripThru {
     public $api_key;
     public $api_cliente_id;
     public $api_secret;
-	public $access_token;
+	public $tripthruAccessToken;
+	public $partnerAccessToken;
     public $getHomeUrl;
     public $getRelativeHomeUrl;
 	public $apiUrl;
     public $debug;
     public $resetPasswordCallbackPage;
-    public $baseURL;
+    public $tripthruUrl;
+	public $partnerUrl;
     public $lastErrorMsg;
     public $lastErrorCode;
+	public $partnerId;
 
     /* API FUNCTIONS */
     function __construct() {
@@ -67,19 +70,21 @@ class TripThru {
         $this->api_key = ConfigTT::getFleetApiKey();
         $this->api_cliente_id = ConfigTT::getApiClientId();
         $this->api_secret = ConfigTT::getApiSecret();
-		$this->apiUrl = ConfigTT::getApiBaseUrl();
 		
         $this->getHomeUrl = ConfigTT::getHomeUrl();
         $this->getRelativeHomeUrl = ConfigTT::getRelativeHomeUrl();
         $this->debug = ConfigTT::isDebug();
         $this->resetPasswordCallbackPage = ConfigTT::getResetPasswordCallbackPage();
-        $this->baseURL = ConfigTT::getApiBaseUrl();
-		$this->access_token = ConfigTT::getAccessToken();
+        $this->tripthruUrl = ConfigTT::getTripThruBaseUrl();
+        $this->partnerUrl = ConfigTT::getPartnerBaseUrl();
+		$this->tripthruAccessToken = ConfigTT::getTripThruAccessToken();
+		$this->partnerAccessToken = ConfigTT::getPartnerAccessToken();
+		$this->partnerId = ConfigTT::getPartnerId();
     }
 
     public function getToken() {
-        if (isset($_SESSION['TRIPTHRU']['access']["access_token"])) {
-            return $_SESSION['TRIPTHRU']['access']["access_token"];
+        if (isset($_SESSION[$this->partnerId]['access']["access_token"])) {
+            return $_SESSION[$this->partnerId]['access']["access_token"];
         }
     }
 
@@ -131,8 +136,8 @@ class TripThru {
 
     public function Account_login($user, $password) {
 		if($user == 'passenger@tripthru.com' && $password == 'tripthru'){
-			$_SESSION['TRIPTHRU']['trips'] = array();
-			$_SESSION['TRIPTHRU']['access']["access_token"] = $this->access_token;
+			$_SESSION[$this->partnerId]['trips'] = array();
+			$_SESSION[$this->partnerId]['access']["access_token"] = $this->tripthruAccessToken;
 			return true;
 		}
     }
@@ -155,7 +160,7 @@ class TripThru {
      */
 
     public function Account_checkLogin() {
-        if (isset($_SESSION['TRIPTHRU']['access']["access_token"])) {
+        if (isset($_SESSION[$this->partnerId]['access']["access_token"])) {
             return true;
         }
         return false;
@@ -164,15 +169,22 @@ class TripThru {
     /* END - ACCOUNT FUNCTIONS */
 
 	public function Dispatch($passenger, $trip_id, $pickup_time, $pickup_location, $dropoff_location, $partnerId){
-
-        $url = $this->apiUrl . 'dispatch';
+		$url = '';
+		$access_token = '';
+		if($partnerId == $this->partnerId){
+			$url = $this->partnerUrl . 'dispatch';
+			$access_token = $this->tripthruAccessToken;
+		} else {
+			$url = $this->tripthruUrl . 'dispatch';
+			$access_token = $this->partnerAccessToken;
+		}
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		
 		$dataSend = array(
-            "access_token" => $this->access_token,
+            "access_token" => $access_token,
 			'passengerId' => $passenger['id'],
 			'passengerName' => $passenger['name'],
             'pickupTime' => $pickup_time,
@@ -202,12 +214,12 @@ class TripThru {
             return false;
         }
 		
-        return array('pk' => $trip_id);
+        return $res;
 	}
 	
 	public function Get_quotes($pickup_time, $pickup_location, $dropoff_location){
 		$data = array(
-			"access_token" => $this->access_token,
+			"access_token" => $this->tripthruAccessToken,
             'pickupTime' => $pickup_time,
             'pickupLat' => $pickup_location['lat'],
 			'pickupLng' => $pickup_location['lng'],
@@ -215,27 +227,60 @@ class TripThru {
             'dropoffLng' => $dropoff_location['lng']
 		);
 
-		$url = $this->apiUrl . 'quotes?' . http_build_query($data);
+		$url = $this->partnerUrl . 'quotes?' . http_build_query($data);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$result = curl_exec($ch);
-		$res = json_decode($result, true);
+		$resLocal = json_decode($result, true);
 		$info = curl_getinfo($ch);
 		curl_close($ch);
+
+		$data["access_token"] = $this->partnerAccessToken;
+
+		$url = $this->tripthruUrl . 'quotes?' . http_build_query($data);
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+		$result = curl_exec($ch);
+		$resTripThru = json_decode($result, true);
+		$info = curl_getinfo($ch);
+		curl_close($ch);
+		
+		if ((!isset($resLocal['result']) || $resLocal['result'] != 'OK') && (!isset($resTripThru['result']) || $resTripThru['result'] != 'OK')) {
+            $this->setError($res);
+            return false;
+        }
+		
+		$res = array(
+			"localQuotes" => $resLocal,
+			"tripthruQuotes" => $resTripThru
+		);
 		
         return $res;
 	}
 	
-	public function Get_trip_status($trip_id){
+	public function Get_trip_status($trip_id, $partnerId){
+		$url = '';
+		$access_token = '';
+		if($partnerId == $this->partnerId){
+			$url = $this->partnerUrl;
+			$access_token = $this->tripthruAccessToken;
+		} else {
+			$url = $this->tripthruUrl;
+			$access_token = $this->partnerAccessToken;
+		}
+		
 		$data = array(
 			"tripid" => $trip_id,
-			"access_token" => $this->access_token
+			"access_token" => $access_token
 		);
 
-		$url = $this->apiUrl . 'tripstatus?' . http_build_query($data);
+		$url = $url . 'tripstatus?' . http_build_query($data);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_URL, $url);

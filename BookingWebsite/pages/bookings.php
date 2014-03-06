@@ -40,7 +40,7 @@ if (!$td->Account_checkLogin()) {
                 $page = $_GET["page"];
             $status = "quoting,incoming,from_partner,dispatched,confirmed,active,completed,rejected,cancelled,draft";
             $offset = ($page - 1) * $ipp;
-            $bookings = $_SESSION['TRIPTHRU']['trips'];
+            $bookings = $_SESSION[$td->partnerId]['trips'];
 
             if (count($bookings)) {
                 echo '<table class="bookings_table"><tr class="booking_table_heading"><td>Partner</td><td>From</td><td>To</td><td>Date</td><td></td></tr>';
@@ -52,7 +52,7 @@ if (!$td->Account_checkLogin()) {
                     echo '<td>' . $booking["dropoff_location"]["address"] . '</td>';
                     echo '<td class="bookings_datetime">' . date('Y-m-d', strtotime($booking["pickup_time"])) . '</td>';
                     echo '<td class="bookings_status">' .
-                    '<a href="tracking?pk=' . $booking["trip_id"] . '">Track</a>'.
+                    '<a href="tracking?pk=' . $booking["trip_id"] . '&partnerId=' . $booking["partner_id"] . '">Track</a>'.
                     '</td>';
                     echo '</tr>';
                 }
@@ -126,8 +126,8 @@ if (!$td->Account_checkLogin()) {
                 });
 
 
-<?php if (isset($_SESSION['booking_complete']) && $_SESSION['booking_complete'] != ''): ?>
-            var book_pk = '<?php echo $_SESSION['booking_complete']; ?>';
+<?php if (isset($_SESSION[$td->partnerId]['booking_complete']) && $_SESSION[$td->partnerId]['booking_complete'] != ''): ?>
+            var book_pk = '<?php echo $_SESSION[$td->partnerId]['booking_complete']; ?>';
             $('.booking_table_rows').removeClass('booking-highlight');
             $('.booking_table_rows[book_pk='+book_pk+']').addClass('booking-highlight');
 
@@ -138,7 +138,7 @@ if (!$td->Account_checkLogin()) {
                 },3000);
             });
     <?php
-    unset($_SESSION['booking_complete']);
+    unset($_SESSION[$td->partnerId]['booking_complete']);
 endif;
 ?>
 

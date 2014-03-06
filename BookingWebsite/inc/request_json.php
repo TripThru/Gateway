@@ -67,7 +67,8 @@ switch ($type) {
 		$td = new TripThru();
         if ($td->Account_checkLogin()) {
             $bookingPk = (isset($_POST['bookingPk']) ? $_POST['bookingPk'] : '');
-            $out = $td->Get_trip_status($bookingPk);
+            $partnerId = (isset($_POST['partnerId']) ? $_POST['partnerId'] : '');
+            $out = $td->Get_trip_status($bookingPk, $partnerId);
 			
             if ($out) {
                 header('Content-type: application/json');
@@ -112,7 +113,7 @@ switch ($type) {
             $response['pickup_location']['lng'] = $pickupLocation["location"]["lng"];
             $response['dropoff_location']['lat'] = $dropoffLocation["location"]["lat"];
             $response['dropoff_location']['lng'] = $dropoffLocation["location"]["lng"];
-        } else {
+		} else {
             $response = array("message" => array("text" => "Call /quotes failed"), "status_code" => 400);
         }
         header('Content-type: application/json');

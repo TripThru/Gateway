@@ -70,8 +70,12 @@ namespace TripThruSsh
                 var bookingwebConfig = new System.IO.StreamWriter("config.txt");
                 bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
                 bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
-                bookingwebConfig.WriteLine("AccessToken=" + configuration.Partner.AccessToken);
+                bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
+                bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
+                bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
+                bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
                 bookingwebConfig.WriteLine("PartnerName=" + name);
+                bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
                 bookingwebConfig.Flush();
                 bookingwebConfig.Close();
                 ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/inc/tripthru/config.txt");
@@ -170,6 +174,7 @@ namespace TripThruSsh
 
     public class PartnerConfiguration
     {
+        public string TripThruUrlMono { get; set; }
         public ConfigPartner Partner { get; set; }
 
         public class ConfigPartner
@@ -177,7 +182,9 @@ namespace TripThruSsh
             public string Name { get; set; }
             public string WebUrl { get; set; }
             public string WebUrlRelative { get; set; }
+            public string CallbackUrlMono { get; set; }
             public string AccessToken { get; set; }
+            public string ClientId { get; set; }
         }
     }
 }
