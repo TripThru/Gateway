@@ -40,7 +40,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK,
-                    LogList = Logger.Queue.Where(log => log.tripID == null || log.tripID == request.tripID).ToList()
+                    LogList = Logger.Queue.Where(log => log.tripID == request.tripID).ToList()
                 };
             }
         }

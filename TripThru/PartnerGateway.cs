@@ -222,7 +222,14 @@ namespace TripThruCore
                 var trips = new List<Trip>();
                 if (activeTrips.Count > 0)
                 {
-                    trips.AddRange(activeTrips.Values);
+                    if (r.status != null)
+                    {
+                        trips.AddRange(activeTrips.Values.Where(trip => trip.Status == r.status).ToList());
+                    }
+                    else
+                    {
+                        trips.AddRange(activeTrips.Values);
+                    }
                 }
                 return new GetTripsResponse(trips);
             }
@@ -430,6 +437,7 @@ namespace TripThruCore
             {
                 Logger.Log("Trip status changed from " + _status + " to " + value);
                 _status = value;
+                this.partner.activeTrips[this.ID].Status = value;
                 if ((origination == Origination.Foreign || service == Origination.Foreign) && notifyPartner)
                 {
                     Logger.Log("Since trip originated elsewhere, notify originating partner through TripThru");

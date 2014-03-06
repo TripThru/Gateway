@@ -460,7 +460,14 @@ namespace TripThruCore
                 var trips = new List<Trip>();
                 if (activeTrips.Count > 0)
                 {
-                    trips.AddRange(activeTrips.Values);
+                    if (r.status != null)
+                    {
+                        trips.AddRange(activeTrips.Values.Where(trip => trip.Status == r.status).ToList());
+                    }
+                    else
+                    {
+                        trips.AddRange(activeTrips.Values);
+                    }
                 }
                 return new GetTripsResponse(trips);
             }

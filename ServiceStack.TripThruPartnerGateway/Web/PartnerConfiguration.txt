@@ -12,7 +12,7 @@
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 10,
+        "tripsPerHour" : 1,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
