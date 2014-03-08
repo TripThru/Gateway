@@ -28,11 +28,100 @@ if (!$td->Account_checkLogin()) {
     exit;
 }
 ?>
+<style>
+#trip-info {
+margin-top: 10px;
+margin-bottom: 10px;
+text-indent: 15px;
+font-size: 16px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+#trip-info p {
+	margin: 0px;
+	padding: 0;
+}
+
+#trip-info div {
+	float: left;
+}
+</style>
+
 
 <div id="maincol" >
     <!--TRACKING INFO CONTAINER-->
     <div class="account_fields_cont vehicle_tracking_page box-container">
         <h1>Track your vehicle</h1>
+		<div id="trip-info">
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Passenger: </span>
+					<span id="selectedTripPassengerName" />
+				</p>
+			</div>
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Pickup time: </span>
+					<span id="selectedTripPickupTime" />
+				</p>
+			</div>
+			<br />
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Pickup: </span>
+					<span id="selectedTripPickupLocation" />
+				</p>
+			</div>
+			<br />
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Origin: </span>
+					<span id="selectedTripOriginatingPartner"></span>
+				</p>
+			</div>
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Servicing: </span>
+					<span id="selectedTripServicingPartner"></span>
+				</p>
+			</div>
+			<br />
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Status: </span>
+					<span id="selectedTripStatus">Select a trip to track</span>
+				</p>
+			</div>
+			<div>
+				<p>
+					<span style='font-weight: bold;'>ETA: </span>
+					<span id="selectedTripETA" />
+				</p>
+			</div>
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Fare: </span>$
+					<span id="selectedTripFare" />
+				</p>
+			</div>
+			<br />
+			<div>
+				<p>
+					<span style='font-weight: bold;'>Driver: </span>
+					<span id="selectedTripDriverName" />
+				</p>
+				<p>
+					<span style='font-weight: bold;'>Driver location: </span>
+					<span id="selectedTripDriverLocation" />
+				</p>
+				<p>
+					<span style='font-weight: bold;'>Drop off: </span>
+					<span id="selectedTripDropoffLocation" />
+				</p>
+			</div>
+		</div>
         <!--Tracking map-->
         <div id="map-canvas" class="tracking_map" ></div>
         <!--Tracking map-->
@@ -131,34 +220,46 @@ if (!$td->Account_checkLogin()) {
                 },function(data){
 					var stat = '';
 					if(data.resultCode == 'NotFound' || data.status == "Complete") {
-						var status = [];
-						status.push('<div id="status" class="booking_date_cost"><b>Status:</b><span>Completed</span></div>');
-						$(status.join('')).hide().insertAfter(".account_fields_cont h1").fadeIn();
+						setTripInfo(data);
 						completed = true;
 						return;
 					}
-					var status = [];
-					status.push('<div id="status" class="booking_date_cost"><b>Status:</b><span>'+data.status+'</span></div>');
-					$(status.join('')).hide().insertAfter(".account_fields_cont h1").fadeIn();
+					setTripInfo(data);
                     if(!$.isEmptyObject(data.driverLocation))
                     {
-                        //Get vehicle lng/lat and store it to local variable
-                        var lat = data.driverLocation.lat;
-                        var lng = data.driverLocation.lng;
-                        var setupLocation = new google.maps.LatLng(lat,lng);
+                        var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
+						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
+						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+						
                         //Setup google maps for first time
                         var mapOptions = {
-                            center: setupLocation,
+                            center: driverLocation,
                             zoom: 15,
                             mapTypeId: google.maps.MapTypeId.ROADMAP
                         };
                         map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-                        //Vehicle marker
-                        marker = new google.maps.Marker({
-                            position: setupLocation,
+                        
+                        driverMarker = new google.maps.Marker({
+                            position: driverLocation,
                             map: map,
-                            draggable:false
+                            draggable:false,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=taxi|FFFF00",
+							title: 'Driver'
                         });
+						
+						pickupMarker = new google.maps.Marker({
+							position: pickupLocation,
+							map: map,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00",
+							title: 'Pickup'
+						});
+						
+						dropoffMarker = new google.maps.Marker({
+							position: dropoffLocation,
+							map: map,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
+							title: 'Destination'
+						});
                     }else{
                         $(".tracking_map").text("Driver location unavailable");
                     }
@@ -166,7 +267,11 @@ if (!$td->Account_checkLogin()) {
 				
                 //Reload map marker and location every 30 sec
 				if(!completed){
+					var updating = false;
 					var loop = setInterval(function(){
+						if(!updating)
+						{
+						updating = true;
 						$.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),{
 							JSON:true,
 							TYPE:'getTrack',
@@ -174,42 +279,97 @@ if (!$td->Account_checkLogin()) {
 							partnerId:partnerId
 						},function(data){
 							if(data.resultCode == 'NotFound' || data.status == "Complete") {
-								$('#status').hide().html('<b>Status:</b><span>Completed</span>').fadeIn();
+								setTripInfo(data);
+								updateMap(data);
 								clearInterval(loop);
 								return;
 							} else {
 								if(data.status){
-									$('#status').hide().html('<b>Status:</b><span>'+data.status+'</span>').fadeIn();
-									if(!$.isEmptyObject(data.driverLocation))
-									{
-										//Get vehicle lng/lat and store it to local variable
-										var lat = data.driverLocation.lat;
-										var lng = data.driverLocation.lng;
-										var setupLocation = new google.maps.LatLng(lat,lng);
-										if(!marker){
-											var mapOptions = {
-												center: setupLocation,
-												zoom: 15,
-												mapTypeId: google.maps.MapTypeId.ROADMAP
-											};
-											map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-											//Vehicle marker
-											marker = new google.maps.Marker({
-												position: setupLocation,
-												map: map,
-												draggable:false
-											});
-										}
-										//Setup google maps center and new vehicle location
-										marker.setPosition(setupLocation);
-										map.setCenter(setupLocation);
-									}else{
-										$(".tracking_map").text("Driver location unavailable");
+									setTripInfo(data);
+									updateMap(data);
 									}
-								}
 							}
-						},"json");
-					},30000);
+
+							updating = false;
+						},"json").error( function() {
+							updating = false;
+						});
+
+						}
+
+					},15000);
+				}
+				
+				function setTripInfo(trip){
+					var passengerName = trip.passengerName ? trip.passengerName : 'Not available';
+					var pickupTime = trip.pickupTime ? trip.pickupTime.split(".")[0] : (trip.resultCode != 'NotFound' ? 'Passenger waiting' : 'Not available');
+					var status = trip.status ? trip.status : (trip.resultCode == 'NotFound' ? 'Complete' : 'Not available');
+					var eta = trip.eta ? trip.eta.split(".")[0] : 'Not available';
+					var fare = trip.price ? Math.round(trip.price).toFixed(2) : 'Not available';
+					var driverName = trip.driverName ? trip.driverName : 'Not available';
+					var pickupLocationName = trip.pickupLocation ? trip.pickupLocation.address : 'Not available';
+					var dropoffLocationName = trip.dropoffLocation ? trip.dropoffLocation.address : 'Not available';
+					var driverLocationName = trip.driverLocation ? trip.driverLocation.address : "Not available";
+					var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
+					var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
+
+					$("#selectedTripPassengerName").hide().html(passengerName).fadeIn();
+					$("#selectedTripPickupTime").hide().html(pickupTime).fadeIn();
+					$("#selectedTripPickupLocation").hide().html(pickupLocationName).fadeIn();
+					$("#selectedTripStatus").hide().html(status).fadeIn();
+					$("#selectedTripETA").hide().html(eta).fadeIn();
+					$("#selectedTripFare").hide().html(fare).fadeIn();
+					$("#selectedTripDropoffLocation").hide().html(dropoffLocationName).fadeIn();
+					$("#selectedTripDriverName").hide().html(driverName).fadeIn();
+					$("#selectedTripDriverLocation").hide().html(driverLocationName).fadeIn();
+					$("#selectedTripOriginatingPartner").hide().html(originatingPartnerName).fadeIn();
+					$("#selectedTripServicingPartner").hide().html(servicingPartnerName).fadeIn();
+				}
+            }
+
+            function updateMap(data){
+				if(!$.isEmptyObject(data.driverLocation))
+				{
+					var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
+					if(!map){
+						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
+						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+						
+						//Setup google maps for first time
+						var mapOptions = {
+							center: driverLocation,
+							zoom: 15,
+							mapTypeId: google.maps.MapTypeId.ROADMAP
+						};
+						map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+						
+						driverMarker = new google.maps.Marker({
+							position: driverLocation,
+							map: map,
+							draggable:false,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=taxi|FFFF00",
+							title: 'Driver'
+						});
+						
+						pickupMarker = new google.maps.Marker({
+							position: pickupLocation,
+							map: map,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00",
+							title: 'Pickup'
+						});
+						
+						dropoffMarker = new google.maps.Marker({
+							position: dropoffLocation,
+							map: map,
+							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
+							title: 'Destination'
+						});
+					}
+					//Setup google maps center and new vehicle location
+					driverMarker.setPosition(driverLocation);
+					map.setCenter(driverLocation);
+				}else{
+					$(".tracking_map").text("Driver location unavailable");
 				}
             }
 
