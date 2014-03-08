@@ -378,7 +378,7 @@ namespace Utils
         static long nextID = 0;
         static public string GenerateUniqueID() { nextID++; return nextID.ToString(); }
         static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
-    
+
     }
 
     public class MapTools
@@ -597,13 +597,13 @@ namespace Utils
 
                 XmlDocument doc = new XmlDocument();
                 {
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
+                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                     XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
                     if (element.InnerText == "OVER_QUERY_LIMIT")
                     {
 
                         System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
+                        doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                         element = doc.SelectSingleNode("//GeocodeResponse/status");
 
                     }
@@ -631,13 +631,13 @@ namespace Utils
                 //return "Google -- Over query limit";
 
                 XmlDocument doc = new XmlDocument();
-            doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
+                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                 XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
                 if (element.InnerText == "OVER_QUERY_LIMIT")
                 {
 
                     System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
+                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
                     element = doc.SelectSingleNode("//GeocodeResponse/status");
 
                 }
@@ -666,17 +666,18 @@ namespace Utils
 
         // http://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&sensor=false
         public static Route GetRoute(Location from, Location to)
-        {
+        {//GETROUTEOSCAR
             lock (routes)
             {
                 string key = Route.GetKey(from, to);
                 if (routes.ContainsKey(key))
                     return routes[key];
                 double METERS_TO_MILES = 0.000621371192;
+                int MAX_DURATION = 10;
                 XmlDocument doc = new XmlDocument();
                 TimeSpan elapse = new TimeSpan(0, 0, 0);
                 double totalDistance = 0;
-                string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false";
+                string url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false&units=imperial";
                 doc.Load(url);
                 XmlNode status = doc.SelectSingleNode("//DirectionsResponse/status");
                 if (status == null || status.InnerText == "ZERO_RESULTS")
@@ -689,12 +690,24 @@ namespace Utils
                     var stepNodes = leg.SelectNodes("step");
                     foreach (XmlNode stepNode in stepNodes)
                     {
-                        TimeSpan duration = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
-                        Location end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                        int duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
                         double distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * METERS_TO_MILES;
-                            totalDistance += distance;
-                            elapse += duration;
+                        TimeSpan duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
+                        Location end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                        totalDistance += distance;
+                        TimeSpan timeSpanTemp = elapse;
+                        elapse += duration2;
+
+                        if (duration > MAX_DURATION)
+                        {
+                            Location start = new Location(double.Parse(stepNode.SelectSingleNode("start_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("start_location/lng").InnerText));
+                            waypoints.AddRange(IncreaseGranularity(duration, MAX_DURATION, timeSpanTemp.TotalSeconds, distance, start, end));
+                        }
+                        else
+                        {
                             waypoints.Add(new Waypoint(end, elapse, totalDistance));
+                        }
+
                     }
                 }
                 waypoints.Add(new Waypoint(to, elapse, totalDistance));
@@ -703,7 +716,36 @@ namespace Utils
                 return route;
             }
         }
+
+        private static List<Waypoint> IncreaseGranularity(int duration, int maxDuration, double totalDuration, double distance, Location from, Location to)
+        {
+            List<Waypoint> wayPoints = new List<Waypoint>();
+
+            double granularity = (duration / maxDuration);
+            double stepDistance = distance / granularity;
+            double stepDistaceCount = 0;
+            double durationCount = totalDuration;
+            double stepLat = from.Lat - to.Lat;
+            double stepLng = from.Lng - to.Lng;
+            double subStepLat = stepLat / granularity;
+            double subStepLng = stepLng / granularity;
+            for (int i = 0; i < (granularity - 1); i++)
+            {
+                from.Lat -= subStepLat;
+                from.Lng -= subStepLng;
+                Location location = new Location(from.Lat, from.Lng);
+
+                durationCount += maxDuration;
+                stepDistaceCount += stepDistance;
+
+                TimeSpan timeSpan = new TimeSpan(0, 0, (int)durationCount);
+                wayPoints.Add(new Waypoint(location, timeSpan, stepDistaceCount));
+
+            }
+            return wayPoints;
+        }
     }
+
     public class GarbageCleanup<T>
     {
         TimeSpan maxAge;
@@ -754,89 +796,89 @@ namespace Utils
             TryAdd(key, value);
         }
     }
-/*
-    public class RedisDictionary<K, T> : IEnumerable<T>
-    {
-        RedisClient redis;
-        string id;
-        public RedisDictionary(RedisClient redis, string id, Expression<Func<T>> member)
+    /*
+        public class RedisDictionary<K, T> : IEnumerable<T>
         {
-            this.redis = redis;
-            this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
-        }
-        public RedisDictionary(RedisClient redis, string id)
-        {
-            this.redis = redis;
-            this.id = id;
-        }
-        public bool ContainsKey(K key)
-        {
-            return redis.As<T>().GetHash<K>(id).ContainsKey(key);
-        }
-        public void Clear()
-        {
-            redis.As<T>().GetHash<K>(id).Clear();
-        }
-        public void Remove(K key)
-        {
-            redis.As<T>().GetHash<K>(id).Remove(key);
-        }
-        public void Add(K key, T item)
-        {
-            this[key] = item;
-        }
-
-        public IEnumerable<K> Keys
-        {
-            get
+            RedisClient redis;
+            string id;
+            public RedisDictionary(RedisClient redis, string id, Expression<Func<T>> member)
             {
-                return redis.As<T>().GetHash<K>(id).Keys;
+                this.redis = redis;
+                this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
             }
-        }
-
-        public IEnumerable<T> Values
-        {
-            get
+            public RedisDictionary(RedisClient redis, string id)
             {
-                return redis.As<T>().GetHash<K>(id).Values;
+                this.redis = redis;
+                this.id = id;
             }
-        }
-
-        public T this[K key]
-        {
-            get
+            public bool ContainsKey(K key)
             {
-                return redis.As<T>().GetHash<K>(id)[key];
+                return redis.As<T>().GetHash<K>(id).ContainsKey(key);
             }
-            set
+            public void Clear()
             {
-                redis.As<T>().GetHash<K>(id)[key] = value;
+                redis.As<T>().GetHash<K>(id).Clear();
             }
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            // Lets call the generic version here
-            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
-        }
-
-        public int Count
-        {
-            get
+            public void Remove(K key)
             {
-                return redis.As<T>().GetHash<K>(id).Count;
+                redis.As<T>().GetHash<K>(id).Remove(key);
             }
-        }
+            public void Add(K key, T item)
+            {
+                this[key] = item;
+            }
 
-        public IEnumerator<T> GetEnumerator<T>()
-        {
-            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
-        }
-        public IEnumerator<T> GetEnumerator()
-        {
-            return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
-        }
-    } */
+            public IEnumerable<K> Keys
+            {
+                get
+                {
+                    return redis.As<T>().GetHash<K>(id).Keys;
+                }
+            }
+
+            public IEnumerable<T> Values
+            {
+                get
+                {
+                    return redis.As<T>().GetHash<K>(id).Values;
+                }
+            }
+
+            public T this[K key]
+            {
+                get
+                {
+                    return redis.As<T>().GetHash<K>(id)[key];
+                }
+                set
+                {
+                    redis.As<T>().GetHash<K>(id)[key] = value;
+                }
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                // Lets call the generic version here
+                return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return redis.As<T>().GetHash<K>(id).Count;
+                }
+            }
+
+            public IEnumerator<T> GetEnumerator<T>()
+            {
+                return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+            }
+            public IEnumerator<T> GetEnumerator()
+            {
+                return redis.As<T>().GetHash<K>(id).Values.GetEnumerator();
+            }
+        } */
 
 
     public class RedisExpiryCounter : RedisExpiryList<double>
@@ -891,13 +933,13 @@ namespace Utils
             this.redis = redis;
             this.id = id;
         }
-//        ServiceStack.Redis.Generic.IRedisList<Pair<DateTime, T>> List { get { return redis.As<Pair<DateTime, T>>().Lists[id]; } }
-        ConcurrentQueue<Pair<DateTime, T>> List = new ConcurrentQueue<Pair<DateTime,T>>();
+        //        ServiceStack.Redis.Generic.IRedisList<Pair<DateTime, T>> List { get { return redis.As<Pair<DateTime, T>>().Lists[id]; } }
+        ConcurrentQueue<Pair<DateTime, T>> List = new ConcurrentQueue<Pair<DateTime, T>>();
         void Cleanup()
         {
             while (List.Count > 0)
             {
-//                    if (List.Count > 0 && List.Last().First <= DateTime.UtcNow)
+                //                    if (List.Count > 0 && List.Last().First <= DateTime.UtcNow)
                 Pair<DateTime, T> end;
                 List.TryPeek(out end);
                 if (List.Count > 0 && end.First <= DateTime.UtcNow)
@@ -924,7 +966,7 @@ namespace Utils
             Pair<DateTime, T> end;
             while (List.Count > 0)
                 List.TryDequeue(out end); // RemoveEnd();  // for Redis
-//            List.Clear();
+            //            List.Clear();
         }
         public void Add(T item, DateTime expireAt)
         {
@@ -942,12 +984,12 @@ namespace Utils
             Cleanup();
             return List.GetEnumerator();
         }
-/*        public IEnumerator<Pair<DateTime, T>> GetEnumerator<T>() for Redis?
-        {
-            Cleanup();
-//            return (IEnumerator<Pair<DateTime, T>>)List.GetEnumerator();
-            return (IEnumerator<Pair<DateTime, T>>) List.GetEnumerator();
-        } */
+        /*        public IEnumerator<Pair<DateTime, T>> GetEnumerator<T>() for Redis?
+                {
+                    Cleanup();
+        //            return (IEnumerator<Pair<DateTime, T>>)List.GetEnumerator();
+                    return (IEnumerator<Pair<DateTime, T>>) List.GetEnumerator();
+                } */
         public IEnumerator<Pair<DateTime, T>> GetEnumerator()
         {
             Cleanup();
@@ -1048,7 +1090,7 @@ namespace Utils
         {
             this.maxAge = maxAge;
             counts = new Queue<Pair<DateTime, double>>();
-}
+        }
         void Cleanup()
         {
             while (counts.Count > 0 && DateTime.UtcNow - counts.Peek().First > maxAge)
