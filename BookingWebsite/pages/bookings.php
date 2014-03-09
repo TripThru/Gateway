@@ -42,21 +42,21 @@ if (!$td->Account_checkLogin()) {
             $offset = ($page - 1) * $ipp;
             $bookings = $_SESSION[$td->partnerId]['trips'];
 
+			$trip_list = '';
             if (count($bookings)) {
                 echo '<table class="bookings_table"><tr class="booking_table_heading"><td>Partner</td><td>From</td><td>To</td><td>Date</td><td></td></tr>';
-				
                 foreach ($bookings as $key => $booking) {
+					$trip_list = $trip_list . ($trip_list != '' ? ',' : '') . $booking["trip_id"] . "|" . $booking["partner_id"];
                     echo '<tr class="booking_table_rows" book_pk="' . $booking["trip_id"] . '">';
                     echo '<td>' . $booking["partner_name"] . '</td>';
                     echo '<td>' . $booking["pickup_location"]["address"] . '</td>';
                     echo '<td>' . $booking["dropoff_location"]["address"] . '</td>';
                     echo '<td class="bookings_datetime">' . date('Y-m-d', strtotime($booking["pickup_time"])) . '</td>';
-                    echo '<td class="bookings_status">' .
-                    '<a href="tracking?pk=' . $booking["trip_id"] . '&partnerId=' . $booking["partner_id"] . '">Track</a>'.
-                    '</td>';
+					echo '<td class="bookings_status" id="' . $booking["trip_id"] .'">Updating...</td>';
                     echo '</tr>';
                 }
                 echo '</table>';
+				echo '<div style="display:none;" id="trips_list">' . $trip_list . '</div>';
                 $total = count($bookings);
 
                 if ($ipp < $total) {
@@ -91,8 +91,27 @@ if (!$td->Account_checkLogin()) {
             #bookings-completed-message{border-color:#0fc16a;background-color: #f7fffa;}
         </style>
         <script type="text/javascript">
+			var trips = $("#trips_list").html().split(",");
+			
+			trips.forEach(function(trip){
+				var tripInfo = trip.split("|");
+				var tripId = tripInfo[0];
+				var partnerId = tripInfo[1];
+				$.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),{
+					JSON:true,
+					TYPE:'getTrack',
+					bookingPk: tripId,
+					partnerId: partnerId
+				},function(data){
+					if(data.resultCode == 'NotFound' || data.status == "Complete") {
+						$("#"+tripId).hide().html("Completed").fadeIn();
+					} else {
+						$("#"+tripId).hide().html('<a href="tracking?pk='+tripId+'&partnerId='+partnerId+'">Track</a>').fadeIn();
+					}
+				},"json");
+			});
+			
             $(function(){
-
 
                 $('.bookings_cancel').click(function(){
                     var pk = $(this).attr('pk');

@@ -36,11 +36,13 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
+                List<Logger.RequestLog> logList = 
+                    request.tripID == null ? Logger.Queue.ToList() : Logger.Queue.Where(log => log.tripID == request.tripID).ToList();
                 return new LogResponse
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK,
-                    LogList = Logger.Queue.Where(log => log.tripID == request.tripID).ToList()
+                    LogList = logList
                 };
             }
         }

@@ -88,7 +88,7 @@ namespace Utils
                             {
                                 requestLog = this.queue.Dequeue();
                                 foreach (Pair<int, string> msg in requestLog.Messages)
-                                    logEntries.Add(msg.Second);
+                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg.Second);
                             }
 
                             if (logEntries.Any())
@@ -174,13 +174,13 @@ namespace Utils
 
         public class RequestLog
         {
-            public DateTime Time;
-            public List<Pair<int,string>> Messages;
-            public string Request;
-            public string Response;
-            public int MaxTab;
-            public int Tab;
-            public string tripID;
+            public DateTime Time { get; set; }
+            public List<Pair<int, string>> Messages { get; set; }
+            public string Request { get; set; }
+            public string Response { get; set; }
+            public int MaxTab { get; set; }
+            public int Tab { get; set; }
+            public string tripID { get; set; }
 
             public RequestLog(string request, string tripID = null)
             {
@@ -224,13 +224,7 @@ namespace Utils
             else if (!numBegunRequests.ContainsKey(thread))
                 numBegunRequests[thread] = 0;
             numBegunRequests[thread] = numBegunRequests[thread] + 1;
-            //            if (request != null)
-            //                msg += ": Request = " + restReq.JsonSerializer.Serialize(request);
-            if (numBegunRequests[thread] == 1)
-                Logger.Log(DateTime.Now.ToString() + " | " + msg);
-            //                Logger.Log(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg);
-            else
-                Logger.Log(msg);
+            Logger.Log(msg);
             Logger.Tab();
         }
 

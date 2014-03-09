@@ -12,6 +12,8 @@
     <script type="text/javascript" src="http://code.highcharts.com/highcharts-more.js"></script>
     <script type="text/javascript" src="Scripts/jquery.easing.1.3.js"></script>
     <script type="text/javascript" src="Scripts/jquery.flipCounter.1.2.pack.js"></script>
+    <!--<script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>-->
+    <script type="text/javascript" src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
 </head>
 
 
@@ -80,10 +82,11 @@
             height: 72px;
             background: #FFF;
             font-size: 0.85em;
+            border-bottom: 1px solid #E3E3E3;
         }
 
         #header {
-            width: 960px;
+            width: 95%;
             height: 70px;
             margin: 0px auto;
         }
@@ -91,7 +94,7 @@
 
         /*CHARTS STYLE*/
         .box_container {
-            width: 960px;
+            width: 98%;
             margin: 0px auto;
             margin-top: 10px;
         }
@@ -103,72 +106,136 @@
             padding-top: 10px;
         }
 
-        .left_container {
-            float: left;
-            position: absolute;
-            width: 585px;
+        .box_container_subtitle {
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            padding-top: 10px;
         }
 
-        .right_container {
-            width: 285px;
-            margin-left: 595px;
+        #counters_main_container {
+            float: left;
+            display: block;
+            overflow: hidden;
+            width: 50%;
         }
 
         .counters_container {
             background: #fff;
-            width: 287px;
-            height: 350px;
+            min-width: 200px;
+            width: 30%;
+            height: 280px;
             text-align: center;
             float: left;
-            display: block;
+            display: inline-block;
+            border: 1px solid #E3E3E3;
+            margin-top: 10px;
         }
 
         .counter {
             padding-top: 10px;
-            padding-bottom: 10px;
         }
 
         .chart_container {
-            height: 300px;
+            height: 806px;
+            min-width: 280px;
+            width: 17%;
             background: #FFF;
+            float: right;
+            display: block;
+            margin-left: 10px;
+            margin-top: 10px;
+            margin-right: -10px;
+            border: 1px solid #E3E3E3;
         }
 
-        .trips_container {
-            height: 300px;
+        #stats {
+            height: 795px;
+            min-width: 280px;
+            width: 100%;
             background: #FFF;
+            float: left;
+            display: block;
+            margin-top: 10px;
+        }
+
+        #trip_gauges_container {
+            min-width: 325px;
+            width: 15%;
+            height: 280px;
+            background: #FFF;
+            float: left;
+            display: block;
+            margin-top: 10px;
+            margin-left: 10px;
+            border: 1px solid #E3E3E3;
+        }
+
+        .trip_gauge {
+            width: 300px;
+            height: 250px;
+            background: #FFF;
+            margin-left: 15px;
+            float: left;
+            display: block;
         }
 
         .map_container {
             height: 513px;
+            min-width: 624px;
+            width: 46.3%;
             background: #FFF;
+            margin-top: 10px;
+            float: left;
+            border: 1px solid #E3E3E3;
         }
 
         #map-canvas {
-            width: 565px;
-            height: 340px;
-            margin: 10px;
+            min-width: 602px;
+            width: 95%;
+            height: 345px;
+            margin: 0 auto;
         }
 
         .tracking-map {
-            float: left;
-            width: 636px;
-            height: 340px;
+            min-width: 602px;
+            width: 95%;
+            height: 345px;
             border: 1px solid #eee;
-            margin: 0;
+            margin: 0 auto;
             margin-top: 10px;
             background: #EBEBEB;
         }
 
         #triplog_container {
             height: 513px;
+            min-width: 325px;
+            width: 15%;
             background: #FFF;
             text-align: center;
+            display: inline-block;
+            float: left;
             overflow: auto;
+            margin-top: 10px;
+            margin-left: 10px;
+            border: 1px solid #E3E3E3;
         }
+
+        #triplog_selector {
+            width: 100%;
+        }
+
+            #triplog_selector select {
+                width: 100%;
+                height: 21px;
+                font-size: 16px;
+                border: 0px;
+                border-bottom: 1px solid #E3E3E3;
+            }
 
         .trip {
             height: 65px;
-            width: 265px;
+            width: 100%;
             border-bottom: 1px dotted rgba(0, 0, 0, 0.5);
             border-bottom: 1px solid rgba(0, 0, 0, 0.2);
             border-bottom: 1px dotted #eee;
@@ -201,6 +268,44 @@
             background: #E0E0E0;
         }
 
+        #triplogs_container {
+            min-height: 300px;
+            width: 100%;
+            background: #FFF;
+            overflow: auto;
+            float: left;
+            display: block;
+            margin: 10px;
+            border: 1px solid #E3E3E3;
+        }
+
+        .triplog {
+            height: 40px;
+            width: 100%;
+            border-bottom: 1px dotted rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            border-bottom: 1px dotted #eee;
+            border-bottom: 1px solid #ccc;
+            background: #FFF;
+            text-align: left;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+            .triplog p {
+                margin: 2px;
+                padding: 0;
+            }
+
+            .triplog h2 {
+                margin: 0px;
+                padding: 0;
+                font-size: 13px;
+                font-weight: bold;
+            }
+
         #trip-info {
             margin-top: 10px;
             margin-bottom: 10px;
@@ -221,147 +326,255 @@
             }
 
         /*CHARTS STYLE*/
+
+        /*LOG STYLE*/
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            word-wrap: break-word;
+        }
+
+        li {
+            font-weight: 300;
+            padding-left: 1.5em;
+            word-wrap: break-word;
+        }
+
+        .request_list {
+            word-wrap: break-word;
+        }
+
+        .request_block {
+            padding-left: 0em;
+            border: 1px solid #eee;
+            background: white;
+            font-weight: bold;
+            margin-top: 1.0em;
+            margin-bottom: 1.0em;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .handle {
+            background: transparent url(/images/books/jquery-1-7/spacer.png);
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            display: block;
+            float: left;
+            width: 10px;
+            height: 11px;
+        }
+
+        .collapsed {
+            background: transparent url(content/images/arrow_collapsed.gif);
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .expanded {
+            background: transparent url(content/images/arrow_expanded.gif);
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        pre {
+            overflow-x: auto; /* Use horizontal scroller if needed; for Firefox 2, not needed in Firefox 3 */
+            white-space: pre-wrap; /* css-3 */
+            white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+            white-space: -pre-wrap; /* Opera 4-6 */
+            white-space: -o-pre-wrap; /* Opera 7 */
+            /* width: 99%; */
+            word-wrap: break-word; /* Internet Explorer 5.5+ */
+        }
+
+        /*LOG STYLE*/
     </style>
 
     <div id="header_out">
         <div id="header">
-            <div class="logo"><img src="/content/images/Logo.png" border="0" /></div>
+            <div class="logo"><img src="content/images/Logo.png" border="0" /></div>
             <ul id="head_nav">
                 <li><a class="active" href="#">Stats</a></li>
                 <li><a href="log">Log</a></li>
             </ul>
         </div>
     </div>
-    <div class="box_container">
-        <div id="stats" class="left_container chart_container"></div>
-        <div id="activeTrips" class="right_container trips_container"></div>
-    </div>
-    <div class="box_container">
-        <div class="map_container left_container">
-            <div class="box_container_title">
-                Tracking
-                <span style="display:none;" id="updatingTripContainer">
-                    <img src='/content/images/loading.gif' width='12' height='12' />
-                </span>
+    <div id="main_container">
+        <div class="box_container">
+            <div id="trip_gauges_container" class="draggable">
+                <div class="box_container_title">
+                    Active trips
+                </div>
+                <div id="activeTripsChart" class="trip_gauge"></div>
             </div>
-            <div id="trip-info">
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Passenger: </span>
-                        <span id="selectedTripPassengerName" />
-                    </p>
+            <div id="counters_main_container">
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Requests</div>
+                    <br />
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="requestsLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="requestsLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="requestsAllTime"><input type="hidden" name="counter-value" value="0" /></div>
                 </div>
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Pickup time: </span>
-                        <span id="selectedTripPickupTime" />
-                    </p>
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Distance</div>
+                    <br />
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="distanceLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="distanceLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="distanceAllTime"><input type="hidden" name="counter-value" value="0" /></div>
                 </div>
-                <br />
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Pickup: </span>
-                        <span id="selectedTripPickupLocation" />
-                    </p>
-                </div>
-                <br />
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Origin: </span>
-                        <span id="selectedTripOriginatingPartner"></span>
-                    </p>
-                </div>
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Servicing: </span>
-                        <span id="selectedTripServicingPartner"></span>
-                    </p>
-                </div>
-                <br />
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Status: </span>
-                        <span id="selectedTripStatus">Select a trip to track</span>
-                    </p>
-                </div>
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>ETA: </span>
-                        <span id="selectedTripETA" />
-                    </p>
-                </div>
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Fare: </span>$
-                        <span id="selectedTripFare" />
-                    </p>
-                </div>
-                <br />
-                <div>
-                    <p>
-                        <span style='font-weight: bold;'>Driver: </span>
-                        <span id="selectedTripDriverName" />
-                    </p>
-                    <p>
-                        <span style='font-weight: bold;'>Driver location: </span>
-                        <span id="selectedTripDriverLocation" />
-                    </p>
-                    <p>
-                        <span style='font-weight: bold;'>Drop off: </span>
-                        <span id="selectedTripDropoffLocation" />
-                    </p>
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Fare</div>
+                    <br />
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="fareLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="fareLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="fareAllTime"><input type="hidden" name="counter-value" value="0" /></div>
                 </div>
             </div>
-            <div id="map-canvas" class="tracking-map"></div>
-        </div>
-        <div id="triplog_container" class="right_container">
-            <div style="display:none; margin-top:10px;" id="loadingTripsContainer">
-                <img src='/content/images/loading.gif' width='24' height='24' />
+            <div class="chart_container draggable">
+                <div id="stats"></div>
             </div>
-            <div style="display:none; margin-top:10px;" id="noTrips">No active trips found</div>
         </div>
-    </div>
-    <div class="box_container">
-        <div class="counters_container">
-            <div class="box_container_title">Requests</div>
-            <br />
-            <div class="box_container_title">Last hour</div>
-            <div class="counter" id="requestsLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">Last 24 hours</div>
-            <div class="counter" id="requestsLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">All time</div>
-            <div class="counter" id="requestsAllTime"><input type="hidden" name="counter-value" value="0" /></div>
+        <div class="box_container">
+            <div id="triplog_container" class="draggable">
+                <div id="triplog_selector" style="margin-bottom: 10px;">
+                    <select>
+                        <option value="All" selected="selected"> All</option>
+                        <option value="Queued">Queued</option>
+                        <option value="Dispatched">Dispatched</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Enroute">Enroute</option>
+                        <option value="ArrivedAndWaiting">ArrivedAndWaiting</option>
+                        <option value="PickedUp">Picked up</option>
+                        <option value="DroppedOff">DroppedOff</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Complete">Complete</option>
+                    </select>
+                </div>
+                <div style="display:none; margin-top:10px;" id="loadingTripsContainer">
+                    <img src='content/images/loading.gif' width='24' height='24' />
+                </div>
+                <div style="display:none; margin-top:10px;" id="noTrips">No active trips found</div>
+                <div id="triplog_trips"> </div>
+            </div>
+            <div class="map_container draggable" style="margin-left:10px;">
+                <div class="box_container_title">
+                    Tracking
+                    <span style="display:none;" id="updatingTripContainer">
+                        <img src='content/images/loading.gif' width='12' height='12' />
+                    </span>
+                </div>
+                <div id="trip-info">
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Passenger: </span>
+                            <span id="selectedTripPassengerName" />
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Pickup time: </span>
+                            <span id="selectedTripPickupTime" />
+                        </p>
+                    </div>
+                    <br />
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Pickup: </span>
+                            <span id="selectedTripPickupLocation" />
+                        </p>
+                    </div>
+                    <br />
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Origin: </span>
+                            <span id="selectedTripOriginatingPartner"></span>
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Servicing: </span>
+                            <span id="selectedTripServicingPartner"></span>
+                        </p>
+                    </div>
+                    <br />
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Status: </span>
+                            <span id="selectedTripStatus">Select a trip to track</span>
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>ETA: </span>
+                            <span id="selectedTripETA" />
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Fare: </span>$
+                            <span id="selectedTripFare" />
+                        </p>
+                    </div>
+                    <br />
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>Driver: </span>
+                            <span id="selectedTripDriverName" />
+                        </p>
+                        <p>
+                            <span style='font-weight: bold;'>Driver location: </span>
+                            <span id="selectedTripDriverLocation" />
+                        </p>
+                        <p>
+                            <span style='font-weight: bold;'>Drop off: </span>
+                            <span id="selectedTripDropoffLocation" />
+                        </p>
+                    </div>
+                </div>
+                <div id="map-canvas" class="tracking-map"></div>
+            </div>
         </div>
-        <div style="margin-left:10px;" class="counters_container">
-            <div class="box_container_title">Distance</div>
-            <br />
-            <div class="box_container_title">Last hour</div>
-            <div class="counter" id="distanceLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">Last 24 hours</div>
-            <div class="counter" id="distanceLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">All time</div>
-            <div class="counter" id="distanceAllTime"><input type="hidden" name="counter-value" value="0" /></div>
-        </div>
-        <div style="margin-left:10px;" class="counters_container">
-            <div class="box_container_title">Fare</div>
-            <br />
-            <div class="box_container_title">Last hour</div>
-            <div class="counter" id="fareLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">Last 24 hours</div>
-            <div class="counter" id="fareLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-            <div class="box_container_title">All time</div>
-            <div class="counter" id="fareAllTime"><input type="hidden" name="counter-value" value="0" /></div>
+        <div class="box_container">
+            <div id="triplogs_container">
+                <div class="box_container_title" style="margin-bottom:10px;">
+                    Trip activity
+                </div>
+                <div style="display:none; margin-top:10px;" id="updatingTripLog">
+                    <img src='content/images/loading.gif' width='24' height='24' />
+                </div>
+                <div style="display:none; margin-top:10px;" id="noTrips">No log entries found</div>
+                <div id="triplogs_logs">
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
     $(document).ready(function () {
-        var baseUrl = "";
+		//$(".draggable").draggable({
+		//	containment: '#main_container'
+		//});
+        var baseUrl = "http://54.201.134.194/TripThru.TripThruGateway/";
         var stats = null;
         var activeTripsChart = null;
         var activeTripsCount = [];
-        var activeTrips = [];
-        var activeTripsInfo = {};
+		var activeTrips = [];
+		var activeTripsInfo = {};
+		var selectedStatus = $("#triplog_selector option:selected").val();
 		var counters = {
 			requestsLastHour :0,
 			requestsLast24Hrs: 0,
@@ -373,15 +586,15 @@
 			fareLast24Hrs: 0,
 			fareAllTime: 0
 		};
-		$("#requestsLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#requestsLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#requestsAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#distanceLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#distanceLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#distanceAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#fareLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#fareLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
-		$("#fareAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 30, number: 0 });
+		$("#requestsLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#requestsLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#requestsAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#distanceLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#distanceLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#distanceAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#fareLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#fareLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#fareAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
 
 		var updatedTripAudio = document.createElement('audio');
         updatedTripAudio.setAttribute('src', 'http://soundfxnow.com/soundfx/quick-blip.mp3');
@@ -420,32 +633,32 @@
                         items: [{
                             html: 'Last hour',
                             style: {
-                                left: '90',
-                                top: '30',
+                                left: '115',
+                                top: '25',
                                 color: "#727272"
                             }
                         },
-                                {
-                                    html: 'Last 24 hours',
-                                    style: {
-                                        left: '250',
-                                        top: '30',
-                                        color: "#727272"
-                                    }
-                                },
-                                {
-                                    html: 'All time',
-                                    style: {
-                                        left: '425',
-                                        top: '30',
-                                        color: "#727272"
-                                    }
-                                }
+						{
+							html: 'Last 24 hours',
+							style: {
+								left: '105',
+								top: '240',
+								color: "#727272"
+							}
+						},
+						{
+							html: 'All time',
+							style: {
+								left: '120',
+								top: '450',
+								color: "#727272"
+							}
+						}
                         ]
                     },
                     series: [{
-                        center: ['20%', '60%'],
-                        size: '50%',
+                        center: ['50%', '15%'],
+                        size: '40%',
                         showInLegend: true,
                         type: 'pie',
                         name: 'Count',
@@ -473,8 +686,8 @@
                             }
                         ]
                     }, {
-                        center: ['50%', '60%'],
-                        size: '50%',
+                        center: ['50%', '50%'],
+                        size: '40%',
                         showInLegend: false,
                         type: 'pie',
                         name: 'Count',
@@ -503,8 +716,8 @@
                         ]
                     },
                              {
-                                 center: ['80%', '60%'],
-                                 size: '50%',
+                                 center: ['50%', '85%'],
+                                 size: '40%',
                                  showInLegend: false,
                                  type: 'pie',
                                  name: 'Count',
@@ -557,10 +770,10 @@
                     });
                 });
 
-                activeTripsCount.push(data.activeTrips);
+				activeTripsCount.push(data.activeTrips);
                 activeTripsChart = new Highcharts.Chart({
                     chart: {
-                        renderTo: 'activeTrips',
+                        renderTo: 'activeTripsChart',
                         type: 'gauge',
                         plotBackgroundColor: null,
                         plotBackgroundImage: null,
@@ -573,7 +786,7 @@
                     },
                     exporting: { enabled: false },
                     title: {
-                        text: 'Active trips',
+                        text: '',
                         style: {
                             fontFamily: 'Open Sans, sans-serif',
                             color: "#727272"
@@ -642,15 +855,30 @@
                         }]
                     },
 
-                    series: [{
-                        name: 'Active trips',
-                        data: [data.activeTrips],
-                        tooltip: {
-                            valueSuffix: ' Trips'
-                        }
-                    }]
+                    series: [
+						{
+							name: "All trips",
+							data: [data.activeTrips],
+							dial: {
+								radius: "50%",
+								rearLength: "0%"
+							}
+						},{
+							name: "Selected status",
+							data: [data.activeTrips],
+							dial: {
+								radius: "90%",
+								rearLength: "0%"
+							},
+							dataLabels: {
+								enabled: false
+							}
+						}
+					]
 
                 });
+
+				updateTripGauge();
 				updateCounters(data);
             }
         });
@@ -659,12 +887,18 @@
 			return tripId.replace(new RegExp("@@", 'g'), "").replace(".", "");
 		}
 
+		$("#triplog_selector").change(function(){
+			selectedStatus = $("#triplog_selector option:selected").val();
+			updateTrips();
+		});
+
         function updateTrips() {
 			if (activeTrips.length == 0) {
 				$("#noTrips").fadeOut();
 				$("#loadingTripsContainer").fadeIn();
 			}
-			$.get(baseUrl+'trips', function (data) {
+			var status = selectedStatus != "All" ? "?status="+selectedStatus : "";
+			$.get(baseUrl+'trips'+status, function (data) {
 				if (data.result == "OK") {
 					var dataTrips = [];
 					data.trips.forEach(function (trip) {
@@ -673,7 +907,7 @@
 							activeTrips.push(trip.id);
 							activeTripsInfo[trip.id] = trip;
 							var tripContainerId = getContainerTripId(trip.id);
-							$("#triplog_container").prepend("<div style='display:none;' class='trip' id='" + tripContainerId + "'>" +
+							$("#triplog_trips").prepend("<div style='display:none;' class='trip' id='" + tripContainerId + "'>" +
 																"<h2>" + trip.id + "</h2>" +
 																"<p><span style='font-weight: bold;'>Passenger: </span><span id='passengerName"+tripContainerId+"'>" + trip.passengerName + "</span></p>" +
 																"<p><span style='font-weight: bold;'>Time: </span><span id='pickupTime"+tripContainerId+"'>" + trip.pickupTime.split(".")[0] + "</span></p>" +
@@ -682,14 +916,16 @@
 															"</div>"
 															);
 							$("#" + tripContainerId).slideDown();
-							$('#triplog_container').on('click', "#" + tripContainerId, function () {
+							$('#triplog_trips').on('click', "#" + tripContainerId, function () {
 								if (!$("#" + tripContainerId).hasClass("activeTrip")) {
-									$("#triplog_container>div.activeTrip").removeClass("activeTrip");
+									$("#triplog_trips>div.activeTrip").removeClass("activeTrip");
 									$("#" + tripContainerId).toggleClass("activeTrip");
 									setTripInfo(activeTripsInfo[trip.id]);
 									updateSelectedTrip();
 								}
 							});
+
+
 						}
 					});
 					activeTrips.forEach(function (trip) {
@@ -737,6 +973,7 @@
 							activeTripsInfo[tripId].price = data.price;
 							activeTripsInfo[tripId].distance = data.distance;
                             setTripInfo(activeTripsInfo[tripId]);
+							updateTripLog(tripId);
                         }
                         updatingSelectedTrip = false;
 						$("#updatingTripContainer").fadeOut();
@@ -773,12 +1010,8 @@
 				var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
 				var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
-				if($.trim($("#selectedTripPassengerName").text()) == ""){
-					$("#selectedTripPassengerName").hide().html(passengerName).fadeIn();
-				}
-				if($.trim($("#selectedTripPickupTime").text()) == ""){
-					$("#selectedTripPickupTime").hide().html(pickupTime).fadeIn();
-				}
+				$("#selectedTripPassengerName").hide().html(passengerName).fadeIn();
+				$("#selectedTripPickupTime").hide().html(pickupTime).fadeIn();
 				$("#selectedTripPickupLocation").hide().html(pickupLocationName).fadeIn();
 				$("#selectedTripStatus").hide().html(status).fadeIn();
 				$("#selectedTripETA").hide().html(eta).fadeIn();
@@ -856,12 +1089,92 @@
 			}
         }
 
+		var updatingTripLog = false;
+		function updateTripLog(tripId){
+			if(!updatingTripLog){
+				updatingTripLog = true;
+				$.get(baseUrl + 'log' + "?tripid=" +tripId, function (data) {
+					if (data.result == "OK") {
+						$("#triplogs_logs").html('');
+						var logString = '<ul class="request_list tree">';
+						for (j=data.logList.length-1; j>=0; j--) {
+							var log = data.logList[j];
+							if(log.messages.length > 0){
+								logString 		+=  '<li class="request_block">';
+								logString 		+= log.time + " | " + log.messages[0].second;
+								logString		+= '<ul>';
+								if(log.request){
+									logString	+= '<li>Json request <ul><li><pre style=" word-wrap: break-word;" class="prettyprint language-java">' + log.request + '</pre></li></ul></li>';
+								}
+								if(log.messages.length > 1){
+									for (i=1; i<log.messages.length; i++) {
+										logString += '<li><p style="padding-left:'+log.messages[i].first+'">'+log.messages[i].second+'</p></li>';
+									}
+								}
+								if(log.response){
+									logString	+= '<li>Json response <ul><li><pre style=" word-wrap: break-word;" class="prettyprint language-java">' + log.response + '</pre></li></ul></li>';
+								}
+								logString += '</ul></li>';
+							}
+						}
+						logString += '</ul>';
+						$("#triplogs_logs").append(logString);
+
+						$(".tree li").prepend("<span class='handle'></span>");
+						$(".tree li:has(ul)").children(":first-child").addClass("collapsed").click(function () {
+							$(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
+						});
+					}
+					updatingTripLog = false;
+					$("#updatingTripLog").fadeOut();
+				}).error(function () {
+					updatingTripLog = false;
+					$("#updatingTripLog").fadeOut();
+				});
+			}
+		}
+
+		var updatingTripGauge = false;
+		function updateTripGauge(){
+			if(!updatingTripGauge){
+				updaingTripGauge = true;
+				$.get(baseUrl + 'trips', function (data) {
+                    if (data.result == "OK") {
+                        //Active trips gauge
+						if(activeTripsChart != null){
+							var selectedStatusCount = 0;
+							if(selectedStatus != 'All'){
+								data.trips.forEach(function (trip) {
+									if(trip.status == selectedStatus){
+										selectedStatusCount++;
+									}
+								});
+							} else {
+								selectedStatusCount = data.trips.length;
+							}
+
+							activeTripsCount.push(selectedStatusCount);
+							var max = Math.max.apply(Math, activeTripsCount);
+							max = (max < 10) ? 10 : max * 1.4;
+							var x = activeTripsChart;
+							activeTripsChart.yAxis[0].setExtremes(0, max);
+							activeTripsChart.series[0].points[0].update(data.trips.length);
+							activeTripsChart.series[1].points[0].update(selectedStatusCount);
+						}
+                    }
+                    updatingTripGauge = false;
+                }).error(function () {
+                    updatingTripGauge = false;
+                });
+			}
+		}
+
         var updatingCharts = false;
         function updateCharts() {
-            if (!updatingCharts) {
+            if (!updatingCharts && activeTripsChart != null) {
                 updatingCharts = true;
                 $.get(baseUrl + 'stats', function (data) {
-                    if (data.result == "OK" && activeTripsChart != null) {
+                    if (data.result == "OK") {
                         stats.series[2].data[3].update(data.exceptionsAllTime, false, {
                             duration: 1500,
                             easing: 'swing'
@@ -912,19 +1225,7 @@
                             duration: 1500,
                             easing: 'swing'
                         });
-
-                        activeTripsCount.push(data.activeTrips);
-                        var max = 0;
-                        $.each(activeTripsCount, function () {
-                            if (max < this) {
-                                max = this;
-                            }
-                        });
-                        max = (max < 10) ? 10 : max * 1.4;
-                        activeTripsChart.yAxis[0].setExtremes(0, max); activeTripsChart.series[0].points[0].update(data.activeTrips);
-
-                        stats.redraw();
-                        activeTripsChart.redraw();
+						stats.redraw();
 						updateCounters(data);
                     }
                     updatingCharts = false;
@@ -947,23 +1248,31 @@
 		}
 
 		function updateCounter(id, number){
-			$("#"+id).flipCounter(
-				"startAnimation", // scroll counter from the current number to the specified number
-				{
-						number: counters[id], // the number we want to scroll from
-						end_number: number, // the number we want the counter to scroll to
-						easing: jQuery.easing.easeOutCubic, // this easing function to apply to the scroll.
-						duration: 2000 // number of ms animation should take to complete
-				}
-			);
+			if(counters[id] == 0 && number == 0) {
+				$("#"+id).flipCounter("setNumber", 0);
+			} else {
+				$("#"+id).flipCounter(
+					"startAnimation", // scroll counter from the current number to the specified number
+					{
+							number: counters[id], // the number we want to scroll from
+							end_number: number, // the number we want the counter to scroll to
+							easing: jQuery.easing.easeOutCubic, // this easing function to apply to the scroll.
+							duration: 2000 // number of ms animation should take to complete
+					}
+				);
+			}
+			var x = counters;
 			counters[id] = number;
+			x = counters;
 		}
 
         setInterval(function () {
             updateCharts();
+			updateTripGauge();
             updateTrips();
             updateSelectedTrip();
         }, 10000);
+
     });
     </script>
 

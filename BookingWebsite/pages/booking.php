@@ -330,7 +330,7 @@ $fields = '';
                 }
 
                 $radios_vehicles .='<input type="radio" ' . $checked_v . ' name="vehicle_type" id="vehicle_type_' . $v_temp_key . '" value="' . $v_temp_key . '" />';
-                $select_vehicles .='<div class="vehicle_box_cont ' . $active_v . '">' . $v_temp_name . '</div>';
+                $select_vehicles .='<div ' . ($active_v != '' ? 'id="selected_vehicle"' : '')  . ' class="vehicle_box_cont ' . $active_v . '">' . $v_temp_name . '</div>';
 
                 $checked_v = '';
                 $active_v = '';
@@ -570,16 +570,18 @@ $fields = '';
 				if(data.localQuotes.count > 0){
 					$("#suggested_partner").append('<br><br><h1>With us</h1>');
 					data.localQuotes.quotes.forEach(function(x){
-                        var eta = x.eta.split('T');
-                        var time = eta[1].split('.');
-						$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-						$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-						$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-						$('#suggested_partner').on('click', '#book'+i, function() {
-							$("#selected_partner_id").val(x.partnerId);
-							$("#selected_partner_name").val(x.partnerName);
-						});
-						partnerId = x.partnerId;
+						if(x.vehicleType == $("#selected_vehicle").html()){
+							var eta = x.eta.split('T');
+							var time = eta[1].split('.');
+							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+							$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+							$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+							$('#suggested_partner').on('click', '#book'+i, function() {
+								$("#selected_partner_id").val(x.partnerId);
+								$("#selected_partner_name").val(x.partnerName);
+							});
+							partnerId = x.partnerId;
+						}
 					});
 					
 					hasLocalQuotes = true;
@@ -616,32 +618,33 @@ $fields = '';
                     function(x){
 						if(partnerId != x.partnerId){
 							//Display cost, destination
-							partnersAvailable = true;
-							var eta = x.eta.split('T');
-							var time = eta[1].split('.');
-
-							if(x == bestOption && !hasLocalQuotes){
-								$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
-								$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-								$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-								$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-								$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-								$('#suggested_partner').on('click', '#book'+i, function() {
-									$("#selected_partner_id").val(x.partnerId);
-									$("#selected_partner_name").val(x.partnerName);
-								});
+							if(x.vehicleType == $("#selected_vehicle").html()){
+								partnersAvailable = true;
+								var eta = x.eta.split('T');
+								var time = eta[1].split('.');
+								if(x == bestOption && !hasLocalQuotes){
+									$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
+									$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+									$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+									$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+									$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+									$('#suggested_partner').on('click', '#book'+i, function() {
+										$("#selected_partner_id").val(x.partnerId);
+										$("#selected_partner_name").val(x.partnerName);
+									});
+								}
+								else{
+									$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+									$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+									$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+									$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+									$('#partner_detail').on('click', '#book'+i, function() {
+										$("#selected_partner_id").val(x.partnerId);
+										$("#selected_partner_name").val(x.partnerName);
+									});
+								}
+								i++;
 							}
-							else{
-								$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-								$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-								$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-								$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-								$('#partner_detail').on('click', '#book'+i, function() {
-									$("#selected_partner_id").val(x.partnerId);
-									$("#selected_partner_name").val(x.partnerName);
-								});
-							}
-							i++;
 						}
                     }
                 )

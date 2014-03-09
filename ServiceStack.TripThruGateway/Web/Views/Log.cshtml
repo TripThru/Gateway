@@ -177,7 +177,7 @@
                 if (entry.Messages.Count > 0)
                 {
                     <li class="request_block">
-                        @entry.Messages.First().Second
+                        @entry.Time.ToString() | @entry.Messages.First().Second
                         <ul>
                             @if (!entry.Request.IsNullOrEmpty())
                             {

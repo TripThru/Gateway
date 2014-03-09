@@ -252,7 +252,7 @@ class TripThru {
 		curl_close($ch);
 		
 		if ((!isset($resLocal['result']) || $resLocal['result'] != 'OK') && (!isset($resTripThru['result']) || $resTripThru['result'] != 'OK')) {
-            $this->setError($res);
+            $this->setError($resLocal);
             return false;
         }
 		
