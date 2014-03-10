@@ -102,7 +102,7 @@ switch ($type) {
 		$hour = $_POST['hours'];
 		$minutes = $_POST['minutes'];
         $pickup_time = "{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00+00:00";
-        $quotes = $td->Get_quotes($pickup_time, $pickup_location, $dropoff_location);
+        $quotes = $td->Get_quotes($pickup_time, $pickup_location, $dropoff_location, $_POST['ORIGIN']);
 		
         if ($quotes) {
             $response = $quotes;

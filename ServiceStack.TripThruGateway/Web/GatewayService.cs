@@ -359,7 +359,6 @@ namespace ServiceStack.TripThruGateway
                             fleetID: request.FleetId,
                             driverID: request.DriverId
                             ));
-
                         if (response.result == Gateway.Result.OK)
                         {
                             quotesResponse = new QuotesResponse

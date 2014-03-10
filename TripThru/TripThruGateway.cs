@@ -415,8 +415,9 @@ namespace TripThruCore
 
                 foreach (Gateway p in partners.Values)
                 {
-                    //if (p.ID == r.clientID)
-                    //    continue;
+                    if (p.ID == r.clientID)
+                        continue;
+
 
                     bool covered = false;
                     foreach (Zone z in GetPartnerCoverage(p.ID))

@@ -544,8 +544,12 @@ $fields = '';
                 name: "TYPE",
                 value: "getQuotes"
             });
+			data.push({
+				name: 'ORIGIN',
+				value: 'local'
+			});
 
-            //Do quote request
+            //Do a local quote request
             $.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),data,function(data){
                 $("#right_ad").fadeOut(function(){
                     $("#journey_map").fadeIn(function(){
@@ -559,17 +563,15 @@ $fields = '';
         //Draw map function
         function drawMap(data){
             if(data.status_code == 200){
-                var partnersAvailable = false;
-                var b = true;
-                var bestOption;
 				var hasLocalQuotes = false;
 				var partnerId = "";
+				var i = 0;
 
                 $("#suggested_partner").html('');
 				
-				if(data.localQuotes.count > 0){
+				if(data.count > 0){
 					$("#suggested_partner").append('<br><br><h1>With us</h1>');
-					data.localQuotes.quotes.forEach(function(x){
+					data.quotes.forEach(function(x){
 						if(x.vehicleType == $("#selected_vehicle").html()){
 							var eta = x.eta.split('T');
 							var time = eta[1].split('.');
@@ -587,71 +589,92 @@ $fields = '';
 					hasLocalQuotes = true;
 				}
 				
+				$("#partner_detail").html('<br><br><h1>Getting partner quotes...</h1>');
 				
-
-                // select best option
-                data.tripthruQuotes.quotes.forEach(
-                    function(x){
-						if(partnerId != x.partnerId){
-							if(b){
-								bestOption = x;
-								b = false;
-							}
-							else if(x.price < bestOption.price){
-								bestOption = x;
-							}
-							else if(x.price == bestOption.price && x.eta < bestOption.eta){
-								bestOption = x;
-							}
-							else if(x.price == bestOption.price && x.eta == bestOption.eta && x.vehicleType == "Sedan"){
-								bestOption = x;
+				//Do a quote request to tripthru
+				var info = $(".booking_form").serializeArray();
+				info.push({
+					name: "JSON",
+					value: true
+				});
+				info.push({
+					name: "TYPE",
+					value: "getQuotes"
+				});
+				info.push({
+					name: 'ORIGIN',
+					value: 'tripthru'
+				});
+				$.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),info,function(data){
+					var partnersAvailable = false;
+					var b = true;
+					var bestOption;
+					
+					// select best option
+					data.quotes.forEach(
+						function(x){
+							if(partnerId != x.partnerId){
+								if(b){
+									bestOption = x;
+									b = false;
+								}
+								else if(x.price < bestOption.price){
+									bestOption = x;
+								}
+								else if(x.price == bestOption.price && x.eta < bestOption.eta){
+									bestOption = x;
+								}
+								else if(x.price == bestOption.price && x.eta == bestOption.eta && x.vehicleType == "Sedan"){
+									bestOption = x;
+								}
 							}
 						}
-                    }
-                )
-				
-				if(hasLocalQuotes)
-					$("#partner_detail").html('<br><br><h1>Available partners</h1>');
-                var i = 0;
-                // show available options
-                data.tripthruQuotes.quotes.forEach(
-                    function(x){
-						if(partnerId != x.partnerId){
-							//Display cost, destination
-							if(x.vehicleType == $("#selected_vehicle").html()){
-								partnersAvailable = true;
-								var eta = x.eta.split('T');
-								var time = eta[1].split('.');
-								if(x == bestOption && !hasLocalQuotes){
-									$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
-									$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-									$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-									$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-									$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-									$('#suggested_partner').on('click', '#book'+i, function() {
-										$("#selected_partner_id").val(x.partnerId);
-										$("#selected_partner_name").val(x.partnerName);
-									});
+					)
+					
+					
+					if(hasLocalQuotes)
+						$("#partner_detail").html('<br><br><h1>Available partners</h1>');
+					// show available options
+					i++;
+					data.quotes.forEach(
+						function(x){
+							if(partnerId != x.partnerId){
+								//Display cost, destination
+								if(x.vehicleType == $("#selected_vehicle").html()){
+									partnersAvailable = true;
+									var eta = x.eta.split('T');
+									var time = eta[1].split('.');
+									if(x == bestOption && !hasLocalQuotes){
+										$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
+										$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+										$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+										$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+										$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+										$('#suggested_partner').on('click', '#book'+i, function() {
+											$("#selected_partner_id").val(x.partnerId);
+											$("#selected_partner_name").val(x.partnerName);
+										});
+									}
+									else{
+										$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
+										$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+										$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
+										$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
+										$('#partner_detail').on('click', '#book'+i, function() {
+											$("#selected_partner_id").val(x.partnerId);
+											$("#selected_partner_name").val(x.partnerName);
+										});
+									}
+									i++;
 								}
-								else{
-									$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-									$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
-									$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
-									$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
-									$('#partner_detail').on('click', '#book'+i, function() {
-										$("#selected_partner_id").val(x.partnerId);
-										$("#selected_partner_name").val(x.partnerName);
-									});
-								}
-								i++;
 							}
 						}
-                    }
-                )
-
-                if(!partnersAvailable && !hasLocalQuotes){
-                    $("#partner_detail").html('<div class="map_info_txt"><span></span><label>Sorry, no service available on this area</label></div>');
-                }
+					)
+				
+					if(!partnersAvailable && !hasLocalQuotes){
+						$("#partner_detail").html('<div class="map_info_txt"><span></span><label>Sorry, no service available on this area</label></div>');
+					}
+				});
 
                 //Setup map directions
                 var directionsDisplay;

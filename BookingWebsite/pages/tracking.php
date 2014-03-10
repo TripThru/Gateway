@@ -325,54 +325,53 @@ text-overflow: ellipsis;
 					$("#selectedTripOriginatingPartner").hide().html(originatingPartnerName).fadeIn();
 					$("#selectedTripServicingPartner").hide().html(servicingPartnerName).fadeIn();
 				}
-            }
-
-            function updateMap(data){
-				if(!$.isEmptyObject(data.driverLocation))
-				{
-					var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
-					if(!map){
-						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
-						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
-						
-						//Setup google maps for first time
-						var mapOptions = {
-							center: driverLocation,
-							zoom: 15,
-							mapTypeId: google.maps.MapTypeId.ROADMAP
-						};
-						map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-						
-						driverMarker = new google.maps.Marker({
-							position: driverLocation,
-							map: map,
-							draggable:false,
-							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=taxi|FFFF00",
-							title: 'Driver'
-						});
-						
-						pickupMarker = new google.maps.Marker({
-							position: pickupLocation,
-							map: map,
-							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00",
-							title: 'Pickup'
-						});
-						
-						dropoffMarker = new google.maps.Marker({
-							position: dropoffLocation,
-							map: map,
-							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
-							title: 'Destination'
-						});
+				
+				function updateMap(data){
+					if(!$.isEmptyObject(data.driverLocation))
+					{
+						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
+						if(!map){
+							var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
+							var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+							
+							//Setup google maps for first time
+							var mapOptions = {
+								center: driverLocation,
+								zoom: 15,
+								mapTypeId: google.maps.MapTypeId.ROADMAP
+							};
+							map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+							
+							driverMarker = new google.maps.Marker({
+								position: driverLocation,
+								map: map,
+								draggable:false,
+								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=taxi|FFFF00",
+								title: 'Driver'
+							});
+							
+							pickupMarker = new google.maps.Marker({
+								position: pickupLocation,
+								map: map,
+								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00",
+								title: 'Pickup'
+							});
+							
+							dropoffMarker = new google.maps.Marker({
+								position: dropoffLocation,
+								map: map,
+								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
+								title: 'Destination'
+							});
+						}
+						//Setup google maps center and new vehicle location
+						driverMarker.setPosition(driverLocation);
+						map.setCenter(driverLocation);
+					}else{
+						$(".tracking_map").text("Driver location unavailable");
 					}
-					//Setup google maps center and new vehicle location
-					driverMarker.setPosition(driverLocation);
-					map.setCenter(driverLocation);
-				}else{
-					$(".tracking_map").text("Driver location unavailable");
 				}
             }
-
         });
     </script>
 </div>

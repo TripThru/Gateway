@@ -265,13 +265,14 @@ namespace Utils
                 return;
             RequestLog error = new RequestLog("");
             //error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + message));
-            error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString() + " | " + message));
+            error.Messages.Add(new Pair<int, string>(0, message));
             if (detailed != null)
                 error.Messages.Add(new Pair<int, string>(40, detailed));
             error.Messages.Add(new Pair<int, string>(40, "Type=DEBUG"));
             error.Messages.Add(new Pair<int, string>(0, "End"));
             error.Response = "";
             splunkClient.Enqueue(error);
+            Console.WriteLine(message + " | " + detailed);
         }
 
         public static void Log(string message, object o)

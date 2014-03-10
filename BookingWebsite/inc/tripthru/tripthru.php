@@ -217,50 +217,39 @@ class TripThru {
         return $res;
 	}
 	
-	public function Get_quotes($pickup_time, $pickup_location, $dropoff_location){
+	public function Get_quotes($pickup_time, $pickup_location, $dropoff_location, $origin){
+		$res = null;
+		$url = '';
 		$data = array(
 			"access_token" => $this->tripthruAccessToken,
-            'pickupTime' => $pickup_time,
-            'pickupLat' => $pickup_location['lat'],
+			'pickupTime' => $pickup_time,
+			'pickupLat' => $pickup_location['lat'],
 			'pickupLng' => $pickup_location['lng'],
-            'dropoffLat' => $dropoff_location['lat'],
-            'dropoffLng' => $dropoff_location['lng']
+			'dropoffLat' => $dropoff_location['lat'],
+			'dropoffLng' => $dropoff_location['lng']
 		);
-
-		$url = $this->partnerUrl . 'quotes?' . http_build_query($data);
+		
+		if($origin == 'local'){
+			$url = $this->partnerUrl . 'quotes?' . http_build_query($data);
+		} else {
+			$data["access_token"] = $this->partnerAccessToken;
+			$url = $this->tripthruUrl . 'quotes?' . http_build_query($data);
+		}
+		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$result = curl_exec($ch);
-		$resLocal = json_decode($result, true);
+		$res = json_decode($result, true);
 		$info = curl_getinfo($ch);
 		curl_close($ch);
-
-		$data["access_token"] = $this->partnerAccessToken;
-
-		$url = $this->tripthruUrl . 'quotes?' . http_build_query($data);
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-		$result = curl_exec($ch);
-		$resTripThru = json_decode($result, true);
-		$info = curl_getinfo($ch);
-		curl_close($ch);
-		
-		if ((!isset($resLocal['result']) || $resLocal['result'] != 'OK') && (!isset($resTripThru['result']) || $resTripThru['result'] != 'OK')) {
-            $this->setError($resLocal);
-            return false;
-        }
-		
-		$res = array(
-			"localQuotes" => $resLocal,
-			"tripthruQuotes" => $resTripThru
-		);
-		
+			
+		if (!isset($res['result']) || $res['result'] != 'OK') {
+			$this->setError($res);
+			return false;
+		}
         return $res;
 	}
 	
