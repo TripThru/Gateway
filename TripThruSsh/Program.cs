@@ -6,13 +6,14 @@ using System.Linq;
 using System.Text;
 using ServiceStack.Text;
 using Tamir.SharpSsh;
+using System.Threading;
 
 namespace TripThruSsh
 {
     class Program
     {
 
-        private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
+        private static Boolean fullDeploy = false; //if true will upload and replace everything, else just update partner configuations
         private static string localPath = "C:\\Users\\DanielErnesto\\Documents\\Projects\\";
         private static string remoteFilePath = "/home/tripservice/servicestack/";
         private static string host = "54.201.134.194";
@@ -57,10 +58,12 @@ namespace TripThruSsh
 
             var webappNames = new List<string>();
             string[] partnerConfigurations = Directory.GetFiles("PartnerConfigurations/", "*.txt");
+            List<string> partnerscallbackUrlMono = new List<string>();
             foreach (var partnerConfiguration in partnerConfigurations)
             {
                 var configuration = JsonSerializer.DeserializeFromString<PartnerConfiguration>(File.ReadAllText(partnerConfiguration));
                 var name = configuration.Partner.Name.Replace(" ", "");
+                partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
                 Console.WriteLine("Configuring " + name);
                 webappNames.Add(name);
                 ssh.RunCommand("cp -a " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/  " + remoteFilePath + "ServiceStack." + name + "/");
@@ -70,12 +73,8 @@ namespace TripThruSsh
                 var bookingwebConfig = new System.IO.StreamWriter("config.txt");
                 bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
                 bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
-                bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
-                bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
-                bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
-                bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
+                bookingwebConfig.WriteLine("AccessToken=" + configuration.Partner.AccessToken);
                 bookingwebConfig.WriteLine("PartnerName=" + name);
-                bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
                 bookingwebConfig.Flush();
                 bookingwebConfig.Close();
                 ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/inc/tripthru/config.txt");
@@ -134,10 +133,43 @@ namespace TripThruSsh
             ssh.RunCommand("rm -rf /var/www/ServiceStack.*");
             ssh.RunCommand("cp -a " + remoteFilePath + "/ServiceStack.* /var/www/");
 
-            Console.WriteLine("Starting mono");
-            ssh.RunCommand("fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log &");
+            Thread startMono = new Thread(
+                    delegate()
+                    {
+                        Console.WriteLine("Starting mono");
+                        ssh.RunCommand("fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log &");
+                    });
+            startMono.Start();
+
+            Console.WriteLine("Sleep 8 seconds for to wait mono.");
+            Thread.Sleep(8000);
+
+            var client = new System.Net.WebClient();
+            foreach (string callbackUrlMono in partnerscallbackUrlMono)
+            {
+                Console.WriteLine("Sending request to: \n" + @callbackUrlMono.ToString() + "log");
+                while (true)
+                {
+                    try
+                    {
+                        var response = client.DownloadString(@callbackUrlMono.ToString() + "log");
+                        var analyzeResponse = JsonSerializer.DeserializeFromString<ResponseRequest>(response);
+                        if (analyzeResponse.ResultCode.Equals("OK"))
+                        {
+                            Console.WriteLine("Correct.");
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+            
 
             Console.WriteLine("Done!");
+            startMono.Abort();
             sftpBase.Close();
             ssh.Close();
         }
@@ -174,7 +206,6 @@ namespace TripThruSsh
 
     public class PartnerConfiguration
     {
-        public string TripThruUrlMono { get; set; }
         public ConfigPartner Partner { get; set; }
 
         public class ConfigPartner
@@ -182,9 +213,14 @@ namespace TripThruSsh
             public string Name { get; set; }
             public string WebUrl { get; set; }
             public string WebUrlRelative { get; set; }
-            public string CallbackUrlMono { get; set; }
             public string AccessToken { get; set; }
-            public string ClientId { get; set; }
+            public string CallbackUrlMono { get; set; }
         }
+    }
+
+    public class ResponseRequest
+    {
+        public string Result { get; set; }
+        public string ResultCode { get; set; }
     }
 }
