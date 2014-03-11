@@ -13,7 +13,7 @@ namespace TripThruSsh
     class Program
     {
 
-        private static Boolean fullDeploy = false; //if true will upload and replace everything, else just update partner configuations
+        private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
         private static string localPath = "C:\\Users\\DanielErnesto\\Documents\\Projects\\";
         private static string remoteFilePath = "/home/tripservice/servicestack/";
         private static string host = "54.201.134.194";
@@ -62,8 +62,8 @@ namespace TripThruSsh
             foreach (var partnerConfiguration in partnerConfigurations)
             {
                 var configuration = JsonSerializer.DeserializeFromString<PartnerConfiguration>(File.ReadAllText(partnerConfiguration));
-                var name = configuration.Partner.Name.Replace(" ", "");
                 partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
+                var name = configuration.Partner.Name.Replace(" ", "");
                 Console.WriteLine("Configuring " + name);
                 webappNames.Add(name);
                 ssh.RunCommand("cp -a " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/  " + remoteFilePath + "ServiceStack." + name + "/");
@@ -73,8 +73,12 @@ namespace TripThruSsh
                 var bookingwebConfig = new System.IO.StreamWriter("config.txt");
                 bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
                 bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
-                bookingwebConfig.WriteLine("AccessToken=" + configuration.Partner.AccessToken);
+                bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
+                bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
+                bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
+                bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
                 bookingwebConfig.WriteLine("PartnerName=" + name);
+                bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
                 bookingwebConfig.Flush();
                 bookingwebConfig.Close();
                 ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/inc/tripthru/config.txt");
@@ -141,7 +145,7 @@ namespace TripThruSsh
                     });
             startMono.Start();
 
-            Console.WriteLine("Sleep 8 seconds for to wait mono.");
+            Console.WriteLine("Sleep 8 seconds, waiting for mono to initialize.");
             Thread.Sleep(8000);
 
             var client = new System.Net.WebClient();
@@ -166,7 +170,7 @@ namespace TripThruSsh
                     }
                 }
             }
-            
+
 
             Console.WriteLine("Done!");
             startMono.Abort();
@@ -206,6 +210,7 @@ namespace TripThruSsh
 
     public class PartnerConfiguration
     {
+        public string TripThruUrlMono { get; set; }
         public ConfigPartner Partner { get; set; }
 
         public class ConfigPartner
@@ -213,8 +218,9 @@ namespace TripThruSsh
             public string Name { get; set; }
             public string WebUrl { get; set; }
             public string WebUrlRelative { get; set; }
-            public string AccessToken { get; set; }
             public string CallbackUrlMono { get; set; }
+            public string AccessToken { get; set; }
+            public string ClientId { get; set; }
         }
     }
 
