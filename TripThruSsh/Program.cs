@@ -62,6 +62,10 @@ namespace TripThruSsh
             foreach (var partnerConfiguration in partnerConfigurations)
             {
                 var configuration = JsonSerializer.DeserializeFromString<PartnerConfiguration>(File.ReadAllText(partnerConfiguration));
+                if (!configuration.Enabled)
+                {
+                    continue;
+                }
                 partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
                 var name = configuration.Partner.Name.Replace(" ", "");
                 Console.WriteLine("Configuring " + name);
@@ -163,6 +167,10 @@ namespace TripThruSsh
                             Console.WriteLine("Correct.");
                             break;
                         }
+                        else
+                        {
+                            Thread.Sleep(1000);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -212,6 +220,7 @@ namespace TripThruSsh
     {
         public string TripThruUrlMono { get; set; }
         public ConfigPartner Partner { get; set; }
+        public Boolean Enabled { get; set; }
 
         public class ConfigPartner
         {

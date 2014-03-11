@@ -218,7 +218,6 @@ namespace TripThruCore
         {
             try
             {
-                requests++;
                 var trips = new List<Trip>();
                 if (activeTrips.Count > 0)
                 {

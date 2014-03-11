@@ -12,8 +12,8 @@
     <script type="text/javascript" src="http://code.highcharts.com/highcharts-more.js"></script>
     <script type="text/javascript" src="Scripts/jquery.easing.1.3.js"></script>
     <script type="text/javascript" src="Scripts/jquery.flipCounter.1.2.pack.js"></script>
-    <!--<script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>-->
-    <script type="text/javascript" src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <link href="Scripts/prism.css" rel="stylesheet" />
+    <script type="text/javascript" src="Scripts/prism.js"></script>
 </head>
 
 
@@ -92,11 +92,32 @@
         }
         /*HEADER STYLE*/
 
+        #main_container {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            display: block;
+        }
+
         /*CHARTS STYLE*/
+
         .box_container {
             width: 98%;
-            margin: 0px auto;
             margin-top: 10px;
+        }
+
+        .left_container {
+            width: 340px;
+            float: left;
+        }
+
+        .right_container {
+            width: 425px;
+            float: right;
+        }
+
+        .middle_container {
+            overflow: hidden;
         }
 
         .box_container_title {
@@ -114,103 +135,94 @@
         }
 
         #counters_main_container {
-            float: left;
+            float: right;
             display: block;
             overflow: hidden;
-            width: 50%;
+            width: 200px;
+            height: 612px;
         }
 
         .counters_container {
             background: #fff;
-            min-width: 200px;
-            width: 30%;
-            height: 280px;
+            width: 90%;
+            height: 192px;
             text-align: center;
-            float: left;
             display: inline-block;
-            border: 1px solid #E3E3E3;
+            border: 1px solid #DEDEDE;
             margin-top: 10px;
+            margin-left: 5px;
         }
 
         .counter {
-            padding-top: 10px;
+            margin-top: 5px;
         }
 
         .chart_container {
-            height: 806px;
-            min-width: 280px;
-            width: 17%;
+            height: 600px;
+            width: 200px;
             background: #FFF;
             float: right;
             display: block;
-            margin-left: 10px;
             margin-top: 10px;
-            margin-right: -10px;
-            border: 1px solid #E3E3E3;
+            margin-left: 5px;
+            margin-right: 10px;
+            border: 1px solid #DEDEDE;
         }
 
         #stats {
-            height: 795px;
-            min-width: 280px;
-            width: 100%;
+            height: 590px;
+            width: 99%;
             background: #FFF;
-            float: left;
-            display: block;
-            margin-top: 10px;
-        }
-
-        #trip_gauges_container {
-            min-width: 325px;
-            width: 15%;
-            height: 280px;
-            background: #FFF;
-            float: left;
-            display: block;
-            margin-top: 10px;
-            margin-left: 10px;
-            border: 1px solid #E3E3E3;
-        }
-
-        .trip_gauge {
-            width: 300px;
-            height: 250px;
-            background: #FFF;
-            margin-left: 15px;
             float: left;
             display: block;
         }
 
         .map_container {
-            height: 513px;
-            min-width: 624px;
-            width: 46.3%;
+            height: 600px;
+            width: 98%;
             background: #FFF;
             margin-top: 10px;
             float: left;
-            border: 1px solid #E3E3E3;
+            border: 1px solid #DEDEDE;
         }
 
         #map-canvas {
-            min-width: 602px;
-            width: 95%;
-            height: 345px;
+            width: 93%;
+            height: 415px;
             margin: 0 auto;
         }
 
         .tracking-map {
-            min-width: 602px;
-            width: 95%;
-            height: 345px;
+            width: 93%;
+            height: 415px;
             border: 1px solid #eee;
             margin: 0 auto;
             margin-top: 10px;
             background: #EBEBEB;
         }
 
+        #trip_gauges_container {
+            width: 95%;
+            height: 220px;
+            background: #FFF;
+            float: left;
+            display: block;
+            margin: 0 auto;
+            border-bottom: 1px solid #DEDEDE;
+        }
+
+        .trip_gauge {
+            width: 175px;
+            height: 180px;
+            background: #FFF;
+            margin-left: 70px;
+            float: left;
+            display: block;
+        }
+
         #triplog_container {
-            height: 513px;
-            min-width: 325px;
-            width: 15%;
+            height: 600px;
+            width: 325px;
             background: #FFF;
             text-align: center;
             display: inline-block;
@@ -218,7 +230,7 @@
             overflow: auto;
             margin-top: 10px;
             margin-left: 10px;
-            border: 1px solid #E3E3E3;
+            border: 1px solid #DEDEDE;
         }
 
         #triplog_selector {
@@ -230,7 +242,7 @@
                 height: 21px;
                 font-size: 16px;
                 border: 0px;
-                border-bottom: 1px solid #E3E3E3;
+                border-bottom: 1px solid #DEDEDE;
             }
 
         .trip {
@@ -276,7 +288,7 @@
             float: left;
             display: block;
             margin: 10px;
-            border: 1px solid #E3E3E3;
+            border: 1px solid #DEDEDE;
         }
 
         .triplog {
@@ -351,8 +363,8 @@
             border: 1px solid #eee;
             background: white;
             font-weight: bold;
-            margin-top: 1.0em;
-            margin-bottom: 1.0em;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
             font-size: 14px;
             word-wrap: break-word;
         }
@@ -393,7 +405,6 @@
 
         /*LOG STYLE*/
     </style>
-
     <div id="header_out">
         <div id="header">
             <div class="logo"><img src="content/images/Logo.png" border="0" /></div>
@@ -404,51 +415,14 @@
         </div>
     </div>
     <div id="main_container">
-        <div class="box_container">
-            <div id="trip_gauges_container" class="draggable">
-                <div class="box_container_title">
-                    Active trips
+        <div class="left_container">
+            <div id="triplog_container" style="float:left;" class="draggable">
+                <div id="trip_gauges_container">
+                    <div class="box_container_title">
+                        Active trips
+                    </div>
+                    <div id="activeTripsChart" class="trip_gauge"></div>
                 </div>
-                <div id="activeTripsChart" class="trip_gauge"></div>
-            </div>
-            <div id="counters_main_container">
-                <div style="margin-left:10px;" class="counters_container draggable">
-                    <div class="box_container_title">Requests</div>
-                    <br />
-                    <div class="box_container_subtitle">Last hour</div>
-                    <div class="counter" id="requestsLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">Last 24 hours</div>
-                    <div class="counter" id="requestsLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">All time</div>
-                    <div class="counter" id="requestsAllTime"><input type="hidden" name="counter-value" value="0" /></div>
-                </div>
-                <div style="margin-left:10px;" class="counters_container draggable">
-                    <div class="box_container_title">Distance</div>
-                    <br />
-                    <div class="box_container_subtitle">Last hour</div>
-                    <div class="counter" id="distanceLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">Last 24 hours</div>
-                    <div class="counter" id="distanceLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">All time</div>
-                    <div class="counter" id="distanceAllTime"><input type="hidden" name="counter-value" value="0" /></div>
-                </div>
-                <div style="margin-left:10px;" class="counters_container draggable">
-                    <div class="box_container_title">Fare</div>
-                    <br />
-                    <div class="box_container_subtitle">Last hour</div>
-                    <div class="counter" id="fareLastHour"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">Last 24 hours</div>
-                    <div class="counter" id="fareLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
-                    <div class="box_container_subtitle">All time</div>
-                    <div class="counter" id="fareAllTime"><input type="hidden" name="counter-value" value="0" /></div>
-                </div>
-            </div>
-            <div class="chart_container draggable">
-                <div id="stats"></div>
-            </div>
-        </div>
-        <div class="box_container">
-            <div id="triplog_container" class="draggable">
                 <div id="triplog_selector" style="margin-bottom: 10px;">
                     <select>
                         <option value="All" selected="selected"> All</option>
@@ -470,6 +444,42 @@
                 <div style="display:none; margin-top:10px;" id="noTrips">No active trips found</div>
                 <div id="triplog_trips"> </div>
             </div>
+        </div>
+        <div class="right_container">
+            <div class="chart_container draggable">
+                <div id="stats"></div>
+            </div>
+            <div id="counters_main_container">
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Requests</div>
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="requestsLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="requestsLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="requestsAllTime"><input type="hidden" name="counter-value" value="0" /></div>
+                </div>
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Distance</div>
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="distanceLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="distanceLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="distanceAllTime"><input type="hidden" name="counter-value" value="0" /></div>
+                </div>
+                <div style="margin-left:10px;" class="counters_container draggable">
+                    <div class="box_container_title">Fare</div>
+                    <div class="box_container_subtitle">Last hour</div>
+                    <div class="counter" id="fareLastHour"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">Last 24 hours</div>
+                    <div class="counter" id="fareLast24Hrs"><input type="hidden" name="counter-value" value="0" /></div>
+                    <div class="box_container_subtitle">All time</div>
+                    <div class="counter" id="fareAllTime"><input type="hidden" name="counter-value" value="0" /></div>
+                </div>
+            </div>
+        </div>
+        <div class="middle_container">
             <div class="map_container draggable" style="margin-left:10px;">
                 <div class="box_container_title">
                     Tracking
@@ -575,6 +585,7 @@
 		var activeTrips = [];
 		var activeTripsInfo = {};
 		var selectedStatus = $("#triplog_selector option:selected").val();
+		var currentTripLogs = [];
 		var counters = {
 			requestsLastHour :0,
 			requestsLast24Hrs: 0,
@@ -586,15 +597,15 @@
 			fareLast24Hrs: 0,
 			fareAllTime: 0
 		};
-		$("#requestsLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#requestsLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#requestsAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#distanceLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#distanceLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#distanceAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#fareLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#fareLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
-		$("#fareAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 40, digitWidth: 22, number: 0 });
+		$("#requestsLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#requestsLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#requestsAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#distanceLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#distanceLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#distanceAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#fareLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#fareLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
+		$("#fareAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
 
 		var updatedTripAudio = document.createElement('audio');
         updatedTripAudio.setAttribute('src', 'http://soundfxnow.com/soundfx/quick-blip.mp3');
@@ -610,7 +621,7 @@
                     },
                     exporting: { enabled: false },
                     title: {
-                        text: 'Completed trips, rejections and cancellations',
+                        text: 'Trip stats',
                         style: {
                             fontFamily: 'Open Sans, sans-serif',
                             color: "#727272"
@@ -633,24 +644,24 @@
                         items: [{
                             html: 'Last hour',
                             style: {
-                                left: '115',
-                                top: '25',
+                                left: '65',
+                                top: '15',
                                 color: "#727272"
                             }
                         },
 						{
 							html: 'Last 24 hours',
 							style: {
-								left: '105',
-								top: '240',
+								left: '55',
+								top: '150',
 								color: "#727272"
 							}
 						},
 						{
 							html: 'All time',
 							style: {
-								left: '120',
-								top: '450',
+								left: '70',
+								top: '285',
 								color: "#727272"
 							}
 						}
@@ -878,7 +889,7 @@
 
                 });
 
-				updateTripGauge();
+				updateTrips();
 				updateCounters(data);
             }
         });
@@ -892,61 +903,101 @@
 			updateTrips();
 		});
 
-        function updateTrips() {
-			if (activeTrips.length == 0) {
-				$("#noTrips").fadeOut();
-				$("#loadingTripsContainer").fadeIn();
-			}
-			var status = selectedStatus != "All" ? "?status="+selectedStatus : "";
-			$.get(baseUrl+'trips'+status, function (data) {
-				if (data.result == "OK") {
-					var dataTrips = [];
-					data.trips.forEach(function (trip) {
-						dataTrips.push(trip.id);
-						if ($.inArray(trip.id, activeTrips) == -1) {
-							activeTrips.push(trip.id);
-							activeTripsInfo[trip.id] = trip;
-							var tripContainerId = getContainerTripId(trip.id);
-							$("#triplog_trips").prepend("<div style='display:none;' class='trip' id='" + tripContainerId + "'>" +
-																"<h2>" + trip.id + "</h2>" +
-																"<p><span style='font-weight: bold;'>Passenger: </span><span id='passengerName"+tripContainerId+"'>" + trip.passengerName + "</span></p>" +
-																"<p><span style='font-weight: bold;'>Time: </span><span id='pickupTime"+tripContainerId+"'>" + trip.pickupTime.split(".")[0] + "</span></p>" +
-																"<p><span style='font-weight: bold;'>Pickup: </span><span id='pickupLocation"+tripContainerId+"'>" + trip.pickupLocation.address + "</span></p>" +
-																"<input type='hidden' id='tripId' name='tripId' value='" + trip.id + "' />" +
-															"</div>"
-															);
-							$("#" + tripContainerId).slideDown();
-							$('#triplog_trips').on('click', "#" + tripContainerId, function () {
-								if (!$("#" + tripContainerId).hasClass("activeTrip")) {
-									$("#triplog_trips>div.activeTrip").removeClass("activeTrip");
-									$("#" + tripContainerId).toggleClass("activeTrip");
-									setTripInfo(activeTripsInfo[trip.id]);
-									updateSelectedTrip();
+		var updatingTrips = false;
+		function updateTrips(){
+			if(!updatingTrips){
+				updaingTrips = true;
+				if (activeTrips.length == 0) {
+					$("#noTrips").fadeOut();
+					$("#loadingTripsContainer").fadeIn();
+				}
+				$.get(baseUrl + 'trips', function (data) {
+                    if (data.result == "OK") {
+                        var trips = [];
+						var selectedStatusCount = 0;
+						if(selectedStatus != 'All'){
+							data.trips.forEach(function (trip) {
+								if(trip.status == selectedStatus){
+									selectedStatusCount++;
+									trips.push(trip);
 								}
 							});
+						} else {
+							selectedStatusCount = data.trips.length;
+							trips = data.trips;
+						}
+						if(activeTripsChart != null){
+							activeTripsCount.push(selectedStatusCount);
+							var max = Math.max.apply(Math, activeTripsCount);
+							max = (max < 10) ? 10 : max * 1.4;
+							activeTripsChart.yAxis[0].setExtremes(0, max);
+							activeTripsChart.series[0].points[0].update(data.trips.length);
+							activeTripsChart.series[1].points[0].update(selectedStatusCount);
+						}
+						updateSelectedStatusTrips(trips);
 
+                    }
 
+					if (activeTrips.length > 0) {
+						$("#loadingTripsContainer").fadeOut();
+						$("#noTrips").fadeOut();
+					} else {
+						$("#loadingTripsContainer").fadeOut();
+						$("#noTrips").fadeIn();
+					}
+                    updatingTrips = false;
+                }).error(function () {
+					if (activeTrips.length > 0) {
+						$("#loadingTripsContainer").fadeOut();
+						$("#noTrips").fadeOut();
+					} else {
+						$("#loadingTripsContainer").fadeOut();
+						$("#noTrips").fadeIn();
+					}
+                    updatingTrips = false;
+                });
+			}
+		}
+
+        function updateSelectedStatusTrips(trips) {
+			var dataTrips = [];
+			trips.forEach(function (trip) {
+				dataTrips.push(trip.id);
+				if ($.inArray(trip.id, activeTrips) == -1) {
+					activeTrips.push(trip.id);
+					activeTripsInfo[trip.id] = trip;
+					var tripContainerId = getContainerTripId(trip.id);
+					$("#triplog_trips").prepend("<div style='display:none;' class='trip' id='" + tripContainerId + "'>" +
+														"<h2>" + trip.id + "</h2>" +
+														"<p><span style='font-weight: bold;'>Passenger: </span><span id='passengerName"+tripContainerId+"'>" + trip.passengerName + "</span></p>" +
+														"<p><span style='font-weight: bold;'>Time: </span><span id='pickupTime"+tripContainerId+"'>" + trip.pickupTime.split(".")[0] + "</span></p>" +
+														"<p><span style='font-weight: bold;'>Pickup: </span><span id='pickupLocation"+tripContainerId+"'>" + trip.pickupLocation.address + "</span></p>" +
+														"<input type='hidden' id='tripId' name='tripId' value='" + trip.id + "' />" +
+													"</div>"
+													);
+					$("#" + tripContainerId).slideDown();
+					$('#triplog_trips').on('click', "#" + tripContainerId, function () {
+						if (!$("#" + tripContainerId).hasClass("activeTrip")) {
+							$("#triplog_trips>div.activeTrip").removeClass("activeTrip");
+							$("#" + tripContainerId).toggleClass("activeTrip");
+							setTripInfo(activeTripsInfo[trip.id]);
+							updateSelectedTrip();
+							currentTripLogs = [];
 						}
 					});
-					activeTrips.forEach(function (trip) {
-						if ($.inArray(trip, dataTrips) == -1) {
-							activeTrips = $.grep(activeTrips, function (value) {
-								return value != trip;
-							});
-							$("#" + getContainerTripId(trip)).slideUp().remove();
-						}
-					});
+
+
 				}
-				if (activeTrips.length > 0) {
-					$("#loadingTripsContainer").fadeOut();
-					$("#noTrips").fadeOut();
-				} else {
-					$("#loadingTripsContainer").fadeOut();
-					$("#noTrips").fadeIn();
+			});
+			activeTrips.forEach(function (trip) {
+				if ($.inArray(trip, dataTrips) == -1) {
+					activeTrips = $.grep(activeTrips, function (value) {
+						return value != trip;
+					});
+					$("#" + getContainerTripId(trip)).slideUp().remove();
 				}
 			});
         }
-        updateTrips();
 
         var updatingSelectedTrip = false;
 		var updatingTripId = "";
@@ -1095,35 +1146,62 @@
 				updatingTripLog = true;
 				$.get(baseUrl + 'log' + "?tripid=" +tripId, function (data) {
 					if (data.result == "OK") {
-						$("#triplogs_logs").html('');
-						var logString = '<ul class="request_list tree">';
-						for (j=data.logList.length-1; j>=0; j--) {
-							var log = data.logList[j];
-							if(log.messages.length > 0){
-								logString 		+=  '<li class="request_block">';
-								logString 		+= log.time + " | " + log.messages[0].second;
-								logString		+= '<ul>';
-								if(log.request){
-									logString	+= '<li>Json request <ul><li><pre style=" word-wrap: break-word;" class="prettyprint language-java">' + log.request + '</pre></li></ul></li>';
-								}
-								if(log.messages.length > 1){
-									for (i=1; i<log.messages.length; i++) {
-										logString += '<li><p style="padding-left:'+log.messages[i].first+'">'+log.messages[i].second+'</p></li>';
-									}
-								}
-								if(log.response){
-									logString	+= '<li>Json response <ul><li><pre style=" word-wrap: break-word;" class="prettyprint language-java">' + log.response + '</pre></li></ul></li>';
-								}
-								logString += '</ul></li>';
-							}
-						}
-						logString += '</ul>';
-						$("#triplogs_logs").append(logString);
+						var logs = [];
+						var initLog = false;
 
-						$(".tree li").prepend("<span class='handle'></span>");
-						$(".tree li:has(ul)").children(":first-child").addClass("collapsed").click(function () {
-							$(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
-						});
+						//filter only new logs
+						if(currentTripLogs.length > 0){
+							var last = currentTripLogs[currentTripLogs.length-1].time;
+							for (j=0; j<data.logList.length; j++) {
+								var log = data.logList[j];
+								if(Date.parse(log.time) > Date.parse(last)){
+									logs.push(log);
+									currentTripLogs.push(log);
+								}
+							}
+						} else {
+							initLog = true;
+							logs = data.logList;
+							currentTripLogs = data.logList;
+							$("#triplogs_logs").html('');
+						}
+
+						if(logs.length > 0){
+							var logString = '';
+							if(initLog){
+								logString = '<ul class="request_list tree">';
+							}
+							for (j=logs.length-1; j>=0; j--) {
+								var log = logs[j];
+								if(log.messages.length > 0){
+									logString 		+=  '<li class="request_block"> <span class="handle collapsed"></span>';
+									logString 		+= log.time + " | " + log.messages[0].second;
+									logString		+= '<ul style="display: none;">';
+									if(log.request){
+										logString	+= '<li><span class="handle collapsed"></span>Json request <ul style="display: none;"><li><pre><code class="language-css">' + log.request + '</code></pre></li></ul></li>';
+									}
+									if(log.messages.length > 1){
+										for (i=1; i<log.messages.length; i++) {
+											logString += '<li><p style="padding-left:'+log.messages[i].first+'">'+log.messages[i].second+'</p></li>';
+										}
+									}
+									if(log.response){
+										logString	+= '<li><span class="handle collapsed"></span>Json response <ul style="display: none;"><li><pre><code class="language-css">' + log.response + '</code></pre></li></ul></li>';
+									}
+									logString += '</ul></li>';
+								}
+							}
+							if(initLog){
+								logString += '</ul>';
+								$("#triplogs_logs").append(logString);
+							} else {
+								$('.request_list').prepend(logString);
+							}
+
+							$(".tree li:has(ul)").children(":first-child").click(function () {
+								$(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
+							});
+						}
 					}
 					updatingTripLog = false;
 					$("#updatingTripLog").fadeOut();
@@ -1131,41 +1209,6 @@
 					updatingTripLog = false;
 					$("#updatingTripLog").fadeOut();
 				});
-			}
-		}
-
-		var updatingTripGauge = false;
-		function updateTripGauge(){
-			if(!updatingTripGauge){
-				updaingTripGauge = true;
-				$.get(baseUrl + 'trips', function (data) {
-                    if (data.result == "OK") {
-                        //Active trips gauge
-						if(activeTripsChart != null){
-							var selectedStatusCount = 0;
-							if(selectedStatus != 'All'){
-								data.trips.forEach(function (trip) {
-									if(trip.status == selectedStatus){
-										selectedStatusCount++;
-									}
-								});
-							} else {
-								selectedStatusCount = data.trips.length;
-							}
-
-							activeTripsCount.push(selectedStatusCount);
-							var max = Math.max.apply(Math, activeTripsCount);
-							max = (max < 10) ? 10 : max * 1.4;
-							var x = activeTripsChart;
-							activeTripsChart.yAxis[0].setExtremes(0, max);
-							activeTripsChart.series[0].points[0].update(data.trips.length);
-							activeTripsChart.series[1].points[0].update(selectedStatusCount);
-						}
-                    }
-                    updatingTripGauge = false;
-                }).error(function () {
-                    updatingTripGauge = false;
-                });
 			}
 		}
 
@@ -1238,13 +1281,13 @@
 		function updateCounters(data){
 			updateCounter("requestsLastHour", data.requestsLastHour);
 			updateCounter("requestsLast24Hrs", data.requestsLast24Hrs);
-			updateCounter("requestsAllTime", data.requestsAllTime);
+			updateCounter("requestsAllTime", Math.ceil(data.requestsAllTime));
 			updateCounter("distanceLastHour", data.distanceLastHour);
 			updateCounter("distanceLast24Hrs", data.distanceLast24Hrs);
-			updateCounter("distanceAllTime", data.distanceAllTime);
+			updateCounter("distanceAllTime", Math.ceil(data.distanceAllTime));
 			updateCounter("fareLastHour", data.fareLastHour);
 			updateCounter("fareLast24Hrs", data.fareLast24Hrs);
-			updateCounter("fareAllTime", data.fareAllTime);
+			updateCounter("fareAllTime", Math.ceil(data.fareAllTime));
 		}
 
 		function updateCounter(id, number){
@@ -1268,7 +1311,6 @@
 
         setInterval(function () {
             updateCharts();
-			updateTripGauge();
             updateTrips();
             updateSelectedTrip();
         }, 10000);

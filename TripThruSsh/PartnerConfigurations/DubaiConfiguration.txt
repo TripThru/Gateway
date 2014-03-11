@@ -1,6 +1,7 @@
 {
   "tripThruUrlMono" : "http://54.201.134.194/TripThru.TripThruGateway/",
   "simInterval" : 10,
+  "enabled" : true,
   "partner" : {
       "name" : "Dubai Taxi Corporation",
       "clientId" : "dubai@tripthru.com",

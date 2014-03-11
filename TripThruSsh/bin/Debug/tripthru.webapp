@@ -35,13 +35,6 @@
                                     <path>/var/www/ServiceStack.MetroCabofBoston/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.TestTDispatch</name>
-                                    <vhost>*</vhost>
-                                    <vport>80</vport>
-                                    <vpath>/TripThru.TestTDispatch</vpath>
-                                    <path>/var/www/ServiceStack.TestTDispatch/Web</path>
-                                 </web-application>
-<web-application>
                                     <name>TripThru.YellowCab</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
