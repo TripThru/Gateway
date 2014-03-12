@@ -572,7 +572,7 @@ $fields = '';
 				if(data.count > 0){
 					$("#suggested_partner").append('<br><br><h1>With us</h1>');
 					data.quotes.forEach(function(x){
-						if(x.vehicleType == $("#selected_vehicle").html()){
+						if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
 							var eta = x.eta.split('T');
 							var time = eta[1].split('.');
 							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
@@ -640,7 +640,7 @@ $fields = '';
 						function(x){
 							if(partnerId != x.partnerId){
 								//Display cost, destination
-								if(x.vehicleType == $("#selected_vehicle").html()){
+								if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
 									partnersAvailable = true;
 									var eta = x.eta.split('T');
 									var time = eta[1].split('.');

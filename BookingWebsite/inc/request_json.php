@@ -105,7 +105,13 @@ switch ($type) {
         $quotes = $td->Get_quotes($pickup_time, $pickup_location, $dropoff_location, $_POST['ORIGIN']);
 		
         if ($quotes) {
-            $response = $quotes;
+			if($quotes['resultCode'] == 'Rejected'){
+				$quotes = array(
+					'count' => 0,
+					'quotes' => array()
+				);
+			}
+			$response = $quotes;
 			$response['status_code'] = 200;
             $response['pickup_postcode'] = $pickupLocation["postcode"];
             $response['dropoff_postcode'] = $dropoffLocation["postcode"];

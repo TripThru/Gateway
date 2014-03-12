@@ -246,7 +246,7 @@ class TripThru {
 		$info = curl_getinfo($ch);
 		curl_close($ch);
 			
-		if (!isset($res['result']) || $res['result'] != 'OK') {
+		if (!isset($res['result']) || ($res['result'] != 'OK' && $res['resultCode'] != 'Rejected')) {
 			$this->setError($res);
 			return false;
 		}
