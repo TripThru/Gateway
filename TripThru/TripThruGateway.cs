@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ServiceStack.Common.Utils;
 using Utils;
 using CustomIntegrations;
@@ -190,6 +191,7 @@ namespace TripThruCore
             }
 
             LoadTDispatchIntegrations();
+            var thread = new PartnersUpdateThread(partners);
 
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
         }
@@ -793,6 +795,65 @@ namespace TripThruCore
         public override void Log()
         {
             gateway.Log();
+        }
+    }
+
+    public class PartnersUpdateThread : IDisposable
+    {
+        private Dictionary<string, Gateway> _partners;
+        private TimeSpan _heartbeat = new TimeSpan(0, 0, 30);
+        private Thread _worker;
+        private volatile bool _workerTerminateSignal = false;
+
+        public PartnersUpdateThread(Dictionary<string, Gateway> partners)
+        {
+            this._partners = partners;
+            _worker = new Thread(StartThread);
+            _worker.Start();
+        }
+
+        private void StartThread()
+        {
+            try
+            {
+                while (true)
+                {
+                    try
+                    {
+                        foreach (var partner in _partners.Values)
+                        {
+                            try
+                            {
+                                lock (partner)
+                                {
+                                    partner.Update();
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                if (e.Message != "Not supported")
+                                {
+                                    Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
+                    }
+                    System.Threading.Thread.Sleep(_heartbeat);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("PartnersUpdateThread initialization error :" + e.Message, e.StackTrace);
+            }
+        }
+
+        public void Dispose()
+        {
+            Logger.LogDebug("PartnersUpdateThread disposed");
         }
     }
 }
