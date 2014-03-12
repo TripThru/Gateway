@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web;
+using Utils;
 
 namespace ServiceStack.TripThruGateway
 {
@@ -9,6 +10,12 @@ namespace ServiceStack.TripThruGateway
         {
             //Initialize your application
             (new TripThruGatewayHost()).Init();
+        }
+
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            System.Exception ex = Server.GetLastError();
+            Logger.LogDebug("Application_Error : " + ex.Message, ex.StackTrace);
         }
 	}
 }

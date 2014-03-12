@@ -125,6 +125,7 @@
             text-align: center;
             font-size: 16px;
             padding-top: 10px;
+            font-weight: bold;
         }
 
         .box_container_subtitle {
@@ -170,7 +171,7 @@
         }
 
         #stats {
-            height: 590px;
+            height: 570px;
             width: 99%;
             background: #FFF;
             float: left;
@@ -363,10 +364,12 @@
             border: 1px solid #eee;
             background: white;
             font-weight: bold;
+            margin: 0 auto;
             margin-top: 0.5em;
             margin-bottom: 0.5em;
             font-size: 14px;
             word-wrap: break-word;
+            width: 97%;
         }
 
         .handle {
@@ -394,13 +397,14 @@
         }
 
         pre {
-            overflow-x: auto; /* Use horizontal scroller if needed; for Firefox 2, not needed in Firefox 3 */
-            white-space: pre-wrap; /* css-3 */
-            white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-            white-space: -pre-wrap; /* Opera 4-6 */
-            white-space: -o-pre-wrap; /* Opera 7 */
-            /* width: 99%; */
-            word-wrap: break-word; /* Internet Explorer 5.5+ */
+            width: 97%;
+            font-size: 13px;
+            border: 1px solid #DEDEDE;
+            background: #fff !important;
+        }
+
+        code {
+            background: #fff;
         }
 
         /*LOG STYLE*/
@@ -447,6 +451,9 @@
         </div>
         <div class="right_container">
             <div class="chart_container draggable">
+                <div class="box_container_title">
+                    Trip stats
+                </div>
                 <div id="stats"></div>
             </div>
             <div id="counters_main_container">
@@ -561,7 +568,7 @@
         <div class="box_container">
             <div id="triplogs_container">
                 <div class="box_container_title" style="margin-bottom:10px;">
-                    Trip activity
+                    Trip activity log
                 </div>
                 <div style="display:none; margin-top:10px;" id="updatingTripLog">
                     <img src='content/images/loading.gif' width='24' height='24' />
@@ -578,7 +585,8 @@
 		//$(".draggable").draggable({
 		//	containment: '#main_container'
 		//});
-        var baseUrl = "http://54.201.134.194/TripThru.TripThruGateway/";
+        var baseUrl = "";
+        var accessToken = "webondazazxx21";
         var stats = null;
         var activeTripsChart = null;
         var activeTripsCount = [];
@@ -621,7 +629,7 @@
                     },
                     exporting: { enabled: false },
                     title: {
-                        text: 'Trip stats',
+                        text: '',
                         style: {
                             fontFamily: 'Open Sans, sans-serif',
                             color: "#727272"
@@ -982,7 +990,11 @@
 							$("#" + tripContainerId).toggleClass("activeTrip");
 							setTripInfo(activeTripsInfo[trip.id]);
 							updateSelectedTrip();
-							currentTripLogs = [];
+							clearLogs();
+						} else {
+							$("#" + tripContainerId).toggleClass("activeTrip");
+							clearTripInfo();
+							clearLogs();
 						}
 					});
 
@@ -1003,14 +1015,14 @@
 		var updatingTripId = "";
         function updateSelectedTrip() {
 			var tripId = $(".activeTrip").find("#tripId").val();
-            if (!updatingSelectedTrip || tripId != updatingTripId) {
+            if (tripId && (!updatingSelectedTrip || tripId != updatingTripId)) {
 				updatedTripAudio.pause();
                 updatingSelectedTrip = true;
 				updatingTripId = tripId;
                 if (tripId) {
                     var tripContainerId = getContainerTripId(tripId);
 					$("#updatingTripContainer").fadeIn();
-                    $.get(baseUrl + 'tripstatus' + "?access_token=webondazazxx21&tripid=" +tripId, function (data) {
+                    $.get(baseUrl + 'tripstatus' + "?access_token="+accessToken+"&tripid=" +tripId, function (data) {
                         if (data.result == "OK") {
                             activeTripsInfo[tripId].fleetId = data.fleetId;
 							activeTripsInfo[tripId].fleetName = data.fleetName;
@@ -1085,12 +1097,14 @@
 					if(dropoffLocation){
 						destinationLocation = new google.maps.LatLng(dropoffLocation.lat, dropoffLocation.lng);
 						if (destinationMarker != null) {
+							destinationMarker.setMap(map);
 							destinationMarker.setPosition(destinationLocation);
 						}
 					}
 					if (pickupLocation) {
 						passengerLocation = new google.maps.LatLng(pickupLocation.lat, pickupLocation.lng);
 						if (passengerMarker != null) {
+							passengerMarker.setMap(map);
 							passengerMarker.setPosition(passengerLocation);
 						}
 					}
@@ -1098,6 +1112,7 @@
 					if (driverLocation) {
 						driverCurrentLocation = new google.maps.LatLng(driverLocation.lat, driverLocation.lng);
 						if (driverMarker != null) {
+							driverMarker.setMap(map);
 							driverMarker.setPosition(driverCurrentLocation);
 						}
 					}
@@ -1140,6 +1155,35 @@
 			}
         }
 
+		function clearTripInfo(){
+			$("#selectedTripPassengerName").hide().html('').fadeIn();
+			$("#selectedTripPickupTime").hide().html('').fadeIn();
+			$("#selectedTripPickupLocation").hide().html('').fadeIn();
+			$("#selectedTripStatus").hide().html('').fadeIn();
+			$("#selectedTripETA").hide().html('').fadeIn();
+			$("#selectedTripFare").hide().html('').fadeIn();
+			$("#selectedTripDropoffLocation").hide().html('').fadeIn();
+			$("#selectedTripDriverName").hide().html('').fadeIn();
+			$("#selectedTripDriverLocation").hide().html('').fadeIn();
+			$("#selectedTripOriginatingPartner").hide().html('').fadeIn();
+			$("#selectedTripServicingPartner").hide().html('').fadeIn();
+
+			if (passengerMarker != null) {
+				passengerMarker.setMap(null);
+			}
+			if (driverMarker != null) {
+				driverMarker.setMap(null);
+			}
+			if (destinationMarker != null) {
+				destinationMarker.setMap(null);
+			}
+		}
+
+		function clearLogs(){
+			currentTripLogs = [];
+			$("#triplogs_logs").html('');
+		}
+
 		var updatingTripLog = false;
 		function updateTripLog(tripId){
 			if(!updatingTripLog){
@@ -1175,18 +1219,26 @@
 								var log = logs[j];
 								if(log.messages.length > 0){
 									logString 		+=  '<li class="request_block"> <span class="handle collapsed"></span>';
-									logString 		+= log.time + " | " + log.messages[0].second;
+									logString 		+= log.time + " | " + log.messages[0].text;
 									logString		+= '<ul style="display: none;">';
 									if(log.request){
-										logString	+= '<li><span class="handle collapsed"></span>Json request <ul style="display: none;"><li><pre><code class="language-css">' + log.request + '</code></pre></li></ul></li>';
+										logString	+= '<li><span class="handle collapsed"></span> Request <ul style="display: none;"><li><pre><code class="language-javascript">' + FormatJSON(JSON.parse(log.request)) + '</code></pre></li></ul></li>';
 									}
 									if(log.messages.length > 1){
 										for (i=1; i<log.messages.length; i++) {
-											logString += '<li><p style="padding-left:'+log.messages[i].first+'">'+log.messages[i].second+'</p></li>';
+											logString += '<li style="padding-left:'+log.messages[i].indent+'px">';
+
+											if(log.messages[i].json){
+												logString += '<span class="handle collapsed"></span>';
+											}
+
+											logString += '<p>'+log.messages[i].text+'</p>';
+
+											if(log.messages[i].json){
+												logString	+= '<ul style="display: none;"><li><pre><code class="language-javascript">' + FormatJSON(JSON.parse(log.messages[i].json)) + '</code></pre></li></ul>';
+											}
+											logString += '</li>';
 										}
-									}
-									if(log.response){
-										logString	+= '<li><span class="handle collapsed"></span>Json response <ul style="display: none;"><li><pre><code class="language-css">' + log.response + '</code></pre></li></ul></li>';
 									}
 									logString += '</ul></li>';
 								}
@@ -1201,6 +1253,8 @@
 							$(".tree li:has(ul)").children(":first-child").click(function () {
 								$(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
 							});
+
+							Prism.highlightAll();
 						}
 					}
 					updatingTripLog = false;
@@ -1314,6 +1368,90 @@
             updateTrips();
             updateSelectedTrip();
         }, 10000);
+
+		//JSON formatter
+		function RealTypeOf(v) {
+		  if (typeof(v) == "object") {
+			if (v === null) return "null";
+			if (v.constructor == (new Array).constructor) return "array";
+			if (v.constructor == (new Date).constructor) return "date";
+			if (v.constructor == (new RegExp).constructor) return "regex";
+			return "object";
+		  }
+		  return typeof(v);
+		}
+
+		function FormatJSON(oData, sIndent) {
+			if (arguments.length < 2) {
+				var sIndent = "";
+			}
+			var sIndentStyle = "    ";
+			var sDataType = RealTypeOf(oData);
+
+			// open object
+			if (sDataType == "array") {
+				if (oData.length == 0) {
+					return "[]";
+				}
+				var sHTML = "[";
+			} else {
+				var iCount = 0;
+				$.each(oData, function() {
+					iCount++;
+					return;
+				});
+				if (iCount == 0) { // object is empty
+					return "{}";
+				}
+				var sHTML = "{";
+			}
+
+			// loop through items
+			var iCount = 0;
+			$.each(oData, function(sKey, vValue) {
+				if (iCount > 0) {
+					sHTML += ",";
+				}
+				if (sDataType == "array") {
+					sHTML += ("\n" + sIndent + sIndentStyle);
+				} else {
+					sHTML += ("\n" + sIndent + sIndentStyle + "\"" + sKey + "\"" + ": ");
+				}
+
+				// display relevant data type
+				switch (RealTypeOf(vValue)) {
+					case "array":
+					case "object":
+						sHTML += FormatJSON(vValue, (sIndent + sIndentStyle));
+						break;
+					case "boolean":
+					case "number":
+						sHTML += vValue.toString();
+						break;
+					case "null":
+						sHTML += "null";
+						break;
+					case "string":
+						sHTML += ("\"" + vValue + "\"");
+						break;
+					default:
+						sHTML += ("TYPEOF: " + typeof(vValue));
+				}
+
+				// loop
+				iCount++;
+			});
+
+			// close object
+			if (sDataType == "array") {
+				sHTML += ("\n" + sIndent + "]");
+			} else {
+				sHTML += ("\n" + sIndent + "}");
+			}
+
+			// return
+			return sHTML;
+		}
 
     });
     </script>

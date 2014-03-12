@@ -7,8 +7,9 @@
 
 <head>
     <title>Log</title>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" ></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link href="Scripts/prism.css" rel="stylesheet" />
+    <script type="text/javascript" src="Scripts/prism.js"></script>
 </head>
 
 
@@ -146,13 +147,14 @@
         }
 
         pre {
-            overflow-x: auto; /* Use horizontal scroller if needed; for Firefox 2, not needed in Firefox 3 */
-            white-space: pre-wrap; /* css-3 */
-            white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-            white-space: -pre-wrap; /* Opera 4-6 */
-            white-space: -o-pre-wrap; /* Opera 7 */
-            /* width: 99%; */
-            word-wrap: break-word; /* Internet Explorer 5.5+ */
+            width: 97%;
+            font-size: 13px;
+            border: 1px solid #DEDEDE;
+            background: #fff !important;
+        }
+
+        code {
+            background: #fff;
         }
     </style>
 
@@ -177,13 +179,13 @@
                 if (entry.Messages.Count > 0)
                 {
                     <li class="request_block">
-                        @entry.Time.ToString() | @entry.Messages.First().Second
+                        @entry.Time.ToString() | @entry.Messages.First().Text
                         <ul>
                             @if (!entry.Request.IsNullOrEmpty())
                             {
-                                <li>
-                                    Json request
-                                    <ul>
+                                <li><span class="handle collapsed"></span>
+                                    Request
+                                    <ul style="display: none;">
                                         <li><pre style=" word-wrap: break-word;" class="prettyprint language-java">@entry.Request</pre></li>
                                     </ul>
                                 </li>
@@ -193,21 +195,20 @@
                                 for (int i = 1; i < entry.Messages.Count; i++)
                                 {
                                     var log = entry.Messages.ElementAt(i);
-                                    <li>
-                                        <p style="padding-left: @log.First.ToString()px;">
-                                            @log.Second
-                                        </p>
+                                    <li style="padding-left: @log.Indent.ToString()px;">
+                                        @if (log.Json != null)
+                                        {
+                                            <span class="handle collapsed"></span>
+                                        }
+
+                                        <p>@log.Text</p>
+
+                                        @if (log.Json != null)
+                                        {
+                                            <ul style="display: none;"><li><pre><code class="language-javascript">@log.Json</code></pre></li></ul>
+                                        }
                                     </li>
                                 }
-                            }
-                            @if (!entry.Response.IsNullOrEmpty())
-                            {
-                                <li>
-                                    Json response
-                                    <ul>
-                                        <li><pre style=" word-wrap: break-word;" class="prettyprint language-java">@entry.Response</pre></li>
-                                    </ul>
-                                </li>
                             }
                         </ul>
                     </li>
@@ -217,11 +218,10 @@
     </div>
     <script>
         $(document).ready(function () {
-            //jQuery(".tree ul").hide();
-            jQuery(".tree li").prepend("<span class='handle'></span>");
-            jQuery(".tree li:has(ul)").children(":first-child").addClass("expanded").click(function () {
-                jQuery(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
+            $(".tree li:has(ul)").children(":first-child").click(function () {
+                $(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
             });
+            Prism.highlightAll();
         });
     </script>
 

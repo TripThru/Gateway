@@ -290,11 +290,11 @@ namespace CustomIntegrations
         {
             public class SubStatus
             {
-                bool is_drop { get; set; }
-                bool is_coa { get; set; }
-                bool is_passenger_on_board { get; set; }
-                bool is_on_way_to_job { get; set; }
-                bool is_arrived_waiting { get; set; }
+                public bool is_drop { get; set; }
+                public bool is_coa { get; set; }
+                public bool is_passenger_on_board { get; set; }
+                public bool is_on_way_to_job { get; set; }
+                public bool is_arrived_waiting { get; set; }
             }
             public string status { get; set; }
             public SubStatus sub_status { get; set; }
@@ -555,7 +555,7 @@ namespace CustomIntegrations
             if (activeTrips[tripID].status == value.status)
                 return;
 
-            Logger.BeginRequest("TDispatch trip "+tripID+" update", null);
+            Logger.BeginRequest("TDispatch trip " + tripID + " update", null);
             try
             {
                 string bookingPK = activeTrips[tripID].pk;
@@ -570,7 +570,7 @@ namespace CustomIntegrations
                 Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
                     clientID: ID,
                     tripID: tripID,
-                    status: ConvertTDispatchStatusToTripThruStatus(value.status));
+                    status: ConvertTDispatchStatusToTripThruStatus(value.status, value.sub_status));
                 tripthru.UpdateTripStatus(request);
                 Logger.Untab();
                 if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" ||
@@ -579,24 +579,32 @@ namespace CustomIntegrations
             }
             catch (Exception e)
             {
-                Logger.LogDebug("TDispatch trip "+tripID+" update=" + e.Message, e.StackTrace);
+                Logger.LogDebug("TDispatch trip " + tripID + " update=" + e.Message, e.StackTrace);
                 Logger.Log("Exception=" + e.Message);
             }
             Logger.EndRequest(null);
         }
 
-        Status ConvertTDispatchStatusToTripThruStatus(string value)
+        Status ConvertTDispatchStatusToTripThruStatus(string status, TDispatchAPI.Booking.SubStatus sub_status)
         {
-            switch (value)
+            switch (status)
             {
                 case "missed": return Status.Cancelled;
-                case "dispatched": return Status.Queued;
+                case "dispatched": return Status.Dispatched;
                 case "incoming": return Status.Queued;
                 case "completed": return Status.Complete;
                 case "rejected": return Status.Rejected;
                 case "cancelled": return Status.Cancelled;
-                case "confirmed": return Status.Dispatched;
-                case "active": return Status.Enroute;
+                case "confirmed": return Status.Confirmed;
+                case "active":
+                    {
+                        if (sub_status.is_on_way_to_job)
+                            return Status.Enroute;
+                        if (sub_status.is_arrived_waiting)
+                            return Status.ArrivedAndWaiting;
+                        return Status.PickedUp;
+                    }
+
                 default: throw new Exception("fatal error");
             }
         }
@@ -674,7 +682,7 @@ namespace CustomIntegrations
                 var price = 0.0;
                 try
                 {
-                    price = double.Parse(createResponse.fare.formatted_total_cost.Replace("$",""));
+                    price = double.Parse(createResponse.fare.formatted_total_cost.Replace("$", ""));
                 }
                 catch (Exception e) { }
                 quotes.Add(new Quote(partnerID: ID, partnerName: name, fleetID: ID, fleetName: name, price: price, ETA: DateTime.UtcNow + new TimeSpan(0, 0, createResponse.fare.time_to_wait)));
@@ -704,14 +712,14 @@ namespace CustomIntegrations
                     way_points = booking.way_points,
                     pickup_time =
                         booking.pickup_time != null
-                            ? ((DateTime) booking.pickup_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
+                            ? ((DateTime)booking.pickup_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
                                 DateTimeFormatInfo.InvariantInfo)
                             : null,
                     pickup_location = booking.pickup_Location.location,
                     dropoff_location = booking.dropoff_Location.location,
                     dropoff_time =
                         booking.dropoff_time != null
-                            ? ((DateTime) booking.dropoff_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
+                            ? ((DateTime)booking.dropoff_time).ToString("yyyy-MM-dd'T'HH:mm:ssK",
                                 DateTimeFormatInfo.InvariantInfo)
                             : null,
                     payment_method = booking.payment_method
@@ -726,9 +734,9 @@ namespace CustomIntegrations
                     driverName: booking.driver != null ? booking.driver.name : null,
                     driverLocation: booking.driver != null
                         ? new Location((double)booking.driver.location.lat,
-                            (double) booking.driver.location.lng)
+                            (double)booking.driver.location.lng)
                         : null, price: booking.cost.value, distance: fare.fare.distance.km,
-                    result: Result.OK, status: this.ConvertTDispatchStatusToTripThruStatus(booking.status)
+                    result: Result.OK, status: this.ConvertTDispatchStatusToTripThruStatus(booking.status, booking.sub_status)
                     );
                 if (booking.pk == null)
                     booking.pk = bookingPK;
@@ -749,7 +757,7 @@ namespace CustomIntegrations
             if (request.status == Status.Cancelled)
             {
                 TDispatchAPI.CancelBookingResponse resp = api.CancelBooking(activeTrips[request.tripID].pk,
-                    new TDispatchAPI.CancelBookingRequest {description = "abandoned"});
+                    new TDispatchAPI.CancelBookingRequest { description = "abandoned" });
                 response = new Gateway.UpdateTripStatusResponse(result: Result.OK);
             }
             else

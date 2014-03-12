@@ -237,7 +237,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("RegisterPartner=" + e.Message, e.ToString());
                 return new RegisterPartnerResponse(result: Result.UnknownError);
             }
@@ -267,7 +266,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
@@ -353,9 +351,9 @@ namespace TripThruCore
                     {
                         Gateway client = partners[r.clientID];
                         originatingPartnerByTrip.Add(r.tripID, r.clientID);
-                        Logger.Log("Originating partner = " + r.clientID);
+                        Logger.AddTag("Originating partner", r.clientID);
                         servicingPartnerByTrip.Add(r.tripID, partner.ID);
-                        Logger.Log("Servicing partner = " + partner.name);
+                        Logger.AddTag("Servicing partner", partner.name);
                         r.clientID = ID;
                         response1 = partner.DispatchTrip(r);
                         if (response1.result != Result.OK)
@@ -379,10 +377,10 @@ namespace TripThruCore
                                 VehicleType = r.vehicleType
                             };
                             activeTrips.Add(r.tripID, trip);
-                            Logger.Log("Passenger= " + r.passengerName);
-                            Logger.Log("Pickup time= " + r.pickupTime);
-                            Logger.Log("Pickup location= " + r.pickupLocation);
-                            Logger.Log("Dropoff location= " + r.dropoffLocation);
+                            Logger.AddTag("Passenger", r.passengerName);
+                            Logger.AddTag("Pickup_time", r.pickupTime.ToString());
+                            Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
+                            Logger.AddTag("Dropoff_location", r.dropoffLocation.ToString());
                         }
                     }
                     else
@@ -401,7 +399,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
@@ -448,7 +445,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
@@ -486,7 +482,7 @@ namespace TripThruCore
                 Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
                 if (partner != null)
                 {
-                    Logger.Log("Destination partner=" + partner.name);
+                    Logger.AddTag("Destination_partner", partner.name);
                     r.clientID = ID;
                     GetTripStatusResponse response = partner.GetTripStatus(r);
                     if (response.result == Result.OK)
@@ -512,19 +508,19 @@ namespace TripThruCore
                             });
                         }
 
-                        Logger.Log("Passenger = " + response.passengerName);
-                        Logger.Log("Pickup time = " + response.pickupTime);
-                        Logger.Log("Pickup location = "+response.pickupLocation);
-                        Logger.Log("Dropoff location = " + response.dropoffLocation);
-                        Logger.Log("Status = " + response.status);
-                        Logger.Log("ETA = " + response.ETA);
+                        Logger.AddTag("Passenger", response.passengerName);
+                        Logger.AddTag("Pickup time", response.pickupTime.ToString());
+                        Logger.AddTag("Pickup location", response.pickupLocation.ToString());
+                        Logger.AddTag("Dropoff location", response.dropoffLocation.ToString());
+                        Logger.AddTag("Status", response.status.ToString());
+                        Logger.AddTag("ETA", response.ETA.ToString());
 
                         response.partnerID = partner.ID;
                         response.partnerName = partner.name;
                         response.originatingPartnerName = partners[originatingPartnerByTrip[r.tripID]].name;
                         response.servicingPartnerName = partners[servicingPartnerByTrip[r.tripID]].name;
-                        Logger.Log("Originating partner = " + response.originatingPartnerName);
-                        Logger.Log("Servicing partner = " + response.servicingPartnerName);
+                        Logger.AddTag("Originating partner", response.originatingPartnerName);
+                        Logger.AddTag("Servicing partner", response.servicingPartnerName);
                     }
                     else
                     {
@@ -532,13 +528,13 @@ namespace TripThruCore
                     }
                     return response;
                 }
-                Logger.Log("Destination partner trip not found, ClientId=" + r.clientID);
+                Logger.Log("Destination partner trip not found");
+                Logger.AddTag("ClientId", r.clientID);
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("GetTripStatus = " + e.Message, e.ToString());
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
@@ -551,7 +547,7 @@ namespace TripThruCore
                 Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
                 if (destPartner != null)
                 {
-                    Logger.Log("Destination partner = " + destPartner.name);
+                    Logger.AddTag("Destination partner", destPartner.name);
                     string clientID = r.clientID;
                     r.clientID = ID;
                     UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
@@ -575,13 +571,13 @@ namespace TripThruCore
                     }
                     return response;
                 }
-                Logger.Log("Destination partner trip not found, ClientId="+r.clientID);
+                Logger.Log("Destination partner trip not found");
+                Logger.AddTag("ClientId", r.clientID);
                 return new UpdateTripStatusResponse(result: Result.NotFound);
             }
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception = " + e.Message);
                 Logger.LogDebug("UpdateTripStatus = " + e.Message, e.ToString());
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }

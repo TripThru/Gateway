@@ -87,8 +87,10 @@ namespace Utils
                             lock (queue)
                             {
                                 requestLog = this.queue.Dequeue();
-                                foreach (Pair<int, string> msg in requestLog.Messages)
-                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg.Second);
+                                foreach (Message msg in requestLog.Messages)
+                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg.Text);
+                                foreach (Tag tag in requestLog.Tags)
+                                    logEntries.Add(tag.Name + "=" + tag.Value);
                             }
 
                             if (logEntries.Any())
@@ -172,10 +174,38 @@ namespace Utils
             }
         }
 
+        public class Message
+        {
+            public Message(int indent, string text, string json = null)
+            {
+                this.Indent = indent;
+                this.Text = text;
+                this.Json = json;
+            }
+
+            public int Indent { get; set; }
+            public string Text { get; set; }
+            public string Json { get; set; }
+
+        }
+
+        public class Tag
+        {
+            public Tag(string name, string value)
+            {
+                this.Name = name;
+                this.Value = value;
+            }
+
+            public string Name { get; set; }
+            public string Value { get; set; }
+        }
+
         public class RequestLog
         {
             public DateTime Time { get; set; }
-            public List<Pair<int, string>> Messages { get; set; }
+            public List<Message> Messages { get; set; }
+            public List<Tag> Tags { get; set; }
             public string Request { get; set; }
             public string Response { get; set; }
             public int MaxTab { get; set; }
@@ -186,7 +216,8 @@ namespace Utils
             {
                 this.Request = request;
                 Time = DateTime.UtcNow;
-                Messages = new List<Pair<int, string>>();
+                Messages = new List<Message>();
+                Tags = new List<Tag>();
                 MaxTab = 0;
                 Tab = 0;
                 this.tripID = tripID;
@@ -221,10 +252,11 @@ namespace Utils
                 requestLog[thread] = new RequestLog(json, tripID);
                 numBegunRequests[thread] = 0;
             }
-            else if (!numBegunRequests.ContainsKey(thread))
+
+            if (!numBegunRequests.ContainsKey(thread))
                 numBegunRequests[thread] = 0;
             numBegunRequests[thread] = numBegunRequests[thread] + 1;
-            Logger.Log(msg);
+            Logger.Log(msg, request);
             Logger.Tab();
         }
 
@@ -234,7 +266,7 @@ namespace Utils
                 return;
             Logger.Untab();
             if (response != null)
-                Logger.Log("EndRequest: Response = " + restReq.JsonSerializer.Serialize(response));
+                Logger.Log("EndRequest: Response = ", response);
             else
                 Logger.Log("End");
 
@@ -244,7 +276,7 @@ namespace Utils
                 splunkClient.Enqueue(requestLog[thread]);
             if (numBegunRequests[thread] == 0)
             {
-                Logger.Log("Type=INFO");
+                Logger.AddTag("Type", "INFO");
                 var json = "";
                 if (response != null)
                     json = restReq.JsonSerializer.Serialize(response);
@@ -259,30 +291,32 @@ namespace Utils
             }
         }
 
+        public static void AddTag(string name, string value)
+        {
+            if (requestLog == null || !enabled)
+                return;
+            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            if (!requestLog.ContainsKey(thread))
+                return;
+            requestLog[thread].Tags.Add(new Tag(name, value));
+        }
+
         public static void LogDebug(string message, string detailed = null)
         {
+            Console.WriteLine(message + " | " + detailed);
             if (requestLog == null || !enabled)
                 return;
             RequestLog error = new RequestLog("");
-            //error.Messages.Add(new Pair<int, string>(0, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + message));
-            error.Messages.Add(new Pair<int, string>(0, message));
+            error.Messages.Add(new Message(0, message));
             if (detailed != null)
-                error.Messages.Add(new Pair<int, string>(40, detailed));
-            error.Messages.Add(new Pair<int, string>(40, "Type=DEBUG"));
-            error.Messages.Add(new Pair<int, string>(0, "End"));
+                error.Messages.Add(new Message(40, detailed));
+            error.Tags.Add(new Tag("Type", "DEBUG"));
+            error.Messages.Add(new Message(0, "End"));
             error.Response = "";
             splunkClient.Enqueue(error);
-            Console.WriteLine(message + " | " + detailed);
         }
 
-        public static void Log(string message, object o)
-        {
-            if (requestLog == null || !enabled)
-                return;
-            Log(message + " -- " + restReq.JsonSerializer.Serialize(o));
-        }
-
-        public static void Log(string message)
+        public static void Log(string message, object json = null)
         {
             if (requestLog == null || !enabled)
                 return;
@@ -295,8 +329,21 @@ namespace Utils
                 file.WriteLine(str);
                 file.Flush();
             }
-            requestLog[thread].Messages.Add(new Pair<int, string>(requestLog[thread].Tab * 40, str));
+            string jsonString = json != null ? restReq.JsonSerializer.Serialize(json) : null;
+            requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
         }
+
+        public static void Log(Message message)
+        {
+            if (requestLog == null || !enabled)
+                return;
+            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            if (!requestLog.ContainsKey(thread))
+                throw new Exception("Log with no enclosing request");
+            message.Indent = requestLog[thread].Tab*40;
+            requestLog[thread].Messages.Add(message);
+        }
+
         public static bool enabled = false;
 
         public static void OpenLog(string id, string filePath = null)

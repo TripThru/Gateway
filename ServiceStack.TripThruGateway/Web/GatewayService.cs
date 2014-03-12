@@ -36,8 +36,8 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
-                List<Logger.RequestLog> logList = 
-                    request.tripID == null ? Logger.Queue.ToList() : Logger.Queue.Where(log => log.tripID == request.tripID).ToList();
+                List<Logger.RequestLog> logList =
+                    Logger.Queue.Where(log => log.tripID == request.tripID).ToList();
                 return new LogResponse
                 {
                     Result = "OK",
@@ -182,7 +182,7 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
-                Logger.Log("RequestType=RegisterPartner");
+                Logger.AddTag("RequestType", "RegisterPartner");
                 Logger.EndRequest(partnerResponse);
                 return partnerResponse;
             }
@@ -259,15 +259,14 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("GetPartnerInfo="+e.Message, e.ToString());
-                    Logger.Log("Exception=" + e.Message);
                     partnersResponse = new PartnersResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=GetPartnerInfo");
-                Logger.Log("ClientId = " + clientId);
+                Logger.AddTag("RequestType", "GetPartnerInfo");
+                Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(partnersResponse);
                 return partnersResponse;
             }
@@ -394,15 +393,14 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
-                    Logger.Log("Exception="+e.Message);
                     quotesResponse = new QuotesResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=QuoteTrip");
-                Logger.Log("ClientId = " + clientId);
+                Logger.AddTag("RequestType", "QuoteTrip");
+                Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(quotesResponse);
                 return quotesResponse;
             }
@@ -532,15 +530,14 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
-                    Logger.Log("Exception=" + e.Message);
                     dispatchResponse = new DispatchResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=DispatchTrip");
-                Logger.Log("ClientId="+clientId);
+                Logger.AddTag("RequestType", "DispatchTrip");
+                Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(dispatchResponse);
                 return dispatchResponse;
             }
@@ -659,15 +656,14 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
-                    Logger.Log("Exception=" + e.Message);
                     tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=GetTripStatus");
-                Logger.Log("ClientId="+clientId);
+                Logger.AddTag("RequestType", "GetTripStatus");
+                Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(tripStatusResponse);
                 return tripStatusResponse;
             }
@@ -724,15 +720,14 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
-                    Logger.Log("Exception=" + e.Message);
                     tripResponse = new TripStatusResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=UpdateTripStatus");
-                Logger.Log("ClientId=" + clientId);
+                Logger.AddTag("RequestType", "UpdateTripStatus");
+                Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(tripResponse);
                 return tripResponse;
             }
@@ -792,7 +787,7 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
-                Logger.Log("RequestType=GetTrips");
+                Logger.AddTag("RequestType", "GetTrips");
                 Logger.EndRequest(tripResponse);
                 Logger.enabled = true;
                 return tripResponse;

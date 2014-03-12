@@ -1,5 +1,6 @@
 ﻿using System;
 using ServiceStack.TripThruPartnerGateway.App_Start;
+using Utils;
 
 namespace ServiceStack.TripThruPartnerGateway
 {
@@ -11,6 +12,12 @@ namespace ServiceStack.TripThruPartnerGateway
         {
             //Initialize your application
             (new TripThruPartnerGatewayHost()).Init();
+        }
+
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            System.Exception ex = Server.GetLastError();
+            Logger.LogDebug("Application_Error : " + ex.Message, ex.StackTrace);
         }
 	}
 }

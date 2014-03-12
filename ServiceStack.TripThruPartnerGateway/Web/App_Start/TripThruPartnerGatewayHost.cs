@@ -1,8 +1,11 @@
 using Funq;
 using ServiceStack.Common.Utils;
 using ServiceStack.Razor;
+using ServiceStack.ServiceHost;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints;
+using ServiceStack.WebHost.Endpoints.Extensions;
+using Utils;
 using ContentType = ServiceStack.Common.Web.ContentType;
 
 namespace ServiceStack.TripThruPartnerGateway.App_Start
@@ -38,6 +41,27 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
                           });
 
             container.RegisterAutoWiredAs<TripThruPartnerGateway.InitPartnerService, InitPartnerService>();
+
+            //Unhandled exceptions
+            //Handle Exceptions occurring in Services:
+            this.ServiceExceptionHandler = (request, exception) =>
+            {
+
+                //log your exceptions here
+                Logger.LogDebug("ServiceExceptionHandler : " + exception.Message, exception.StackTrace);
+
+                //call default exception handler or prepare your own custom response
+                return DtoUtils.HandleException(this, request, exception);
+            };
+
+            //Handle Unhandled Exceptions occurring outside of Services, 
+            //E.g. in Request binding or filters:
+            this.ExceptionHandler = (req, res, operationName, ex) =>
+            {
+                Logger.LogDebug("ExceptionHandler : " + ex.Message, ex.StackTrace);
+                res.Write("Error: {0}: {1}".Fmt(ex.GetType().Name, ex.Message));
+                res.EndServiceStackRequest(skipHeaders: true);
+            };
 
             /**
              * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain

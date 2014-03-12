@@ -62,37 +62,39 @@ namespace TripThruSsh
             foreach (var partnerConfiguration in partnerConfigurations)
             {
                 var configuration = JsonSerializer.DeserializeFromString<PartnerConfiguration>(File.ReadAllText(partnerConfiguration));
-                if (!configuration.Enabled)
+                if (configuration.Enabled)
                 {
-                    continue;
+                    partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
+                    var name = configuration.Partner.Name.Replace(" ", "");
+                    Console.WriteLine("Configuring " + name);
+                    webappNames.Add(name);
+                    ssh.RunCommand("cp -a " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/  " + remoteFilePath +
+                                   "ServiceStack." + name + "/");
+                    ssh.RunCommand("rm " + remoteFilePath + "ServiceStack." + name + "/Web/PartnerConfiguration.txt");
+                    sftpBase.Put(partnerConfiguration,
+                        remoteFilePath + "ServiceStack." + name + "/Web/PartnerConfiguration.txt");
+
+                    var bookingwebConfig = new System.IO.StreamWriter("config.txt");
+                    bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
+                    bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
+                    bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
+                    bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
+                    bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
+                    bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
+                    bookingwebConfig.WriteLine("PartnerName=" + name);
+                    bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
+                    bookingwebConfig.Flush();
+                    bookingwebConfig.Close();
+                    ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/inc/tripthru/config.txt");
+                    sftpBase.Put("config.txt", remoteFilePath + "BookingWebsite/inc/tripthru/");
+                    ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
+                    var x = name + ".png";
+                    var y = remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png";
+                    sftpBase.Put("PartnerConfigurations/" + name + ".png",
+                        remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
+                    ssh.RunCommand("rm -rf /var/www/sanfran/Bookings" + name);
+                    ssh.RunCommand("cp -a " + remoteFilePath + "BookingWebsite/ /var/www/sanfran/Bookings" + name);
                 }
-                partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
-                var name = configuration.Partner.Name.Replace(" ", "");
-                Console.WriteLine("Configuring " + name);
-                webappNames.Add(name);
-                ssh.RunCommand("cp -a " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/  " + remoteFilePath + "ServiceStack." + name + "/");
-                ssh.RunCommand("rm " + remoteFilePath + "ServiceStack." + name + "/Web/PartnerConfiguration.txt");
-                sftpBase.Put(partnerConfiguration, remoteFilePath + "ServiceStack." + name + "/Web/PartnerConfiguration.txt");
-                
-                var bookingwebConfig = new System.IO.StreamWriter("config.txt");
-                bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
-                bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
-                bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
-                bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
-                bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
-                bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
-                bookingwebConfig.WriteLine("PartnerName=" + name);
-                bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
-                bookingwebConfig.Flush();
-                bookingwebConfig.Close();
-                ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/inc/tripthru/config.txt");
-                sftpBase.Put("config.txt", remoteFilePath + "BookingWebsite/inc/tripthru/");
-                ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
-                var x = name + ".png";
-                var y = remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png";
-                sftpBase.Put("PartnerConfigurations/" +name + ".png", remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
-                ssh.RunCommand("rm -rf /var/www/sanfran/Bookings" + name);
-                ssh.RunCommand("cp -a " + remoteFilePath + "BookingWebsite/ /var/www/sanfran/Bookings" + name);
             }
 
             if (fullDeploy)

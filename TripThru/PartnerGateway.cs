@@ -96,7 +96,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
                 return new GetPartnerInfoResponse(result: Result.UnknownError);
             }
@@ -163,7 +162,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
                 return new DispatchTripResponse(result: Result.UnknownError);
             }
@@ -209,7 +207,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
                 return new QuoteTripResponse(result: Result.UnknownError);
             }
@@ -235,7 +232,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
+                Logger.Log("Exception", e.Message);
                 Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
                 return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
             }
@@ -301,7 +298,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
                 return new GetTripStatusResponse(result: Result.UnknownError);
             }
@@ -322,7 +318,6 @@ namespace TripThruCore
             catch (Exception e)
             {
                 exceptions++;
-                Logger.Log("Exception=" + e.Message);
                 Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
                 return new UpdateTripStatusResponse(result: Result.UnknownError);
             }
