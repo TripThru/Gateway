@@ -426,7 +426,7 @@ $fields = '';
 <?php else: ?>
             <div id="journey_map" class="box-container">
                     <div id="map_canvas" class="small_map_canvas" ></div>
-                    <div class="journey_map_info">
+                    <div class="journey_map_info" style="margin-bottom:50px;">
                         <?php 
                             if ($td->Account_checkLogin() && isset($_SESSION[$td->partnerId]['post_booking']['booking_form_type']) && ( $_SESSION[$td->partnerId]['post_booking']['booking_form_type']) == 'addposted'){ 
                                 $bk_submit = 'Confirm'; 
@@ -435,6 +435,7 @@ $fields = '';
                         <div id="suggested_partner"></div>
                         <div id="partner_detail"></div>
                     </div>
+                    <div style="margin:0 auto; width:100%;" id="loading"></div>
                 </div>
 <?php endif; ?>
     </div>
@@ -533,6 +534,7 @@ $fields = '';
         refreshInfoMap();
         //Get quote function
         function gQuote(){
+            $("#loading").html("<div style='margin:0 auto; left:35%; position:absolute; bottom:0;'><img src='/BookingWebsiteGif/images/loader.gif' align='middle'/></ div>");
             //Serialize data
             var data = $(".booking_form").serializeArray();
             if(data[data.length-1].value == "Type your message to the driver here" || data[data.length-1].value == "" ) data.pop();
@@ -588,7 +590,8 @@ $fields = '';
 					
 					hasLocalQuotes = true;
 				}
-				
+
+
 				$("#partner_detail").html('<br><br><h1>Getting partner quotes...</h1>');
 				
 				//Do a quote request to tripthru
@@ -605,6 +608,8 @@ $fields = '';
 					name: 'ORIGIN',
 					value: 'tripthru'
 				});
+
+
 				$.post(window.location.pathname.replace(/^\/([^\/]*).*$/, '$1'),info,function(data){
 					var partnersAvailable = false;
 					var b = true;
@@ -631,6 +636,7 @@ $fields = '';
 						}
 					)
 					
+
 					
 					if(hasLocalQuotes)
 						$("#partner_detail").html('<br><br><h1>Available partners</h1>');
@@ -674,7 +680,11 @@ $fields = '';
 					if(!partnersAvailable && !hasLocalQuotes){
 						$("#partner_detail").html('<div class="map_info_txt"><span></span><label>Sorry, no service available on this area</label></div>');
 					}
+
+                    $("#loading").hide();
 				});
+
+    
 
                 //Setup map directions
                 var directionsDisplay;
