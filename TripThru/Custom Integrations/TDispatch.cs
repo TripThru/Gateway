@@ -555,7 +555,7 @@ namespace CustomIntegrations
             if (activeTrips[tripID].status == value.status)
                 return;
 
-            Logger.BeginRequest("TDispatch trip " + tripID + " update", null);
+            Logger.BeginRequest("TDispatch trip " + tripID + " update", null, tripID);
             try
             {
                 string bookingPK = activeTrips[tripID].pk;
@@ -580,7 +580,6 @@ namespace CustomIntegrations
             catch (Exception e)
             {
                 Logger.LogDebug("TDispatch trip " + tripID + " update=" + e.Message, e.StackTrace);
-                Logger.Log("Exception=" + e.Message);
             }
             Logger.EndRequest(null);
         }
@@ -619,7 +618,7 @@ namespace CustomIntegrations
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
 
-            Logger.BeginRequest("DispatchTrip recieved from " + tripthru.name, request);
+            Logger.BeginRequest("DispatchTrip recieved from " + tripthru.name, request, request.tripID);
             Gateway.DispatchTripResponse response = null;
             {
 
@@ -694,7 +693,7 @@ namespace CustomIntegrations
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
-            Logger.BeginRequest("GetTripStatus received from " + tripthru.name, request);
+            Logger.BeginRequest("GetTripStatus received from " + tripthru.name, request, request.tripID);
             Gateway.GetTripStatusResponse response = null;
             if (activeTrips.ContainsKey(request.tripID))
             {
@@ -752,7 +751,7 @@ namespace CustomIntegrations
         }
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
-            Logger.BeginRequest("UpdateTripStatus received from " + tripthru.name, request);
+            Logger.BeginRequest("UpdateTripStatus received from " + tripthru.name, request, request.tripID);
             Gateway.UpdateTripStatusResponse response;
             if (request.status == Status.Cancelled)
             {

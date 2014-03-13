@@ -588,7 +588,7 @@
 		//$(".draggable").draggable({
 		//	containment: '#main_container'
 		//});
-        var baseUrl = "http://54.201.134.194/TripThru.TripThruGateway/";
+        var baseUrl = "";
 		var accessToken = "webondazazxx21";
         var stats = null;
         var activeTripsChart = null;
@@ -1011,7 +1011,14 @@
 			activeTrips.forEach(function (trip) {
 				if ($.inArray(trip, dataTrips) == -1) {
 					activeTrips = $.grep(activeTrips, function (value) {
-						return value != trip;
+						if(value != trip){
+							var tripId = $(".activeTrip").find("#tripId").val();
+							if(tripdId === trip){
+								$("#selectedTripStatus").hide().html('Completed').fadeIn();
+							}
+							return true;
+						}
+						return false;
 					});
 					$("#" + getContainerTripId(trip)).slideUp().remove();
 				}
@@ -1247,12 +1254,13 @@
 											logString += '<p>'+log.messages[i].text+'</p>';
 
 											if(log.messages[i].json){
-												logString	+= '<ul style="display: none;"><li><pre><code class="language-javascript">Request: \n' + FormatJSON(JSON.parse(log.messages[i].json));
-												if(((i+1) < (log.messages.length-1)) && log.messages[i+1].text.indexOf('Response') != -1 && log.messages[(i+1)].json){
+												var hasResponse = ((i+1) < (log.messages.length-1)) && log.messages[i+1].text.indexOf('Response') != -1 && log.messages[(i+1)].json;
+												var title = hasResponse ? 'Request: \n' : '';
+												logString	+= '<ul style="display: none;"><li><pre><code class="language-javascript">' + title + FormatJSON(JSON.parse(log.messages[i].json));
+												if(hasResponse){
 													i++;
 													logString += '\n\nResponse: \n' + FormatJSON(JSON.parse(log.messages[i].json));
 												}
-
 												logString	+= '</code></pre></li></ul>';
 											}
 											logString += '</li>';
@@ -1268,7 +1276,7 @@
 								$('.request_list').prepend(logString);
 							}
 
-							$(".tree li:has(ul)").children(":first-child").click(function () {
+							$(".tree li:has(ul)").children(":first-child").off('click').on('click', function () {
 								$(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
 							});
 
