@@ -192,25 +192,35 @@
                                 </li>
                             }
                             @if (entry.Messages.Count > 1)
-                            {
-                                for (int i = 1; i < entry.Messages.Count; i++)
-                                {
-                                    var log = entry.Messages.ElementAt(i);
-                                    <li style="padding-left: @log.Indent.ToString()px;">
-                                        @if (log.Json != null)
-                                        {
-                                            <span class="handle collapsed"></span>
-                                        }
+{
+    for (int i = 1; i < entry.Messages.Count; i++)
+    {
+        var log = entry.Messages.ElementAt(i);
+        <li style="padding-left: @log.Indent.ToString()px;">
+            @if (log.Json != null)
+            {
+                <span class="handle collapsed"></span>
+            }
 
-                                        <p>@log.Text</p>
+            <p>@log.Text</p>
 
-                                        @if (log.Json != null)
-                                        {
-                                            <ul style="display: none;"><li><pre><code class="language-javascript">@log.Json</code></pre></li></ul>
-                                        }
-                                    </li>
-                                }
-                            }
+            @if (log.Json != null)
+            {
+                <ul style="display: none;">
+                    <li>
+                        <pre><code class="language-javascript">Request: \n @log.Json
+                        @if (i + 1 < entry.Messages.Count - 1 && entry.Messages.ElementAt(i + 1).Text.Contains("Response") && entry.Messages.ElementAt(i + 1).Json != null)
+                        {
+                            i++;
+                            <span>\n\nResponse: \n</span> @entry.Messages.ElementAt(i).Json
+                        }
+                        </code></pre>
+                    </li>
+                </ul>
+            }
+        </li>
+    }
+}
                         </ul>
                     </li>
                 }

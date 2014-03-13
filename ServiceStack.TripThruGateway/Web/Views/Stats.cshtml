@@ -227,11 +227,14 @@
             background: #FFF;
             text-align: center;
             display: inline-block;
-            float: left;
             overflow: auto;
+            float: left;
             margin-top: 10px;
             margin-left: 10px;
             border: 1px solid #DEDEDE;
+        }
+
+        #triplog_trips {
         }
 
         #triplog_selector {
@@ -285,12 +288,12 @@
             min-height: 300px;
             width: 100%;
             background: #FFF;
-            overflow: auto;
             float: left;
             display: block;
             margin: 10px;
             border: 1px solid #DEDEDE;
         }
+
 
         .triplog {
             height: 40px;
@@ -585,8 +588,8 @@
 		//$(".draggable").draggable({
 		//	containment: '#main_container'
 		//});
-        var baseUrl = "";
-        var accessToken = "webondazazxx21";
+        var baseUrl = "http://54.201.134.194/TripThru.TripThruGateway/";
+		var accessToken = "webondazazxx21";
         var stats = null;
         var activeTripsChart = null;
         var activeTripsCount = [];
@@ -692,16 +695,17 @@
                             {
                                 name: 'Rejections',
                                 y: data.rejectsLastHour,
-                                color: '#46456B'
+                                color: '#282963'
                             },
                             {
                                 name: 'Cancellations',
                                 y: data.cancelsLastHour,
-                                color: '#E35D5D'
+                                color: '#FFED26'
                             },
                             {
                                 name: 'Exceptions',
-                                y: data.exceptionsLastHour
+                                y: data.exceptionsLastHour,
+                                color: '#E35D5D'
                             }
                         ]
                     }, {
@@ -721,49 +725,51 @@
                             {
                                 name: 'Rejections',
                                 y: data.rejectsLast24Hrs,
-                                color: '#46456B'
+                                color: '#282963'
                             },
                             {
                                 name: 'Cancellations',
                                 y: data.cancelsLast24Hrs,
-                                color: '#E35D5D'
+                                color: '#FFED26'
                             },
                             {
                                 name: 'Exceptions',
-                                y: data.exceptionsLast24Hrs
+                                y: data.exceptionsLast24Hrs,
+                                color: '#E35D5D'
                             }
                         ]
                     },
-                             {
-                                 center: ['50%', '85%'],
-                                 size: '40%',
-                                 showInLegend: false,
-                                 type: 'pie',
-                                 name: 'Count',
-                                 data: [
-                                     {
-                                         name: 'Completed',
-                                         y: data.tripsAllTime,
-                                         sliced: true,
-                                         selected: true,
-                                         color: '#75C944'
-                                     },
-                                     {
-                                         name: 'Rejections',
-                                         y: data.rejectsAllTime,
-                                         color: '#46456B'
-                                     },
-                                     {
-                                         name: 'Cancellations',
-                                         y: data.cancelsAllTime,
-                                         color: '#E35D5D'
-                                     },
-                                     {
-                                         name: 'Exceptions',
-                                         y: data.exceptionsAllTime
-                                     }
-                                 ]
-                             }
+					{
+						center: ['50%', '85%'],
+						size: '40%',
+						showInLegend: false,
+						type: 'pie',
+						name: 'Count',
+						data: [
+						 {
+							 name: 'Completed',
+							 y: data.tripsAllTime,
+							 sliced: true,
+							 selected: true,
+							 color: '#75C944'
+						 },
+						 {
+							 name: 'Rejections',
+							 y: data.rejectsAllTime,
+							 color: '#282963'
+						 },
+						 {
+							 name: 'Cancellations',
+							 y: data.cancelsAllTime,
+							 color: '#FFED26'
+						 },
+						 {
+							 name: 'Exceptions',
+							 y: data.exceptionsAllTime,
+                             color: '#E35D5D'
+						 }
+						]
+					}
                     ]
                 }, function (chart) {
                     $(chart.series[0].data).each(function (i, e) {
@@ -899,6 +905,7 @@
 
 				updateTrips();
 				updateCounters(data);
+				updateTripLog();
             }
         });
 
@@ -1036,7 +1043,7 @@
 							activeTripsInfo[tripId].price = data.price;
 							activeTripsInfo[tripId].distance = data.distance;
                             setTripInfo(activeTripsInfo[tripId]);
-							updateTripLog(tripId);
+							updateTripLog();
                         }
                         updatingSelectedTrip = false;
 						$("#updatingTripContainer").fadeOut();
@@ -1185,10 +1192,15 @@
 		}
 
 		var updatingTripLog = false;
-		function updateTripLog(tripId){
+		var updatingTripLogId = "";
+		function updateTripLog(){
+			var tripId = $(".activeTrip").find("#tripId").val();
+			if(!tripId) tripId = 'All';
 			if(!updatingTripLog){
 				updatingTripLog = true;
-				$.get(baseUrl + 'log' + "?tripid=" +tripId, function (data) {
+				updatingTripLogId = tripId;
+				tripId = tripId == 'All' ? '' : '?tripid=' + tripId;
+				$.get(baseUrl + 'log'+tripId, function (data) {
 					if (data.result == "OK") {
 						var logs = [];
 						var initLog = false;
@@ -1235,7 +1247,13 @@
 											logString += '<p>'+log.messages[i].text+'</p>';
 
 											if(log.messages[i].json){
-												logString	+= '<ul style="display: none;"><li><pre><code class="language-javascript">' + FormatJSON(JSON.parse(log.messages[i].json)) + '</code></pre></li></ul>';
+												logString	+= '<ul style="display: none;"><li><pre><code class="language-javascript">Request: \n' + FormatJSON(JSON.parse(log.messages[i].json));
+												if(((i+1) < (log.messages.length-1)) && log.messages[i+1].text.indexOf('Response') != -1 && log.messages[(i+1)].json){
+													i++;
+													logString += '\n\nResponse: \n' + FormatJSON(JSON.parse(log.messages[i].json));
+												}
+
+												logString	+= '</code></pre></li></ul>';
 											}
 											logString += '</li>';
 										}
@@ -1367,6 +1385,7 @@
             updateCharts();
             updateTrips();
             updateSelectedTrip();
+			updateTripLog();
         }, 10000);
 
 		//JSON formatter

@@ -42,9 +42,9 @@
             margin: 12px 55px 11px 11px;
         }
 
-        .logo a {
-            float: left;
-        }
+            .logo a {
+                float: left;
+            }
 
         #head_nav {
             float: left;
@@ -53,25 +53,25 @@
             list-style: none;
         }
 
-        #head_nav li {
-            float: left;
-            margin: 0px;
-            padding: 0px 10px;
-        }
+            #head_nav li {
+                float: left;
+                margin: 0px;
+                padding: 0px 10px;
+            }
 
-        #head_nav li.last {
-            border-right: none;
-        }
+                #head_nav li.last {
+                    border-right: none;
+                }
 
-        #head_nav li a {
-            float: left;
-            text-decoration: none;
-            color: #727272;
-        }
+                #head_nav li a {
+                    float: left;
+                    text-decoration: none;
+                    color: #727272;
+                }
 
-        #head_nav li a:hover, #head_nav li a.active {
-            color: #0087bc;
-        }
+                    #head_nav li a:hover, #head_nav li a.active {
+                        color: #0087bc;
+                    }
 
         #header_out {
             width: 100%;
@@ -183,7 +183,8 @@
                         <ul>
                             @if (!entry.Request.IsNullOrEmpty())
                             {
-                                <li><span class="handle collapsed"></span>
+                                <li>
+                                    <span class="handle collapsed"></span>
                                     Request
                                     <ul style="display: none;">
                                         <li><pre style=" word-wrap: break-word;" class="prettyprint language-java">@entry.Request</pre></li>
@@ -205,7 +206,17 @@
 
                                         @if (log.Json != null)
                                         {
-                                            <ul style="display: none;"><li><pre><code class="language-javascript">@log.Json</code></pre></li></ul>
+                                            <ul style="display: none;">
+                                                <li>
+                                                    <pre><code class="language-javascript">Request: \n @log.Json
+                        @if (i + 1 < entry.Messages.Count - 1 && entry.Messages.ElementAt(i + 1).Text.Contains("Response") && entry.Messages.ElementAt(i + 1).Json != null)
+                        {
+                            i++;
+                                                    <span>\n\nResponse: \n</span> @entry.Messages.ElementAt(i).Json
+                        }
+                        </code></pre>
+                                                </li>
+                                            </ul>
                                         }
                                     </li>
                                 }

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Text;
 using Utils;
 using RestSharp;
+using ServiceStack.Text;
 namespace Utils
 {
     public class Logger
@@ -250,7 +251,7 @@ namespace Utils
             {
                 var json = "";
                 if (request != null)
-                    json = restReq.JsonSerializer.Serialize(request);
+                    json = JsonSerializer.SerializeToString(request);
                 requestLog[thread] = new RequestLog(json, tripID);
                 numBegunRequests[thread] = 0;
             }
@@ -268,7 +269,7 @@ namespace Utils
                 return;
             Logger.Untab();
             if (response != null)
-                Logger.Log("EndRequest: Response = ", response);
+                Logger.Log("Response", response);
             else
                 Logger.Log("End");
 
@@ -281,7 +282,7 @@ namespace Utils
                 Logger.AddTag("Type", "INFO");
                 var json = "";
                 if (response != null)
-                    json = restReq.JsonSerializer.Serialize(response);
+                    json = JsonSerializer.SerializeToString(response);
                 requestLog[thread].Response = json;
                 if (splunkEnabled)
                 {

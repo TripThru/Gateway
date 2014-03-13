@@ -50,7 +50,7 @@ namespace ServiceStack.TripThruGateway
             this.ServiceExceptionHandler = (request, exception) => {
 
                 //log your exceptions here
-                Logger.LogDebug("Unhandled exception : " + exception.Message, exception.StackTrace);
+                Logger.LogDebug("ServiceExceptionHandler : " + exception.Message, exception.StackTrace);
 
                 //call default exception handler or prepare your own custom response
                 return DtoUtils.HandleException(this, request, exception);
@@ -60,7 +60,7 @@ namespace ServiceStack.TripThruGateway
             //E.g. in Request binding or filters:
             this.ExceptionHandler = (req, res, operationName, ex) =>
             {
-                 Logger.LogDebug("Unhandled exception : "+ex.Message, ex.StackTrace);
+                 Logger.LogDebug("ExceptionHandler : "+ex.Message, ex.StackTrace);
                  res.Write("Error: {0}: {1}".Fmt(ex.GetType().Name, ex.Message));
                  res.EndServiceStackRequest(skipHeaders: true);
             };

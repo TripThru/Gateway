@@ -37,7 +37,9 @@ namespace ServiceStack.TripThruGateway
             public LogResponse Get(Log request)
             {
                 List<Logger.RequestLog> logList =
-                    Logger.Queue.Where(log => log.tripID == request.tripID).ToList();
+                    request.tripID != null
+                        ? Logger.Queue.Where(log => log.tripID == request.tripID).ToList()
+                        : Logger.Queue.ToList();
                 return new LogResponse
                 {
                     Result = "OK",
