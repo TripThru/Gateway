@@ -87,8 +87,10 @@ namespace Utils
                             lock (queue)
                             {
                                 requestLog = this.queue.Dequeue();
+                                if(requestLog.Messages.Count > 0)
+                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss"));
                                 foreach (Message msg in requestLog.Messages)
-                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss") + " | " + msg.Text);
+                                    logEntries.Add(msg.Text);
                                 foreach (Tag tag in requestLog.Tags)
                                     logEntries.Add(tag.Name + "=" + tag.Value);
                             }
