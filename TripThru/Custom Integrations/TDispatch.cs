@@ -596,13 +596,13 @@ namespace CustomIntegrations
                 case "cancelled": return Status.Cancelled;
                 case "confirmed": return Status.Confirmed;
                 case "active":
-                    {
+                {
                         if (sub_status.is_on_way_to_job)
                             return Status.Enroute;
                         if (sub_status.is_arrived_waiting)
                             return Status.ArrivedAndWaiting;
                         return Status.PickedUp;
-                    }
+                 }
 
                 default: throw new Exception("fatal error");
             }

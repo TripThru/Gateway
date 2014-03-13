@@ -36,7 +36,7 @@ namespace TripThruSsh
             Console.WriteLine("Trying to Open Connection...");
             sftpBase.Connect();
             Console.WriteLine("Connected Successfully !");
-
+            
             if (fullDeploy)
             {
                 //Remove any old files and upload projects
@@ -135,7 +135,7 @@ namespace TripThruSsh
                 ssh.RunCommand("rm /etc/rc.d/init.d/mono-fastcgi/tripthru.webapp");
                 sftpBase.Put("tripthru.webapp", "/etc/rc.d/init.d/mono-fastcgi/tripthru.webapp");
             }
-
+            
             Console.WriteLine("Stopping mono");
             ssh.RunCommand("kill -9 $(netstat -tpan |grep \"LISTEN\"|grep :9000|awk -F' ' '{print $7}'|awk -F'/' '{print $1}')");
 

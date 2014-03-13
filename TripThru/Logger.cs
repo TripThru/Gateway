@@ -267,11 +267,13 @@ namespace Utils
         {
             if (requestLog == null || !enabled)
                 return;
-            Logger.Untab();
+            
             if (response != null)
                 Logger.Log("Response", response);
             else
                 Logger.Log("End");
+
+            Logger.Untab();
 
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             numBegunRequests[thread] = numBegunRequests[thread] - 1;
