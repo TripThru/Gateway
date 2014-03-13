@@ -1013,7 +1013,7 @@
 					activeTrips = $.grep(activeTrips, function (value) {
 						if(value != trip){
 							var tripId = $(".activeTrip").find("#tripId").val();
-							if(tripdId === trip){
+							if(tripId === trip){
 								$("#selectedTripStatus").hide().html('Completed').fadeIn();
 							}
 							return true;
