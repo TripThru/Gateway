@@ -534,7 +534,7 @@ $fields = '';
         refreshInfoMap();
         //Get quote function
         function gQuote(){
-            $("#loading").html("<div style='margin:0 auto; left:35%; position:absolute; bottom:0;'><img src='/BookingWebsiteGif/images/loader.gif' align='middle'/></ div>");
+            $("#loading").html("<div style='margin:0 auto; left:35%; position:absolute; bottom:0;'><img src='images/loader.gif' align='middle'/></ div>");
             //Serialize data
             var data = $(".booking_form").serializeArray();
             if(data[data.length-1].value == "Type your message to the driver here" || data[data.length-1].value == "" ) data.pop();
