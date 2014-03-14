@@ -575,8 +575,10 @@ $fields = '';
 					$("#suggested_partner").append('<br><br><h1>With us</h1>');
 					data.quotes.forEach(function(x){
 						if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
-							var eta = x.eta.split('T');
-							var time = eta[1].split('.');
+							var dateOriginal = new Date(x.eta);
+
+                            var eta = dateOriginal.getHours() + " : " + dateOriginal.getMinutes() + " : " + dateOriginal.getSeconds();
+                            var time = eta;
 							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
 							$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
 							$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');

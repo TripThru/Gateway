@@ -302,9 +302,9 @@ text-overflow: ellipsis;
 				
 				function setTripInfo(trip){
 					var passengerName = trip.passengerName ? trip.passengerName : 'Not available';
-					var pickupTime = trip.pickupTime ? trip.pickupTime.split(".")[0] : (trip.resultCode != 'NotFound' ? 'Passenger waiting' : 'Not available');
+					var pickupTime = trip.pickupTime ? new Date(trip.pickupTime) : (trip.resultCode != 'NotFound' ? 'Passenger waiting' : 'Not available');
 					var status = trip.status ? trip.status : (trip.resultCode == 'NotFound' ? 'Complete' : 'Not available');
-					var eta = trip.eta ? trip.eta.split(".")[0] : 'Not available';
+					var eta = trip.eta ? new Date(trip.eta) : 'Not available';
 					var fare = trip.price ? Math.round(trip.price).toFixed(2) : 'Not available';
 					var driverName = trip.driverName ? trip.driverName : 'Not available';
 					var pickupLocationName = trip.pickupLocation ? trip.pickupLocation.address : 'Not available';
