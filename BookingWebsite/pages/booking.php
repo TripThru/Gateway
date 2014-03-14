@@ -528,51 +528,6 @@ $fields = '';
             }
         }
 
-
-
-
-          var pos;
-
-          // Try HTML5 geolocation
-          if(navigator.geolocation) 
-          {
-            navigator.geolocation.getCurrentPosition(
-
-              function(position) {
-
-              pos = new google.maps.LatLng(position.coords.latitude,
-                                               position.coords.longitude);
-
-              var infowindow = new google.maps.InfoWindow({
-                map: map,
-                position: pos,
-                content: 'Location found using HTML5.'
-              });
-
-              map.setCenter(pos);
-            }, 
-            function() {
-                handleNoGeolocation(true);
-            }
-            );
-
-          } 
-          else 
-          {
-            handleNoGeolocation(false);
-          }
-
-
-            function handleNoGeolocation(errorFlag) {
-              if (errorFlag) {
-                var content = 'Error: The Geolocation service failed.';
-              } else {
-                var content = 'Error: Your browser doesn\'t support geolocation.';
-              }
-            }
-
-
-
         autocomplete_getLocation("#journey_location",'#journey_location_obj',10,true,refreshInfoMap);
         autocomplete_getLocation("#journey_destination",'#journey_destination_obj',10,false,refreshInfoMap);
 
