@@ -528,6 +528,51 @@ $fields = '';
             }
         }
 
+
+
+
+          var pos;
+
+          // Try HTML5 geolocation
+          if(navigator.geolocation) 
+          {
+            navigator.geolocation.getCurrentPosition(
+
+              function(position) {
+
+              pos = new google.maps.LatLng(position.coords.latitude,
+                                               position.coords.longitude);
+
+              var infowindow = new google.maps.InfoWindow({
+                map: map,
+                position: pos,
+                content: 'Location found using HTML5.'
+              });
+
+              map.setCenter(pos);
+            }, 
+            function() {
+                handleNoGeolocation(true);
+            }
+            );
+
+          } 
+          else 
+          {
+            handleNoGeolocation(false);
+          }
+
+
+            function handleNoGeolocation(errorFlag) {
+              if (errorFlag) {
+                var content = 'Error: The Geolocation service failed.';
+              } else {
+                var content = 'Error: Your browser doesn\'t support geolocation.';
+              }
+            }
+
+
+
         autocomplete_getLocation("#journey_location",'#journey_location_obj',10,true,refreshInfoMap);
         autocomplete_getLocation("#journey_destination",'#journey_destination_obj',10,false,refreshInfoMap);
 
@@ -919,4 +964,44 @@ $fields = '';
                     $("input.minutes:eq(1)").val(minutes[1]);
             }
         })
+
+    function getLocation()
+      {
+
+      if (navigator.geolocation)
+        {
+        navigator.geolocation.getCurrentPosition(showPosition);
+        }
+      else{x.innerHTML="Geolocation is not supported by this browser.";}
+      }
+    function showPosition(position)
+      {
+        var urlMaps = "http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + position.coords.latitude + "," + position.coords.longitude + "&sensor=false";
+        xmlDoc=loadXMLDoc(urlMaps);
+        var status = xmlDoc.getElementsByTagName("status")[0];
+        var statusChildNode = status.childNodes[0];
+        if(statusChildNode.data === "OK")
+        {
+          x=xmlDoc.getElementsByTagName("formatted_address")[0]
+          y=x.childNodes[0];
+          document.getElementById("journey_location").value = y.nodeValue;
+          document.getElementById("journey_location_obj").value = y.nodeValue;
+        }
+      }
+
+      function loadXMLDoc(filename)
+      {
+        if (window.XMLHttpRequest)
+          {
+          xhttp=new XMLHttpRequest();
+          }
+        else // code for IE5 and IE6
+          {
+          xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+          }
+        xhttp.open("GET",filename,false);
+        xhttp.send();
+        return xhttp.responseXML;
+      }
+      getLocation();
 </script>
