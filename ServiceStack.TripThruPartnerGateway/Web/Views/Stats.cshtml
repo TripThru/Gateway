@@ -589,7 +589,7 @@
 		//	containment: '#main_container'
 		//});
         var baseUrl = "";
-        var accessToken = "jaosid1201231";
+		var accessToken = "webondazazxx21";
         var stats = null;
         var activeTripsChart = null;
         var activeTripsCount = [];
@@ -918,60 +918,54 @@
 			updateTrips();
 		});
 
-		var updatingTrips = false;
 		function updateTrips(){
-			if(!updatingTrips){
-				updatingTrips = true;
-				if (activeTrips.length == 0) {
-					$("#noTrips").fadeOut();
-					$("#loadingTripsContainer").fadeIn();
-				}
-				$.get(baseUrl + 'trips', function (data) {
-                    if (data.result == "OK") {
-                        var trips = [];
-						var selectedStatusCount = 0;
-						if(selectedStatus != 'All'){
-							data.trips.forEach(function (trip) {
-								if(trip.status == selectedStatus){
-									selectedStatusCount++;
-									trips.push(trip);
-								}
-							});
-						} else {
-							selectedStatusCount = data.trips.length;
-							trips = data.trips;
-						}
-						if(activeTripsChart != null){
-							activeTripsCount.push(selectedStatusCount);
-							var max = Math.max.apply(Math, activeTripsCount);
-							max = (max < 10) ? 10 : max * 1.4;
-							activeTripsChart.yAxis[0].setExtremes(0, max);
-							activeTripsChart.series[0].points[0].update(data.trips.length);
-							activeTripsChart.series[1].points[0].update(selectedStatusCount);
-						}
-						updateSelectedStatusTrips(trips);
-
-                    }
-
-					if (activeTrips.length > 0) {
-						$("#loadingTripsContainer").fadeOut();
-						$("#noTrips").fadeOut();
-					} else {
-						$("#loadingTripsContainer").fadeOut();
-						$("#noTrips").fadeIn();
-					}
-                    updatingTrips = false;
-                }).error(function () {
-					if (activeTrips.length > 0) {
-						$("#loadingTripsContainer").fadeOut();
-						$("#noTrips").fadeOut();
-					} else {
-						$("#loadingTripsContainer").fadeOut();
-						$("#noTrips").fadeIn();
-					}
-                    updatingTrips = false;
-                });
+			if (activeTrips.length == 0) {
+				$("#noTrips").fadeOut();
+				$("#loadingTripsContainer").fadeIn();
 			}
+			$.get(baseUrl + 'trips', function (data) {
+				if (data.result == "OK") {
+					var trips = [];
+					var selectedStatusCount = 0;
+					if(selectedStatus != 'All'){
+						data.trips.forEach(function (trip) {
+							if(trip.status == selectedStatus){
+								selectedStatusCount++;
+								trips.push(trip);
+							}
+						});
+					} else {
+						selectedStatusCount = data.trips.length;
+						trips = data.trips;
+					}
+					if(activeTripsChart != null){
+						activeTripsCount.push(selectedStatusCount);
+						var max = Math.max.apply(Math, activeTripsCount);
+						max = (max < 10) ? 10 : max * 1.4;
+						activeTripsChart.yAxis[0].setExtremes(0, max);
+						activeTripsChart.series[0].points[0].update(data.trips.length);
+						activeTripsChart.series[1].points[0].update(selectedStatusCount);
+					}
+					updateSelectedStatusTrips(trips);
+
+				}
+
+				if (activeTrips.length > 0) {
+					$("#loadingTripsContainer").fadeOut();
+					$("#noTrips").fadeOut();
+				} else {
+					$("#loadingTripsContainer").fadeOut();
+					$("#noTrips").fadeIn();
+				}
+			}).error(function () {
+				if (activeTrips.length > 0) {
+					$("#loadingTripsContainer").fadeOut();
+					$("#noTrips").fadeOut();
+				} else {
+					$("#loadingTripsContainer").fadeOut();
+					$("#noTrips").fadeIn();
+				}
+			});
 		}
 
         function updateSelectedStatusTrips(trips) {
@@ -1011,15 +1005,12 @@
 			activeTrips.forEach(function (trip) {
 				if ($.inArray(trip, dataTrips) == -1) {
 					activeTrips = $.grep(activeTrips, function (value) {
-						if(value != trip){
-							var tripId = $(".activeTrip").find("#tripId").val();
-							if(tripId === trip){
-								$("#selectedTripStatus").hide().html('Completed').fadeIn();
-							}
-							return true;
-						}
-						return false;
+						return value != trip;
 					});
+					var tripId = $(".activeTrip").find("#tripId").val();
+					if(tripId === trip){
+						$("#selectedTripStatus").hide().html('Completed').fadeIn();
+					}
 					$("#" + getContainerTripId(trip)).slideUp().remove();
 				}
 			});
