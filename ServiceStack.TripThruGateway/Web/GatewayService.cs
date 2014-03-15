@@ -36,16 +36,31 @@ namespace ServiceStack.TripThruGateway
         {
             public LogResponse Get(Log request)
             {
+                LogResponse logResponse = new LogResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.OK,
+                    LogList = new List<Logger.RequestLog>()
+                };
+                try
+                {
+
                 List<Logger.RequestLog> logList =
                     request.tripID != null
                         ? Logger.Queue.Where(log => log.tripID == request.tripID).ToList()
                         : Logger.Queue.ToList();
-                return new LogResponse
+                    logResponse = new LogResponse
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK,
                     LogList = logList
                 };
+            }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("GetLog = " + e.Message, e.ToString());
+                }
+                return logResponse;
             }
         }
 
@@ -88,11 +103,21 @@ namespace ServiceStack.TripThruGateway
         {
             public StatsResponse Get(Stats request)
             {
+
+                StatsResponse statsResponse = new StatsResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
+
+                try
+                { 
+
                 var response = gateway.GetGatewayStats(new Gateway.GetGatewayStatsRequest());
 
                 if (response.result == Gateway.Result.OK)
                 {
-                    return new StatsResponse
+                        statsResponse = new StatsResponse
                     {
                         Result = "OK",
                         ResultCode = response.result,
@@ -120,12 +145,21 @@ namespace ServiceStack.TripThruGateway
                         TripsLastHour = response.tripsLastHour
                     };
                 }
-
-                return new StatsResponse
+                    else
+                    {
+                        statsResponse = new StatsResponse
                 {
                     Result = "Failed",
                     ResultCode = response.result
                 };
+            }
+        }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("GetStats=" + e.Message, e.ToString());
+                }
+
+                return statsResponse;
             }
         }
         [Api("Use POST to create a new Partner, GET to retrieve it and PUT to update name or callback url.")]
@@ -156,7 +190,13 @@ namespace ServiceStack.TripThruGateway
             public PartnerResponse Post(PartnerRequest request)
             {
                 var accessToken = request.access_token;
-                PartnerResponse partnerResponse;
+                PartnerResponse partnerResponse = new PartnerResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.AuthenticationError
+                };
+                try
+                {
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 if (acct != null && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
                 {
@@ -184,8 +224,12 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.AuthenticationError
                     };
                 }
+                }
+                finally
+                {
                 Logger.AddTag("RequestType", "RegisterPartner");
                 Logger.EndRequest(partnerResponse);
+                }
                 return partnerResponse;
             }
 
@@ -214,7 +258,11 @@ namespace ServiceStack.TripThruGateway
             {
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                PartnersResponse partnersResponse;
+                PartnersResponse partnersResponse = new PartnersResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
                 var clientId = "none";
                 try
                 {
@@ -267,9 +315,12 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "GetPartnerInfo");
                 Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(partnersResponse);
+                }
                 return partnersResponse;
             }
 
@@ -333,7 +384,11 @@ namespace ServiceStack.TripThruGateway
 
             public QuotesResponse Get(Quotes request)
             {
-                QuotesResponse quotesResponse;
+                QuotesResponse quotesResponse = new QuotesResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
@@ -401,9 +456,12 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "QuoteTrip");
                 Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(quotesResponse);
+                }
                 return quotesResponse;
             }
 
@@ -470,7 +528,11 @@ namespace ServiceStack.TripThruGateway
             }
             public DispatchResponse Post(Dispatch request)
             {
-                DispatchResponse dispatchResponse;
+                DispatchResponse dispatchResponse = new DispatchResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
@@ -538,9 +600,12 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "DispatchTrip");
                 Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(dispatchResponse);
+                }
                 return dispatchResponse;
             }
         }
@@ -591,7 +656,12 @@ namespace ServiceStack.TripThruGateway
             public TripStatusResponse Get(TripStatus request)
             {
                 Logger.BeginRequest("GetTripStatus received", request);
-                TripStatusResponse tripStatusResponse;
+                TripStatusResponse tripStatusResponse = new TripStatusResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
+
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
@@ -664,15 +734,22 @@ namespace ServiceStack.TripThruGateway
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "GetTripStatus");
                 Logger.AddTag("ClientId", clientId);
                 Logger.EndRequest(tripStatusResponse);
+                }
                 return tripStatusResponse;
             }
 
             public TripStatusResponse Put(TripStatus request)
             {
-                TripStatusResponse tripResponse;
+                TripStatusResponse tripStatusResponse = new TripStatusResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
@@ -681,7 +758,7 @@ namespace ServiceStack.TripThruGateway
                     if (acct != null)
                     {
                         clientId = acct.ClientId;
-                        Logger.BeginRequest("UpdateTripStatus received from " + acct.UserName, request, request.TripId);
+                        Logger.BeginRequest("UpdateTripStatus(" + request.Status + ") received from " + acct.UserName, request, request.TripId);
                         var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
                             acct.ClientId,
                             request.TripId,
@@ -690,7 +767,7 @@ namespace ServiceStack.TripThruGateway
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            tripResponse = new TripStatusResponse
+                            tripStatusResponse = new TripStatusResponse
                             {
                                 Result = "OK",
                                 ResultCode = response.result
@@ -699,7 +776,7 @@ namespace ServiceStack.TripThruGateway
                         else
                         {
 
-                            tripResponse = new TripStatusResponse
+                            tripStatusResponse = new TripStatusResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result
@@ -712,7 +789,7 @@ namespace ServiceStack.TripThruGateway
                         string msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                                      ", Response = Authentication failed";
                         Logger.Log(msg);
-                        tripResponse = new TripStatusResponse
+                        tripStatusResponse = new TripStatusResponse
                         {
                             Result = "Failed",
                             ResultCode = Gateway.Result.AuthenticationError
@@ -722,16 +799,19 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
-                    tripResponse = new TripStatusResponse
+                    tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "UpdateTripStatus");
                 Logger.AddTag("ClientId", clientId);
-                Logger.EndRequest(tripResponse);
-                return tripResponse;
+                    Logger.EndRequest(tripStatusResponse);
+                }
+                return tripStatusResponse;
             }
         }
 
@@ -757,14 +837,18 @@ namespace ServiceStack.TripThruGateway
             {
                 Logger.enabled = false;
                 Logger.BeginRequest("GetTrips received", request);
-                TripsResponse tripResponse;
+                TripsResponse tripsResponse = new TripsResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
                 try
                 {
                     var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, request.Status));
 
                     if (response.result == Gateway.Result.OK)
                     {
-                        tripResponse = new TripsResponse
+                        tripsResponse = new TripsResponse
                         {
                             Result = "OK",
                             ResultCode = response.result,
@@ -773,7 +857,7 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        tripResponse = new TripsResponse
+                        tripsResponse = new TripsResponse
                         {
                             Result = "Failed",
                             ResultCode = response.result
@@ -783,16 +867,19 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
-                    tripResponse = new TripsResponse
+                    tripsResponse = new TripsResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
                     };
                 }
+                finally
+                {
                 Logger.AddTag("RequestType", "GetTrips");
-                Logger.EndRequest(tripResponse);
+                    Logger.EndRequest(tripsResponse);
                 Logger.enabled = true;
-                return tripResponse;
+                }
+                return tripsResponse;
             }
         }
 

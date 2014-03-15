@@ -74,8 +74,6 @@ namespace TripThruCore
 
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest request)
         {
-            try
-            {
                 requests++;
                 List<VehicleType> vehicleTypes = new List<VehicleType>();
                 foreach (PartnerFleet f in this.PartnerFleets.Values)
@@ -93,13 +91,6 @@ namespace TripThruCore
                 GetPartnerInfoResponse response = new GetPartnerInfoResponse(PartnerFleets, vehicleTypes);
                 return response;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
-                return new GetPartnerInfoResponse(result: Result.UnknownError);
-            }
-        }
         public PartnerTrip GetTrip(DispatchTripRequest r)
         {
             return new PartnerTrip(
@@ -122,8 +113,6 @@ namespace TripThruCore
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
 
-            try
-            {
                 requests++;
                 if (r.fleetID != null)
                 {
@@ -159,13 +148,6 @@ namespace TripThruCore
                     return response;
                 }
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
-                return new DispatchTripResponse(result: Result.UnknownError);
-            }
-        }
         public PartnerTrip GetTrip(QuoteTripRequest r)
         {
             return new PartnerTrip(this, null, PartnerTrip.Origination.Foreign, r.pickupLocation, r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation,
@@ -173,8 +155,6 @@ namespace TripThruCore
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
         {
-            try
-            {
                 requests++;
                 List<Quote> quotes = new List<Quote>();
                 bool pickupLocationNotServed = true;
@@ -204,17 +184,8 @@ namespace TripThruCore
                 QuoteTripResponse response = quotes.Count > 0 ? new QuoteTripResponse(quotes) : new QuoteTripResponse(result: Result.Rejected);
                 return response;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
-                return new QuoteTripResponse(result: Result.UnknownError);
-            }
-        }
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
-            try
-            {
                 var trips = new List<Trip>();
                 if (activeTrips.Count > 0)
                 {
@@ -229,18 +200,8 @@ namespace TripThruCore
                 }
                 return new GetTripsResponse(trips);
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.Log("Exception", e.Message);
-                Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
-                return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
-            }
-        }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
-            try
-            {
                 requests++;
                 if (!tripsByID.ContainsKey(r.tripID))
                 {
@@ -295,17 +256,8 @@ namespace TripThruCore
                 }
                 return response;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
-                return new GetTripStatusResponse(result: Result.UnknownError);
-            }
-        }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
         {
-            try
-            {
                 // Note: GetTrip populates the foreignTripID
                 requests++;
                 if (!tripsByID.ContainsKey(r.tripID))
@@ -315,13 +267,6 @@ namespace TripThruCore
                 t.SetStatus(r.status, notifyPartner: false);
                 return response;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
-                return new UpdateTripStatusResponse(result: Result.UnknownError);
-            }
-        }
 
         public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null, string preferedPartnerId = null) : base(ID, name)
         {

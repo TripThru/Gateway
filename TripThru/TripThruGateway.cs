@@ -229,24 +229,13 @@ namespace TripThruCore
 
         public override RegisterPartnerResponse RegisterPartner(Gateway partner)
         {
-            try
-            {
                 requests++;
                 partners.Add(partner.ID, partner);
                 RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
                 return response;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("RegisterPartner=" + e.Message, e.ToString());
-                return new RegisterPartnerResponse(result: Result.UnknownError);
-            }
-        }
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest r)
         {
-            try
-            {
                 if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
                     throw new Exception("Filters currently not supported");
                 requests++;
@@ -265,17 +254,8 @@ namespace TripThruCore
                 GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
                 return resp;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
-                return new GetPartnerInfoResponse(result: Result.UnknownError);
-            }
-        }
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
-            try
-            {
                 requests++;
                 DispatchTripResponse response1;
                 if (!activeTrips.Keys.Contains(r.tripID))
@@ -398,17 +378,8 @@ namespace TripThruCore
                 }
                 return response1;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
-                return new DispatchTripResponse(result: Result.UnknownError);
-            }
-        }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
         {
-            try
-            {
                 requests++;
                 var quotes = new List<Quote>();
 
@@ -444,17 +415,8 @@ namespace TripThruCore
                 QuoteTripResponse response1 = new QuoteTripResponse(quotes);
                 return response1;
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
-                return new QuoteTripResponse(result: Result.UnknownError);
-            }
-        }
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
-            try
-            {
                 var trips = new List<Trip>();
                 if (activeTrips.Count > 0)
                 {
@@ -469,17 +431,8 @@ namespace TripThruCore
                 }
                 return new GetTripsResponse(trips);
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("GetTrips=" + e.Message, e.ToString());
-                return new GetTripsResponse(new List<Trip>(), Result.UnknownError);
-            }
-        }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
-            try
-            {
                 requests++;
                 Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
                 if (partner != null)
@@ -534,17 +487,8 @@ namespace TripThruCore
                 Logger.AddTag("ClientId", r.clientID);
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("GetTripStatus = " + e.Message, e.ToString());
-                return new GetTripStatusResponse(result: Result.UnknownError);
-            }
-        }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
         {
-            try
-            {
                 requests++;
                 Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
                 if (destPartner != null)
@@ -577,13 +521,6 @@ namespace TripThruCore
                 Logger.AddTag("ClientId", r.clientID);
                 return new UpdateTripStatusResponse(result: Result.NotFound);
             }
-            catch (Exception e)
-            {
-                exceptions++;
-                Logger.LogDebug("UpdateTripStatus = " + e.Message, e.ToString());
-                return new UpdateTripStatusResponse(result: Result.UnknownError);
-            }
-        }
 
         public class Office
         {
