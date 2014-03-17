@@ -25,3 +25,5 @@ C:\Users\DanielErnesto\Documents\Projects\TripThruSsh\bin\Debug\PartnerConfigura
 C:\Users\DanielErnesto\Documents\Projects\TripThruSsh\bin\Debug\PartnerConfigurations\MetroCabofBoston.png
 C:\Users\DanielErnesto\Documents\Projects\TripThruSsh\bin\Debug\PartnerConfigurations\TestTDispatch.png
 C:\Users\DanielErnesto\Documents\Projects\TripThruSsh\bin\Debug\PartnerConfigurations\YellowCab.png
+C:\Users\Edward\Documents\GitHub\TripThru\Gateway\TripThruSsh\obj\Debug\ConsoleApplication1.exe
+C:\Users\Edward\Documents\GitHub\TripThru\Gateway\TripThruSsh\obj\Debug\ConsoleApplication1.pdb
