@@ -97,6 +97,7 @@ if (isset($_POST['booking_form_type'])) {
                         'lng' => $dropoff_location['location']['lng']
 				);
 				
+
                 $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time, $p_location, $d_location, $selected_partner_id);
                 if ($bk_resp) {
 					$_SESSION[$td->partnerId]['trips'][] = array(
@@ -576,10 +577,9 @@ $fields = '';
 					data.quotes.forEach(function(x){
 						if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
 							var dateOriginal = new Date(x.eta);
-
                             var eta = dateOriginal.getHours() + " : " + dateOriginal.getMinutes() + " : " + dateOriginal.getSeconds();
                             var time = eta;
-							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time+'</label></div>');
 							$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
 							$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
 							$('#suggested_partner').on('click', '#book'+i, function() {
@@ -844,9 +844,23 @@ $fields = '';
             constrainInput    : true
         });
 
+        var dateNow = new Date();
 
         //Datepicker default values
-        var defaultDate = "<?php echo $office_date; ?>";
+        //var defaultDate = "<?php echo $office_date; ?>";
+        
+        var dayNow = dateNow.getDate();
+        if(dayNow < 10)
+        {
+            dayNow = "0" + dayNow;
+        }
+        var monthNow = (dateNow.getMonth() + 1);
+        if(monthNow < 10)
+        {
+            monthNow = "0" + monthNow;
+        }
+        var defaultDate = dayNow + "/" + monthNow + "/" + dateNow.getFullYear();
+
 
         if($("#date").val()=='')
             $("#date").val(defaultDate);
@@ -893,8 +907,8 @@ $fields = '';
             //Timepicker default values
 
             //        //Set hours
+            hours = String(dateNow.getHours());
 
-            hours = String(<?php echo $office_hour; ?>).split("");
             if(hours.length == 1) {
                 $("input.hours:eq(0)").val('0');
                 $("input.hours:eq(1)").val(hours[0]);
@@ -907,7 +921,7 @@ $fields = '';
             }
 
             //Set minutes
-            minutes = String(<?php echo $office_minutes; ?>).split("");
+            minutes = String(dateNow.getMinutes());
             if(minutes.length == 1) {
                 $("input.minutes:eq(0)").val('0');
                 $("input.minutes:eq(1)").val(minutes[0]);
@@ -919,4 +933,77 @@ $fields = '';
                     $("input.minutes:eq(1)").val(minutes[1]);
             }
         })
+
+function getLocation()
+      {
+
+      if (navigator.geolocation)
+        {
+        navigator.geolocation.getCurrentPosition(showPosition);
+        }
+      else{
+        x.innerHTML="Geolocation is not supported by this browser.";
+        }
+      }
+    function showPosition(position)
+      {
+
+        var refreshMap = function(){
+            var $thisObj = $("input[type=hidden]");
+            var emptyFields = $thisObj.filter(function() {
+                return $.trim(this.value) === "";
+            });
+
+            if (!emptyFields.length){
+                if( FieldValid($("#date"),"blank","Plese specify your pickup date") ){
+                    //All destinations are set and date is not blank
+                    //Get quote
+                    if (doSearch) window.clearTimeout(doSearch);
+                    doSearch = window.setTimeout(function(){
+                        gQuote();
+                    },500);
+                }else{
+                    //Date is blank
+                    $("#date").focus();
+                }
+            }
+        }
+
+        var urlMaps = "http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + position.coords.latitude + "," + position.coords.longitude + "&sensor=false";
+        xmlDoc=loadXMLDoc(urlMaps);
+        var status = xmlDoc.getElementsByTagName("status")[0];
+        var statusChildNode = status.childNodes[0];
+        if(statusChildNode.data === "OK")
+        {
+          var Json = new Object();
+          x=xmlDoc.getElementsByTagName("formatted_address")[0]
+          y=x.childNodes[0];
+          document.getElementById("journey_location").value = y.nodeValue;
+        }
+        var JsonLocation = {
+        "location": {
+            "lat": position.coords.latitude,
+            "lng": position.coords.longitude
+            },
+        "postcode": "",
+        }
+        document.getElementById("journey_location_obj").value = JSON.stringify(JsonLocation);
+        
+      }
+
+      function loadXMLDoc(filename)
+      {
+        if (window.XMLHttpRequest)
+          {
+          xhttp=new XMLHttpRequest();
+          }
+        else // code for IE5 and IE6
+          {
+          xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+          }
+        xhttp.open("GET",filename,false);
+        xhttp.send();
+        return xhttp.responseXML;
+      }
+    getLocation();
 </script>
