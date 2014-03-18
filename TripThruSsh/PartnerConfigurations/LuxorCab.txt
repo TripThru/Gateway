@@ -1,13 +1,13 @@
 ﻿{
-  "tripThruUrlMono" : "http://54.201.134.194/TripThru.TripThruGateway/",
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrlMono" : "http://54.201.134.194/TripThru.LuxorCab/",
-	  "webUrl" : "http://54.201.134.194:8080/BookingsLuxorCab/",
+	  "callbackUrlMono" : "TripThru.LuxorCab/",
+	  "webUrl" : "BookingsLuxorCab/",
 	  "webUrlRelative" : "/BookingsLuxorCab/index.php"
   },
   "fleets" : [

@@ -1,13 +1,13 @@
 {
-  "tripThruUrlMono" : "http://54.201.134.194/TripThru.TripThruGateway/",
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
       "name" : "Dubai Taxi Corporation",
       "clientId" : "dubai@tripthru.com",
       "accessToken" : "dubai12ondazazxx21",
-      "callbackUrlMono" : "http://54.201.134.194/TripThru.DubaiTaxiCorporation/",
-	  "webUrl" : "http://54.201.134.194:8080/BookingsDubaiTaxiCorporation/",
+      "callbackUrlMono" : "TripThru.DubaiTaxiCorporation/",
+	  "webUrl" : "BookingsDubaiTaxiCorporation/",
 	  "webUrlRelative" : "/BookingsDubaiTaxiCorporation/index.php"
   },
   "fleets" : [

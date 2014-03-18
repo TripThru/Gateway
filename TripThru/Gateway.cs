@@ -31,6 +31,7 @@ namespace TripThruCore
         public int SimInterval { get; set; }
         public List<PartnerFleet> partnerFleets;
         public string preferedPartnerId { get; set; }
+        public Boolean Enabled { get; set; }
 
         public class ConfigPartner
         {
@@ -39,6 +40,8 @@ namespace TripThruCore
             public string AccessToken { get; set; }
             public string CallbackUrl { get; set; }
             public string CallbackUrlMono { get; set; }
+            public string WebUrl { get; set; }
+            public string WebUrlRelative { get; set; }
         }
 
         public class Fleet

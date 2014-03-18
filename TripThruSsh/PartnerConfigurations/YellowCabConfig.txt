@@ -1,13 +1,13 @@
 {
-  "tripThruUrlMono" : "http://54.201.134.194/TripThru.TripThruGateway/",
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
       "name" : "Yellow Cab",
       "clientId" : "yellow@tripthru.com",
       "accessToken" : "yellow12ondazazxx21",
-    "callbackUrlMono" : "http://54.201.134.194/TripThru.YellowCab/",
-	  "webUrl" : "http://54.201.134.194:8080/BookingsYellowCab/",
+    "callbackUrlMono" : "TripThru.YellowCab/",
+	  "webUrl" : "BookingsYellowCab/",
 	  "webUrlRelative" : "/BookingsYellowCab/index.php"
   },
   "fleets" : [

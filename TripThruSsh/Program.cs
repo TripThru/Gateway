@@ -7,6 +7,7 @@ using System.Text;
 using ServiceStack.Text;
 using Tamir.SharpSsh;
 using System.Threading;
+using TripThruCore;
 
 namespace TripThruSsh
 {
@@ -14,11 +15,20 @@ namespace TripThruSsh
     {
 
         private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
-        private static string localPath = "C:\\Users\\DanielErnesto\\Documents\\Projects\\";
-        private static string remoteFilePath = "/home/tripservice/servicestack/";
-        private static string host = "54.201.134.194";
-        private static string user = "tripservice";
-        private static string password = "Tr1PServ1CeSt@Ck";
+        private static Dictionary<string, Environment> environments = new Dictionary<string, Environment>{
+            {"sandbox", new Environment{
+                     host = "54.201.134.194",
+                     user = "tripservice",
+                     password = "Tr1PServ1CeSt@Ck",
+                     sshPort = 22
+            }},
+            {"vagrant", new Environment{
+                     host = "192.168.0.125",
+                     user = "tripservice",
+                     password = "Tr1PServ1CeSt@Ck",
+                     sshPort = 22
+            }}
+        };
 
         private static SshTransferProtocolBase sftpBase;
         private static SshExec ssh;
@@ -26,15 +36,25 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
+            var env = environments["vagrant"];
+            var localPath = "\\\\psf\\Home\\Desktop\\Gateway\\";
+            var remoteFilePath = "/home/tripservice/servicestack/";
+            var host = env.host;
+            var user = env.user;
+            var password = env.password;
+            var sshPort = env.sshPort;
+            var monoServer = "http://" + host + "/";
+            var webServer = "http://" + host + ":8080/";
+
             ssh = new SshExec(host, user, password);
-            ssh.Connect(22);
+            ssh.Connect(sshPort);
             Console.WriteLine("Connected");
 
             sftpBase = new Tamir.SharpSsh.Sftp(host, user, password);
             sftpBase.OnTransferStart += new FileTransferEvent(sftpBase_OnTransferStart);
             sftpBase.OnTransferEnd += new FileTransferEvent(sftpBase_OnTransferEnd);
             Console.WriteLine("Trying to Open Connection...");
-            sftpBase.Connect();
+            sftpBase.Connect(sshPort);
             Console.WriteLine("Connected Successfully !");
             
             if (fullDeploy)
@@ -62,6 +82,12 @@ namespace TripThruSsh
             foreach (var partnerConfiguration in partnerConfigurations)
             {
                 var configuration = JsonSerializer.DeserializeFromString<PartnerConfiguration>(File.ReadAllText(partnerConfiguration));
+                configuration.TripThruUrlMono = monoServer + configuration.TripThruUrlMono;
+                configuration.Partner.CallbackUrlMono = monoServer + configuration.Partner.CallbackUrlMono;
+                configuration.Partner.WebUrl = webServer + configuration.Partner.WebUrl;
+                string configStr = JsonSerializer.SerializeToString<PartnerConfiguration>(configuration);
+                File.WriteAllText(partnerConfiguration, configStr);
+
                 if (configuration.Enabled)
                 {
                     partnerscallbackUrlMono.Add(configuration.Partner.CallbackUrlMono);
@@ -218,26 +244,18 @@ namespace TripThruSsh
         }
     }
 
-    public class PartnerConfiguration
-    {
-        public string TripThruUrlMono { get; set; }
-        public ConfigPartner Partner { get; set; }
-        public Boolean Enabled { get; set; }
-
-        public class ConfigPartner
-        {
-            public string Name { get; set; }
-            public string WebUrl { get; set; }
-            public string WebUrlRelative { get; set; }
-            public string CallbackUrlMono { get; set; }
-            public string AccessToken { get; set; }
-            public string ClientId { get; set; }
-        }
-    }
 
     public class ResponseRequest
     {
         public string Result { get; set; }
         public string ResultCode { get; set; }
+    }
+
+    public class Environment
+    {
+        public string host { get; set; }
+        public string user { get; set; }
+        public string password { get; set; }
+        public int sshPort { get; set; }
     }
 }

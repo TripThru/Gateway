@@ -1,13 +1,13 @@
 {
-  "tripThruUrlMono" : "http://54.201.134.194/TripThru.TripThruGateway/",
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
       "name" : "Les Taxi Blues",
       "clientId" : "les@tripthru.com",
       "accessToken" : "les12ondazazxx21",
-      "callbackUrlMono" : "http://54.201.134.194/TripThru.LesTaxiBlues/",
-	  "webUrl" : "http://54.201.134.194:8080/BookingsLesTaxiBlues/",
+      "callbackUrlMono" : "TripThru.LesTaxiBlues/",
+	  "webUrl" : "BookingsLesTaxiBlues/",
 	  "webUrlRelative" : "/BookingsLesTaxiBlues/index.php"
   },
   "fleets" : [
