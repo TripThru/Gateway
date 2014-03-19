@@ -1,0 +1,1560 @@
+Starting partners 13/01/2014 08:11:24 a. m.
+	Partner = Luxor Cab with client id = luxor@tripthru.com
+	Partner = Yellow Cab with client id = yellow@tripthru.com
+	Partner = Metro Cab of Boston with client id = metro@tripthru.com
+	Partner = Les Taxi Blues with client id = les@tripthru.com
+	Partner = Dubai Taxi Corporation with client id = dubai@tripthru.com
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
+DispatchTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+	DispatchTrip called on TripThru: (auto) mode, so quote trip through all partners
+		QuoteTrip called on TripThru -- Request: ClientID = luxor@tripthru.com
+			QuoteTrip called on Yellow Cab: Response = Result = 0
+			QuoteTrip called on Yellow Cab, Response = 0
+			QuoteTrip called on Metro Cab of Boston: Response = Result = 0
+			QuoteTrip called on Metro Cab of Boston, Response = 0
+			QuoteTrip called on Les Taxi Blues: Response = Result = 0
+			QuoteTrip called on Les Taxi Blues, Response = 0
+			QuoteTrip called on Dubai Taxi Corporation: Response = Result = 0
+			QuoteTrip called on Dubai Taxi Corporation, Response = 0
+		Response: Result = OK
+		There are no partners to handle this trip
+Response: Result = Rejected
