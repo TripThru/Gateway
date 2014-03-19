@@ -16,7 +16,7 @@ sudo add-apt-repository -y ppa:rwky/redis
 
 sudo apt-get update -y
 
-sudo apt-get install -y nginx mono-complete mono-fastcgi-server4 apache2 php5 libapache2-mod-php5 redis-server install curl libcurl3 libcurl3-dev php5-curl
+sudo apt-get install -y nginx mono-complete mono-fastcgi-server4 apache2 php5 libapache2-mod-php5 redis-server curl libcurl3 libcurl3-dev php5-curl
 
 #Create working directories
 
