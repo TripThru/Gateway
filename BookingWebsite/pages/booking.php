@@ -577,7 +577,16 @@ $fields = '';
 					data.quotes.forEach(function(x){
 						if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
 							var dateOriginal = new Date(x.eta);
-                            var eta = dateOriginal.getHours() + " : " + dateOriginal.getMinutes() + " : " + dateOriginal.getSeconds();
+                            var hoursNow = dateOriginal.getHours();
+                            var minutesNow = dateOriginal.getMinutes();
+                            var secondsNow = dateOriginal.getSeconds();
+                            if(hoursNow < 10)
+                                hoursNow = "0" + hoursNow;
+                            if(minutesNow < 10)
+                                minutesNow = "0" + minutesNow;
+                            if(secondsNow < 10)
+                                secondsNow = "0" + secondsNow;
+                            var eta = hoursNow + " : " + minutesNow + " : " + secondsNow;
                             var time = eta;
 							$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time+'</label></div>');
 							$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
@@ -650,12 +659,26 @@ $fields = '';
 								//Display cost, destination
 								if(!x.vehicleType || x.vehicleType == $("#selected_vehicle").html()){
 									partnersAvailable = true;
-									var eta = x.eta.split('T');
-									var time = eta[1].split('.');
+
+                                    var dateOriginal = new Date(x.eta);
+                                    var hoursNow = dateOriginal.getHours();
+                                    var minutesNow = dateOriginal.getMinutes();
+                                    var secondsNow = dateOriginal.getSeconds();
+                                    if(hoursNow < 10)
+                                        hoursNow = "0" + hoursNow;
+                                    if(minutesNow < 10)
+                                        minutesNow = "0" + minutesNow;
+                                    if(secondsNow < 10)
+                                        secondsNow = "0" + secondsNow;
+                                    var eta = hoursNow + " : " + minutesNow + " : " + secondsNow;
+                                    var time = eta;
+
+									//var eta = x.eta.split('T');
+									//var time = eta[1].split('.');
 									if(x == bestOption && !hasLocalQuotes){
 										$("#suggested_partner").append('<br><br><h1>Suggested Partner</h1>');
 										$("#suggested_partner").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-										$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+										$("#suggested_partner").append('<div class="map_info_txt"><span>ETA:</span><label>'+time+'</label></div>');
 										$("#suggested_partner").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
 										$("#suggested_partner").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
 										$('#suggested_partner').on('click', '#book'+i, function() {
@@ -665,7 +688,7 @@ $fields = '';
 									}
 									else{
 										$("#partner_detail").append('<div class="map_info_txt"><span>Partner:</span><label>'+x.partnerName+'</label></div>');
-										$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time[0]+'</label></div>');
+										$("#partner_detail").append('<div class="map_info_txt"><span>ETA:</span><label>'+time+'</label></div>');
 										$("#partner_detail").append('<div class="map_info_txt"><span>Price:</span><label>'+"$"+Math.round(x.price).toFixed(2)+'</label></div>');
 										$("#partner_detail").append('<input type="submit" name="book" class="blue-button" id="book'+i+'" value="<?php echo $bk_submit; ?>" />');
 										$('#partner_detail').on('click', '#book'+i, function() {
@@ -844,6 +867,7 @@ $fields = '';
             constrainInput    : true
         });
 
+
         var dateNow = new Date();
 
         //Datepicker default values
@@ -860,7 +884,7 @@ $fields = '';
             monthNow = "0" + monthNow;
         }
         var defaultDate = dayNow + "/" + monthNow + "/" + dateNow.getFullYear();
-
+        //var defaultDate = "<?php echo $office_date; ?>";
 
         if($("#date").val()=='')
             $("#date").val(defaultDate);
@@ -908,6 +932,7 @@ $fields = '';
 
             //        //Set hours
             hours = String(dateNow.getHours());
+            //hours = String(<?php echo $office_hour; ?>).split("");
 
             if(hours.length == 1) {
                 $("input.hours:eq(0)").val('0');
@@ -922,6 +947,7 @@ $fields = '';
 
             //Set minutes
             minutes = String(dateNow.getMinutes());
+            //minutes = String(<?php echo $office_minutes; ?>).split("");
             if(minutes.length == 1) {
                 $("input.minutes:eq(0)").val('0');
                 $("input.minutes:eq(1)").val(minutes[0]);
@@ -973,12 +999,14 @@ function getLocation()
         xmlDoc=loadXMLDoc(urlMaps);
         var status = xmlDoc.getElementsByTagName("status")[0];
         var statusChildNode = status.childNodes[0];
+        var addressPickUp = "";
         if(statusChildNode.data === "OK")
         {
           var Json = new Object();
           x=xmlDoc.getElementsByTagName("formatted_address")[0]
           y=x.childNodes[0];
           document.getElementById("journey_location").value = y.nodeValue;
+          addressPickUp = y.nodeValue;
         }
         var JsonLocation = {
         "location": {
@@ -986,6 +1014,7 @@ function getLocation()
             "lng": position.coords.longitude
             },
         "postcode": "",
+        "address": addressPickUp,
         }
         document.getElementById("journey_location_obj").value = JSON.stringify(JsonLocation);
         

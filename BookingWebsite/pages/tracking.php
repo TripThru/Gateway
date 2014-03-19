@@ -265,7 +265,9 @@ text-overflow: ellipsis;
                     }
                 },"json");
 				
-                //Reload map marker and location every 30 sec
+				var driverLocationInitial = null;
+
+                //Reload map marker and location every 15 sec
 				if(!completed){
 					var updating = false;
 					var loop = setInterval(function(){
@@ -330,10 +332,11 @@ text-overflow: ellipsis;
 					if(!$.isEmptyObject(data.driverLocation))
 					{
 						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
+						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
+						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+
 						if(!map){
-							var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
-							var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
-							
+
 							//Setup google maps for first time
 							var mapOptions = {
 								center: driverLocation,
@@ -366,6 +369,88 @@ text-overflow: ellipsis;
 						}
 						//Setup google maps center and new vehicle location
 						driverMarker.setPosition(driverLocation);
+
+						//Here
+							
+							var routes = [];
+							switch(data.status)
+							{
+								case "Enroute":
+									if(driverLocationInitial == null)
+										driverLocationInitial = driverLocation;
+									routes = [{origin: driverLocationInitial, destination: driverLocation}];
+									break;
+								case "PickedUp":
+									if(driverLocationInitial != null)
+										routes = [{origin: driverLocationInitial, destination: pickupLocation},{origin: pickupLocation, destination: driverLocation}];
+									else
+										routes = [{origin: pickupLocation, destination: driverLocation}];
+									break;
+								case "Complete":
+									if(driverLocationInitial != null)
+										routes = [{origin: driverLocationInitial, destination: pickupLocation},{origin: pickupLocation, destination: dropoffLocation}];
+									else
+										routes = [{origin: pickupLocation, destination: dropoffLocation}];
+									break;
+							}
+
+							var rendererOptions = {
+							    preserveViewport: true,         
+							    suppressMarkers:true,
+							    polylineOptions: {
+							      strokeColor: "#8B0000",
+							      strokeOpacity: 0.8,
+							      strokeWeight: 5
+							    },
+							};
+
+							var rendererOptions2 = {
+							    preserveViewport: true,         
+							    suppressMarkers:true,
+							    polylineOptions: {
+							      strokeColor: "#008000",
+							      strokeOpacity: 0.8,
+							      strokeWeight: 5
+							    },
+							};
+							var directionsService = new google.maps.DirectionsService();
+
+							var boleanFirst = true;
+
+							routes.forEach(function(route){
+							    var request = {
+							        origin: route.origin,
+							        destination: route.destination,
+							        travelMode: google.maps.TravelMode.DRIVING
+							    };
+
+							    var directionsDisplay;
+
+							    if(boleanFirst)
+							    {
+							    	if(driverLocationInitial != null)
+							        	directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+							        else
+							        	directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions2);
+							        directionsDisplay.setMap(map);
+							        boleanFirst = false;
+						    	}
+						    	else
+						    	{
+						    		directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions2);
+							        directionsDisplay.setMap(map);
+						    	}
+
+							    directionsService.route(request, function(result, status) {
+							        console.log(result);
+
+							        if (status == google.maps.DirectionsStatus.OK) {
+							            directionsDisplay.setDirections(result);
+							        }
+							    });
+							});
+						//Here
+
 						map.setCenter(driverLocation);
 					}else{
 						$(".tracking_map").text("Driver location unavailable");
