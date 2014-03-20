@@ -8,6 +8,8 @@ password=Tr1PServ1CeSt@Ck
 pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
 sudo useradd -m -p $pass $user
 
+sudo echo yourhostname > /etc/hostname
+
 sudo apt-get update -y
 
 sudo apt-get install -y python-software-properties
