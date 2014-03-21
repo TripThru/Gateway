@@ -242,6 +242,5 @@ Z:\WindowsDev\Gateway\TripThru\bin\Debug\System.Runtime.xml
 Z:\WindowsDev\Gateway\TripThru\bin\Debug\System.Threading.Tasks.xml
 Z:\WindowsDev\Gateway\TripThru\bin\Debug\System.Web.Razor.Unofficial.pdb
 Z:\WindowsDev\Gateway\TripThru\obj\x86\Debug\TripThru.csproj.App.config
-Z:\WindowsDev\Gateway\TripThru\obj\x86\Debug\TripThru.csprojResolveAssemblyReference.cache
 Z:\WindowsDev\Gateway\TripThru\obj\x86\Debug\TripThru.exe
 Z:\WindowsDev\Gateway\TripThru\obj\x86\Debug\TripThru.pdb

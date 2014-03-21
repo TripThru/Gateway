@@ -177,7 +177,6 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\TripThru\TripThru.csproj">
       <Project>{92469c21-fcb0-428c-bcbf-0865443edbb2}</Project>

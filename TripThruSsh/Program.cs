@@ -37,7 +37,7 @@ namespace TripThruSsh
         private static void Main(string[] args)
         {
             var env = environments["vagrant"];
-            var localPath = "\\\\psf\\Home\\Desktop\\Gateway\\";
+            var localPath = "Z:\\WindowsDev\\Gateway\\";
             var remoteFilePath = "/home/tripservice/servicestack/";
             var host = env.host;
             var user = env.user;
