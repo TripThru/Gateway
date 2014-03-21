@@ -305,14 +305,13 @@ namespace Utils
 
         public static void LogDebug(string message, string detailed = null)
         {
-            Console.WriteLine(message + " | " + detailed);
+            Console.WriteLine(message + " | " + detailed + "\n*******************************************\n");
             if (requestLog == null || !enabled)
                 return;
             RequestLog error = new RequestLog("");
             error.Messages.Add(new Message(0, message));
             if (detailed != null)
                 error.Messages.Add(new Message(40, detailed));
-            error.Messages.Add(new Message(0, "\n*******************************************\n"));
             error.Tags.Add(new Tag("Type", "DEBUG"));
             error.Messages.Add(new Message(0, "End"));
             error.Response = "";
