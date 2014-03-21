@@ -737,9 +737,10 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
-                Logger.AddTag("RequestType", "GetTripStatus");
-                Logger.AddTag("ClientId", clientId);
-                Logger.EndRequest(tripStatusResponse);
+                    Logger.AddTag("RequestType", "GetTripStatus");
+                    Logger.AddTag("ClientId", clientId);
+                    Logger.EndRequest(tripStatusResponse);
+                    Logger.enabled = true;
                 }
                 return tripStatusResponse;
             }
@@ -811,7 +812,6 @@ namespace ServiceStack.TripThruGateway
                     Logger.AddTag("RequestType", "UpdateTripStatus");
                     Logger.AddTag("ClientId", clientId);
                     Logger.EndRequest(tripStatusResponse);
-                    Logger.enabled = true;
                 }
                 return tripStatusResponse;
             }
