@@ -70,9 +70,9 @@ namespace TripThruSsh
                 UploadDirectory(localPath + "BookingWebsite", remoteFilePath + "BookingWebsite");
                 UploadDirectory(localPath + "ServiceStack.TripThruGateway/Web", remoteFilePath + "ServiceStack.TripThruGateway/Web");
                 UploadDirectory(localPath + "ServiceStack.TripThruPartnerGateway/Web", remoteFilePath + "ServiceStack.TripThruPartnerGateway/Web");
-                ssh.RunCommand("mv " + remoteFilePath + "ServiceStack.TripThruGateway/Web/bin/mono/*  " + remoteFilePath +
+                ssh.RunCommand("mv " + remoteFilePath + "ServiceStack.TripThruGateway/Web/mono/*  " + remoteFilePath +
                                "ServiceStack.TripThruGateway/Web/bin");
-                ssh.RunCommand("mv " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/Web/bin/mono/*  " +
+                ssh.RunCommand("mv " + remoteFilePath + "ServiceStack.TripThruPartnerGateway/Web/mono/*  " +
                                remoteFilePath + "ServiceStack.TripThruPartnerGateway/Web/bin");
             }
 
