@@ -65,7 +65,7 @@ namespace TripThruCore
             public Location End { get; set; }
         }
     }
-    public enum Status { Queued, Dispatched, Confirmed, Enroute, ArrivedAndWaiting, PickedUp, DroppedOff, Complete, Rejected, Cancelled };
+    public enum Status { New, Queued, Dispatched, Confirmed, Enroute, ArrivedAndWaiting, PickedUp, DroppedOff, Complete, Rejected, Cancelled };
     public enum VehicleType { Compact, Sedan };
     public enum PaymentMethod { Cash, Credit, Account };
     public class Zone
@@ -836,7 +836,7 @@ namespace TripThruCore
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
-        public void DeactivateTrip(string tripID, Status status, double? price = null, double? distance = null)
+        public void DeactivateTripAndUpdateStats(string tripID, Status status, double? price = null, double? distance = null)
         {
             if (!activeTrips.ContainsKey(tripID))
                 return;
@@ -858,7 +858,7 @@ namespace TripThruCore
                 garbageCleanup.Add(tripID);
         }
 
-        public void UpdateTrip(Trip trip)
+        public void UpdateActiveTrip(Trip trip)
         {
             if (activeTrips.Keys.Contains(trip.Id))
             {

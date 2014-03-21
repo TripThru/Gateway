@@ -265,17 +265,14 @@ namespace Utils
 
         public static void EndRequest(object response)
         {
-            if (requestLog == null || !enabled)
+			object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            if (requestLog == null || !enabled || numBegunRequests[thread] == 0)
                 return;
             
             if (response != null)
                 Logger.Log("Response", response);
-            else
-                Logger.Log("End");
-
             Logger.Untab();
-
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+			
             numBegunRequests[thread] = numBegunRequests[thread] - 1;
             if (splunkEnabled)
                 splunkClient.Enqueue(requestLog[thread]);
@@ -327,16 +324,19 @@ namespace Utils
                 return;
             object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (!requestLog.ContainsKey(thread))
-                throw new Exception("Log with no enclosing request");
-            string str = requestLog[thread].GetTab() + message;
-            if (file != null)
-            {
-                file.WriteLine(str);
-                file.Flush();
-            }
-            string jsonString = json != null ? restReq.JsonSerializer.Serialize(json) : null;
-            requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
-        }
+                BeginRequest(message, json);
+			else 
+			{
+				string str = requestLog[thread].GetTab() + message;
+				if (file != null)
+				{
+					file.WriteLine(str);
+					file.Flush();
+				}
+				var jsonString = json != null ? JsonSerializer.SerializeToString(json) : null;
+                requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
+			}
+		}
 
         public static void Log(Message message)
         {

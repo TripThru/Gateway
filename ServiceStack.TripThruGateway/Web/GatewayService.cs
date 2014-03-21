@@ -47,7 +47,7 @@ namespace ServiceStack.TripThruGateway
 
                 List<Logger.RequestLog> logList =
                     request.tripID != null
-                        ? Logger.Queue.Where(log => log.tripID == request.tripID).ToList()
+                        ? Logger.Queue.Where(log => log.tripID == request.tripID).ToList().OrderBy(log => log.Time).ToList()
                         : Logger.Queue.ToList();
                     logResponse = new LogResponse
                 {
@@ -655,6 +655,7 @@ namespace ServiceStack.TripThruGateway
         {
             public TripStatusResponse Get(TripStatus request)
             {
+                Logger.enabled = false;
                 Logger.BeginRequest("GetTripStatus received", request);
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
                 {
@@ -807,9 +808,10 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
-                Logger.AddTag("RequestType", "UpdateTripStatus");
-                Logger.AddTag("ClientId", clientId);
+                    Logger.AddTag("RequestType", "UpdateTripStatus");
+                    Logger.AddTag("ClientId", clientId);
                     Logger.EndRequest(tripStatusResponse);
+                    Logger.enabled = true;
                 }
                 return tripStatusResponse;
             }

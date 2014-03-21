@@ -47,8 +47,21 @@ namespace TripThruCore
             : base("TripThru", "TripThru")
         {
             //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
+            InitializePersistantDataObjects();
+
+            LoadUserAccounts();
+
+            LoadTDispatchIntegrations();
+
+            var thread = new PartnersUpdateThread(partners);
+
+            garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
+        }
+
+        private void InitializePersistantDataObjects()
+        {
             partners = new Dictionary<string, Gateway>();
-            var redisClient = (RedisClient) redis.GetClient();
+            var redisClient = (RedisClient)redis.GetClient();
             originatingPartnerByTrip = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => originatingPartnerByTrip));
             originatingPartnerByTrip.Clear();
             servicingPartnerByTrip = new RedisDictionary<string, string>(redisClient, ID + "." + MemberInfoGetting.GetMemberName(() => servicingPartnerByTrip));
@@ -57,6 +70,10 @@ namespace TripThruCore
             partnerCoverage.Clear();
             partnerAccounts.Clear();
             clientIdByAccessToken.Clear();
+        }
+
+        private void LoadUserAccounts()
+        {
             {
                 PartnerAccount partnerAccount = new PartnerAccount
                 {
@@ -189,11 +206,6 @@ namespace TripThruCore
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
-
-            LoadTDispatchIntegrations();
-            var thread = new PartnersUpdateThread(partners);
-
-            garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
         }
         public override string GetName(string clientID)
         {
@@ -207,320 +219,419 @@ namespace TripThruCore
         }
         public Gateway GetDestinationPartner(string clientID, string tripID)
         {
-            if (originatingPartnerByTrip.ContainsKey(tripID))
+            if (OriginationHasBeenEstablished(tripID))
             {
-                Gateway partner = partners[originatingPartnerByTrip[tripID]];
-                if (partner.ID == clientID || (servicingPartnerByTrip.ContainsKey(tripID) && partners[servicingPartnerByTrip[tripID]].ID != clientID)) // who's asking?
+                if (TripOriginatedWithClient(clientID, tripID) || (ServiceHasBeenEstablished(tripID) && ClientIsNotServicingTheTrip(clientID, tripID))) 
                 {
-                    // the originating partner or third party is asking.
-                    if (servicingPartnerByTrip.ContainsKey(tripID))
-                    {
-                        return partners[servicingPartnerByTrip[tripID]];
-                    }
+                    if (ServiceHasBeenEstablished(tripID))
+                        return ServicingPartner(tripID);
                     else
                         throw new Exception("Fatal Error: destination could not be found");
                 }
-                // the servicing partner must be asking.
-                return partner;
+                return OriginatingPartner(tripID);
             }
             throw new Exception("Fatal Error: destination could not be found");
 
         }
 
+        private Gateway ServicingPartner(string tripID)
+        {
+            return partners[servicingPartnerByTrip[tripID]];
+        }
+
+        private bool OriginationHasBeenEstablished(string tripID)
+        {
+            return originatingPartnerByTrip.ContainsKey(tripID);
+        }
+
+        private Gateway OriginatingPartner(string tripID)
+        {
+            return partners[originatingPartnerByTrip[tripID]];
+        }
+
+        private bool ServiceHasBeenEstablished(string tripID)
+        {
+            return servicingPartnerByTrip.ContainsKey(tripID);
+        }
+
+        private bool TripOriginatedWithClient(string clientID, string tripID)
+        {
+            return partners[originatingPartnerByTrip[tripID]].ID == clientID;
+        }
+
+        private bool ClientIsNotServicingTheTrip(string clientID, string tripID)
+        {
+            return partners[servicingPartnerByTrip[tripID]].ID != clientID;
+        }
+
         public override RegisterPartnerResponse RegisterPartner(Gateway partner)
         {
-                requests++;
-                partners.Add(partner.ID, partner);
-                RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
-                return response;
-            }
+            requests++;
+            partners.Add(partner.ID, partner);
+            RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
+            return response;
+        }
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest r)
         {
-                if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
-                    throw new Exception("Filters currently not supported");
-                requests++;
-                List<VehicleType> vehicleTypes = new List<VehicleType>();
-                List<Fleet> fleets = new List<Fleet>();
-                r.clientID = ID;
-                foreach (Gateway p in partners.Values)
+            if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
+                throw new Exception("Filters currently not supported");
+            requests++;
+            List<VehicleType> vehicleTypes = new List<VehicleType>();
+            List<Fleet> fleets = new List<Fleet>();
+            r.clientID = ID;
+            foreach (Gateway p in partners.Values)
+            {
+                GetPartnerInfoResponse response = p.GetPartnerInfo(r);
+                if (response.result == Result.OK)
                 {
-                    GetPartnerInfoResponse response = p.GetPartnerInfo(r);
-                    if (response.result == Result.OK)
-                    {
-                        fleets.AddRange(response.fleets);
-                        vehicleTypes.AddRange(response.vehicleTypes);
-                    }
+                    fleets.AddRange(response.fleets);
+                    vehicleTypes.AddRange(response.vehicleTypes);
                 }
-                GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
-                return resp;
             }
+            GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
+            return resp;
+        }
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
-                requests++;
-                DispatchTripResponse response1;
-                if (!activeTrips.Keys.Contains(r.tripID))
+            requests++;
+            DispatchTripResponse response;
+            if (TripIsNotAlreadyActive(r))
+            {
+                // Note: GetTrip populates the foreignTripID
+                Gateway partner = null;
+                if (PartnerHasNotBeenSpecified(r))
+                    response = AutoDispatchTrip(r, ref partner);
+                else
+                    partner = SpecifiedPartner(r);
+
+                if (ThereIsASpecifiedPartner(partner))
                 {
-                    // Note: GetTrip populates the foreignTripID
-                    Gateway partner = null;
-                    if (r.partnerID == null)
-                    {
-                        Logger.Log("Auto mode, so quote trip through all partners");
-                        Logger.Tab();
-                        // Dispatch to partner with shortest ETA
-                        QuoteTripResponse response = QuoteTrip(new QuoteTripRequest(
-                            clientID: r.clientID, // TODO: Daniel, fix this when you add authentication
-                            pickupLocation: r.pickupLocation,
-                            pickupTime: r.pickupTime,
-                            passengerID: r.passengerID,
-                            passengerName: r.passengerName,
-                            luggage: r.luggage,
-                            persons: r.persons,
-                            dropoffLocation: r.dropoffLocation,
-                            waypoints: r.waypoints,
-                            paymentMethod: r.paymentMethod,
-                            vehicleType: r.vehicleType,
-                            maxPrice: r.maxPrice,
-                            minRating: r.minRating,
-                            partnerID: r.partnerID,
-                            fleetID: r.fleetID,
-                            driverID: r.driverID));
-                        if (response.result == Result.Rejected || response.quotes.Count == 0)
-                        {
-                            Logger.Log("No partners are available that cover that area");
-                            Logger.Untab();
-                            rejects++;
-                            return new DispatchTripResponse(result: Result.Rejected);
-                        }
-                        else if (response.result != Result.OK)
-                        {
-                            Logger.Log("QuoteTrip call failed");
-                            Logger.Untab();
-                            rejects++;
-                            return new DispatchTripResponse(result: response.result);
-                        }
-                        else
-                        {
-                            Quote bestQuote = null;
-                            DateTime bestETA = r.pickupTime + missedBookingPeriod;
-                            // not more than 30 minues late
-                            foreach (Quote q in response.quotes)
-                            {
-                                DateTime eta = (DateTime)q.ETA;
-                                if (eta == null) // if no ETA is returned then we assum a certain lateness.
-                                    eta = r.pickupTime + missedBookingPeriod - new TimeSpan(0, 1, 0);
-                                if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
-                                {
-                                    bestETA = (DateTime)q.ETA;
-                                    bestQuote = q;
-                                }
-                            }
-                            if (bestQuote != null)
-                            {
-                                partner = partners[bestQuote.PartnerId];
-                                r.fleetID = bestQuote.FleetId;
-                                Logger.Log("Best quote " + bestQuote + " from " + partner.name);
-                            }
-                            else
-                                Logger.Log("There are no partners to handle this trip within an exceptable service time");
-
-                        }
-                        Logger.Untab();
-                    }
+                    RecordTripOriginatingAndServicingPartner(r, partner);
+                    ChangeTheClientIDToTripThru(r);
+                    response = partner.DispatchTrip(r);
+                    if (response.result != Result.OK)
+                        Logger.Log("DispatchTrip to " + partner.name + " failed");
                     else
-                        partner = partners[r.partnerID];
+                        MakeTripAndAddItToActive(r, partner);
+                }
+                else
+                    response = MakeRejectDispatchResponse();
+            }
+            else
+                response = MakeRejectDispatchResponse();
+            return response;
+        }
 
-                    if (partner != null)
-                    {
-                        Gateway client = partners[r.clientID];
-                        originatingPartnerByTrip.Add(r.tripID, r.clientID);
-                        Logger.AddTag("Originating partner", r.clientID);
-                        servicingPartnerByTrip.Add(r.tripID, partner.ID);
-                        Logger.AddTag("Servicing partner", partner.name);
-                        r.clientID = ID;
-                        response1 = partner.DispatchTrip(r);
-                        if (response1.result != Result.OK)
-                        {
-                            Logger.Log("DispatchTrip to " + partner.name + " failed");
-                        }
-                        else
-                        {
-                            var trip = new Trip
-                            {
-                                Id = r.tripID,
-                                OriginatingPartnerName = client.name,
-                                OriginatingPartnerId = client.ID,
-                                ServicingPartnerName = partner.name,
-                                ServicingPartnerId = partner.ID,
-                                Status = Status.Queued,
-                                PickupLocation = r.pickupLocation,
-                                PickupTime = r.pickupTime,
-                                DropoffLocation = r.dropoffLocation,
-                                PassengerName = r.passengerName,
-                                VehicleType = r.vehicleType
-                            };
-                            activeTrips.Add(r.tripID, trip);
-                            Logger.AddTag("Passenger", r.passengerName);
-                            Logger.AddTag("Pickup_time", r.pickupTime.ToString());
-                            Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
-                            Logger.AddTag("Dropoff_location", r.dropoffLocation.ToString());
-                        }
-                    }
+        private DispatchTripResponse MakeRejectDispatchResponse()
+        {
+            DispatchTripResponse response;
+            rejects++;
+            response = new DispatchTripResponse(result: Result.Rejected); return response;
+        }
+
+        private void MakeTripAndAddItToActive(DispatchTripRequest r, Gateway partner)
+        {
+            Gateway client = partners[r.clientID];
+            var trip = new Trip
+            {
+                Id = r.tripID,
+                OriginatingPartnerName = client.name,
+                OriginatingPartnerId = client.ID,
+                ServicingPartnerName = partner.name,
+                ServicingPartnerId = partner.ID,
+                Status = Status.Queued,
+                PickupLocation = r.pickupLocation,
+                PickupTime = r.pickupTime,
+                DropoffLocation = r.dropoffLocation,
+                PassengerName = r.passengerName,
+                VehicleType = r.vehicleType
+            };
+            activeTrips.Add(r.tripID, trip);
+            Logger.AddTag("Passenger", r.passengerName);
+            Logger.AddTag("Pickup_time", r.pickupTime.ToString());
+            Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
+            Logger.AddTag("Dropoff_location", r.dropoffLocation.ToString());
+        }
+
+        private void RecordTripOriginatingAndServicingPartner(DispatchTripRequest r, Gateway partner)
+        {
+            originatingPartnerByTrip.Add(r.tripID, r.clientID);
+            Logger.AddTag("Originating partner", r.clientID);
+            servicingPartnerByTrip.Add(r.tripID, partner.ID);
+            Logger.AddTag("Servicing partner", partner.name);
+        }
+
+        private void ChangeTheClientIDToTripThru(DispatchTripRequest r)
+        {
+            r.clientID = ID;
+        }
+
+        private bool TripIsNotAlreadyActive(DispatchTripRequest r)
+        {
+            return !activeTrips.Keys.Contains(r.tripID);
+        }
+
+        private static bool ThereIsASpecifiedPartner(Gateway partner)
+        {
+            return partner != null;
+        }
+
+        private Gateway SpecifiedPartner(DispatchTripRequest r)
+        {
+            return partners[r.partnerID];
+        }
+
+        private static bool PartnerHasNotBeenSpecified(DispatchTripRequest r)
+        {
+            return r.partnerID == null;
+        }
+
+        private DispatchTripResponse AutoDispatchTrip(DispatchTripRequest r, ref Gateway partner)
+        {
+            DispatchTripResponse response = new DispatchTripResponse(result: Result.UnknownError);
+            Logger.Log("Auto mode, so quote trip through all partners");
+            Logger.Tab();
+            // Dispatch to partner with shortest ETA
+            QuoteTripResponse quoteTripResponse = BroadcastQuoteRequestsToAllPartners(r);
+            if (BroadcastQuoteWasRejected(quoteTripResponse))
+                response = HandleRejectDispatchResponse(response);
+            else if (quoteTripResponse.result != Result.OK)
+                response = HandleQuoteBroadcastFailedResponse(response, quoteTripResponse);
+            else
+                partner = SelectTheBestQuote(r, partner, quoteTripResponse);
+            Logger.Untab(); 
+            return response;
+        }
+
+        private static bool BroadcastQuoteWasRejected(QuoteTripResponse response)
+        {
+            return response.result == Result.Rejected || response.quotes.Count == 0;
+        }
+
+        private DispatchTripResponse HandleQuoteBroadcastFailedResponse(DispatchTripResponse response1, QuoteTripResponse response)
+        {
+            Logger.Log("QuoteTrip call failed");
+            Logger.Untab();
+            rejects++;
+            response1 = new DispatchTripResponse(result: response.result); return response1;
+        }
+
+        private DispatchTripResponse HandleRejectDispatchResponse(DispatchTripResponse response1)
+        {
+            Logger.Log("No partners are available that cover that area");
+            Logger.Untab();
+            rejects++;
+            response1 = new DispatchTripResponse(result: Result.Rejected); return response1;
+        }
+
+        private QuoteTripResponse BroadcastQuoteRequestsToAllPartners(DispatchTripRequest r)
+        {
+            QuoteTripResponse response = QuoteTrip(new QuoteTripRequest(
+                clientID: r.clientID, // TODO: Daniel, fix this when you add authentication
+                pickupLocation: r.pickupLocation,
+                pickupTime: r.pickupTime,
+                passengerID: r.passengerID,
+                passengerName: r.passengerName,
+                luggage: r.luggage,
+                persons: r.persons,
+                dropoffLocation: r.dropoffLocation,
+                waypoints: r.waypoints,
+                paymentMethod: r.paymentMethod,
+                vehicleType: r.vehicleType,
+                maxPrice: r.maxPrice,
+                minRating: r.minRating,
+                partnerID: r.partnerID,
+                fleetID: r.fleetID,
+                driverID: r.driverID));
+            return response;
+        }
+
+        private Gateway SelectTheBestQuote(DispatchTripRequest r, Gateway partner, QuoteTripResponse response)
+        {
+            Quote bestQuote = null;
+            DateTime bestETA = r.pickupTime + missedBookingPeriod;
+            // not more than 30 minues late
+            foreach (Quote q in response.quotes)
+            {
+                DateTime eta = (DateTime)q.ETA;
+                if (eta == null) // if no ETA is returned then we assum a certain lateness.
+                    eta = r.pickupTime + missedBookingPeriod - new TimeSpan(0, 1, 0);
+                if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
+                {
+                    bestETA = (DateTime)q.ETA;
+                    bestQuote = q;
+                }
+            }
+            if (bestQuote != null)
+            {
+                partner = partners[bestQuote.PartnerId];
+                r.fleetID = bestQuote.FleetId;
+                Logger.Log("Best quote " + bestQuote + " from " + partner.name);
+            }
+            else
+                Logger.Log("There are no partners to handle this trip within an exceptable service time"); return partner;
+        }
+        public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
+        {
+            requests++;
+            var quotes = new List<Quote>();
+
+            foreach (Gateway partner in partners.Values)
+            {
+                if (partner.ID == request.clientID)
+                    continue;
+                if (PickupLocationIsServedByPartner(request, partner))
+                    RequestQuotesFromPartnerAndAdd(request, quotes, partner);
+            }
+            QuoteTripResponse response1 = new QuoteTripResponse(quotes);
+            return response1;
+        }
+
+        private void RequestQuotesFromPartnerAndAdd(QuoteTripRequest request, List<Quote> quotes, Gateway partner)
+        {
+            string savedClientID = request.clientID;
+            request.clientID = ID;
+            QuoteTripResponse response = partner.QuoteTrip(request);
+            if (response.result == Result.OK)
+            {
+                if (response.quotes != null)
+                    quotes.AddRange(response.quotes);
+            }
+            request.clientID = savedClientID;
+        }
+
+        private bool PickupLocationIsServedByPartner(QuoteTripRequest r, Gateway p)
+        {
+            bool covered = false;
+            foreach (Zone z in GetPartnerCoverage(p.ID))
+            {
+                if (z.IsInside(r.pickupLocation))
+                {
+                    covered = true;
+                    break;
+                }
+            }
+            return covered;
+        }
+        public override GetTripsResponse GetTrips(GetTripsRequest r)
+        {
+            var trips = new List<Trip>();
+            if (activeTrips.Count > 0)
+            {
+                if (r.status != null)
+                    trips.AddRange(activeTrips.Values.Where(trip => trip.Status == r.status).ToList());
+                else
+                    trips.AddRange(activeTrips.Values);
+            }
+            return new GetTripsResponse(trips);
+        }
+        public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
+        {
+            requests++;
+            Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
+            if (partner != null)
+            {
+                Logger.AddTag("Destination_partner", partner.name);
+                r.clientID = ID;
+                GetTripStatusResponse response = partner.GetTripStatus(r);
+                if (response.result == Result.OK)
+                {
+                    if (TripHasNonActiveStatus(response))
+                        DeactivateTripAndUpdateStats(r.tripID, (Status) response.status, response.price, response.distance);
                     else
-                    {
-                        rejects++;
-                        response1 = new DispatchTripResponse(result: Result.Rejected);
-                    }
+                        UpdateActiveTripWithNewTripStatus(r, response);
+                    MakeGetTripStatusResponse(r, partner, response);
                 }
                 else
                 {
-                    rejects++;
-                    response1 = new DispatchTripResponse(result: Result.Rejected);
+                    Logger.Log("Request to destination partner failed, Result=" + response.result);
                 }
-                return response1;
+                return response;
             }
-        public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
+            Logger.Log("Destination partner trip not found");
+            Logger.AddTag("ClientId", r.clientID);
+            return new GetTripStatusResponse(result: Result.NotFound);
+        }
+
+        private void UpdateActiveTripWithNewTripStatus(GetTripStatusRequest r, GetTripStatusResponse response)
         {
-                requests++;
-                var quotes = new List<Quote>();
+            UpdateActiveTrip(new Trip
+            {
+                Id = r.tripID,
+                FleetId = response.fleetID,
+                FleetName = response.fleetName,
+                DriverId = response.driverID,
+                DriverName = response.driverName,
+                Status = response.status,
+                ETA = response.ETA,
+                Price = response.price,
+                Distance = response.distance
+            });
+        }
 
-                foreach (Gateway p in partners.Values)
-                {
-                    if (p.ID == r.clientID)
-                        continue;
-
-
-                    bool covered = false;
-                    foreach (Zone z in GetPartnerCoverage(p.ID))
-                    {
-                        if (z.IsInside(r.pickupLocation))
-                        {
-                            covered = true;
-                            break;
-                        }
-                    }
-
-                    if (covered)
-                    {
-                        string clientID = r.clientID;
-                        r.clientID = ID;
-                        QuoteTripResponse response = p.QuoteTrip(r);
-                        if (response.result == Result.OK)
-                        {
-                            if (response.quotes != null)
-                                quotes.AddRange(response.quotes);
-                        }
-                        r.clientID = clientID;
-                    }
-                }
-                QuoteTripResponse response1 = new QuoteTripResponse(quotes);
-                return response1;
-            }
-        public override GetTripsResponse GetTrips(GetTripsRequest r)
+        private void MakeGetTripStatusResponse(GetTripStatusRequest r, Gateway partner, GetTripStatusResponse response)
         {
-                var trips = new List<Trip>();
-                if (activeTrips.Count > 0)
-                {
-                    if (r.status != null)
-                    {
-                        trips.AddRange(activeTrips.Values.Where(trip => trip.Status == r.status).ToList());
-                    }
-                    else
-                    {
-                        trips.AddRange(activeTrips.Values);
-                    }
-                }
-                return new GetTripsResponse(trips);
-            }
-        public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
+            Logger.AddTag("Passenger", response.passengerName);
+            Logger.AddTag("Pickup time", response.pickupTime.ToString());
+            Logger.AddTag("Pickup location", response.pickupLocation.ToString());
+            Logger.AddTag("Dropoff location", response.dropoffLocation.ToString());
+            Logger.AddTag("Status", response.status.ToString());
+            Logger.AddTag("ETA", response.ETA.ToString());
+
+            response.partnerID = partner.ID;
+            response.partnerName = partner.name;
+            response.originatingPartnerName = partners[originatingPartnerByTrip[r.tripID]].name;
+            response.servicingPartnerName = partners[servicingPartnerByTrip[r.tripID]].name;
+            Logger.AddTag("Originating partner", response.originatingPartnerName);
+            Logger.AddTag("Servicing partner", response.servicingPartnerName);
+        }
+
+        private static bool TripHasNonActiveStatus(GetTripStatusResponse response)
         {
-                requests++;
-                Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
-                if (partner != null)
-                {
-                    Logger.AddTag("Destination_partner", partner.name);
-                    r.clientID = ID;
-                    GetTripStatusResponse response = partner.GetTripStatus(r);
-                    if (response.result == Result.OK)
-                    {
-                        if (response.status == Status.Complete || response.status == Status.Cancelled ||
-                            response.status == Status.Rejected)
-                        {
-                            DeactivateTrip(r.tripID, (Status) response.status, response.price, response.distance);
-                        }
-                        else
-                        {
-                            UpdateTrip(new Trip
-                            {
-                                Id = r.tripID,
-                                FleetId = response.fleetID,
-                                FleetName = response.fleetName,
-                                DriverId = response.driverID,
-                                DriverName = response.driverName,
-                                Status = response.status,
-                                ETA = response.ETA,
-                                Price = response.price,
-                                Distance = response.distance
-                            });
-                        }
-
-                        Logger.AddTag("Passenger", response.passengerName);
-                        Logger.AddTag("Pickup time", response.pickupTime.ToString());
-                        Logger.AddTag("Pickup location", response.pickupLocation.ToString());
-                        Logger.AddTag("Dropoff location", response.dropoffLocation.ToString());
-                        Logger.AddTag("Status", response.status.ToString());
-                        Logger.AddTag("ETA", response.ETA.ToString());
-
-                        response.partnerID = partner.ID;
-                        response.partnerName = partner.name;
-                        response.originatingPartnerName = partners[originatingPartnerByTrip[r.tripID]].name;
-                        response.servicingPartnerName = partners[servicingPartnerByTrip[r.tripID]].name;
-                        Logger.AddTag("Originating partner", response.originatingPartnerName);
-                        Logger.AddTag("Servicing partner", response.servicingPartnerName);
-                    }
-                    else
-                    {
-                        Logger.Log("Request to destination partner failed, Result=" + response.result);
-                    }
-                    return response;
-                }
-                Logger.Log("Destination partner trip not found");
-                Logger.AddTag("ClientId", r.clientID);
-                return new GetTripStatusResponse(result: Result.NotFound);
-            }
+            return response.status == Status.Complete || response.status == Status.Cancelled || response.status == Status.Rejected;
+        }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
         {
-                requests++;
-                Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
-                if (destPartner != null)
+            requests++;
+            Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
+            if (destPartner != null)
+            {
+                Logger.AddTag("Destination partner", destPartner.name);
+                string savedClientID = r.clientID;
+                ChangeClientIDToTripThru(r);
+                UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
+                r.clientID = savedClientID;
+                if (response.result == Result.OK)
                 {
-                    Logger.AddTag("Destination partner", destPartner.name);
-                    string clientID = r.clientID;
-                    r.clientID = ID;
-                    UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
-                    r.clientID = clientID;
-                    if (response.result == Result.OK)
+                    activeTrips[r.tripID].Status = r.status;
+                    if (r.status == Status.Complete)
                     {
-                        activeTrips[r.tripID].Status = r.status;
-                        if (r.status == Status.Complete)
-                        {
-                            Gateway origPartner = partners[r.clientID];
-                            GetTripStatusResponse resp = origPartner.GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
-                            r.clientID = clientID;
-                            DeactivateTrip(r.tripID, Status.Complete, resp.price, resp.distance);
-                        }
-                        else if (r.status == Status.Cancelled || r.status == Status.Rejected)
-                            DeactivateTrip(r.tripID, r.status);
+                        GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
+                        r.clientID = savedClientID;
+                        DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
                     }
-                    else
-                    {
-                        Logger.Log("Request to destination partner failed, Result="+response.result);
-                    }
-                    return response;
+                    else if (r.status == Status.Cancelled || r.status == Status.Rejected)
+                        DeactivateTripAndUpdateStats(r.tripID, r.status);
                 }
-                Logger.Log("Destination partner trip not found");
-                Logger.AddTag("ClientId", r.clientID);
-                return new UpdateTripStatusResponse(result: Result.NotFound);
+                else
+                    Logger.Log("Request to destination partner failed, Result="+response.result);
+                return response;
             }
+            Logger.Log("Destination partner trip not found");
+            Logger.AddTag("ClientId", r.clientID);
+            return new UpdateTripStatusResponse(result: Result.NotFound);
+        }
+
+        private GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(UpdateTripStatusRequest r)
+        {
+            GetTripStatusResponse resp = partners[r.clientID].GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
+            return resp;
+        }
+
+        private void ChangeClientIDToTripThru(UpdateTripStatusRequest r)
+        {
+            r.clientID = ID;
+        }
 
         public class Office
         {
@@ -562,26 +673,8 @@ namespace TripThruCore
                 Gateway tripThru = new GatewayLocalClient(new GatewayLocalServer(this));
                 foreach (Office o in config.offices)
                 {
-                    if (!o.enabled)
-                        continue;
-                    List<Fleet> fleets = new List<Fleet>();
-                    List<Zone> coverage = o.coverage;
-                    fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
-                    List<VehicleType> vehicleTypes = new List<VehicleType>();
-
-                    TDispatchIntegration partner = new TDispatchIntegration(tripThru, apiKey: o.api_key,
-                        fleetAuth: o.fleetAuthorizationCode, fleetAccessToken: o.fleetAccessToken,
-                        fleetRefreshToken: o.fleetRefreshToken,
-                        passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
-                        passengerRefreshToken: o.passengerRefreshToken,
-                        passengerProxyPK: o.passengerProxyPK, fleets: fleets, vehicleTypes: vehicleTypes);
-                    o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
-                    o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
-                    o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
-                    o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
-                    o.ID = partner.ID;
-                    o.name = partner.name;
-                    RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
+                    if (o.enabled)
+                        RegisterOfficeConfiguration(tripThru, o);
                 }
             }
 
@@ -595,6 +688,28 @@ namespace TripThruCore
 
             //TDispatchAPI.Booking booking = sanFranOffice.activeTrips["test"];
             //sanFranOffice.api.RejectBooking(booking.pk);
+        }
+
+        private void RegisterOfficeConfiguration(Gateway tripThru, Office o)
+        {
+            List<Fleet> fleets = new List<Fleet>();
+            List<Zone> coverage = o.coverage;
+            fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
+            List<VehicleType> vehicleTypes = new List<VehicleType>();
+
+            TDispatchIntegration partner = new TDispatchIntegration(tripThru, apiKey: o.api_key,
+                fleetAuth: o.fleetAuthorizationCode, fleetAccessToken: o.fleetAccessToken,
+                fleetRefreshToken: o.fleetRefreshToken,
+                passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
+                passengerRefreshToken: o.passengerRefreshToken,
+                passengerProxyPK: o.passengerProxyPK, fleets: fleets, vehicleTypes: vehicleTypes);
+            o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
+            o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
+            o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
+            o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
+            o.ID = partner.ID;
+            o.name = partner.name;
+            RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
         }
 
         public override void Update()
@@ -759,19 +874,9 @@ namespace TripThruCore
                     {
                         foreach (var partner in _partners.Values)
                         {
-                            try
+                            lock (partner)
                             {
-                                lock (partner)
-                                {
-                                    partner.Update();
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                if (e.Message != "Not supported")
-                                {
-                                    Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
-                                }
+                                partner.Update();
                             }
                         }
                     }
