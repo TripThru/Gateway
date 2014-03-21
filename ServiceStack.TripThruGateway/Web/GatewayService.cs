@@ -197,38 +197,38 @@ namespace ServiceStack.TripThruGateway
                 };
                 try
                 {
-                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                if (acct != null && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
-                {
-                    Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
-                    acct.Name = request.Name;
-                    acct.CallbackUrl = request.CallbackUrl;
-                    gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
+                    PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                    if (acct != null && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
+                    {
+                        Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
+                        acct.Name = request.Name;
+                        acct.CallbackUrl = request.CallbackUrl;
+                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
 
-                    partnerResponse = new PartnerResponse
+                        partnerResponse = new PartnerResponse
+                        {
+                            Result = "OK",
+                            ResultCode = Gateway.Result.OK,
+                            Id = -1 // what is this used for
+                        };
+                    }
+                    else
                     {
-                        Result = "OK",
-                        ResultCode = Gateway.Result.OK,
-                        Id = -1 // what is this used for
-                    };
-                }
-                else
-                {
-                    Logger.BeginRequest("RegisterPartner received from unknown user", request);
-                    string msg = "POST /partner called with invalid access token, ip: " + Request.RemoteIp +
-                                 ", Response = Authentication failed";
-                    Logger.Log(msg);
-                    partnerResponse = new PartnerResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.AuthenticationError
-                    };
-                }
+                        Logger.BeginRequest("RegisterPartner received from unknown user", request);
+                        string msg = "POST /partner called with invalid access token, ip: " + Request.RemoteIp +
+                                     ", Response = Authentication failed";
+                        Logger.Log(msg);
+                        partnerResponse = new PartnerResponse
+                        {
+                            Result = "Failed",
+                            ResultCode = Gateway.Result.AuthenticationError
+                        };
+                    }
                 }
                 finally
                 {
-                Logger.AddTag("RequestType", "RegisterPartner");
-                Logger.EndRequest(partnerResponse);
+                    Logger.AddTag("RequestType", "RegisterPartner");
+                    Logger.EndRequest(partnerResponse);
                 }
                 return partnerResponse;
             }

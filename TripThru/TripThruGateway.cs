@@ -703,13 +703,13 @@ namespace TripThruCore
                 passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
                 passengerRefreshToken: o.passengerRefreshToken,
                 passengerProxyPK: o.passengerProxyPK, fleets: fleets, vehicleTypes: vehicleTypes);
-            o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
-            o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
-            o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
-            o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
-            o.ID = partner.ID;
-            o.name = partner.name;
-            RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
+                o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
+                o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
+                o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
+                o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
+                o.ID = partner.ID;
+                o.name = partner.name;
+                RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
         }
 
         public override void Update()
@@ -870,19 +870,22 @@ namespace TripThruCore
             {
                 while (true)
                 {
-                    try
+                    foreach (var partner in _partners.Values)
                     {
-                        foreach (var partner in _partners.Values)
+                        try
                         {
                             lock (partner)
                             {
                                 partner.Update();
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
+                        catch (Exception e)
+                        {
+                            if (e.Message != "Not supported")
+                            {
+                                Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
+                            }
+                        }
                     }
                     System.Threading.Thread.Sleep(_heartbeat);
                 }

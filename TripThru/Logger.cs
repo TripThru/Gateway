@@ -312,6 +312,7 @@ namespace Utils
             error.Messages.Add(new Message(0, message));
             if (detailed != null)
                 error.Messages.Add(new Message(40, detailed));
+            error.Messages.Add(new Message(0, "\n*******************************************\n"));
             error.Tags.Add(new Tag("Type", "DEBUG"));
             error.Messages.Add(new Message(0, "End"));
             error.Response = "";
