@@ -30,7 +30,7 @@ server {
 
         location ~ /(ServiceStack|TripThru)\.* {
             root /var/www;
-            fastcgi_index /default.htm;
+            fastcgi_index /;
             fastcgi_pass 127.0.0.1:9000;
             include /etc/nginx/fastcgi_params;
         }
