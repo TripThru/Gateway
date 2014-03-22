@@ -17,6 +17,7 @@ namespace ServiceStack.TripThruPartnerGateway
         protected void Application_Error(object sender, EventArgs e)
         {
             System.Exception ex = Server.GetLastError();
+            System.Console.WriteLine("Application_Error : " + ex.Message, ex.StackTrace);
             Logger.LogDebug("Application_Error : " + ex.Message, ex.StackTrace);
         }
 	}

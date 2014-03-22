@@ -1,18 +1,18 @@
 ﻿{
-  "tripThruUrl" : "http://localhost:17187/",
+  "tripThruUrl" : "http://192.168.0.125/TripThru.TripThruGateway/",
   "simInterval" : 10,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrl" : "http://localhost:17188/"
+	  "callbackUrl" : "http://192.168.0.106:17188/"
   },
   "fleets" : [
     {
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 1,
+        "tripsPerHour" : 15,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127

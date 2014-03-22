@@ -21,13 +21,6 @@
                                     <path>/var/www/ServiceStack.LesTaxiBlues/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.LuxorCab</name>
-                                    <vhost>*</vhost>
-                                    <vport>80</vport>
-                                    <vpath>/TripThru.LuxorCab</vpath>
-                                    <path>/var/www/ServiceStack.LuxorCab/Web</path>
-                                 </web-application>
-<web-application>
                                     <name>TripThru.MetroCabofBoston</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>

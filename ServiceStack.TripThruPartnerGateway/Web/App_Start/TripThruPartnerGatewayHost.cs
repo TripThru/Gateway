@@ -48,6 +48,7 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
             {
 
                 //log your exceptions here
+                System.Console.WriteLine("ServiceExceptionHandler : " + exception.Message, exception.StackTrace);
                 Logger.LogDebug("ServiceExceptionHandler : " + exception.Message, exception.StackTrace);
 
                 //call default exception handler or prepare your own custom response
@@ -58,6 +59,7 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
             //E.g. in Request binding or filters:
             this.ExceptionHandler = (req, res, operationName, ex) =>
             {
+                System.Console.WriteLine("ExceptionHandler : " + ex.Message, ex.StackTrace);
                 Logger.LogDebug("ExceptionHandler : " + ex.Message, ex.StackTrace);
                 res.Write("Error: {0}: {1}".Fmt(ex.GetType().Name, ex.Message));
                 res.EndServiceStackRequest(skipHeaders: true);
