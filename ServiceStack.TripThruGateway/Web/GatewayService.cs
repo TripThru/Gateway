@@ -99,6 +99,7 @@ namespace ServiceStack.TripThruGateway
             public double FareLastHour { get; set; }
         }
 
+        [Authenticate]
         public class StatsService : Service
         {
             public StatsResponse Get(Stats request)

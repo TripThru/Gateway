@@ -1,12 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Mime;
+using ServiceStack.Common;
 using ServiceStack.Razor;
 using ServiceStack.ServiceHost;
+using ServiceStack.ServiceInterface;
 using ServiceStack.TripThruGateway;
 using ServiceStack.WebHost.Endpoints.Extensions;
 using Utils;
 using ContentType = ServiceStack.Common.Web.ContentType;
 using ServiceStack.Api.Swagger;
+using ServiceStack.ServiceInterface;
+using ServiceStack.ServiceInterface.Auth;
+
 
 namespace ServiceStack.TripThruGateway
 {
@@ -26,6 +32,7 @@ namespace ServiceStack.TripThruGateway
 		{
 		}
 
+
 		public override void Configure(Container container)
 		{
 			JsConfig.DateHandler = JsonDateHandler.ISO8601;
@@ -42,8 +49,28 @@ namespace ServiceStack.TripThruGateway
 						    },
                             DebugMode = true,
                             DefaultContentType = ContentType.Json,
-                            AllowJsonpRequests = true
+                            AllowJsonpRequests = true,
+                            DefaultRedirectPath = "/stats",
+                            MetadataRedirectPath = "/stats",
+                            MetadataCustomPath = "/stats"
                           });
+
+
+            //Authentication
+		    Plugins.Add(new AuthFeature(() => new AuthUserSession(),
+                    new IAuthProvider[] {
+                        new CustomCredentialsAuthProvider()
+                    }
+                )
+                {
+                    HtmlRedirect = "~/login.html",
+                    ServiceRoutes = new Dictionary<Type, string[]> {
+                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"} },
+                        { typeof(AssignRolesService), new[]{"/assignroles"} },
+                        { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
+                    }
+                }
+            );
 
             //Unhandled exceptions
             //Handle Exceptions occurring in Services:
@@ -84,4 +111,25 @@ namespace ServiceStack.TripThruGateway
             Plugins.Add(new SwaggerFeature());
 		}
 	}
+
+    public class CustomCredentialsAuthProvider : CredentialsAuthProvider
+    {
+        private Dictionary<string, string> authenticatedUsers = new Dictionary<string, string>
+        {
+            {"tripthru", "optimize"}
+        };
+
+        public override bool TryAuthenticate(IServiceBase authService, string userName, string password)
+        {
+            return authenticatedUsers.ContainsKey(userName) && authenticatedUsers[userName] == password;
+        }
+
+        public override void OnAuthenticated(IServiceBase authService,
+            IAuthSession session, IOAuthTokens tokens, Dictionary<string, string> authInfo)
+        {
+            session.ReferrerUrl = "/TripThru.TripThruGateway/";
+            session.IsAuthenticated = true;
+            authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
+        }
+    }
 }
