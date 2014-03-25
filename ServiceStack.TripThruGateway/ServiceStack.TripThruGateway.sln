@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripThru", "..\TripThru\Tri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripThruSSH", "..\TripThruSsh\TripThruSSH.csproj", "{3679DFAF-17B8-4AB5-AC8B-993342998D2B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{582CA051-4BCF-41F4-A94D-A10472892E5D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripThruTests", "..\TripThruTests\TripThruTests.csproj", "{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +68,16 @@ Global
 		{3679DFAF-17B8-4AB5-AC8B-993342998D2B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3679DFAF-17B8-4AB5-AC8B-993342998D2B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3679DFAF-17B8-4AB5-AC8B-993342998D2B}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AB199585-2CBF-48F0-A54D-97D9D5CE28BF}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

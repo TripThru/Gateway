@@ -75,7 +75,7 @@ namespace TripThruCore
 
         public Zone()
         {
-            
+
         }
         public Zone(Location center, double radius)
         {
@@ -527,7 +527,7 @@ namespace TripThruCore
         }
         public class QuoteTripResponse
         {
-                
+
             public Result result;
             public List<Quote> quotes;
             public QuoteTripResponse(List<Quote> quotes = null, Result result = Result.OK)
@@ -810,11 +810,11 @@ namespace TripThruCore
                 return new GetGatewayStatsResponse(result: Result.UnknownError);
             }
         }
-        TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
+        readonly TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
         DateTime lastGetGatewayStats = DateTime.UtcNow;
         //public readonly RedisClient redis = new RedisClient("localhost", 6379)
         public readonly PooledRedisClientManager redis = new PooledRedisClientManager("localhost:6379")
-                                                        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
+        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
         {
             ConnectTimeout = 5000,
             IdleTimeOutSecs = 30000
@@ -823,7 +823,7 @@ namespace TripThruCore
             : base(ID, name)
         {
             JsConfig.AssumeUtc = true;
-            var redisClient = (RedisClient) redis.GetClient();
+            var redisClient = (RedisClient)redis.GetClient();
             exceptions = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => exceptions));
             rejects = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => rejects));
             requests = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => requests));
@@ -836,6 +836,17 @@ namespace TripThruCore
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
+        override public DispatchTripResponse DispatchTrip(DispatchTripRequest request)
+        {
+            return MakeRejectDispatchResponse();
+        }
+        protected DispatchTripResponse MakeRejectDispatchResponse()
+        {
+            DispatchTripResponse response;
+            rejects++;
+            response = new DispatchTripResponse(result: Result.Rejected);
+            return response;
+        }
         public void DeactivateTripAndUpdateStats(string tripID, Status status, double? price = null, double? distance = null)
         {
             if (!activeTrips.ContainsKey(tripID))
@@ -845,12 +856,12 @@ namespace TripThruCore
             switch (status)
             {
                 case Status.Complete:
-                {
-                    completes++;
-                    fare += (double)price;
-                    this.distance += (double)distance;
-                    break;
-                }
+                    {
+                        completes++;
+                        fare += (double)price;
+                        this.distance += (double)distance;
+                        break;
+                    }
                 case Status.Cancelled: cancels++; break;
                 case Status.Rejected: rejects++; break;
             }

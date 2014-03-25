@@ -27,16 +27,17 @@ namespace ServiceStack.TripThruPartnerGateway
 	public class InitPartnerService : Service
 	{
         public object Any(IReturn<InitPartner> request)
-		{
-            MapTools.LoadGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+        {
+            MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+            MapTools.LoadGeoData();
+            MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
             TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl ?? configuration.TripThruUrlMono), configuration.partnerFleets);
 
             GatewayService.gateway = partner;
 
-            MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+            MapTools.WriteGeoData();
 
 		    var sim = new SimulationThread(partner, configuration);
             return new InitPartnerResponse();
@@ -85,9 +86,7 @@ namespace ServiceStack.TripThruPartnerGateway
                         {
                             _partner.Update();
                         }
-                        MapTools.WriteGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(),
-                            "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(),
-                            "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+                        MapTools.WriteGeoData();
                     }
                     catch (Exception e)
                     {

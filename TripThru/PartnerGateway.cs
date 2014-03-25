@@ -157,12 +157,10 @@ namespace TripThruCore
         {
             requests++;
             List<Quote> quotes = new List<Quote>();
-            bool pickupLocationNotServed = true;
             foreach (PartnerFleet f in PartnerFleets.Values)
             {
                 if (!f.FleetServesLocation(r.pickupLocation))
                     continue;
-                pickupLocationNotServed = false;
                 foreach (VehicleType vehicleType in f.vehicleTypes)
                 {
                     if (r.vehicleType == vehicleType || r.vehicleType == null)
@@ -175,7 +173,7 @@ namespace TripThruCore
                             fleetID: f.ID, fleetName: f.name,
                             vehicleType: vehicleType,
                             price: trip.dropoffLocation == null ? (double?)null : f.GetPrice(trip),
-                            distance: trip.dropoffLocation == null ? (double?) null : f.GetDistance(trip),
+                            distance: trip.dropoffLocation == null ? (double?)null : f.GetDistance(trip),
                             duration: trip.duration,
                             ETA: f.GetETA(trip)));
                     }
@@ -218,15 +216,15 @@ namespace TripThruCore
                 DateTime? ETA = t.PartnerFleet.GetETA(t);
                 double? distance = t.PartnerFleet.GetDistance(t);
                 response = new GetTripStatusResponse(
-                    partnerID: ID, 
-                    partnerName: name, 
-                    fleetID: t.PartnerFleet.ID, 
+                    partnerID: ID,
+                    partnerName: name,
+                    fleetID: t.PartnerFleet.ID,
                     fleetName: t.PartnerFleet.name,
                     pickupTime: pickupTime,
                     pickupLocation: t.pickupLocation,
-                    driverID: t.driver.ID, 
-                    driverName: t.driver.name, 
-                    driverLocation: t.driver.location, 
+                    driverID: t.driver.ID,
+                    driverName: t.driver.name,
+                    driverLocation: t.driver.location,
                     dropoffTime: t.dropoffTime,
                     dropoffLocation: t.dropoffLocation,
                     vehicleType: t.vehicleType,
@@ -264,7 +262,8 @@ namespace TripThruCore
             return response;
         }
 
-        public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null, string preferedPartnerId = null) : base(ID, name)
+        public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null, string preferedPartnerId = null)
+            : base(ID, name)
         {
             this.tripthru = tripthru;
             this.preferedPartnerId = preferedPartnerId;
@@ -564,27 +563,27 @@ namespace TripThruCore
     public class PartnerFleet : IDName
     {
         public Partner partner;
-        public Location location;
-        public List<Zone> coverage;
-        public List<VehicleType> vehicleTypes;
+        public readonly Location location;
+        public readonly List<Zone> coverage;
+        public readonly List<VehicleType> vehicleTypes;
         public Dictionary<string, Driver> drivers;
         public LinkedList<Driver> availableDrivers;
         public LinkedList<Driver> returningDrivers;
         public Pair<Location, Location>[] possibleTrips;
         public LinkedList<PartnerTrip> queue;
         public Passenger[] passengers;
-        public double tripsPerHour;
-        public double costPerMile; // in local currency
-        public double baseCost;
+        public readonly double tripsPerHour;
+        public readonly double costPerMile; // in local currency
+        public readonly double baseCost;
         public Random random;
-        public TimeSpan tripMaxAdvancedNotice = new TimeSpan(0, 15, 0); // minutes
-        public TimeSpan simInterval = new TimeSpan(0, 0, 10);
-        public TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
-        public TimeSpan missedPeriod = new TimeSpan(0, 15, 0);
-        public TimeSpan retryInterval = new TimeSpan(0, 5, 0);
-        public TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
-        public TimeSpan removalAge = new TimeSpan(0, 5, 0);
-        public int maxActiveTrips = 2;
+        public readonly TimeSpan tripMaxAdvancedNotice = new TimeSpan(0, 15, 0); // minutes
+        public readonly TimeSpan simInterval = new TimeSpan(0, 0, 10);
+        public readonly TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
+        public readonly TimeSpan missedPeriod = new TimeSpan(0, 15, 0);
+        public readonly TimeSpan retryInterval = new TimeSpan(0, 5, 0);
+        public readonly TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
+        public readonly TimeSpan removalAge = new TimeSpan(0, 5, 0);
+        public const int maxActiveTrips = 2;
 
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
@@ -737,8 +736,13 @@ namespace TripThruCore
         {
             Passenger passenger = passengers[random.Next(passengers.Length)];
             Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
-            Route route = GetTripRoute(fromTo.First, fromTo.Second);
             DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
+            QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+        }
+
+        public PartnerTrip GenerateTrip(Passenger passenger, DateTime pickupTime, Pair<Location, Location> fromTo)
+        {
+            Route route = GetTripRoute(fromTo.First, fromTo.Second);
             Logger.Log("Pickup request (" + name + ") " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
             Logger.Tab();
             PartnerTrip trip = new PartnerTrip(
@@ -751,9 +755,8 @@ namespace TripThruCore
                 passengerName: passenger.name,
                 dropoffLocation: route.end,
                 paymentMethod: PaymentMethod.Cash);
-            partner.requests++;
-            QueueTrip(trip);
             Logger.Untab();
+            return trip;
         }
         public bool QueueTrip(PartnerTrip t)
         {
@@ -763,24 +766,24 @@ namespace TripThruCore
             queue.AddLast(t);
             partner.tripsByID.Add(t.ID, t);
             partner.activeTrips.Add(t.ID, new Trip
-                {
-                    FleetId = t.PartnerFleet != null ? t.PartnerFleet.ID : null,
-                    FleetName = t.PartnerFleet != null ? t.PartnerFleet.name : null,
-                    DriverId = t.driver != null ? t.driver.ID : null,
-                    DriverLocation = t.driver != null ? t.driver.location : null,
-                    DriverName = t.driver != null ? t.driver.name : null,
-                    DropoffLocation = t.dropoffLocation,
-                    DropoffTime = t.dropoffTime,
-                    Id = t.ID,
-                    OriginatingPartnerId = this.ID,
-                    OriginatingPartnerName = this.name,
-                    PassengerName = t.passengerName,
-                    PickupLocation = t.pickupLocation,
-                    PickupTime = t.pickupTime,
-                    Price = t.price,
-                    Status = t.status,
-                    VehicleType = t.vehicleType
-                });
+            {
+                FleetId = t.PartnerFleet != null ? t.PartnerFleet.ID : null,
+                FleetName = t.PartnerFleet != null ? t.PartnerFleet.name : null,
+                DriverId = t.driver != null ? t.driver.ID : null,
+                DriverLocation = t.driver != null ? t.driver.location : null,
+                DriverName = t.driver != null ? t.driver.name : null,
+                DropoffLocation = t.dropoffLocation,
+                DropoffTime = t.dropoffTime,
+                Id = t.ID,
+                OriginatingPartnerId = this.ID,
+                OriginatingPartnerName = this.name,
+                PassengerName = t.passengerName,
+                PickupLocation = t.pickupLocation,
+                PickupTime = t.pickupTime,
+                Price = t.price,
+                Status = t.status,
+                VehicleType = t.vehicleType
+            });
             t.SetStatus(Status.Queued, notifyPartner: true);
             return true;
         }
@@ -795,7 +798,7 @@ namespace TripThruCore
             UpdateReturningDriverLocations();
         }
 
-        private void UpdateReturningDriverLocations()
+        public void UpdateReturningDriverLocations()
         {
             LinkedListNode<Driver> next = null;
             for (LinkedListNode<Driver> node = returningDrivers.First; node != null; node = next)
@@ -818,7 +821,7 @@ namespace TripThruCore
 
         private bool DriverHomeOfficeReached(Driver driver)
         {
-            return driver.location == location;
+            return driver.location.Equals(location);
         }
 
         private static Location UpdateDriverReturningLocation(Driver driver)
@@ -920,54 +923,72 @@ namespace TripThruCore
 
         public void ProcessQueue()
         {
-            for (LinkedListNode<PartnerTrip> node = queue.First; node != null; )
+            lock (queue)
             {
-                PartnerTrip t = node.Value;
-                LinkedListNode<PartnerTrip> next = node.Next;
-                Logger.LogDebug("Processing " + t);
-
-                switch (t.status)
+                for (LinkedListNode<PartnerTrip> node = queue.First; node != null; )
                 {
-                    case Status.New:
-                    {
-                        Logger.Log("Unexpected status (New): Something wrong with " + t);
-                        break;
-                    }
-                    case Status.Queued:
-                    {
-                        ProcessStatusQueued(t);
-                        break;
-                    }
-                    case Status.Dispatched:
-                    {
-                        ProcessStatusDispatched(t);
-                        break;
-                    }
-                    case Status.Enroute:
-                    {
-                        ProcessStatusEnroute(t);
-                        break;
-                    }
-                    case Status.PickedUp:
-                    {
-                        ProcessStatusPickedUp(t);
-                        break;
-                    }
-                    case Status.Cancelled:
-                    case Status.Rejected:
+                    PartnerTrip t = node.Value;
+                    LinkedListNode<PartnerTrip> next = node.Next;
+                    ProcessTrip(t);
+                    RemoveOldNonActiveTrips(node, t);
+
+                    node = next;
+                }
+            }
+
+        }
+
+        private void RemoveOldNonActiveTrips(LinkedListNode<PartnerTrip> node, PartnerTrip t)
+        {
+            switch (t.status)
+            {
+                case Status.Cancelled:
+                case Status.Rejected:
                     {
                         RemoveTripIfOld(node, t, GetAgeSinceCancelledOrRejected(t));
                         break;
                     }
-                    case Status.Complete:
+                case Status.Complete:
                     {
                         if (AgeSinceCompletedClock_HasNotBeenSet(t))
                             StartTheAgeSinceCompletedClock_FromNow(t);
                         RemoveTripIfOld(node, t, GetAgeSinceCompleted(t));
                         break;
                     }
-                }
-                node = next;
+            }
+        }
+
+        public void ProcessTrip(PartnerTrip t)
+        {
+            Logger.LogDebug("Processing " + t);
+
+            switch (t.status)
+            {
+                case Status.New:
+                    {
+                        Logger.Log("Unexpected status (New): Something wrong with " + t);
+                        break;
+                    }
+                case Status.Queued:
+                    {
+                        ProcessStatusQueued(t);
+                        break;
+                    }
+                case Status.Dispatched:
+                    {
+                        ProcessStatusDispatched(t);
+                        break;
+                    }
+                case Status.Enroute:
+                    {
+                        ProcessStatusEnroute(t);
+                        break;
+                    }
+                case Status.PickedUp:
+                    {
+                        ProcessStatusPickedUp(t);
+                        break;
+                    }
             }
 
         }
@@ -993,6 +1014,7 @@ namespace TripThruCore
                 partner.GetTripStatusFromForeignServiceProvider(t);
             else
             {
+                UpdateTripDriverLocation(t);
                 if (DriverHasReachedThePickupLocation(t))
                     MakeTripPickedUp(t);
                 else if (TripStatusUpdateIntervalReached(t))
@@ -1068,13 +1090,17 @@ namespace TripThruCore
             return t.driver.location == route.end;
         }
 
-        private static void MakeTripPickedUp(PartnerTrip t)
+        private static void MakeTripPickedUp(PartnerTrip trip)
         {
-            Logger.Log("Picking up: " + t);
+            Logger.Log("Picking up: " + trip);
             Logger.Tab();
-            t.driver.route = t.PartnerFleet.GetTripRoute(t.pickupLocation, t.dropoffLocation);
-            t.driver.routeStartTime = DateTime.UtcNow;
-            t.SetStatus(Status.PickedUp);
+            if (!trip.driver.location.Equals(trip.pickupLocation))
+                throw new Exception("Error: picking up driver not at pickup location1");
+            trip.driver.route = trip.PartnerFleet.GetTripRoute(trip.pickupLocation, trip.dropoffLocation);
+            if (!trip.driver.location.Equals(trip.pickupLocation))
+                throw new Exception("Error: picking up driver not at pickup location2");
+            trip.driver.routeStartTime = DateTime.UtcNow;
+            trip.SetStatus(Status.PickedUp);
             Logger.Untab();
         }
 
@@ -1122,7 +1148,8 @@ namespace TripThruCore
         }
         public static implicit operator Fleet(PartnerFleet f)  // explicit byte to digit conversion operator
         {
-            return new Fleet{
+            return new Fleet
+            {
                 FleetId = f.ID,
                 FleetName = f.name,
                 PartnerId = f.partner.ID,
@@ -1157,5 +1184,5 @@ namespace TripThruCore
             return ETA; // TODO: for now all trips are picked up on time
         }
     }
-    
+
 }

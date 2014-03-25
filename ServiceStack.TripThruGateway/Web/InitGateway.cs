@@ -29,8 +29,8 @@ namespace ServiceStack.TripThruGateway
                 GatewayService.gateway = new TripThru(); // TODO: do we need this?
                 Logger.OpenLog("TripThruGateway");
                 //Logger.OpenLog("TripThruGateway", "c:\\Users\\Edward\\");
-                MapTools.LoadGeoData("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-
+                MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+                MapTools.LoadGeoData();
             }
             catch (Exception e)
             {

@@ -221,7 +221,7 @@ namespace TripThruCore
         {
             if (OriginationHasBeenEstablished(tripID))
             {
-                if (TripOriginatedWithClient(clientID, tripID) || (ServiceHasBeenEstablished(tripID) && ClientIsNotServicingTheTrip(clientID, tripID))) 
+                if (TripOriginatedWithClient(clientID, tripID) || (ServiceHasBeenEstablished(tripID) && ClientIsNotServicingTheTrip(clientID, tripID)))
                 {
                     if (ServiceHasBeenEstablished(tripID))
                         return ServicingPartner(tripID);
@@ -303,6 +303,7 @@ namespace TripThruCore
                     response = AutoDispatchTrip(r, ref partner);
                 else
                     partner = SpecifiedPartner(r);
+
 
                 if (ThereIsASpecifiedPartner(partner))
                 {
@@ -399,7 +400,7 @@ namespace TripThruCore
                 response = HandleQuoteBroadcastFailedResponse(response, quoteTripResponse);
             else
                 partner = SelectTheBestQuote(r, partner, quoteTripResponse);
-            Logger.Untab(); 
+            Logger.Untab();
             return response;
         }
 
