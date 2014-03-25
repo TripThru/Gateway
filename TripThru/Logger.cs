@@ -279,6 +279,7 @@ namespace Utils
             if (numBegunRequests[thread] == 0)
             {
                 Logger.AddTag("Type", "INFO");
+                Logger.AddTag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb");
                 var json = "";
                 if (response != null)
                     json = JsonSerializer.SerializeToString(response);
@@ -313,6 +314,7 @@ namespace Utils
             if (detailed != null)
                 error.Messages.Add(new Message(40, detailed));
             error.Tags.Add(new Tag("Type", "DEBUG"));
+            error.Tags.Add(new Tag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
             error.Messages.Add(new Message(0, "End"));
             error.Response = "";
             splunkClient.Enqueue(error);
