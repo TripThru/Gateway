@@ -27,6 +27,10 @@
             {
                 "start" : { "lat" : 37.800224, "lng" : -122.43352},
                 "end"   : { "lat" : 37.800066, "lng" : -122.436167}
+            },
+            {
+                "start" : { "lat" : 37.784345, "lng" : -122.422922},
+                "end"   : { "lat" : 37.785292, "lng" : -122.416257}
             }
         ],
         "vehicleTypes" : [
@@ -37,6 +41,9 @@
             "Alex Goldman",
             "Jason Fama",
             "Simon Shvarts"
+            "Steve Jones",
+            "Herby Barret",
+            "Elvis Presley"
         ],
         "passengers" : [
             "Elvis Presley",

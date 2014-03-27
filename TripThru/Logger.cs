@@ -305,7 +305,7 @@ namespace Utils
 
         public static void LogDebug(string message, string detailed = null)
         {
-            Console.WriteLine(message + " | " + detailed + "\n*******************************************\n");
+            Console.WriteLine(message + " | " + detailed + "\n\n");
             if (requestLog == null || !enabled)
                 return;
             RequestLog error = new RequestLog("");

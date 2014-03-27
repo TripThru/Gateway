@@ -209,45 +209,41 @@ namespace TripThruCore
                 pickupTime = t.pickupTime; // Only if trip has been pickedup.
 
             GetTripStatusResponse response;
-            if (t.driver != null && t.PartnerFleet != null)
+            if (t.price == null && t.PartnerFleet != null)
+                t.price = t.PartnerFleet.GetPrice(t);
+
+            DateTime? ETA = null;
+            double? distance = null;
+            if (t.PartnerFleet != null)
             {
-                if (t.price == null)
-                    t.price = t.PartnerFleet.GetPrice(t);
-                DateTime? ETA = t.PartnerFleet.GetETA(t);
-                double? distance = t.PartnerFleet.GetDistance(t);
-                response = new GetTripStatusResponse(
-                    partnerID: ID,
-                    partnerName: name,
-                    fleetID: t.PartnerFleet.ID,
-                    fleetName: t.PartnerFleet.name,
-                    pickupTime: pickupTime,
-                    pickupLocation: t.pickupLocation,
-                    driverID: t.driver.ID,
-                    driverName: t.driver.name,
-                    driverLocation: t.driver.location,
-                    dropoffTime: t.dropoffTime,
-                    dropoffLocation: t.dropoffLocation,
-                    vehicleType: t.vehicleType,
-                    ETA: ETA,
-                    distance: distance,
-                    price: t.price,
-                    status: t.status,
-                    passengerName: t.passengerName
-                    );
+                ETA = t.PartnerFleet.GetETA(t);
+                distance = t.PartnerFleet.GetDistance(t);
             }
-            else
-            {
-                response = new GetTripStatusResponse(
-                    partnerID: ID,
-                    partnerName: name,
-                    pickupTime: pickupTime,
-                    pickupLocation: t.pickupLocation,
-                    dropoffTime: t.dropoffTime,
-                    dropoffLocation: t.dropoffLocation,
-                    passengerName: t.passengerName,
-                    status: t.status
-                    );
-            }
+
+            double? driverRouteDuration = null;
+            if (t.driver != null && t.driver.route != null)
+                driverRouteDuration = t.driver.route.duration.TotalSeconds;
+
+            response = new GetTripStatusResponse(
+                partnerID: ID,
+                partnerName: name,
+                fleetID: t.PartnerFleet != null ? t.PartnerFleet.ID : null,
+                fleetName: t.PartnerFleet != null ? t.PartnerFleet.name : null,
+                pickupTime: pickupTime,
+                pickupLocation: t.pickupLocation,
+                driverID: t.driver != null ? t.driver.ID : null,
+                driverName: t.driver != null ? t.driver.name : null,
+                driverLocation: t.driver != null ? t.driver.location : null,
+                dropoffTime: t.dropoffTime,
+                dropoffLocation: t.dropoffLocation,
+                vehicleType: t.vehicleType,
+                ETA: ETA,
+                distance: distance,
+                driverRouteDuration: driverRouteDuration,
+                price: t.price,
+                status: t.status,
+                passengerName: t.passengerName
+            );
             return response;
         }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
@@ -313,7 +309,7 @@ namespace TripThruCore
         // speed is miles per hour
         public void GetTripStatusFromForeignServiceProvider(PartnerTrip trip, bool force = false)
         {
-            if (force || trip.PartnerFleet.TripStatusUpdateIntervalReached(trip))
+            if (force || DateTime.UtcNow > trip.lastUpdate + updateInterval)
             {
                 Logger.Log("Getting (Foreign) status of " + trip);
                 Logger.Tab();
@@ -331,6 +327,8 @@ namespace TripThruCore
                     trip.ETA = response.ETA;
                 if (response.distance != null)
                     trip.distance = response.distance;
+                if (response.driverRouteDuration != null)
+                    trip.driverRouteDuration = new TimeSpan(0, 0, (int)response.driverRouteDuration);
                 Logger.Untab();
                 trip.lastUpdate = DateTime.UtcNow;
             }
@@ -388,7 +386,6 @@ namespace TripThruCore
             else if (value == Status.Cancelled || value == Status.Rejected)
                 partner.DeactivateTripAndUpdateStats(ID, value);
         }
-
         private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
         {
             Gateway.GetTripStatusResponse resp = partner.tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, ID));
@@ -432,6 +429,7 @@ namespace TripThruCore
         public Location pickupLocation;
         public DateTime pickupTime;
         public TimeSpan? duration;
+        public TimeSpan? driverRouteDuration;
         public Location dropoffLocation;
         public DateTime? dropoffTime;
         public List<Location> waypoints;
@@ -458,6 +456,7 @@ namespace TripThruCore
             this.pickupLocation = t.pickupLocation;
             this.pickupTime = t.pickupTime;
             this.duration = t.duration;
+            this.driverRouteDuration = t.driverRouteDuration;
             this.dropoffLocation = t.dropoffLocation;
             this.dropoffTime = t.dropoffTime;
             this.waypoints = t.waypoints;
@@ -497,7 +496,7 @@ namespace TripThruCore
             return s;
         }
         public PartnerTrip(Partner partner, string ID, Origination origination, Location pickupLocation, DateTime pickupTime, PaymentMethod? paymentMethod = null, string passengerID = null, string passengerName = null, Location dropoffLocation = null,
-           DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, TimeSpan? duration = null, double? price = null)
+           DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, TimeSpan? duration = null, TimeSpan? driverRouteDuration = null, double? price = null)
         {
             this.ID = ID;
             this.origination = origination;
@@ -508,6 +507,7 @@ namespace TripThruCore
             this.pickupLocation = pickupLocation;
             this.pickupTime = pickupTime;
             this.duration = duration;
+            this.driverRouteDuration = driverRouteDuration;
             this.dropoffLocation = dropoffLocation;
             this.dropoffTime = dropoffTime;
             this.waypoints = waypoints;
@@ -784,7 +784,7 @@ namespace TripThruCore
                 Status = t.status,
                 VehicleType = t.vehicleType
             });
-            t.SetStatus(Status.Queued, notifyPartner: true);
+            t.SetStatus(Status.Queued, notifyPartner: false);
             return true;
         }
         public void RemoveTrip(PartnerTrip t)
@@ -960,7 +960,7 @@ namespace TripThruCore
 
         public void ProcessTrip(PartnerTrip t)
         {
-            Logger.LogDebug("Processing " + t);
+            //Logger.LogDebug("Processing " + t);
 
             switch (t.status)
             {
@@ -1025,7 +1025,7 @@ namespace TripThruCore
         private void ProcessStatusDispatched(PartnerTrip t)
         {
             if (TripServicedByForeignProvider(t))
-                partner.GetTripStatusFromForeignServiceProvider(t);
+                partner.GetTripStatusFromForeignServiceProvider(t, true);
             else if (DriverWillBeLateIfHeDoesntLeaveNow(t))
                 MakeTripEnroute(t);
             else if (TripStatusUpdateIntervalReached(t))
@@ -1064,6 +1064,7 @@ namespace TripThruCore
         private static void UpdateTripDriverLocation(PartnerTrip t)
         {
             t.driver.location = t.driver.route.GetCurrentWaypoint(t.driver.routeStartTime, DateTime.UtcNow);
+            t.driverRouteDuration = t.driver.route.duration;
         }
 
         private void RemoveTripIfOld(LinkedListNode<PartnerTrip> node, PartnerTrip t, TimeSpan age)
@@ -1132,6 +1133,7 @@ namespace TripThruCore
             t.driver.route = GetDriverRoute(t.driver.location, t.pickupLocation);
             if (t.driver.route == null)
                 throw new Exception("fatal error");
+            t.driverRouteDuration = t.driver.route.duration;
             t.driver.routeStartTime = DateTime.UtcNow;
             t.SetStatus(Status.Enroute);
             Logger.Untab();

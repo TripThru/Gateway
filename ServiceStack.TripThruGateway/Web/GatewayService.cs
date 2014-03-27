@@ -645,6 +645,7 @@ namespace ServiceStack.TripThruGateway
             public DateTime? ETA { get; set; } // in minutes;
             public double? Price { get; set; }
             public double? Distance { get; set; }
+            public double? DriverRouteDuration { get; set; }
             public Location PickupLocation { get; set; }
             public Location DropoffLocation { get; set; }
             public string OriginatingPartnerName { get; set; }
@@ -700,6 +701,7 @@ namespace ServiceStack.TripThruGateway
                                 Status = response.status,
                                 Price = response.price,
                                 Distance = response.distance,
+                                DriverRouteDuration = response.driverRouteDuration,
                                 OriginatingPartnerName = response.originatingPartnerName,
                                 ServicingPartnerName = response.servicingPartnerName
                             };

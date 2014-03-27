@@ -157,6 +157,7 @@ namespace ServiceStack.TripThruGateway
                     pickupTime = resp.PickupTime,
                     pickupLocation = resp.PickupLocation,
                     distance = resp.Distance,
+                    driverRouteDuration = resp.DriverRouteDuration,
                     price = resp.Price
                 };
             }

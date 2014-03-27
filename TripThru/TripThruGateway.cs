@@ -43,7 +43,7 @@ namespace TripThruCore
             }
             return partnerCoverage[partnerID];
         }
-        public TripThru()
+        public TripThru(bool enableTDispatch = true)
             : base("TripThru", "TripThru")
         {
             //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
@@ -51,7 +51,8 @@ namespace TripThruCore
 
             LoadUserAccounts();
 
-            LoadTDispatchIntegrations();
+            if (enableTDispatch)
+                LoadTDispatchIntegrations();
 
             var thread = new PartnersUpdateThread(partners);
 
@@ -302,13 +303,14 @@ namespace TripThruCore
                 if (PartnerHasNotBeenSpecified(r))
                     response = AutoDispatchTrip(r, ref partner);
                 else
-                    partner = SpecifiedPartner(r);
+                    partner = SelectedPartner(r);
 
-
-                if (ThereIsASpecifiedPartner(partner))
+                if (PartnerHasBeenSelected(partner))
                 {
                     RecordTripOriginatingAndServicingPartner(r, partner);
+                    var partnerClientId = r.clientID; 
                     ChangeTheClientIDToTripThru(r);
+                    r.clientID = partnerClientId;
                     response = partner.DispatchTrip(r);
                     if (response.result != Result.OK)
                         Logger.Log("DispatchTrip to " + partner.name + " failed");
@@ -321,13 +323,6 @@ namespace TripThruCore
             else
                 response = MakeRejectDispatchResponse();
             return response;
-        }
-
-        private DispatchTripResponse MakeRejectDispatchResponse()
-        {
-            DispatchTripResponse response;
-            rejects++;
-            response = new DispatchTripResponse(result: Result.Rejected); return response;
         }
 
         private void MakeTripAndAddItToActive(DispatchTripRequest r, Gateway partner)
@@ -372,12 +367,12 @@ namespace TripThruCore
             return !activeTrips.Keys.Contains(r.tripID);
         }
 
-        private static bool ThereIsASpecifiedPartner(Gateway partner)
+        private static bool PartnerHasBeenSelected(Gateway partner)
         {
             return partner != null;
         }
 
-        private Gateway SpecifiedPartner(DispatchTripRequest r)
+        private Gateway SelectedPartner(DispatchTripRequest r)
         {
             return partners[r.partnerID];
         }
@@ -399,7 +394,7 @@ namespace TripThruCore
             else if (quoteTripResponse.result != Result.OK)
                 response = HandleQuoteBroadcastFailedResponse(response, quoteTripResponse);
             else
-                partner = SelectTheBestQuote(r, partner, quoteTripResponse);
+                partner = SelectThePartnerWithBestQuote(r, partner, quoteTripResponse);
             Logger.Untab();
             return response;
         }
@@ -447,7 +442,7 @@ namespace TripThruCore
             return response;
         }
 
-        private Gateway SelectTheBestQuote(DispatchTripRequest r, Gateway partner, QuoteTripResponse response)
+        private Gateway SelectThePartnerWithBestQuote(DispatchTripRequest r, Gateway partner, QuoteTripResponse response)
         {
             Quote bestQuote = null;
             DateTime bestETA = r.pickupTime + missedBookingPeriod;
@@ -470,7 +465,8 @@ namespace TripThruCore
                 Logger.Log("Best quote " + bestQuote + " from " + partner.name);
             }
             else
-                Logger.Log("There are no partners to handle this trip within an exceptable service time"); return partner;
+                Logger.Log("There are no partners to handle this trip within an exceptable service time"); 
+            return partner;
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
         {
@@ -538,7 +534,7 @@ namespace TripThruCore
                 if (response.result == Result.OK)
                 {
                     if (TripHasNonActiveStatus(response))
-                        DeactivateTripAndUpdateStats(r.tripID, (Status) response.status, response.price, response.distance);
+                        DeactivateTripAndUpdateStats(r.tripID, (Status)response.status, response.price, response.distance);
                     else
                         UpdateActiveTripWithNewTripStatus(r, response);
                     MakeGetTripStatusResponse(r, partner, response);
@@ -566,7 +562,8 @@ namespace TripThruCore
                 Status = response.status,
                 ETA = response.ETA,
                 Price = response.price,
-                Distance = response.distance
+                Distance = response.distance,
+                DriverRouteDuration = response.driverRouteDuration
             });
         }
 
@@ -615,7 +612,7 @@ namespace TripThruCore
                         DeactivateTripAndUpdateStats(r.tripID, r.status);
                 }
                 else
-                    Logger.Log("Request to destination partner failed, Result="+response.result);
+                    Logger.Log("Request to destination partner failed, Result=" + response.result);
                 return response;
             }
             Logger.Log("Destination partner trip not found");
@@ -704,13 +701,13 @@ namespace TripThruCore
                 passengerAuth: o.passengerAuthorizationCode, passengerAccessToken: o.passengerAccessToken,
                 passengerRefreshToken: o.passengerRefreshToken,
                 passengerProxyPK: o.passengerProxyPK, fleets: fleets, vehicleTypes: vehicleTypes);
-                o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
-                o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
-                o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
-                o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
-                o.ID = partner.ID;
-                o.name = partner.name;
-                RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
+            o.fleetAccessToken = partner.api.FLEET_ACCESS_TOKEN;
+            o.fleetRefreshToken = partner.api.FLEET_REFRESH_TOKEN;
+            o.passengerAccessToken = partner.api.PASSENGER_ACCESS_TOKEN;
+            o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
+            o.ID = partner.ID;
+            o.name = partner.name;
+            RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
         }
 
         public override void Update()
@@ -733,7 +730,10 @@ namespace TripThruCore
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
-            return server.RegisterPartner(request);
+            Logger.BeginRequest("RegisterPartner sent to " + server.name, request);
+            Gateway.RegisterPartnerResponse response = server.RegisterPartner(request);
+            Logger.EndRequest(response);
+            return response;
         }
 
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
@@ -871,22 +871,19 @@ namespace TripThruCore
             {
                 while (true)
                 {
-                    foreach (var partner in _partners.Values)
+                    try
                     {
-                        try
+                        foreach (var partner in _partners.Values)
                         {
                             lock (partner)
                             {
                                 partner.Update();
                             }
                         }
-                        catch (Exception e)
-                        {
-                            if (e.Message != "Not supported")
-                            {
-                                Logger.LogDebug(partner.name + " update error :" + e.Message, e.StackTrace);
-                            }
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
                     }
                     System.Threading.Thread.Sleep(_heartbeat);
                 }

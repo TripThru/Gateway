@@ -175,6 +175,7 @@ namespace TripThruCore
         public DateTime? ETA { get; set; } // in minutes;
         public double? Price { get; set; }
         public double? Distance { get; set; }
+        public double? DriverRouteDuration { get; set; }
         public void Update(Trip trip)
         {
             this.FleetId = trip.FleetId;
@@ -186,6 +187,7 @@ namespace TripThruCore
             this.ETA = trip.ETA;
             this.Price = trip.Price;
             this.Distance = trip.Distance;
+            this.DriverRouteDuration = trip.DriverRouteDuration;
         }
     }
 
@@ -603,12 +605,13 @@ namespace TripThruCore
             public DateTime? ETA; // in minutes;
             public double? price;
             public double? distance;
+            public double? driverRouteDuration;
             public string originatingPartnerName;
             public string servicingPartnerName;
             public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null, string originatingPartnerName = null,
                 string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null, string passengerName = null,
                 DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
-                double? price = null, double? distance = null, Result result = Result.OK
+                double? price = null, double? distance = null, double? driverRouteDuration = null, Result result = Result.OK
                  )
             {
                 this.partnerID = partnerID;
@@ -627,6 +630,7 @@ namespace TripThruCore
                 this.dropoffTime = dropoffTime;
                 this.price = price;
                 this.distance = distance;
+                this.driverRouteDuration = driverRouteDuration;
                 this.result = result;
                 this.status = status;
                 this.originatingPartnerName = originatingPartnerName;
@@ -835,6 +839,16 @@ namespace TripThruCore
             activeTrips.Clear();
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
+        }
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner)
+        {
+            return MakeRejectRegisterPartnerResponse();
+        }
+        protected RegisterPartnerResponse MakeRejectRegisterPartnerResponse(){
+            RegisterPartnerResponse response;
+            rejects++;
+            response = new RegisterPartnerResponse(result: Result.Rejected);
+            return response;
         }
         override public DispatchTripResponse DispatchTrip(DispatchTripRequest request)
         {

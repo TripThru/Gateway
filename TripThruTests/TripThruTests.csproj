@@ -84,10 +84,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Test_Configurations\ForeignTripsEnoughDriversA.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\ForeignTripsEnoughDriversB.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test_Configurations\LocalTripsEnoughDrivers.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Test_Configurations\LocalTripsNotEnoughDrivers.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\LocalTripsNotEnoughDriversSimultaneous.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

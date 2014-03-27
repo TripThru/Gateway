@@ -41,7 +41,10 @@
             "compact",
             "sedan"
         ],
-        "drivers" : [],
+        "drivers" : [
+            "Alex Goldman",
+            "Jason Fama",
+        ],
         "passengers" : [
             "Elvis Presley",
             "John Riggins",
