@@ -11,7 +11,6 @@ namespace Utils
 {
     public class Logger
     {
-        const bool splunkEnabled = true;
         public class SplunkClient
         {
             private RestClient restClient;
@@ -315,7 +314,8 @@ namespace Utils
             error.Tags.Add(new Tag("Type", "DEBUG"));
             error.Messages.Add(new Message(0, "End"));
             error.Response = "";
-            splunkClient.Enqueue(error);
+            if(splunkEnabled)
+                splunkClient.Enqueue(error);
         }
 
         public static void Log(string message, object json = null)
@@ -350,6 +350,7 @@ namespace Utils
         }
 
         public static bool enabled = false;
+        public static bool splunkEnabled = true;
 
         public static void OpenLog(string id, string filePath = null)
         {

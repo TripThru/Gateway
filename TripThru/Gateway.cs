@@ -148,7 +148,7 @@ namespace TripThruCore
         public bool Equals(Location l)
         {
             double distance = Math.Sqrt(Math.Pow(l.Lat - Lat, 2) + Math.Pow(l.Lng - Lng, 2));
-            return distance < .00001;
+            return distance < .0001;
         }
     }
 

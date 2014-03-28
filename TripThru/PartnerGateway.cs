@@ -255,6 +255,7 @@ namespace TripThruCore
             PartnerTrip t = tripsByID[r.tripID];
             UpdateTripStatusResponse response = new UpdateTripStatusResponse();
             t.SetStatus(r.status, notifyPartner: false);
+            
             return response;
         }
 
@@ -385,6 +386,10 @@ namespace TripThruCore
             }
             else if (value == Status.Cancelled || value == Status.Rejected)
                 partner.DeactivateTripAndUpdateStats(ID, value);
+        }
+        public void SetDriverLocation(Location driverLocation)
+        {
+            this.driver.location = driverLocation;
         }
         private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
         {
@@ -1095,6 +1100,8 @@ namespace TripThruCore
         {
             Logger.Log("Picking up: " + trip);
             Logger.Tab();
+            Logger.Log("Pickup location: " + trip.pickupLocation.Lat + ", " + trip.pickupLocation.Lng + ", " + trip.pickupLocation.Address);
+            Logger.Log("Driver location: " + trip.driver.location.Lat + ", " + trip.driver.location.Lng + ", " + trip.driver.location.Address);
             if (!trip.driver.location.Equals(trip.pickupLocation))
                 throw new Exception("Error: picking up driver not at pickup location1");
             trip.driver.route = trip.PartnerFleet.GetTripRoute(trip.pickupLocation, trip.dropoffLocation);
@@ -1107,7 +1114,7 @@ namespace TripThruCore
 
         private static bool DriverHasReachedThePickupLocation(PartnerTrip t)
         {
-            return t.driver.route.GetCurrentWaypoint(t.driver.routeStartTime, DateTime.UtcNow).Equals(t.pickupLocation);
+            return t.driver.location.Equals(t.pickupLocation);
         }
 
         private static bool TripServicedByForeignProvider(PartnerTrip t)
