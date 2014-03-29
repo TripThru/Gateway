@@ -224,6 +224,8 @@ namespace TripThruCore
             if (t.driver != null && t.driver.route != null)
                 driverRouteDuration = t.driver.route.duration.TotalSeconds;
 
+            t.lastStatusNotifiedToPartner = t.status;
+
             response = new GetTripStatusResponse(
                 partnerID: ID,
                 partnerName: name,
@@ -254,7 +256,7 @@ namespace TripThruCore
                 return new UpdateTripStatusResponse(result: Result.NotFound);
             PartnerTrip t = tripsByID[r.tripID];
             UpdateTripStatusResponse response = new UpdateTripStatusResponse();
-            t.SetStatus(r.status, notifyPartner: false);
+            t.UpdateTrip(r.status, r.driverLocation, notifyPartner: false);
             
             return response;
         }
@@ -310,14 +312,14 @@ namespace TripThruCore
         // speed is miles per hour
         public void GetTripStatusFromForeignServiceProvider(PartnerTrip trip, bool force = false)
         {
-            if (force || DateTime.UtcNow > trip.lastUpdate + updateInterval)
+            if (force || DateTime.UtcNow > trip.lastUpdate + updateInterval && trip.status != Status.Complete)
             {
                 Logger.Log("Getting (Foreign) status of " + trip);
                 Logger.Tab();
                 Gateway.GetTripStatusRequest request = new Gateway.GetTripStatusRequest(clientID: ID, tripID: trip.ID);
                 Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(request);
                 if (response.status != null)
-                    trip.SetStatus((Status)response.status, notifyPartner: false);
+                    trip.UpdateTrip((Status)response.status, notifyPartner: false);
                 if (response.driverName != null)
                     trip.driver = new Driver(name: response.driverName, location: response.driverLocation);
                 if (response.dropoffTime != null)
@@ -359,17 +361,22 @@ namespace TripThruCore
         public Status status { get { return _status; } }
         public enum Origination { Local, Foreign };
         public DateTime lastDispatchAttempt;
-        public void SetStatus(Status value, bool notifyPartner = true)
+        public void UpdateTrip(Status value, Location driverLocation = null, bool notifyPartner = true)
         {
             if (TripStatusHasChanged(value))
             {
                 Logger.Log("Trip status changed from " + _status + " to " + value);
                 _status = value;
+                if (this.driver != null && driverLocation != null)
+                {
+                    Logger.Log("Driver moved from " + this.driver.location.Address + " to " + driverLocation.Address);
+                    this.driver.location = driverLocation;
+                }
                 if (IsOneOfTheActiveTrips())
                 {
                     this.partner.activeTrips[this.ID].Status = value;
-                    if (TripHasForeignDependency() && notifyPartner)
-                        NotifyForeignPartner(value);
+                    if (TripHasForeignDependency() && lastStatusNotifiedToPartner != value && notifyPartner)
+                        NotifyForeignPartner(value, driverLocation);
                 }
                 else
                     Logger.Log("Cannot set status: because cannot find active trip with ID = " + this.ID);
@@ -386,10 +393,8 @@ namespace TripThruCore
             }
             else if (value == Status.Cancelled || value == Status.Rejected)
                 partner.DeactivateTripAndUpdateStats(ID, value);
-        }
-        public void SetDriverLocation(Location driverLocation)
-        {
-            this.driver.location = driverLocation;
+
+            lastStatusNotifiedToPartner = value;
         }
         private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
         {
@@ -402,14 +407,16 @@ namespace TripThruCore
             return this.partner.activeTrips.ContainsKey(this.ID);
         }
 
-        private void NotifyForeignPartner(Status value)
+        private void NotifyForeignPartner(Status value, Location driverLocation)
         {
             Logger.Log("Since trip has foreign dependency, notify partner through TripThru");
             Logger.Tab();
             Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
                 clientID: partner.ID,
                 tripID: ID,
-                status: value);
+                status: value,
+                driverLocation: driverLocation
+            );
             partner.tripthru.UpdateTripStatus(request);
             Logger.Untab();
         }
@@ -449,6 +456,7 @@ namespace TripThruCore
         public Partner partner;
         public DateTime? ETA;
         public double? distance;
+        public Status? lastStatusNotifiedToPartner;
         public PartnerTrip(PartnerTrip t)
         {
             this.ID = t.ID;
@@ -523,7 +531,7 @@ namespace TripThruCore
             this.PartnerFleet = fleet;
             this.driver = driver;
             this.price = price;
-            this.SetStatus(Status.New, notifyPartner: false);
+            this.UpdateTrip(Status.New, notifyPartner: false);
         }
     }
     public class Passenger : IDName
@@ -697,7 +705,7 @@ namespace TripThruCore
             if (ThereAreAvailableDrivers())
             {
                 DispatchToFirstAvailableDriver(t);
-                t.SetStatus(Status.Dispatched);
+                t.UpdateTrip(Status.Dispatched, t.driver.location);
                 return true;
             }
             Logger.Log("No drivers are currently available");
@@ -789,7 +797,7 @@ namespace TripThruCore
                 Status = t.status,
                 VehicleType = t.vehicleType
             });
-            t.SetStatus(Status.Queued, notifyPartner: false);
+            t.UpdateTrip(Status.Queued, notifyPartner: false);
             return true;
         }
         public void RemoveTrip(PartnerTrip t)
@@ -915,7 +923,7 @@ namespace TripThruCore
         {
             Logger.Log("Missed period reached: -- so cancel " + t);
             Logger.Tab();
-            t.SetStatus(Status.Cancelled, notifyPartner: true);
+            t.UpdateTrip(Status.Cancelled, t.driver.location);
             Logger.Untab();
             return;
         }
@@ -1004,9 +1012,8 @@ namespace TripThruCore
                 partner.GetTripStatusFromForeignServiceProvider(t);
             else
             {
-                Route route = t.PartnerFleet.GetTripRoute(t.pickupLocation, t.dropoffLocation);
                 UpdateTripDriverLocation(t);
-                if (DestinationReached(t, route))
+                if (DestinationReached(t))
                     MakeTripComplete(t);
                 else if (TripStatusUpdateIntervalReached(t))
                     LogTheNewDriverLocation(t);
@@ -1087,28 +1094,26 @@ namespace TripThruCore
             Logger.Tab();
             t.dropoffTime = DateTime.UtcNow;
             t.driver.PartnerFleet.CompleteTrip(t);
-            t.SetStatus(Status.Complete);
+            t.UpdateTrip(Status.Complete);
             Logger.Untab();
         }
 
-        private static bool DestinationReached(PartnerTrip t, Route route)
+        private static bool DestinationReached(PartnerTrip t)
         {
-            return t.driver.location == route.end;
+            return t.driver.location.Equals(t.driver.route.end);
         }
 
         private static void MakeTripPickedUp(PartnerTrip trip)
         {
             Logger.Log("Picking up: " + trip);
             Logger.Tab();
-            Logger.Log("Pickup location: " + trip.pickupLocation.Lat + ", " + trip.pickupLocation.Lng + ", " + trip.pickupLocation.Address);
-            Logger.Log("Driver location: " + trip.driver.location.Lat + ", " + trip.driver.location.Lng + ", " + trip.driver.location.Address);
             if (!trip.driver.location.Equals(trip.pickupLocation))
                 throw new Exception("Error: picking up driver not at pickup location1");
             trip.driver.route = trip.PartnerFleet.GetTripRoute(trip.pickupLocation, trip.dropoffLocation);
             if (!trip.driver.location.Equals(trip.pickupLocation))
                 throw new Exception("Error: picking up driver not at pickup location2");
             trip.driver.routeStartTime = DateTime.UtcNow;
-            trip.SetStatus(Status.PickedUp);
+            trip.UpdateTrip(Status.PickedUp, trip.driver.location);
             Logger.Untab();
         }
 
@@ -1142,7 +1147,7 @@ namespace TripThruCore
                 throw new Exception("fatal error");
             t.driverRouteDuration = t.driver.route.duration;
             t.driver.routeStartTime = DateTime.UtcNow;
-            t.SetStatus(Status.Enroute);
+            t.UpdateTrip(Status.Enroute, t.driver.location);
             Logger.Untab();
         }
 

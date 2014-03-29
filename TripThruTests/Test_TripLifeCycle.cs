@@ -140,6 +140,9 @@ namespace Tests
                     Console.WriteLine("Trip: <" + tripSpec.First.Lat + ", " + tripSpec.First.Lng + ">, " + 
                                             "<" + tripSpec.Second.Lat + ", " + tripSpec.Second.Lng + ">");
                     parent.TestTripLifecycleAndReturningDriver(fleet, tripSpec);
+
+                    Console.WriteLine("Success, Trip: <" + tripSpec.First.Lat + ", " + tripSpec.First.Lng + ">, " +
+                                            "<" + tripSpec.Second.Lat + ", " + tripSpec.Second.Lng + ">");
                     this.passed = true;
                 }
                 catch (Exception ex)

@@ -595,17 +595,16 @@ namespace TripThruCore
             if (destPartner != null)
             {
                 Logger.AddTag("Destination partner", destPartner.name);
-                string savedClientID = r.clientID;
+                string originClientID = r.clientID;
                 ChangeClientIDToTripThru(r);
                 UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
-                r.clientID = savedClientID;
+                r.clientID = originClientID;
                 if (response.result == Result.OK)
                 {
                     activeTrips[r.tripID].Status = r.status;
                     if (r.status == Status.Complete)
                     {
                         GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
-                        r.clientID = savedClientID;
                         DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
                     }
                     else if (r.status == Status.Cancelled || r.status == Status.Rejected)

@@ -663,11 +663,13 @@ namespace TripThruCore
             public string clientID;  // TODO: TripThru needs to know who's making the call
             public string tripID;
             public Status status;
-            public UpdateTripStatusRequest(string clientID, string tripID, Status status)
+            public Location driverLocation;
+            public UpdateTripStatusRequest(string clientID, string tripID, Status status, Location driverLocation = null)
             {
                 this.clientID = clientID;
                 this.tripID = tripID;
                 this.status = status;
+                this.driverLocation = driverLocation;
             }
             public override string ToString()
             {
