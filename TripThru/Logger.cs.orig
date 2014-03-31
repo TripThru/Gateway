@@ -266,6 +266,35 @@ namespace Utils
         }
 
         public static void EndRequest(object response)
+<<<<<<< HEAD
+        {
+			object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            if (requestLog == null || !enabled || numBegunRequests[thread] == 0)
+                return;
+            
+            if (response != null)
+                Logger.Log("Response", response);
+            Logger.Untab();
+			
+            numBegunRequests[thread] = numBegunRequests[thread] - 1;
+            if (splunkEnabled)
+                splunkClient.Enqueue(requestLog[thread]);
+            if (numBegunRequests[thread] == 0)
+            {
+                Logger.AddTag("Type", "INFO");
+                Logger.AddTag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb");
+                var json = "";
+                if (response != null)
+                    json = JsonSerializer.SerializeToString(response);
+                requestLog[thread].Response = json;
+                if (splunkEnabled)
+                {
+                    splunkClient.Enqueue(requestLog[thread]);
+                    Queue.Enqueue(requestLog[thread]);
+                }
+                requestLog.Remove(thread);
+                numBegunRequests.Remove(thread);
+=======
         {
             lock (locker)
             {
@@ -283,7 +312,6 @@ namespace Utils
                 if (numBegunRequests[thread] == 0)
                 {
                     Logger.AddTag("Type", "INFO");
-                    Logger.AddTag("Memory", (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb");
                     var json = "";
                     if (response != null)
                         json = JsonSerializer.SerializeToString(response);
@@ -296,6 +324,7 @@ namespace Utils
                     requestLog.Remove(thread);
                     numBegunRequests.Remove(thread);
                 }
+>>>>>>> nunit
             }
         }
 
@@ -314,6 +343,20 @@ namespace Utils
 
         public static void LogDebug(string message, string detailed = null)
         {
+<<<<<<< HEAD
+            Console.WriteLine(message + " | " + detailed + "\n*******************************************\n");
+            if (requestLog == null || !enabled)
+                return;
+            RequestLog error = new RequestLog("");
+            error.Messages.Add(new Message(0, message));
+            if (detailed != null)
+                error.Messages.Add(new Message(40, detailed));
+            error.Tags.Add(new Tag("Type", "DEBUG"));
+            error.Tags.Add(new Tag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
+            error.Messages.Add(new Message(0, "End"));
+            error.Response = "";
+            splunkClient.Enqueue(error);
+=======
             lock (locker)
             {
                 Console.WriteLine(message + " | " + detailed + "\n\n");
@@ -324,13 +367,12 @@ namespace Utils
                 if (detailed != null)
                     error.Messages.Add(new Message(40, detailed));
                 error.Tags.Add(new Tag("Type", "DEBUG"));
-                error.Tags.Add(
-                    new Tag("Memory", (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
                 error.Messages.Add(new Message(0, "End"));
                 error.Response = "";
                 if (splunkEnabled)
                     splunkClient.Enqueue(error);
             }
+>>>>>>> nunit
         }
 
         public static void Log(string message, object json = null)
