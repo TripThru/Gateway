@@ -145,10 +145,10 @@ namespace TripThruCore
             double d = 3961.0 * c; // (where 3961 is the radius of the Earth in miles
             return d;
         }
-        public bool Equals(Location l)
+        public bool Equals(Location l, double tolerance = .005)
         {
-            double distance = Math.Sqrt(Math.Pow(l.Lat - Lat, 2) + Math.Pow(l.Lng - Lng, 2));
-            return distance < .0001;
+            double distance = GetDistance(l);
+            return distance < tolerance;
         }
     }
 
@@ -664,12 +664,14 @@ namespace TripThruCore
             public string tripID;
             public Status status;
             public Location driverLocation;
-            public UpdateTripStatusRequest(string clientID, string tripID, Status status, Location driverLocation = null)
+            public DateTime? eta;
+            public UpdateTripStatusRequest(string clientID, string tripID, Status status, Location driverLocation = null, DateTime? eta = null)
             {
                 this.clientID = clientID;
                 this.tripID = tripID;
                 this.status = status;
                 this.driverLocation = driverLocation;
+                this.eta = eta;
             }
             public override string ToString()
             {
@@ -780,7 +782,40 @@ namespace TripThruCore
         public RedisStat distance;
         public RedisStat completes;
         public RedisStat fare;
-        public RedisDictionary<string, Trip> activeTrips;
+
+        public class ActiveTrips
+        {
+            private RedisDictionary<string, Trip> dict;
+            public bool IsEmpty { get { return dict.IsEmpty; } }
+            public int Count { get { return dict.Count; } }
+            public IEnumerable<Trip> Values { get { return dict.Values; } }
+            public ActiveTrips(RedisClient redisClient, string id)
+            {
+                dict = new RedisDictionary<string, Trip>(redisClient, id);
+                dict.Clear();
+
+            }
+            public bool ContainsKey(string id)
+            {
+                return dict.Keys.Contains(id);
+            }
+            public void Add(string id, Trip trip)
+            {
+                dict.Add(id, trip);
+            }
+            public void Remove(string id)
+            {
+                Logger.Log("Removing active trip " + id);
+                dict.Remove(id);
+            }
+            public Trip this[string id]
+            {
+                get { return dict[id]; }
+            }
+        }
+
+        public ActiveTrips activeTrips;
+
         public GarbageCleanup<string> garbageCleanup;
         public RedisDictionary<string, string> clientIdByAccessToken;
         public RedisDictionary<string, PartnerAccount> partnerAccounts;
@@ -837,8 +872,7 @@ namespace TripThruCore
             fare = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => fare));
             completes = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => completes));
             distance = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => distance));
-            activeTrips = new RedisDictionary<string, Trip>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
-            activeTrips.Clear();
+            activeTrips = new ActiveTrips(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
@@ -867,6 +901,7 @@ namespace TripThruCore
         {
             if (!activeTrips.ContainsKey(tripID))
                 return;
+            Logger.Log("Deactivating trip " + tripID + " from " + name);
 
             activeTrips.Remove(tripID);
             switch (status)
@@ -887,7 +922,7 @@ namespace TripThruCore
 
         public void UpdateActiveTrip(Trip trip)
         {
-            if (activeTrips.Keys.Contains(trip.Id))
+            if (activeTrips.ContainsKey(trip.Id))
             {
                 activeTrips[trip.Id].FleetId = trip.FleetId;
                 activeTrips[trip.Id].FleetName = trip.FleetName;

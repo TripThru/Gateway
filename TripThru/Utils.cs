@@ -328,12 +328,10 @@ namespace Utils
         public TimeSpan elapse;
         public double distance;
     }
-    public class Route
+
+    public class SubrouteMap
     {
-        public Route()
-        {
-        }
-        public Route(Waypoint[] waypoints)
+        public SubrouteMap(Waypoint[] waypoints)
         {
             this.waypoints = waypoints;
             map = new Dictionary<string, Pair<int, Waypoint>>();
@@ -362,6 +360,20 @@ namespace Utils
                 waypoints.Add(this.waypoints[i]);
             return new Route(waypoints.ToArray());
         }
+        public Dictionary<string, Pair<int, Waypoint>> map;
+        public Waypoint[] waypoints;
+    }
+
+    public class Route
+    {
+        public Route()
+        {
+        }
+        public Route(Waypoint[] waypoints)
+        {
+            this.waypoints = waypoints;
+        }
+
         public static string GetKey(Location start, Location end) { return start.getID() + ":" + end.getID(); }        // Daniel, you will need to implement this
         public Location start { get { return waypoints[0]; } }
         public Location end { get { return waypoints[waypoints.Length - 1]; } }
@@ -374,7 +386,6 @@ namespace Utils
             for (waypoint = 0; elapse > waypoints[waypoint].elapse && waypoint < waypoints.Length - 1; waypoint++) ;
             return waypoints[waypoint];
         }
-        public Dictionary<string, Pair<int, Waypoint>> map;
         public Waypoint[] waypoints;
     }
     public class IDName

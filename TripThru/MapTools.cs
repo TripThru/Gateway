@@ -189,9 +189,7 @@ namespace Utils
             {
                 CsvRow row = new CsvRow();
                 while (reader.ReadRow(row, ','))
-                {
                     locationNames.Add(row[0], row[1]);
-                }
             }
         }
 
@@ -201,9 +199,7 @@ namespace Utils
             {
                 CsvRow row = new CsvRow();
                 while (reader.ReadRow(row, ','))
-                {
                     locationAddresses.Add(row[0], new Pair<string, string>(row[1], row[2]));
-                }
             }
         }
 

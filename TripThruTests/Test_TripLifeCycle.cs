@@ -19,36 +19,42 @@ namespace Tests
         [SetUp]
         public void SetUp()
         {
+            Logger.OpenLog(id: "Nunit", splunkEnabled: false);
+            MapTools.ClearCache();
+            Logger.Log("Setting up");
+            Logger.Tab();
             MapTools.distance_and_time_scale = .05;
-            MapTools.SetGeodataFilenames("Test_GeoData/Geo-Location-Names.csv",
-                                         "Test_GeoData/Geo-Routes.csv",
-                                         "Test_GeoData/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames(locationNames: "Test_GeoData/Geo-Location-Names.csv",
+                routes: "Test_GeoData/Geo-Routes.csv",
+                locationAddresses: "Test_GeoData/Geo-Location-Addresses.csv");
             MapTools.LoadGeoData();
+            Logger.Untab();
         }
 
         [TearDown]
         public void TearDown()
         {
+            Logger.Log("Tearing down");
             MapTools.ClearCache();
         }
 
         [Test]
         public void EnoughDrivers_SingleTrips()
         {
-            Console.WriteLine("Test_TripLifeCycle_EnoughDrivers_SingleTrips");
+            Logger.Log("Test_TripLifeCycle_EnoughDrivers_SingleTrips");
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
-                timeoutTolerance: new TimeSpan(0, 5, 0));
+                maxLateness: new TimeSpan(0, 5, 0));
             lib.Test_SingleTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
         public void EnoughDrivers_SimultaneousTrips()
         {
-            Console.WriteLine("Test_TripLifeCycle_EnoughDrivers_SimultaneousTrips");
+            Logger.Log("Test_TripLifeCycle_EnoughDrivers_SimultaneousTrips");
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
-                timeoutTolerance: new TimeSpan(0, 5, 0));
+                maxLateness: new TimeSpan(0, 5, 0));
             lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
@@ -56,7 +62,7 @@ namespace Tests
         [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
         public void NotEnoughDrivers_SingleTrips()
         {
-            Console.WriteLine("Test_TripLifeCycle_NotEnoughDrivers_SingleTrips");
+            Logger.Log("Test_TripLifeCycle_NotEnoughDrivers_SingleTrips");
             /* In this test since there are not enough drivers it tries to dispatch to tripthru --
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
@@ -64,16 +70,16 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDrivers.txt",
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
-                timeoutTolerance: new TimeSpan(0, 1, 0));
+                maxLateness: new TimeSpan(0, 1, 0));
 
             lib.Test_SingleTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
         [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
-        public void NotEnoughDrivers_SimultaneousTrips()
+        public void NotEnoughDrivers_SimultaneousTrips_VerifyRejected()
         {
-            Console.WriteLine("Test_TripLifeCycle_NotEnoughDrivers_SimultaneousTrips");
+            Logger.Log("NotEnoughDrivers_SimultaneousTrips_VerifyRejected");
             /* In this test since there are not enough drivers it tries to dispatch to tripthru --
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
@@ -81,33 +87,77 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
-                timeoutTolerance: new TimeSpan(0, 1, 0));
+                maxLateness: new TimeSpan(0, 1, 0));
 
             lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
-        public void EnoughDrivers_TwoPartnersShareJobsThroughTripThru()
+        public void NotEnoughDrivers_SimultaneousTrips_AllowTimeForDriversToBecomeAvailable()
         {
-            Console.WriteLine("Test_TripLifeCycle_EnoughDrivers_TwoPartnersShareJobsThroughTripThru");
+            Logger.Log("NotEnoughDrivers_SimultaneousTrips_AllowTimeForDriversToBecomeAvailable");
+            /* In this test since there are not enough drivers it tries to dispatch to tripthru --
+             * which has an empty implementation that always rejects.
+             * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
+             * */
+            Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
+                filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
+                tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
+                maxLateness: new TimeSpan(0, 10, 0));
+
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+        }
+
+        [Test]
+        public void EnoughDrivers_TwoPartnersShareJobs_Gateway()
+        {
+            Logger.Log("Test_TripLifeCycle_EnoughDrivers_TwoPartnersShareJobs_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);
             var libA = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversA.txt",
                 tripthru: tripthru,
-                timeoutTolerance: new TimeSpan(0, 5, 0),
+                maxLateness: new TimeSpan(0, 5, 0),
                 origination: PartnerTrip.Origination.Local,
-                service: PartnerTrip.Origination.Foreign);
+                service: PartnerTrip.Origination.Foreign, 
+                locationVerificationTolerance: 4);
             var libB = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversB.txt",
                 tripthru: tripthru,
-                timeoutTolerance: new TimeSpan(0, 5, 0),
+                maxLateness: new TimeSpan(0, 5, 0),
                 origination: PartnerTrip.Origination.Local,
-                service: PartnerTrip.Origination.Foreign);
+                service: PartnerTrip.Origination.Foreign,
+                locationVerificationTolerance: 4);
 
             List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
-            libA.ValidateSubTests(subTests);
+            Test_TripLifeCycle_Base.ValidateSubTests(subTests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
         }
+
+        [Test]
+        public void AllPartners_Gateway()
+        {
+            Logger.Log("AllPartners_Gateway");
+            var tripthru = new TripThru(enableTDispatch: false);
+            TimeSpan maxLateness = new TimeSpan(0, 25, 0);
+            double locationVerificationTolerance = 4;
+            string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
+            Logger.Log("filePaths = " + filePaths);
+            List<SubTest> subtests = new List<SubTest>();
+            foreach (string filename in filePaths)
+            {
+                Logger.Log("filename = " + filename);
+                var lib = new Test_TripLifeCycle_Base(
+                    filename: filename,
+                    tripthru: tripthru,
+                    maxLateness: maxLateness,
+                    locationVerificationTolerance: locationVerificationTolerance);
+                subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
+            }
+
+
+            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1));
+        }
+
     }
 
     public class Test_TripLifeCycle_Base
@@ -115,10 +165,11 @@ namespace Tests
         public string filename;
         public Gateway tripthru;
         Partner partner;
-        PartnerTrip.Origination origination = PartnerTrip.Origination.Local;
-        PartnerTrip.Origination service = PartnerTrip.Origination.Local;
+        PartnerTrip.Origination? origination = null;
+        PartnerTrip.Origination? service = null;
         public TimeSpan simInterval = new TimeSpan(0, 0, 1);
-        public TimeSpan timeoutTolerance = new TimeSpan(0, 0, 2);
+        public TimeSpan maxLateness = new TimeSpan(0, 0, 2);
+        public double locationVerificationTolerance = .6;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
@@ -158,24 +209,32 @@ namespace Tests
 
         }
 
-        public Test_TripLifeCycle_Base(string filename, Gateway tripthru, TimeSpan? timeoutTolerance = null, PartnerTrip.Origination? origination = null, PartnerTrip.Origination? service = null)
+        public Test_TripLifeCycle_Base(
+            string filename, 
+            Gateway tripthru, 
+            TimeSpan? maxLateness = null, 
+            PartnerTrip.Origination? origination = null, 
+            PartnerTrip.Origination? service = null, 
+            double? locationVerificationTolerance = null)
         {
             this.filename = filename;
             this.tripthru = tripthru;
-            if (timeoutTolerance != null)
-                this.timeoutTolerance = (TimeSpan)timeoutTolerance;
+            if (maxLateness != null)
+                this.maxLateness = (TimeSpan)maxLateness;
             if (origination != null)
-                this.origination = (PartnerTrip.Origination)origination;
+                this.origination = origination;
             if (service != null)
-                this.service = (PartnerTrip.Origination)service;
+                this.service = service;
+            if (locationVerificationTolerance != null)
+                this.locationVerificationTolerance = (double)locationVerificationTolerance;
             PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
             partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru, configuration.partnerFleets);
             tripthru.RegisterPartner(new GatewayLocalClient(partner));
         }
         public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets()
         {
-            List<SubTest> singleTrips_Subtests = MakeSimultaneousTripLifecycle_SubTests();
-            ValidateSubTests(singleTrips_Subtests);
+            List<SubTest> subtests = MakeSimultaneousTripLifecycle_SubTests();
+            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
         }
 
         public List<SubTest> MakeSimultaneousTripLifecycle_SubTests()
@@ -189,14 +248,13 @@ namespace Tests
             return singleTrips_Subtests;
         }
 
-        public void ValidateSubTests(List<SubTest> singleTrips_Subtests)
+        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
         {
             foreach (SubTest u in singleTrips_Subtests)
                 new Thread(u.Run).Start();
 
-            DateTime timeout = DateTime.UtcNow + new TimeSpan(0, 10, 0);
             bool? passed = null;
-            while (passed == null && DateTime.UtcNow < timeout)
+            while (passed == null && DateTime.UtcNow < timeoutAt)
             {
                 passed = false;
                 foreach (SubTest test in singleTrips_Subtests)
@@ -229,7 +287,7 @@ namespace Tests
         {
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
             TestTripLifecycle_FromNewToComplete(fleet, trip);
-            ValidateReturningDriverRoute(fleet, trip);
+            ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
         }
 
         public void TestTripLifecycle_FromNewToComplete(PartnerFleet fleet, PartnerTrip trip)
@@ -251,12 +309,49 @@ namespace Tests
                 if (trip.status == Status.Enroute)
                     Assert.IsNotNull(response.driverLocation);
                 if (trip.status == Status.PickedUp)
-                    Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation));
+                    Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance));
                 if (trip.status == Status.Complete)
-                    Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation));
+                    Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance));
             }
         }
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
+        {
+            ValidateOriginationAndService(trip);
+            if (trip.status == nextStatus)
+                ValidateTripThruStatus(trip);
+            WaitUntilStatusReachedOrTimeout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
+
+            Assert.AreEqual(nextStatus, trip.status);
+            if (trip.status == Status.Enroute)
+            {
+                Assert.IsNotNull(trip.driverLocation);
+            }
+            else if (trip.status == Status.PickedUp)
+            {
+                Assert.IsNotNull(trip.driverLocation);
+                //Logger.Log("Driver farther from pickup location -- by more than " + trip.driverLocation.GetDistance(trip.pickupLocation) + " miles ");
+                Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance));
+            }
+            else if (trip.status == Status.Complete)
+            {
+                Assert.IsNotNull(trip.driverLocation);
+                Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance));
+            }
+        }
+
+        private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
+        {
+            Status startingStatus = trip.status;
+            do
+            {
+                // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
+                // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
+                fleet.ProcessTrip(trip);
+                System.Threading.Thread.Sleep(simInterval);
+            } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
+        }
+
+        private void ValidateOriginationAndService(PartnerTrip trip)
         {
             if (trip.status == Status.Queued) //if still completely local
             {
@@ -265,44 +360,41 @@ namespace Tests
             }
             else
             {
-                Assert.AreEqual(origination, trip.origination);
-                Assert.AreEqual(service, trip.service);
+                if (origination != null)
+                    Assert.AreEqual(origination, trip.origination);
+                if (service != null)
+                    Assert.AreEqual(service, trip.service);
             }
-            if (trip.status == nextStatus)
-                ValidateTripThruStatus(trip);
-            TimeSpan timeout = new TimeSpan(0);
+        }
+
+        private System.DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)
+        {
+            DateTime timeoutAt;
             switch (trip.status)
             {
-                case Status.Queued: timeout = timeoutTolerance; break;
-                case Status.Dispatched: timeout = timeoutTolerance; break;
-                case Status.Enroute: timeout = (TimeSpan)trip.driverRouteDuration + timeoutTolerance; break;
-                case Status.PickedUp: timeout = (TimeSpan)trip.driverRouteDuration + timeoutTolerance; break;
-                case Status.Complete: timeout = (TimeSpan)trip.driverRouteDuration + timeoutTolerance; break;
+                case Status.Enroute:
+                case Status.PickedUp:
+                case Status.Complete:
+                    {
+                        Assert.IsNotNull(trip.ETA);
+                        timeoutAt = (DateTime)trip.ETA + maxLateness;
+                        break;
+                    }
+                default:
+                    {
+                        timeoutAt = DateTime.UtcNow + maxLateness;
+                        break;
+                    }
             }
-
-            Status startingStatus = trip.status;
-            DateTime timeoutAt = DateTime.UtcNow + timeout;
-            do
-            {
-                // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
-                // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
-                fleet.ProcessTrip(trip);
-            } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
-
-            Assert.AreEqual(nextStatus, trip.status);
-            if (trip.status == Status.Enroute)
-                Assert.IsNotNull(trip.driver.location);
-            if (trip.status == Status.PickedUp)
-                Assert.IsTrue(trip.driver.location.Equals(trip.pickupLocation));
-            if (trip.status == Status.Complete)
-                Assert.IsTrue(trip.driver.location.Equals(trip.dropoffLocation));
-            ValidateTripThruStatus(trip);
+            return timeoutAt;
         }
-        public void ValidateReturningDriverRoute(PartnerFleet fleet, PartnerTrip trip)
+        public void ValidateReturningDriverRouteIfServiceLocal(PartnerFleet fleet, PartnerTrip trip)
         {
-            TimeSpan timeout = ((TimeSpan)trip.driverRouteDuration) + timeoutTolerance;
+            if (trip.service == PartnerTrip.Origination.Foreign)
+                return;
             Status currentStatus = trip.status;
-            DateTime timeoutAt = DateTime.UtcNow + timeout;
+            Assert.AreNotEqual(trip.ETA, null);
+            DateTime timeoutAt = (DateTime) trip.ETA + maxLateness;
             while (!trip.driver.location.Equals(fleet.location))
             {
                 fleet.UpdateReturningDriverLocations();

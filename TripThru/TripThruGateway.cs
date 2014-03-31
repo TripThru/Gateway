@@ -364,7 +364,7 @@ namespace TripThruCore
 
         private bool TripIsNotAlreadyActive(DispatchTripRequest r)
         {
-            return !activeTrips.Keys.Contains(r.tripID);
+            return !activeTrips.ContainsKey(r.tripID);
         }
 
         private static bool PartnerHasBeenSelected(Gateway partner)
@@ -599,7 +599,7 @@ namespace TripThruCore
                 ChangeClientIDToTripThru(r);
                 UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
                 r.clientID = originClientID;
-                if (response.result == Result.OK)
+                if (SuccesAndTripStillActive(r, response))
                 {
                     activeTrips[r.tripID].Status = r.status;
                     if (r.status == Status.Complete)
@@ -617,6 +617,11 @@ namespace TripThruCore
             Logger.Log("Destination partner trip not found");
             Logger.AddTag("ClientId", r.clientID);
             return new UpdateTripStatusResponse(result: Result.NotFound);
+        }
+
+        private bool SuccesAndTripStillActive(UpdateTripStatusRequest r, UpdateTripStatusResponse response)
+        {
+            return response.result == Result.OK && activeTrips.ContainsKey(r.tripID);
         }
 
         private GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(UpdateTripStatusRequest r)
