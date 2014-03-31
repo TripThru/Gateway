@@ -157,6 +157,7 @@ namespace ServiceStack.TripThruGateway
                     pickupTime = resp.PickupTime,
                     pickupLocation = resp.PickupLocation,
                     distance = resp.Distance,
+                    driverRouteDuration = resp.DriverRouteDuration,
                     price = resp.Price
                 };
             }
@@ -179,7 +180,10 @@ namespace ServiceStack.TripThruGateway
             {
                 access_token = AccessToken,
                 Status = request.status,
-                TripId = request.tripID
+                TripId = request.tripID,
+                DriverLocationLat = request.driverLocation != null ? (double?)request.driverLocation.Lat : null,
+                DriverLocationLng = request.driverLocation != null ? (double?)request.driverLocation.Lng : null,
+                DriverLocationAddress = request.driverLocation != null ? request.driverLocation.Address : null
             });
             Gateway.UpdateTripStatusResponse response;
             response = new Gateway.UpdateTripStatusResponse

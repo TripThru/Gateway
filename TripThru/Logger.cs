@@ -11,7 +11,6 @@ namespace Utils
 {
     public class Logger
     {
-        const bool splunkEnabled = true;
         public class SplunkClient
         {
             private RestClient restClient;
@@ -85,7 +84,7 @@ namespace Utils
                         {
                             var logEntries = new List<string>();
                             RequestLog requestLog = null;
-                            lock (queue)
+                            lock (locker)
                             {
                                 requestLog = this.queue.Dequeue();
                                 if(requestLog.Messages.Count > 0)
@@ -146,7 +145,7 @@ namespace Utils
 
             public void Enqueue(RequestLog log)
             {
-                lock (queue)
+                lock (locker)
                 {
                     this.queue.Enqueue(log);
                 }
@@ -234,7 +233,7 @@ namespace Utils
                 return tabs;
             }
         }
-
+        static readonly object locker = new object(); 
         public static FixedSizeQueue Queue;
         public static Dictionary<object, RequestLog> requestLog;
         public static string filePath = null;
@@ -244,168 +243,201 @@ namespace Utils
         static Dictionary<object, int> numBegunRequests;
         public static void BeginRequest(string msg, object request, string tripID = null)
         {
-            if (requestLog == null || !enabled)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (!requestLog.ContainsKey(thread))
+            lock (locker)
             {
-                var json = "";
-                if (request != null)
-                    json = JsonSerializer.SerializeToString(request);
-                requestLog[thread] = new RequestLog(json, tripID);
-                numBegunRequests[thread] = 0;
-            }
+                if (requestLog == null || !enabled)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (!requestLog.ContainsKey(thread))
+                {
+                    var json = "";
+                    if (request != null)
+                        json = JsonSerializer.SerializeToString(request);
+                    requestLog[thread] = new RequestLog(json, tripID);
+                    numBegunRequests[thread] = 0;
+                }
 
-            if (!numBegunRequests.ContainsKey(thread))
-                numBegunRequests[thread] = 0;
-            numBegunRequests[thread] = numBegunRequests[thread] + 1;
-            Logger.Log(msg, request);
-            Logger.Tab();
+                if (!numBegunRequests.ContainsKey(thread))
+                    numBegunRequests[thread] = 0;
+                numBegunRequests[thread] = numBegunRequests[thread] + 1;
+                Logger.Log(msg, request);
+                Logger.Tab();
+            }
         }
 
         public static void EndRequest(object response)
         {
-			object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (requestLog == null || !enabled || numBegunRequests[thread] == 0)
-                return;
-            
-            if (response != null)
-                Logger.Log("Response", response);
-            Logger.Untab();
-			
-            numBegunRequests[thread] = numBegunRequests[thread] - 1;
-            if (splunkEnabled)
-                splunkClient.Enqueue(requestLog[thread]);
-            if (numBegunRequests[thread] == 0)
+            lock (locker)
             {
-                Logger.AddTag("Type", "INFO");
-                Logger.AddTag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb");
-                var json = "";
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !enabled || numBegunRequests[thread] == 0)
+                    return;
+
                 if (response != null)
-                    json = JsonSerializer.SerializeToString(response);
-                requestLog[thread].Response = json;
+                    Logger.Log("Response", response);
+                Logger.Untab();
+
+                numBegunRequests[thread] = numBegunRequests[thread] - 1;
                 if (splunkEnabled)
-                {
                     splunkClient.Enqueue(requestLog[thread]);
-                    Queue.Enqueue(requestLog[thread]);
+                if (numBegunRequests[thread] == 0)
+                {
+                    Logger.AddTag("Type", "INFO");
+                    var json = "";
+                    if (response != null)
+                        json = JsonSerializer.SerializeToString(response);
+                    requestLog[thread].Response = json;
+                    if (splunkEnabled)
+                    {
+                        splunkClient.Enqueue(requestLog[thread]);
+                        Queue.Enqueue(requestLog[thread]);
+                    }
+                    requestLog.Remove(thread);
+                    numBegunRequests.Remove(thread);
                 }
-                requestLog.Remove(thread);
-                numBegunRequests.Remove(thread);
             }
         }
 
         public static void AddTag(string name, string value)
         {
-            if (requestLog == null || !enabled)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (!requestLog.ContainsKey(thread))
-                return;
-            requestLog[thread].Tags.Add(new Tag(name, value));
+            lock (locker)
+            {
+                if (requestLog == null || !enabled)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (!requestLog.ContainsKey(thread))
+                    return;
+                requestLog[thread].Tags.Add(new Tag(name, value));
+            }
         }
 
         public static void LogDebug(string message, string detailed = null)
         {
-            Console.WriteLine(message + " | " + detailed + "\n*******************************************\n");
-            if (requestLog == null || !enabled)
-                return;
-            RequestLog error = new RequestLog("");
-            error.Messages.Add(new Message(0, message));
-            if (detailed != null)
-                error.Messages.Add(new Message(40, detailed));
-            error.Tags.Add(new Tag("Type", "DEBUG"));
-            error.Tags.Add(new Tag("Memory", (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
-            error.Messages.Add(new Message(0, "End"));
-            error.Response = "";
-            splunkClient.Enqueue(error);
+            lock (locker)
+            {
+                Console.WriteLine(message + " | " + detailed + "\n\n");
+                if (requestLog == null || !enabled)
+                    return;
+                RequestLog error = new RequestLog("");
+                error.Messages.Add(new Message(0, message));
+                if (detailed != null)
+                    error.Messages.Add(new Message(40, detailed));
+                error.Tags.Add(new Tag("Type", "DEBUG"));
+                error.Messages.Add(new Message(0, "End"));
+                error.Response = "";
+                if (splunkEnabled)
+                    splunkClient.Enqueue(error);
+            }
         }
 
         public static void Log(string message, object json = null)
         {
-            if (requestLog == null || !enabled)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (!requestLog.ContainsKey(thread))
-                BeginRequest(message, json);
-			else 
-			{
-				string str = requestLog[thread].GetTab() + message;
-				if (file != null)
-				{
-					file.WriteLine(str);
-					file.Flush();
-				}
-				var jsonString = json != null ? JsonSerializer.SerializeToString(json) : null;
-                requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
-			}
+            lock (locker)
+            {
+                if (requestLog == null || !enabled)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (!requestLog.ContainsKey(thread))
+                    BeginRequest(message, json);
+                else
+                {
+                    string str = requestLog[thread].GetTab() + message;
+                    if (file != null)
+                    {
+                        file.WriteLine(str);
+                        file.Flush();
+                    }
+                    Console.WriteLine(thread + ":" + str);
+                    var jsonString = json != null ? JsonSerializer.SerializeToString(json) : null;
+                    requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
+                }
+            }
 		}
 
         public static void Log(Message message)
         {
-            if (requestLog == null || !enabled)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (!requestLog.ContainsKey(thread))
-                throw new Exception("Log with no enclosing request");
-            message.Indent = requestLog[thread].Tab*40;
-            requestLog[thread].Messages.Add(message);
+            lock (locker)
+            {
+                if (requestLog == null || !enabled)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (!requestLog.ContainsKey(thread))
+                    throw new Exception("Log with no enclosing request");
+                message.Indent = requestLog[thread].Tab * 40;
+                requestLog[thread].Messages.Add(message);
+            }
         }
 
         public static bool enabled = false;
+        public static bool splunkEnabled = true;
+        public static bool LogFileOpen() { return filePath != null;  }
 
-        public static void OpenLog(string id, string filePath = null)
+        public static void OpenLog(string id, string filePath = null, bool splunkEnabled = true)
         {
-            enabled = true;
-            requestLog = new Dictionary<object, RequestLog>();
-            Queue = new FixedSizeQueue(300);
-            numBegunRequests = new Dictionary<object, int>();
-            restReq = new RestRequest();
-            // Create new Service object
-            if (splunkEnabled)
+            Logger.splunkEnabled = splunkEnabled;
+            lock (locker)
             {
-                splunkClient = new SplunkClient();
-                splunkClient.SetSource(id);
-            }
-            if (filePath != null)
-            {
-                Logger.filePath = filePath;
-                file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
+                enabled = true;
+                requestLog = new Dictionary<object, RequestLog>();
+                Queue = new FixedSizeQueue(300);
+                numBegunRequests = new Dictionary<object, int>();
+                restReq = new RestRequest();
+                // Create new Service object
+                if (splunkEnabled)
+                {
+                    splunkClient = new SplunkClient();
+                    splunkClient.SetSource(id);
+                }
+                if (filePath != null)
+                {
+                    Logger.filePath = filePath;
+                    file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
+                }
             }
         }
 
         public static void CloseLog()
         {
-            if (requestLog == null)
-                return;
-            if (file != null)
+            lock (locker)
             {
-                file.Close();
-                file = null;
+                if (requestLog == null)
+                    return;
+                if (file != null)
+                {
+                    file.Close();
+                    file = null;
+                }
+                Queue.Clear();
+                if (splunkEnabled)
+                    splunkClient.Close();
             }
-            Queue.Clear();
-            if (splunkEnabled)
-                splunkClient.Close();
         }
 
         public static void Tab()
         {
-            if (requestLog == null)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            var r = requestLog[thread];
-            if (r.Tab < 50)
-                r.Tab++;
-            if (r.MaxTab < r.Tab)
-                r.MaxTab = r.Tab;
+            lock (locker)
+            {
+                if (requestLog == null)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                var r = requestLog[thread];
+                if (r.Tab < 50)
+                    r.Tab++;
+                if (r.MaxTab < r.Tab)
+                    r.MaxTab = r.Tab;
+            }
         }
 
         public static void Untab()
         {
-            if (requestLog == null)
-                return;
-            object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (requestLog[thread].Tab > 0)
-                requestLog[thread].Tab--;
+            lock (locker)
+            {
+                if (requestLog == null)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog[thread].Tab > 0)
+                    requestLog[thread].Tab--;
+            }
         }
     }
 

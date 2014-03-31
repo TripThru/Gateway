@@ -7,6 +7,7 @@ using Utils;
 using TripThruCore;
 using ServiceStack.Redis;
 using System.Linq.Expressions;
+using System.Threading;
 
 
 // Local
@@ -50,11 +51,13 @@ namespace Program
 
         static void Main(string[] args)
         {
+            Logger.OpenLog("", "C:\\Users\\Edward\\");
 
-            Logger.OpenLog("", "TripThruSimulation.log");
-            MapTools.LoadGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
 
-            MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.LoadGeoData();
+
+            MapTools.WriteGeoData();
             string[] filePaths = Directory.GetFiles("../../Partner_Configurations/");
 
             tripthru = new TripThru();
@@ -62,6 +65,7 @@ namespace Program
 
             List<Gateway> partners = new List<Gateway>();
             tripthru = new TripThru();
+
 
             foreach (string filename in filePaths)
             {
@@ -74,13 +78,15 @@ namespace Program
                     tripthru.RegisterPartner(partner);
                 }
             }
-            MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.WriteGeoData();
 
 
 
             Simulate(partners, DateTime.UtcNow + new TimeSpan(2, 30, 0));
-            MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.WriteGeoData();
         }
+
         public static void Simulate(List<Gateway> partners, DateTime until)
         {
 
@@ -91,6 +97,7 @@ namespace Program
                 p.Log();
             Logger.Untab();
             Logger.EndRequest(null);
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
 
             TimeSpan simInterval = new TimeSpan(0, 0, 10);
             while (DateTime.UtcNow < until)
@@ -98,7 +105,7 @@ namespace Program
                 Logger.BeginRequest("Heartbeat", null);
                 tripthru.Update();
                 Logger.EndRequest(null);
-                MapTools.WriteGeoData("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+                MapTools.WriteGeoData();
                 System.Threading.Thread.Sleep(simInterval);
                 tripthru.LogStats();
             }

@@ -616,11 +616,28 @@ namespace ServiceStack.TripThruGateway
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string access_token { get; set; }
+
             [ApiMember(Name = "TripId", Description = "Partner scope unique identifier of the trip (the same as you passed into /dispatch).  Note: it only has to be unique to you.  TripThru will handle any cross-network uniqueness issues.", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string TripId { get; set; }
+
             [ApiAllowableValues("Status", typeof(Status))]
             [ApiMember(Name = "Status", Description = "Trip status code", ParameterType = "query", DataType = "Status", IsRequired = false, Verb = "PUT")]
             public Status Status { get; set; }
+
+            [ApiMember(Name = "DriverLocationLat", Description = "GPS coordinate latitude of the driver location. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DriverLocationLat { get; set; }
+
+            [ApiMember(Name = "DriverLocationLng", Description = "GPS coordinate longitude of the driver location. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false)]
+            public double? DriverLocationLng { get; set; }
+
+            // Can we remove this?  I want to prevent partners from passing locations in this form.
+            [ApiMember(Name = "DriverLocationAddress", Description = "Address of the driver location", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string DriverLocationAddress { get; set; }
+
+            [ApiMember(Name = "ETA", Description = "Time that driver will arrive at destination. Either pickup location or dropoff location", ParameterType = "query", DataType = "DateTime", IsRequired = false)]
+            public DateTime ETA { get; set; }
+
+
             [ApiAllowableValues("Rating", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")]
             [ApiMember(Name = "Rating", Description = "Rating of the trip from driver's or passenger's perspective", ParameterType = "query", DataType = "int", IsRequired = false)]
             public int? Rating { get; set; }
@@ -645,6 +662,7 @@ namespace ServiceStack.TripThruGateway
             public DateTime? ETA { get; set; } // in minutes;
             public double? Price { get; set; }
             public double? Distance { get; set; }
+            public double? DriverRouteDuration { get; set; }
             public Location PickupLocation { get; set; }
             public Location DropoffLocation { get; set; }
             public string OriginatingPartnerName { get; set; }
@@ -700,6 +718,7 @@ namespace ServiceStack.TripThruGateway
                                 Status = response.status,
                                 Price = response.price,
                                 Distance = response.distance,
+                                DriverRouteDuration = response.driverRouteDuration,
                                 OriginatingPartnerName = response.originatingPartnerName,
                                 ServicingPartnerName = response.servicingPartnerName
                             };
@@ -761,10 +780,17 @@ namespace ServiceStack.TripThruGateway
                     {
                         clientId = acct.ClientId;
                         Logger.BeginRequest("UpdateTripStatus(" + request.Status + ") received from " + acct.UserName, request, request.TripId);
+                       
+                        Location driverLocation = null;
+                        if(request.DriverLocationLat != null && request.DriverLocationLng != null && request.DriverLocationAddress != null){
+                            driverLocation = new Location((double)request.DriverLocationLat, (double)request.DriverLocationLng, request.DriverLocationAddress);
+                        }
                         var response = gateway.UpdateTripStatus(new Gateway.UpdateTripStatusRequest(
                             acct.ClientId,
                             request.TripId,
-                            request.Status
+                            request.Status,
+                            driverLocation,
+                            request.ETA
                             ));
 
                         if (response.result == Gateway.Result.OK)

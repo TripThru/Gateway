@@ -75,7 +75,7 @@ namespace TripThruCore
 
         public Zone()
         {
-            
+
         }
         public Zone(Location center, double radius)
         {
@@ -145,10 +145,10 @@ namespace TripThruCore
             double d = 3961.0 * c; // (where 3961 is the radius of the Earth in miles
             return d;
         }
-        public bool Equals(Location l)
+        public bool Equals(Location l, double tolerance = .005)
         {
-            double distance = Math.Sqrt(Math.Pow(l.Lat - Lat, 2) + Math.Pow(l.Lng - Lng, 2));
-            return distance < .00001;
+            double distance = GetDistance(l);
+            return distance < tolerance;
         }
     }
 
@@ -175,6 +175,7 @@ namespace TripThruCore
         public DateTime? ETA { get; set; } // in minutes;
         public double? Price { get; set; }
         public double? Distance { get; set; }
+        public double? DriverRouteDuration { get; set; }
         public void Update(Trip trip)
         {
             this.FleetId = trip.FleetId;
@@ -186,6 +187,7 @@ namespace TripThruCore
             this.ETA = trip.ETA;
             this.Price = trip.Price;
             this.Distance = trip.Distance;
+            this.DriverRouteDuration = trip.DriverRouteDuration;
         }
     }
 
@@ -527,7 +529,7 @@ namespace TripThruCore
         }
         public class QuoteTripResponse
         {
-                
+
             public Result result;
             public List<Quote> quotes;
             public QuoteTripResponse(List<Quote> quotes = null, Result result = Result.OK)
@@ -603,12 +605,13 @@ namespace TripThruCore
             public DateTime? ETA; // in minutes;
             public double? price;
             public double? distance;
+            public double? driverRouteDuration;
             public string originatingPartnerName;
             public string servicingPartnerName;
             public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null, string originatingPartnerName = null,
                 string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null, string passengerName = null,
                 DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
-                double? price = null, double? distance = null, Result result = Result.OK
+                double? price = null, double? distance = null, double? driverRouteDuration = null, Result result = Result.OK
                  )
             {
                 this.partnerID = partnerID;
@@ -627,6 +630,7 @@ namespace TripThruCore
                 this.dropoffTime = dropoffTime;
                 this.price = price;
                 this.distance = distance;
+                this.driverRouteDuration = driverRouteDuration;
                 this.result = result;
                 this.status = status;
                 this.originatingPartnerName = originatingPartnerName;
@@ -659,11 +663,15 @@ namespace TripThruCore
             public string clientID;  // TODO: TripThru needs to know who's making the call
             public string tripID;
             public Status status;
-            public UpdateTripStatusRequest(string clientID, string tripID, Status status)
+            public Location driverLocation;
+            public DateTime? eta;
+            public UpdateTripStatusRequest(string clientID, string tripID, Status status, Location driverLocation = null, DateTime? eta = null)
             {
                 this.clientID = clientID;
                 this.tripID = tripID;
                 this.status = status;
+                this.driverLocation = driverLocation;
+                this.eta = eta;
             }
             public override string ToString()
             {
@@ -774,7 +782,40 @@ namespace TripThruCore
         public RedisStat distance;
         public RedisStat completes;
         public RedisStat fare;
-        public RedisDictionary<string, Trip> activeTrips;
+
+        public class ActiveTrips
+        {
+            private RedisDictionary<string, Trip> dict;
+            public bool IsEmpty { get { return dict.IsEmpty; } }
+            public int Count { get { return dict.Count; } }
+            public IEnumerable<Trip> Values { get { return dict.Values; } }
+            public ActiveTrips(RedisClient redisClient, string id)
+            {
+                dict = new RedisDictionary<string, Trip>(redisClient, id);
+                dict.Clear();
+
+            }
+            public bool ContainsKey(string id)
+            {
+                return dict.Keys.Contains(id);
+            }
+            public void Add(string id, Trip trip)
+            {
+                dict.Add(id, trip);
+            }
+            public void Remove(string id)
+            {
+                Logger.Log("Removing active trip " + id);
+                dict.Remove(id);
+            }
+            public Trip this[string id]
+            {
+                get { return dict[id]; }
+            }
+        }
+
+        public ActiveTrips activeTrips;
+
         public GarbageCleanup<string> garbageCleanup;
         public RedisDictionary<string, string> clientIdByAccessToken;
         public RedisDictionary<string, PartnerAccount> partnerAccounts;
@@ -810,11 +851,11 @@ namespace TripThruCore
                 return new GetGatewayStatsResponse(result: Result.UnknownError);
             }
         }
-        TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
+        readonly TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
         DateTime lastGetGatewayStats = DateTime.UtcNow;
         //public readonly RedisClient redis = new RedisClient("localhost", 6379)
         public readonly PooledRedisClientManager redis = new PooledRedisClientManager("localhost:6379")
-                                                        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
+        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
         {
             ConnectTimeout = 5000,
             IdleTimeOutSecs = 30000
@@ -823,7 +864,7 @@ namespace TripThruCore
             : base(ID, name)
         {
             JsConfig.AssumeUtc = true;
-            var redisClient = (RedisClient) redis.GetClient();
+            var redisClient = (RedisClient)redis.GetClient();
             exceptions = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => exceptions));
             rejects = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => rejects));
             requests = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => requests));
@@ -831,26 +872,47 @@ namespace TripThruCore
             fare = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => fare));
             completes = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => completes));
             distance = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => distance));
-            activeTrips = new RedisDictionary<string, Trip>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
-            activeTrips.Clear();
+            activeTrips = new ActiveTrips(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
+        }
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner)
+        {
+            return MakeRejectRegisterPartnerResponse();
+        }
+        protected RegisterPartnerResponse MakeRejectRegisterPartnerResponse(){
+            RegisterPartnerResponse response;
+            rejects++;
+            response = new RegisterPartnerResponse(result: Result.Rejected);
+            return response;
+        }
+        override public DispatchTripResponse DispatchTrip(DispatchTripRequest request)
+        {
+            return MakeRejectDispatchResponse();
+        }
+        protected DispatchTripResponse MakeRejectDispatchResponse()
+        {
+            DispatchTripResponse response;
+            rejects++;
+            response = new DispatchTripResponse(result: Result.Rejected);
+            return response;
         }
         public void DeactivateTripAndUpdateStats(string tripID, Status status, double? price = null, double? distance = null)
         {
             if (!activeTrips.ContainsKey(tripID))
                 return;
+            Logger.Log("Deactivating trip " + tripID + " from " + name);
 
             activeTrips.Remove(tripID);
             switch (status)
             {
                 case Status.Complete:
-                {
-                    completes++;
-                    fare += (double)price;
-                    this.distance += (double)distance;
-                    break;
-                }
+                    {
+                        completes++;
+                        fare += (double)price;
+                        this.distance += (double)distance;
+                        break;
+                    }
                 case Status.Cancelled: cancels++; break;
                 case Status.Rejected: rejects++; break;
             }
@@ -860,7 +922,7 @@ namespace TripThruCore
 
         public void UpdateActiveTrip(Trip trip)
         {
-            if (activeTrips.Keys.Contains(trip.Id))
+            if (activeTrips.ContainsKey(trip.Id))
             {
                 activeTrips[trip.Id].FleetId = trip.FleetId;
                 activeTrips[trip.Id].FleetName = trip.FleetName;

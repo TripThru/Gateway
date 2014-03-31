@@ -46,27 +46,35 @@ namespace CustomIntegrations
             string fleetAuth, string fleetAccessToken, string fleetRefreshToken,
             string passengerAuth, string passengerAccessToken, string passengerRefreshToken, string passengerProxyPK)
         {
-            this.API_KEY = apiKey; // "24eba1dd5fe7580af0d571e5e6b0e88a";
-            FLEET_AUTH_CODE = fleetAuth; //52b4dd8149d943327b19c269"; //"52a7ff0749d9431698a04a84";
-            FLEET_REFRESH_TOKEN = fleetRefreshToken; // "Si3zx6XmsBgv9c3cQ31bGIGZImYwI3ps";// "FRNqMMP5oamdqasiYeTokPwv89FNXFo9";
-            FLEET_ACCESS_TOKEN = fleetAccessToken; // "52ea8daa49d94350c6b2d53f";// "52eb73ee49d9433369cd3562";
+            StoreFleetAPI_Info(apiKey, fleetAuth, fleetAccessToken, fleetRefreshToken);
 
-            PASSENGER_AUTH_CODE = passengerAuth; // "52eda97049d94364d1ad91f4"; // For Passenger TripThru -- edward.orourke.hamilton@gmail.com
-            PASSENGER_REFRESH_TOKEN = passengerRefreshToken; //"lbUD2i2aNVvzwlDGHw59jKMF5lDnoknG";
-            PASSENGER_ACCESS_TOKEN = passengerAccessToken; //"52edbeef49d94364d1ad92dd";
-            this.passengerProxyPK = passengerProxyPK;
+            StorePassengerAPI_Info(passengerAuth, passengerAccessToken, passengerRefreshToken, passengerProxyPK);
 
             CLIENT_ID = "XU3PSNDBWP@tdispatch.com";
             CLIENT_SECRET = "yBuFN4Pmfxfm5kQ3YKvCIa8NkV1Psrhc";
-
-            FLEET_API_ROOT_URL = "https://api.tdispatch.com/fleet/v1";
-            PASSENGER_API_ROOT_URL = "https://api.tdispatch.com/passenger/v1";
-
             AUTH_URI = "oauth2/auth";
             TOKEN_URI = "oauth2/token";
             REVOKE_URI = "oauth2/revoke";
             Authorize();
 
+        }
+
+        private void StorePassengerAPI_Info(string passengerAuth, string passengerAccessToken, string passengerRefreshToken, string passengerProxyPK)
+        {
+            PASSENGER_AUTH_CODE = passengerAuth; // "52eda97049d94364d1ad91f4"; // For Passenger TripThru -- edward.orourke.hamilton@gmail.com
+            PASSENGER_REFRESH_TOKEN = passengerRefreshToken; //"lbUD2i2aNVvzwlDGHw59jKMF5lDnoknG";
+            PASSENGER_ACCESS_TOKEN = passengerAccessToken; //"52edbeef49d94364d1ad92dd";
+            this.passengerProxyPK = passengerProxyPK;
+            PASSENGER_API_ROOT_URL = "https://api.tdispatch.com/passenger/v1";
+        }
+
+        private void StoreFleetAPI_Info(string apiKey, string fleetAuth, string fleetAccessToken, string fleetRefreshToken)
+        {
+            this.API_KEY = apiKey; // "24eba1dd5fe7580af0d571e5e6b0e88a";
+            FLEET_API_ROOT_URL = "https://api.tdispatch.com/fleet/v1";
+            FLEET_AUTH_CODE = fleetAuth; //52b4dd8149d943327b19c269"; //"52a7ff0749d9431698a04a84";
+            FLEET_REFRESH_TOKEN = fleetRefreshToken; // "Si3zx6XmsBgv9c3cQ31bGIGZImYwI3ps";// "FRNqMMP5oamdqasiYeTokPwv89FNXFo9";
+            FLEET_ACCESS_TOKEN = fleetAccessToken; // "52ea8daa49d94350c6b2d53f";// "52eb73ee49d9433369cd3562";
         }
         public bool Authorize()
         {
@@ -533,17 +541,10 @@ namespace CustomIntegrations
 
             foreach (string tripID in checkTrips)
             {
-                try
-                {
-                    string bookingPK = activeTrips[tripID].pk;
-                    TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
-                    TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
-                    UpdateBooking(tripID, getBookingResponse.booking);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("TDispatchUpdate=" + e.Message, e.StackTrace);
-                }
+                string bookingPK = activeTrips[tripID].pk;
+                TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
+                TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
+                UpdateBooking(tripID, getBookingResponse.booking);
             }
 
             lastCheckStatus = DateTime.UtcNow;
@@ -556,31 +557,24 @@ namespace CustomIntegrations
                 return;
 
             Logger.BeginRequest("TDispatch trip " + tripID + " update", null, tripID);
-            try
-            {
-                string bookingPK = activeTrips[tripID].pk;
-                if (value.pk == null)
-                    value.pk = bookingPK;
+            string bookingPK = activeTrips[tripID].pk;
+            if (value.pk == null)
+                value.pk = bookingPK;
 
-                activeTrips[tripID] = value;
+            activeTrips[tripID] = value;
 
-                Logger.Log("BookingStatus changed ", value);
-                Logger.Log("Notify originating partner through TripThru");
-                Logger.Tab();
-                Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
-                    clientID: ID,
-                    tripID: tripID,
-                    status: ConvertTDispatchStatusToTripThruStatus(value.status, value.sub_status));
-                tripthru.UpdateTripStatus(request);
-                Logger.Untab();
-                if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" ||
-                            activeTrips[tripID].status == "rejected" || activeTrips[tripID].status == "missed")
-                    activeTrips.Remove(tripID);
-            }
-            catch (Exception e)
-            {
-                Logger.LogDebug("TDispatch trip " + tripID + " update=" + e.Message, e.StackTrace);
-            }
+            Logger.Log("BookingStatus changed ", value);
+            Logger.Log("Notify originating partner through TripThru");
+            Logger.Tab();
+            Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
+                clientID: ID,
+                tripID: tripID,
+                status: ConvertTDispatchStatusToTripThruStatus(value.status, value.sub_status));
+            tripthru.UpdateTripStatus(request);
+            Logger.Untab();
+            if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" ||
+                        activeTrips[tripID].status == "rejected" || activeTrips[tripID].status == "missed")
+                activeTrips.Remove(tripID);
             Logger.EndRequest(null);
         }
 
@@ -596,13 +590,13 @@ namespace CustomIntegrations
                 case "cancelled": return Status.Cancelled;
                 case "confirmed": return Status.Confirmed;
                 case "active":
-                {
+                    {
                         if (sub_status.is_on_way_to_job)
                             return Status.Enroute;
                         if (sub_status.is_arrived_waiting)
                             return Status.ArrivedAndWaiting;
                         return Status.PickedUp;
-                 }
+                    }
 
                 default: throw new Exception("fatal error");
             }
