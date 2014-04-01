@@ -121,6 +121,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Images\bg-body-1024.png" />
     <Content Include="Content\Images\btn-github.png" />
+    <Content Include="login.html" />
     <Content Include="packages.config" />
     <Content Include="App_Data\Geo-Location-Addresses.csv" />
     <Content Include="App_Data\Geo-Location-Names.csv" />

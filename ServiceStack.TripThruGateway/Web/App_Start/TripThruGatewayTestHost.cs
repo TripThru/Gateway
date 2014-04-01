@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Mime;
 using ServiceStack.Common;
@@ -13,25 +13,20 @@ using ServiceStack.Api.Swagger;
 using ServiceStack.ServiceInterface;
 using ServiceStack.ServiceInterface.Auth;
 
-
 namespace ServiceStack.TripThruGateway
 {
-	using Funq;
-	using ServiceStack.Common.Utils;
-	using ServiceStack.ServiceInterface.Cors;
-	using ServiceStack.Text;
-	using ServiceStack.WebHost.Endpoints;
+    using Funq;
+    using ServiceStack.Common.Utils;
+    using ServiceStack.ServiceInterface.Cors;
+    using ServiceStack.Text;
+    using ServiceStack.WebHost.Endpoints;
 
-	public class TripThruGatewayHost
-		: AppHostBase
-	{
-		/// <summary>
-		///     Initializes a new instance of your ServiceStack application, with the specified name and assembly containing the services.
-		/// </summary>
-		public TripThruGatewayHost() : base("TripThru gateway v1", typeof (GatewayService).Assembly)
+    public class TripThruGatewayTestHost : AppHostHttpListenerBase
+    {
+        public const string BaseUrl = "http://localhost:8082/";
+        public TripThruGatewayTestHost() : base("TripThru gateway v1", typeof (GatewayService).Assembly)
 		{
 		}
-
 
 		public override void Configure(Container container)
 		{
@@ -56,6 +51,7 @@ namespace ServiceStack.TripThruGateway
                           });
 
 
+            /*
             //Authentication
 		    Plugins.Add(new AuthFeature(() => new AuthUserSession(),
                     new IAuthProvider[] {
@@ -70,7 +66,7 @@ namespace ServiceStack.TripThruGateway
                         { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
                     }
                 }
-            );
+            );*/
 
             //Unhandled exceptions
             //Handle Exceptions occurring in Services:
@@ -111,25 +107,4 @@ namespace ServiceStack.TripThruGateway
             Plugins.Add(new SwaggerFeature());
 		}
 	}
-
-    public class CustomCredentialsAuthProvider : CredentialsAuthProvider
-    {
-        private Dictionary<string, string> authenticatedUsers = new Dictionary<string, string>
-        {
-            {"tripthru", "optimize"}
-        };
-
-        public override bool TryAuthenticate(IServiceBase authService, string userName, string password)
-        {
-            return authenticatedUsers.ContainsKey(userName) && authenticatedUsers[userName] == password;
-        }
-
-        public override void OnAuthenticated(IServiceBase authService,
-            IAuthSession session, IOAuthTokens tokens, Dictionary<string, string> authInfo)
-        {
-            session.ReferrerUrl = "/TripThru.TripThruGateway/";
-            session.IsAuthenticated = true;
-            authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
-        }
-    }
 }
