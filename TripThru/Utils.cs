@@ -452,8 +452,10 @@ namespace Utils
     }
     public class RedisDictionary<K, T> : ConcurrentDictionary<K, T>
     {
+        string id;
         public RedisDictionary(RedisClient redis, string id, Expression<Func<T>> member)
         {
+            this.id = id + ":" + MemberInfoGetting.GetMemberName(member);
         }
         public RedisDictionary(RedisClient redis, string id)
         {
@@ -468,6 +470,23 @@ namespace Utils
         {
             TryAdd(key, value);
         }
+
+        public T this[K key]
+        {
+            get
+            {
+                if (!base.ContainsKey(key))
+                    throw new Exception("Fatal Error: key " + key + " not found in " + id);
+                return base[key];
+            }
+            set
+            {
+                if (!base.ContainsKey(key))
+                    throw new Exception("Fatal Error: key " + key + " not found in " + id);
+                base[key] = value;
+            }
+        }
+
     }
     /*
         public class RedisDictionary<K, T> : IEnumerable<T>

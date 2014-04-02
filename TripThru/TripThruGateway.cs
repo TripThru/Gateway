@@ -635,6 +635,17 @@ namespace TripThruCore
             r.clientID = ID;
         }
 
+        public void HealthCheck()
+        {
+            foreach (Trip trip in activeTrips.Values)
+            {
+                if (!originatingPartnerByTrip.ContainsKey(trip.Id))
+                    Logger.LogDebug("Bad Health: Active trip " + trip + " has no originating partner");
+                if (!servicingPartnerByTrip.ContainsKey(trip.Id))
+                    Logger.LogDebug("Bad Health: Active trip " + trip + " has no servicing partner");
+            }
+        }
+
         public class Office
         {
             public bool enabled { get; set; }
@@ -852,6 +863,41 @@ namespace TripThruCore
         public override void Log()
         {
             gateway.Log();
+        }
+    }
+
+    public class HealthCheckThread : IDisposable
+    {
+        private TripThru _tripthruGateway;
+        private TimeSpan _heartbeat = new TimeSpan(0, 1, 0);
+        private Thread _worker;
+        private volatile bool _workerTerminateSignal = false;
+
+        public HealthCheckThread(TripThru tripthruGateway)
+        {
+            this._tripthruGateway = tripthruGateway;
+            _worker = new Thread(StartThread);
+            _worker.Start();
+        }
+
+        private void StartThread()
+        {
+            try
+            {
+                while (true)
+                {
+                    _tripthruGateway.HealthCheck();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("TripThru health check error :" + e.Message, e.StackTrace);
+            }
+        }
+
+        public void Dispose()
+        {
+            Logger.LogDebug("HealthCheckThread disposed");
         }
     }
 
