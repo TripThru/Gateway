@@ -645,6 +645,9 @@ namespace TripThruCore
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
             tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
+            tags["LoggerQueue"] = Logger.Queue.Count.ToString();
+            if(Logger.splunkEnabled)
+                tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
             
 
             foreach (Trip trip in activeTrips.Values)

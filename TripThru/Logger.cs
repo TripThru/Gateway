@@ -15,7 +15,7 @@ namespace Utils
         {
             private RestClient restClient;
             private string requestUrl;
-            private Queue<RequestLog> queue;
+            public Queue<RequestLog> queue;
             private ManualResetEvent sendEvent;
             private Thread sendThread;
 
@@ -238,7 +238,7 @@ namespace Utils
         public static Dictionary<object, RequestLog> requestLog;
         public static string filePath = null;
         static System.IO.StreamWriter file;
-        static SplunkClient splunkClient;
+        public static SplunkClient splunkClient;
         static RestRequest restReq;
         static Dictionary<object, int> numBegunRequests;
         static Dictionary<object, bool> threadsEnabled; 

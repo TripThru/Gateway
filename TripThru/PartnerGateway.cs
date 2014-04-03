@@ -353,6 +353,9 @@ namespace TripThruCore
             tags["Routes"] = MapTools.routes.Count.ToString();
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
+            tags["LoggerQueue"] = Logger.Queue.Count.ToString();
+            if(Logger.splunkEnabled)
+                tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
             Logger.LogDebug("Health check", null, tags);
         }
     }
