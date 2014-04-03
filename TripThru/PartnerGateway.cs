@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
-using System.Web;
 using System.IO;
 using ServiceStack.Text;
 using Utils;
-using ServiceStack.Redis;
 
 namespace TripThruCore
 {
@@ -397,7 +393,7 @@ namespace TripThruCore
                     this.ETA = eta;
                 if (IsOneOfTheActiveTrips())
                 {
-                    this.partner.activeTrips[this.ID].Status = status;
+                    partner.activeTrips[ID].Status = status;
                     if (TripHasForeignDependency() && lastStatusNotifiedToPartner != status && notifyPartner)
                         NotifyForeignPartner(status, driverLocation, eta);
                 }
@@ -765,7 +761,7 @@ namespace TripThruCore
         {
             Route route = MapTools.GetRoute(fromTo.First, fromTo.Second);
             Logger.Log("Pickup request (" + name + ") " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
-            Logger.Tab();
+            Logger.Tab();//HERE
             PartnerTrip trip = new PartnerTrip(
                 partner: this.partner,
                 ID: PartnerTrip.GenerateUniqueID(this.partner.ID),
@@ -775,7 +771,8 @@ namespace TripThruCore
                 passengerID: passenger.ID,
                 passengerName: passenger.name,
                 dropoffLocation: route.end,
-                paymentMethod: PaymentMethod.Cash);
+                paymentMethod: PaymentMethod.Cash
+                );
             Logger.Untab();
             return trip;
         }
@@ -805,7 +802,7 @@ namespace TripThruCore
                     PickupTime = t.pickupTime,
                     Price = t.price,
                     Status = t.status,
-                    VehicleType = t.vehicleType
+                    VehicleType = t.vehicleType,
                 });
                 t.UpdateTripStatus(notifyPartner: false, status: Status.Queued);
                 return true;
@@ -939,7 +936,6 @@ namespace TripThruCore
             Logger.Tab();
             t.UpdateTripStatus(notifyPartner: true, status: Status.Cancelled);
             Logger.Untab();
-            return;
         }
 
         private bool MissedPeriodReached(PartnerTrip t)

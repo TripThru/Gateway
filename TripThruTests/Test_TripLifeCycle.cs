@@ -1,13 +1,11 @@
 ﻿using System;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Security.Cryptography;
+using NUnit.Framework;
+using System.Collections.Generic;
 using System.IO;
 using Utils;
 using TripThruCore;
-using System.Linq.Expressions;
 using System.Threading;
 
 namespace Tests
@@ -19,7 +17,7 @@ namespace Tests
         [SetUp]
         public void SetUp()
         {
-            Logger.OpenLog(id: "Nunit", splunkEnabled: false);
+            Logger.OpenLog("Nunit", @"C:\Users\OscarErnesto\Documents\GitHub\",splunkEnabled: false);
             MapTools.ClearCache();
             Logger.Log("Setting up");
             Logger.Tab();
@@ -84,12 +82,14 @@ namespace Tests
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
              * */
+            GatewayServer gatewayServer = new GatewayServer("EmptyGateway", "EmptyGateway");
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
-                tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
+                tripthru: gatewayServer,
                 maxLateness: new TimeSpan(0, 1, 0));
 
             lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            Assert.AreEqual(Test_TripLifeCycle_Base._request, gatewayServer.requests.lastHour.Count, "The Gateway content: " + gatewayServer.requests.lastHour.Count);
         }
 
         [Test]
@@ -120,6 +120,7 @@ namespace Tests
                 origination: PartnerTrip.Origination.Local,
                 service: PartnerTrip.Origination.Foreign, 
                 locationVerificationTolerance: 4);
+                Test_TripLifeCycle_Base._request++;
             var libB = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversB.txt",
                 tripthru: tripthru,
@@ -127,10 +128,12 @@ namespace Tests
                 origination: PartnerTrip.Origination.Local,
                 service: PartnerTrip.Origination.Foreign,
                 locationVerificationTolerance: 4);
+                Test_TripLifeCycle_Base._request++;
 
             List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
             Test_TripLifeCycle_Base.ValidateSubTests(subTests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
+            Assert.AreEqual(Test_TripLifeCycle_Base._request, tripthru.requests.lastHour.Count, "The Gateway content: " + tripthru.requests.lastHour.Count);
         }
 
         [Test]
@@ -170,12 +173,16 @@ namespace Tests
         public TimeSpan simInterval = new TimeSpan(0, 0, 1);
         public TimeSpan maxLateness = new TimeSpan(0, 0, 2);
         public double locationVerificationTolerance = .6;
+        public int _activeTrips, _completeTrips;
+        public static int _request, _rejects;
+        List<String> tripsList = new List<String>(); 
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
             PartnerFleet fleet;
             Pair<Location, Location> tripSpec;
             Test_TripLifeCycle_Base parent;
+            
             public UnitTest_SingleTripLifecycleAndReturningDriver(Test_TripLifeCycle_Base parent, PartnerFleet fleet, Pair<Location, Location> tripSpec)
             {
                 if (parent == null)
@@ -184,6 +191,7 @@ namespace Tests
                 this.fleet = fleet;
                 this.tripSpec = tripSpec;
             }
+
             public override void Run()
             {
                 try
@@ -194,12 +202,12 @@ namespace Tests
 
                     Console.WriteLine("Success, Trip: <" + tripSpec.First.Lat + ", " + tripSpec.First.Lng + ">, " +
                                             "<" + tripSpec.Second.Lat + ", " + tripSpec.Second.Lng + ">");
-                    this.passed = true;
+                    Passed = true;
                 }
                 catch (Exception ex)
                 {
-                    this.exception = ex;
-                    passed = null;
+                    Exception = ex;
+                    Passed = null;
                 }
             }
         }
@@ -231,10 +239,11 @@ namespace Tests
             partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru, configuration.partnerFleets);
             tripthru.RegisterPartner(new GatewayLocalClient(partner));
         }
+
         public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets()
         {
             List<SubTest> subtests = MakeSimultaneousTripLifecycle_SubTests();
-            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
+            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
         }
 
         public List<SubTest> MakeSimultaneousTripLifecycle_SubTests()
@@ -259,16 +268,17 @@ namespace Tests
                 passed = false;
                 foreach (SubTest test in singleTrips_Subtests)
                 {
-                    if (test.exception != null)
+                    if (test.Exception != null)
                     {
-                        Console.WriteLine(test.exception.Message + " : " + test.exception);
-                        throw test.exception;
+                        Console.WriteLine(test.Exception.Message + " : " + test.Exception);
+                        throw test.Exception;
                     }
-                    if (test.passed == null)
+                    if (test.Passed == null)
                         passed = null;
                 }
-                System.Threading.Thread.Sleep(simInterval);
+                Thread.Sleep(simInterval);
             }
+            ////
         }
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()
@@ -282,7 +292,9 @@ namespace Tests
                     TestTripLifecycleAndReturningDriver(fleet, tripStartEnd);
                 }
             }
+            var que = Logger.Queue;
         }
+
         public void TestTripLifecycleAndReturningDriver(PartnerFleet fleet, Pair<Location, Location> tripSpec)
         {
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
@@ -292,28 +304,59 @@ namespace Tests
 
         public void TestTripLifecycle_FromNewToComplete(PartnerFleet fleet, PartnerTrip trip)
         {
-            Assert.AreEqual(Status.New, trip.status);
-            fleet.QueueTrip(trip);
-            Assert.AreEqual(Status.Queued, trip.status);
+            int activeTrips, response, request;
+            Assert.AreEqual(Status.New, trip.status,"The trip: " + trip.ID + " no is a new trip.");
+            
+            lock (fleet)
+            {
+                fleet.QueueTrip(trip);
+                response = partner.tripsByID.Count(t => t.Value.origination == PartnerTrip.Origination.Local && t.Value.status != Status.Complete);
+                activeTrips = ++_activeTrips;
+            }
+
+            Assert.AreEqual(Status.Queued, trip.status, "The trip: " + trip.ID + " no is a Queued trip.");
+            Assert.AreEqual(activeTrips, response, "The activeTrips");
             ValidateNextTripStatus(fleet, trip, Status.Dispatched);
+            if (trip.service == PartnerTrip.Origination.Foreign)
+                _request += 2;
             ValidateNextTripStatus(fleet, trip, Status.Enroute);
             ValidateNextTripStatus(fleet, trip, Status.PickedUp);
             ValidateNextTripStatus(fleet, trip, Status.Complete);
-        }
-        public void ValidateTripThruStatus(PartnerTrip trip)
-        {
-            if (trip.origination == PartnerTrip.Origination.Foreign || trip.service == PartnerTrip.Origination.Foreign)
+
+            lock (fleet)
             {
-                Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, trip.ID));
-                Assert.AreEqual(trip.status, response.status);
-                if (trip.status == Status.Enroute)
-                    Assert.IsNotNull(response.driverLocation);
-                if (trip.status == Status.PickedUp)
-                    Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance));
-                if (trip.status == Status.Complete)
-                    Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance));
+                var trips = partner.tripsByID.Where(
+                    t => t.Value.origination == PartnerTrip.Origination.Local && t.Value.status == Status.Complete);
+
+                foreach (var tripp in trips)
+                {
+                    try
+                    {
+                        if (tripsList.Contains(tripp.Key)) continue;
+                        tripsList.Add(tripp.Key);
+                        --_activeTrips;
+                        ++_completeTrips;
+                    }catch
+                    {}
+                }
+                Assert.AreEqual(_completeTrips, tripsList.Count, "The completeTrips");
             }
         }
+
+        public void ValidateTripThruStatus(PartnerTrip trip)
+        {
+            if (trip.origination != PartnerTrip.Origination.Foreign && trip.service != PartnerTrip.Origination.Foreign)
+                return;
+            Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, trip.ID));
+            Assert.AreEqual(trip.status, response.status, "The trip local status is different in compare how gateway says. Trip ID: " + trip.ID);
+            if (trip.status == Status.Enroute)
+                Assert.IsNotNull(response.driverLocation, "The trip is route but the driverLocation is null. Trip ID: " + trip.ID);
+            if (trip.status == Status.PickedUp)
+                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance),"The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+            if (trip.status == Status.Complete)
+                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+        }
+
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
         {
             ValidateOriginationAndService(trip);
@@ -321,21 +364,20 @@ namespace Tests
                 ValidateTripThruStatus(trip);
             WaitUntilStatusReachedOrTimeout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
 
-            Assert.AreEqual(nextStatus, trip.status);
-            if (trip.status == Status.Enroute)
+            Assert.AreEqual(nextStatus, trip.status, "The 'trip' not advance to the next status. Trip ID: " + trip.ID);
+            switch (trip.status)
             {
-                Assert.IsNotNull(trip.driverLocation);
-            }
-            else if (trip.status == Status.PickedUp)
-            {
-                Assert.IsNotNull(trip.driverLocation);
-                //Logger.Log("Driver farther from pickup location -- by more than " + trip.driverLocation.GetDistance(trip.pickupLocation) + " miles ");
-                Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance));
-            }
-            else if (trip.status == Status.Complete)
-            {
-                Assert.IsNotNull(trip.driverLocation);
-                Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance));
+                case Status.Enroute:
+                    Assert.IsNotNull(trip.driverLocation, "The trip is route but the driverLocation is null. Trip ID: " + trip.ID);
+                    break;
+                case Status.PickedUp:
+                    Assert.IsNotNull(trip.driverLocation, "The trip is PickedUp but the driverLocation is null. Trip ID: " + trip.ID);
+                    Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                    break;
+                case Status.Complete:
+                    Assert.IsNotNull(trip.driverLocation, "The trip is Complete but the driverLocation is null. Trip ID: " + trip.ID);
+                    Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                    break;
             }
         }
 
@@ -347,27 +389,32 @@ namespace Tests
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
                 fleet.ProcessTrip(trip);
-                System.Threading.Thread.Sleep(simInterval);
+                Thread.Sleep(simInterval);
             } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
+            if (trip.service == PartnerTrip.Origination.Foreign && trip.status != startingStatus)
+                _request++;
+            if (DateTime.UtcNow > timeoutAt && trip.status == Status.Queued)
+                _rejects++;
+
         }
 
         private void ValidateOriginationAndService(PartnerTrip trip)
         {
             if (trip.status == Status.Queued) //if still completely local
             {
-                Assert.AreEqual(PartnerTrip.Origination.Local, trip.origination);
-                Assert.AreEqual(PartnerTrip.Origination.Local, trip.service);
+                Assert.AreEqual(PartnerTrip.Origination.Local, trip.origination, "The origination 'trip' is different to local. Trip ID: " + trip.ID);
+                Assert.AreEqual(PartnerTrip.Origination.Local, trip.service, "The service 'trip' is different to local. Trip ID: " + trip.ID);
             }
             else
             {
                 if (origination != null)
-                    Assert.AreEqual(origination, trip.origination);
+                    Assert.AreEqual(origination, trip.origination, "The origination is different. Trip ID: " + trip.ID);
                 if (service != null)
-                    Assert.AreEqual(service, trip.service);
+                    Assert.AreEqual(service, trip.service, "The service is different. Trip ID: " + trip.ID);
             }
         }
 
-        private System.DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)
+        private DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)
         {
             DateTime timeoutAt;
             switch (trip.status)
@@ -376,7 +423,7 @@ namespace Tests
                 case Status.PickedUp:
                 case Status.Complete:
                     {
-                        Assert.IsNotNull(trip.ETA);
+                        Assert.IsNotNull(trip.ETA, "The trip ETA is null. Trip ID:" + trip.ID);
                         timeoutAt = (DateTime)trip.ETA + maxLateness;
                         break;
                     }
@@ -388,17 +435,18 @@ namespace Tests
             }
             return timeoutAt;
         }
+
         public void ValidateReturningDriverRouteIfServiceLocal(PartnerFleet fleet, PartnerTrip trip)
         {
             if (trip.service == PartnerTrip.Origination.Foreign)
                 return;
             Status currentStatus = trip.status;
-            Assert.AreNotEqual(trip.ETA, null);
+            Assert.AreNotEqual(trip.ETA, null, "The trip ETA is null. Trip ID");
             DateTime timeoutAt = (DateTime) trip.ETA + maxLateness;
             while (!trip.driver.location.Equals(fleet.location))
             {
                 fleet.UpdateReturningDriverLocations();
-                Assert.IsFalse(DateTime.UtcNow > timeoutAt);
+                Assert.IsFalse(DateTime.UtcNow > timeoutAt, "The timeoutAt is less than UtcNow. Trip ID: " + trip.ID);
                 System.Threading.Thread.Sleep(simInterval);
             }
         }
@@ -406,8 +454,8 @@ namespace Tests
 
     public class SubTest
     {
-        public bool? passed = null;
-        public Exception exception = null;
+        public bool? Passed = null;
+        public Exception Exception = null;
         public virtual void Run()
         {
 

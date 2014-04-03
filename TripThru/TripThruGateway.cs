@@ -524,7 +524,6 @@ namespace TripThruCore
         }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
-            requests++;
             Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
             if (partner != null)
             {
@@ -864,7 +863,7 @@ namespace TripThruCore
 
         public PartnersUpdateThread(Dictionary<string, Gateway> partners)
         {
-            this._partners = partners;
+            _partners = partners;
             _worker = new Thread(StartThread);
             _worker.Start();
         }

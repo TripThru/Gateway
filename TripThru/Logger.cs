@@ -339,7 +339,7 @@ namespace Utils
             {
                 if (requestLog == null || !enabled)
                     return;
-                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                object thread = Thread.CurrentThread.ManagedThreadId;
                 if (!requestLog.ContainsKey(thread))
                     BeginRequest(message, json);
                 else
@@ -391,11 +391,9 @@ namespace Utils
                     splunkClient = new SplunkClient();
                     splunkClient.SetSource(id);
                 }
-                if (filePath != null)
-                {
-                    Logger.filePath = filePath;
-                    file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
-                }
+                if (filePath == null) return;
+                Logger.filePath = filePath;
+                file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
             }
         }
 

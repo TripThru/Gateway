@@ -14,7 +14,7 @@
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 130,
+        "tripsPerHour" : 0,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
@@ -36,7 +36,7 @@
         "drivers" : [
             "Alex Goldman",
             "Jason Fama",
-            "Simon Shvarts"
+            "Simon Shvarts",
             "Steve Jones",
             "Herby Barret",
             "Elvis Presley"
