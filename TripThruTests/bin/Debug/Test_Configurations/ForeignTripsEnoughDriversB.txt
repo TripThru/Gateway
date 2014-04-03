@@ -12,7 +12,7 @@
         "name" : "Les Taxi Blues",
         "baseCost" : 5.00,
         "costPerMile" : 4.70,
-        "tripsPerHour" : 20,
+        "tripsPerHour" : 0,
 		"location" : {
 			"lat" : 48.837246,
             "lng" : 2.347844
@@ -22,7 +22,7 @@
                 "start" : { "lat" : 37.782551, "lng" : -122.445368},
                 "end"   : { "lat" : 37.786956, "lng" : -122.440279}
             },
-            {
+			{
                 "start" : { "lat" : 37.800224, "lng" : -122.43352},
                 "end"   : { "lat" : 37.800066, "lng" : -122.436167}
             },
