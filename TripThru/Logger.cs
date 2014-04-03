@@ -241,13 +241,14 @@ namespace Utils
         static SplunkClient splunkClient;
         static RestRequest restReq;
         static Dictionary<object, int> numBegunRequests;
+        static Dictionary<object, bool> threadsEnabled; 
         public static void BeginRequest(string msg, object request, string tripID = null)
         {
             lock (locker)
             {
-                if (requestLog == null || !enabled)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
                 if (!requestLog.ContainsKey(thread))
                 {
                     var json = "";
@@ -260,6 +261,7 @@ namespace Utils
                 if (!numBegunRequests.ContainsKey(thread))
                     numBegunRequests[thread] = 0;
                 numBegunRequests[thread] = numBegunRequests[thread] + 1;
+                threadsEnabled[thread] = true;
                 Logger.Log(msg, request);
                 Logger.Tab();
             }
@@ -270,12 +272,15 @@ namespace Utils
             lock (locker)
             {
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
-                if (requestLog == null || !enabled || numBegunRequests[thread] == 0)
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]) ||
+                    (numBegunRequests.ContainsKey(thread) && numBegunRequests[thread] == 0)
+                )
                     return;
 
+                Logger.Untab();
                 if (response != null)
                     Logger.Log("Response", response);
-                Logger.Untab();
 
                 numBegunRequests[thread] = numBegunRequests[thread] - 1;
                 if (splunkEnabled)
@@ -303,22 +308,21 @@ namespace Utils
         {
             lock (locker)
             {
-                if (requestLog == null || !enabled)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
                 if (!requestLog.ContainsKey(thread))
                     return;
                 requestLog[thread].Tags.Add(new Tag(name, value));
             }
         }
 
-        public static void LogDebug(string message, string detailed = null)
+        public static void LogDebug(string message, string detailed = null, Dictionary<string, string> tags = null)
         {
             lock (locker)
             {
-                Console.WriteLine(message + " | " + detailed + "\n\n");
-                if (requestLog == null || !enabled)
-                    return;
+                Console.WriteLine(message + (detailed != null ? " | " + detailed : "") + "\n\n");
                 RequestLog error = new RequestLog("");
                 error.Messages.Add(new Message(0, message));
                 if (detailed != null)
@@ -326,9 +330,12 @@ namespace Utils
                 error.Tags.Add(new Tag("Type", "DEBUG"));
                 error.Tags.Add(
                     new Tag("Memory", (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
+                if (tags != null)
+                    foreach(var key in tags.Keys)
+                        error.Tags.Add(new Tag(key, tags[key]));
                 error.Messages.Add(new Message(0, "End"));
                 error.Response = "";
-                if (splunkEnabled)
+                if (splunkEnabled && splunkClient != null)
                     splunkClient.Enqueue(error);
             }
         }
@@ -337,9 +344,9 @@ namespace Utils
         {
             lock (locker)
             {
-                if (requestLog == null || !enabled)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null)
+                    return;
                 if (!requestLog.ContainsKey(thread))
                     BeginRequest(message, json);
                 else
@@ -361,9 +368,10 @@ namespace Utils
         {
             lock (locker)
             {
-                if (requestLog == null || !enabled)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
                 if (!requestLog.ContainsKey(thread))
                     throw new Exception("Log with no enclosing request");
                 message.Indent = requestLog[thread].Tab * 40;
@@ -371,7 +379,6 @@ namespace Utils
             }
         }
 
-        public static bool enabled = false;
         public static bool splunkEnabled = true;
         public static bool LogFileOpen() { return filePath != null;  }
 
@@ -380,10 +387,10 @@ namespace Utils
             Logger.splunkEnabled = splunkEnabled;
             lock (locker)
             {
-                enabled = true;
                 requestLog = new Dictionary<object, RequestLog>();
                 Queue = new FixedSizeQueue(300);
                 numBegunRequests = new Dictionary<object, int>();
+                threadsEnabled = new Dictionary<object, bool>();
                 restReq = new RestRequest();
                 // Create new Service object
                 if (splunkEnabled)
@@ -440,6 +447,28 @@ namespace Utils
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
                 if (requestLog[thread].Tab > 0)
                     requestLog[thread].Tab--;
+            }
+        }
+
+        public static void Enable()
+        {
+            lock(locker)
+            {
+                if (threadsEnabled == null)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                threadsEnabled[thread] = true;
+            }
+        }
+
+        public static void Disable()
+        {
+            lock (locker)
+            {
+                if (threadsEnabled == null)
+                    return;
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                threadsEnabled[thread] = false;
             }
         }
     }

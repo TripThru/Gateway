@@ -15,7 +15,7 @@
         "name" : "Yellow Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 10,
+        "tripsPerHour" : 200,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127

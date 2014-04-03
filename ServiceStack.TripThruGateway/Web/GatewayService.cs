@@ -674,7 +674,7 @@ namespace ServiceStack.TripThruGateway
         {
             public TripStatusResponse Get(TripStatus request)
             {
-                Logger.enabled = false;
+                Logger.Disable();
                 Logger.BeginRequest("GetTripStatus received", request);
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
                 {
@@ -760,7 +760,7 @@ namespace ServiceStack.TripThruGateway
                     Logger.AddTag("RequestType", "GetTripStatus");
                     Logger.AddTag("ClientId", clientId);
                     Logger.EndRequest(tripStatusResponse);
-                    Logger.enabled = true;
+                    Logger.Enable();
                 }
                 return tripStatusResponse;
             }
@@ -864,7 +864,7 @@ namespace ServiceStack.TripThruGateway
         {
             public TripsResponse Get(Trips request)
             {
-                Logger.enabled = false;
+                Logger.Disable();
                 Logger.BeginRequest("GetTrips received", request);
                 TripsResponse tripsResponse = new TripsResponse
                 {
@@ -904,9 +904,9 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
-                Logger.AddTag("RequestType", "GetTrips");
+                    Logger.AddTag("RequestType", "GetTrips");
                     Logger.EndRequest(tripsResponse);
-                Logger.enabled = true;
+                    Logger.Enable();
                 }
                 return tripsResponse;
             }

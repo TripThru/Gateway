@@ -422,7 +422,7 @@ namespace Utils
     public class GarbageCleanup<T>
     {
         TimeSpan maxAge;
-        Queue<Pair<DateTime, T>> garbage;
+        public Queue<Pair<DateTime, T>> garbage;
         Action<T> cleanup;
         public GarbageCleanup(TimeSpan maxAge, Action<T> cleanup)
         {
@@ -481,8 +481,8 @@ namespace Utils
             }
             set
             {
-                if (!base.ContainsKey(key))
-                    throw new Exception("Fatal Error: key " + key + " not found in " + id);
+                if (base.ContainsKey(key))
+                    throw new Exception("Fatal Error: key " + key + " already exists in " + id);
                 base[key] = value;
             }
         }

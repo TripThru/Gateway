@@ -338,12 +338,22 @@ namespace TripThruCore
                     f.Simulate();
                 lastSim = DateTime.UtcNow;
                 Logger.EndRequest(null);
+                HealthCheck();
             }
         }
 
         private bool SimUpdateIntervalReached()
         {
             return DateTime.UtcNow > lastSim + simInterval;
+        }
+        public void HealthCheck()
+        {
+            var tags = new Dictionary<string, string>();
+            tags["ActiveTrips"] = this.activeTrips.Count.ToString();
+            tags["Routes"] = MapTools.routes.Count.ToString();
+            tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
+            tags["LocationNames"] = MapTools.locationNames.Count.ToString();
+            Logger.LogDebug("Health check", null, tags);
         }
     }
 

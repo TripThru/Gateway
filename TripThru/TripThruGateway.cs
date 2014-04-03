@@ -48,15 +48,15 @@ namespace TripThruCore
         {
             //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
             InitializePersistantDataObjects();
+            garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
 
             LoadUserAccounts();
 
             if (enableTDispatch)
                 LoadTDispatchIntegrations();
 
-            var thread = new PartnersUpdateThread(partners);
-
-            garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
+            new PartnersUpdateThread(partners);
+            new HealthCheckThread(this);
         }
 
         private void InitializePersistantDataObjects()
@@ -637,13 +637,25 @@ namespace TripThruCore
 
         public void HealthCheck()
         {
+            var tags = new Dictionary<string, string>();
+            tags["ActiveTrips"] = this.activeTrips.Count.ToString();
+            tags["OriginatingPartnerByTrip"] = this.originatingPartnerByTrip.Count.ToString();
+            tags["ServicingPartnerByTrip"] = this.servicingPartnerByTrip.Count.ToString();
+            tags["Routes"] = MapTools.routes.Count.ToString();
+            tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
+            tags["LocationNames"] = MapTools.locationNames.Count.ToString();
+            tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
+            
+
             foreach (Trip trip in activeTrips.Values)
             {
                 if (!originatingPartnerByTrip.ContainsKey(trip.Id))
-                    Logger.LogDebug("Bad Health: Active trip " + trip + " has no originating partner");
+                    tags["Bad Health"] = "Active trip " + trip + " has no originating partner";
                 if (!servicingPartnerByTrip.ContainsKey(trip.Id))
-                    Logger.LogDebug("Bad Health: Active trip " + trip + " has no servicing partner");
+                    tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
             }
+
+            Logger.LogDebug("Health check", null, tags);
         }
 
         public class Office
@@ -887,6 +899,7 @@ namespace TripThruCore
                 while (true)
                 {
                     _tripthruGateway.HealthCheck();
+                    System.Threading.Thread.Sleep(_heartbeat);
                 }
             }
             catch (Exception e)
@@ -933,7 +946,10 @@ namespace TripThruCore
                     }
                     catch (Exception e)
                     {
-                        Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
+                        if (e.Message != "Not supported")
+                        {
+                            Logger.LogDebug("PartnersUpdateThread error :" + e.Message, e.StackTrace);
+                        }
                     }
                     System.Threading.Thread.Sleep(_heartbeat);
                 }
