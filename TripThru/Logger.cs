@@ -425,9 +425,10 @@ namespace Utils
         {
             lock (locker)
             {
-                if (requestLog == null)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
                 var r = requestLog[thread];
                 if (r.Tab < 50)
                     r.Tab++;
@@ -440,9 +441,10 @@ namespace Utils
         {
             lock (locker)
             {
-                if (requestLog == null)
-                    return;
                 object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
                 if (requestLog[thread].Tab > 0)
                     requestLog[thread].Tab--;
             }
