@@ -316,7 +316,7 @@ namespace Tests
             Assert.AreEqual(activeTrips, response, "The activeTrips");
             ValidateNextTripStatus(fleet, trip, Status.Dispatched);
             if (trip.service == PartnerTrip.Origination.Foreign)
-                _request += 2;
+                _request += 3;
             ValidateNextTripStatus(fleet, trip, Status.Enroute);
             ValidateNextTripStatus(fleet, trip, Status.PickedUp);
             ValidateNextTripStatus(fleet, trip, Status.Complete);
