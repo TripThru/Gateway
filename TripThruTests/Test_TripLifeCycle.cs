@@ -17,7 +17,7 @@ namespace Tests
         [SetUp]
         public void SetUp()
         {
-            Logger.OpenLog("Nunit", @"C:\Users\OscarErnesto\Documents\GitHub\",splunkEnabled: false);
+            Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
             Logger.Log("Setting up");
             Logger.Tab();
@@ -278,7 +278,6 @@ namespace Tests
                 }
                 Thread.Sleep(simInterval);
             }
-            ////
         }
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()
@@ -292,7 +291,6 @@ namespace Tests
                     TestTripLifecycleAndReturningDriver(fleet, tripStartEnd);
                 }
             }
-            var que = Logger.Queue;
         }
 
         public void TestTripLifecycleAndReturningDriver(PartnerFleet fleet, Pair<Location, Location> tripSpec)
