@@ -47,6 +47,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Common.3.9.71\lib\net35\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -62,10 +66,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="GatewayClientMock.cs" />
     <Compile Include="Test_TripLifeCycle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ServiceStack.TripThruGateway\Web\ServiceStack.TripThruGateway.csproj">
+      <Project>{EE3EB8BB-A24E-4F71-8277-1C6DAE652E2C}</Project>
+      <Name>ServiceStack.TripThruGateway</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TripThru\TripThru.csproj">
       <Project>{92469c21-fcb0-428c-bcbf-0865443edbb2}</Project>
       <Name>TripThru</Name>

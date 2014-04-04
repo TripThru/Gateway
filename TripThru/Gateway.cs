@@ -741,8 +741,22 @@ namespace TripThruCore
         }
     }
 
-    public class GatewayServer : Gateway
+    public class GatewayWithStats : Gateway
     {
+        public GatewayWithStats(string ID, string name)
+            : base(ID, name)
+        {
+            JsConfig.AssumeUtc = true;
+            redisClient = (RedisClient)redis.GetClient();
+            exceptions = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => exceptions));
+            rejects = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => rejects));
+            requests = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => requests));
+            cancels = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => cancels));
+            fare = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => fare));
+            completes = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => completes));
+            distance = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => distance));
+        }
+
         public class RedisStat
         {
             public RedisObject<double> allTime;
@@ -782,7 +796,16 @@ namespace TripThruCore
         public RedisStat distance;
         public RedisStat completes;
         public RedisStat fare;
+        protected RedisClient redisClient;
+        public readonly PooledRedisClientManager redis = new PooledRedisClientManager("localhost:6379")
+        {
+            ConnectTimeout = 5000,
+            IdleTimeOutSecs = 30000
+        };
+    }
 
+    public class GatewayServer : GatewayWithStats
+    {
         public class ActiveTrips
         {
             private RedisDictionary<string, Trip> dict;
@@ -853,25 +876,10 @@ namespace TripThruCore
         }
         readonly TimeSpan getGatewayStatsInterval = new TimeSpan(0, 2, 0);
         DateTime lastGetGatewayStats = DateTime.UtcNow;
-        //public readonly RedisClient redis = new RedisClient("localhost", 6379)
-        public readonly PooledRedisClientManager redis = new PooledRedisClientManager("localhost:6379")
-        //new PooledRedisClientManager("Tr1PServ1Ce4trEDi$@localhost:6379")
-        {
-            ConnectTimeout = 5000,
-            IdleTimeOutSecs = 30000
-        };
         public GatewayServer(string ID, string name)
             : base(ID, name)
         {
             JsConfig.AssumeUtc = true;
-            var redisClient = (RedisClient)redis.GetClient();
-            exceptions = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => exceptions));
-            rejects = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => rejects));
-            requests = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => requests));
-            cancels = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => cancels));
-            fare = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => fare));
-            completes = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => completes));
-            distance = new RedisStat(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => distance));
             activeTrips = new ActiveTrips(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
