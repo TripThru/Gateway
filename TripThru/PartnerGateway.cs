@@ -774,7 +774,7 @@ namespace TripThruCore
         {
             Route route = MapTools.GetRoute(fromTo.First, fromTo.Second);
             Logger.Log("Pickup request (" + name + ") " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
-            Logger.Tab();//HERE
+            Logger.Tab();
             PartnerTrip trip = new PartnerTrip(
                 partner: this.partner,
                 ID: PartnerTrip.GenerateUniqueID(this.partner.ID),

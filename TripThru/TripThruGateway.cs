@@ -524,6 +524,7 @@ namespace TripThruCore
         }
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
+            requests++;
             Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
             if (partner != null)
             {
