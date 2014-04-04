@@ -398,11 +398,8 @@ namespace Utils
                     splunkClient = new SplunkClient();
                     splunkClient.SetSource(id);
                 }
-                if (filePath != null)
-                {
-                    Logger.filePath = filePath;
-                    file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
-                }
+
+                Logger.OpenLog("TripThruGateway");
             }
         }
 
