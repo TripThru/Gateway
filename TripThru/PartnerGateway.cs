@@ -784,7 +784,8 @@ namespace TripThruCore
                 passengerID: passenger.ID,
                 passengerName: passenger.name,
                 dropoffLocation: route.end,
-                paymentMethod: PaymentMethod.Cash
+                paymentMethod: PaymentMethod.Cash,
+                fleet:this
                 );
             Logger.Untab();
             return trip;

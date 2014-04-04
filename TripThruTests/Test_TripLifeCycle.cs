@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using TripThruTests;
 using Utils;
 using TripThruCore;
 using System.Threading;
@@ -53,7 +54,7 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
                 maxLateness: new TimeSpan(0, 5, 0));
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>() { lib.partner });
         }
 
         [Test]
@@ -88,8 +89,7 @@ namespace Tests
                 tripthru: gatewayServer,
                 maxLateness: new TimeSpan(0, 1, 0));
 
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
-            Assert.AreEqual(Test_TripLifeCycle_Base._request, gatewayServer.requests.lastHour.Count, "The Gateway content: " + gatewayServer.requests.lastHour.Count);
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>() { lib.partner });
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace Tests
                 tripthru: new GatewayServer("EmptyGateway", "EmptyGateway"),
                 maxLateness: new TimeSpan(0, 10, 0));
 
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>(){lib.partner});
         }
 
         [Test]
@@ -120,7 +120,6 @@ namespace Tests
                 origination: PartnerTrip.Origination.Local,
                 service: PartnerTrip.Origination.Foreign, 
                 locationVerificationTolerance: 4);
-                Test_TripLifeCycle_Base._request++;
             var libB = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversB.txt",
                 tripthru: tripthru,
@@ -128,12 +127,18 @@ namespace Tests
                 origination: PartnerTrip.Origination.Local,
                 service: PartnerTrip.Origination.Foreign,
                 locationVerificationTolerance: 4);
-                Test_TripLifeCycle_Base._request++;
-
             List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
-            Test_TripLifeCycle_Base.ValidateSubTests(subTests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
-            Assert.AreEqual(Test_TripLifeCycle_Base._request, tripthru.requests.lastHour.Count, "The Gateway content: " + tripthru.requests.lastHour.Count);
+            Test_TripLifeCycle_Base.ValidateSubTests(subTests, 
+                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
+                simInterval : new TimeSpan(0, 0, 1), 
+                partners: new List<Partner>(){libA.partner, libB.partner});
+
+
+            Assert.AreEqual(Test_TripLifeCycle_Base.request, tripthru.requests.lastHour.Count, "Request are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
+            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.lastHour.Count, "Cancels are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.lastHour.Count, "Completes are different");
         }
 
         [Test]
@@ -146,6 +151,7 @@ namespace Tests
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
+            List<Partner> partners = new List<Partner>();
             foreach (string filename in filePaths)
             {
                 Logger.Log("filename = " + filename);
@@ -155,10 +161,11 @@ namespace Tests
                     maxLateness: maxLateness,
                     locationVerificationTolerance: locationVerificationTolerance);
                 subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
+                partners.Add(lib.partner);
             }
 
 
-            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1));
+            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1), partners:partners);
         }
 
     }
@@ -167,22 +174,21 @@ namespace Tests
     {
         public string filename;
         public Gateway tripthru;
-        Partner partner;
+        public Partner partner;
         PartnerTrip.Origination? origination = null;
         PartnerTrip.Origination? service = null;
         public TimeSpan simInterval = new TimeSpan(0, 0, 1);
         public TimeSpan maxLateness = new TimeSpan(0, 0, 2);
         public double locationVerificationTolerance = .6;
-        public int _activeTrips, _completeTrips;
-        public static int _request, _rejects;
-        List<String> tripsList = new List<String>(); 
+        public int _activeTrips;
+        List<String> tripsList = new List<String>();
+        static public int rejects, request, cancels, completes;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
             PartnerFleet fleet;
             Pair<Location, Location> tripSpec;
             Test_TripLifeCycle_Base parent;
-            
             public UnitTest_SingleTripLifecycleAndReturningDriver(Test_TripLifeCycle_Base parent, PartnerFleet fleet, Pair<Location, Location> tripSpec)
             {
                 if (parent == null)
@@ -236,14 +242,14 @@ namespace Tests
             if (locationVerificationTolerance != null)
                 this.locationVerificationTolerance = (double)locationVerificationTolerance;
             PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
-            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru, configuration.partnerFleets);
-            tripthru.RegisterPartner(new GatewayLocalClient(partner));
+            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClientMock(tripthru), configuration.partnerFleets);
+            partner.tripthru.RegisterPartner(partner);
         }
 
-        public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets()
+        public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets(List<Partner> partners )
         {
             List<SubTest> subtests = MakeSimultaneousTripLifecycle_SubTests();
-            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
+            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1), partners: partners );
         }
 
         public List<SubTest> MakeSimultaneousTripLifecycle_SubTests()
@@ -257,7 +263,7 @@ namespace Tests
             return singleTrips_Subtests;
         }
 
-        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
+        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval, List<Partner> partners )
         {
             foreach (SubTest u in singleTrips_Subtests)
                 new Thread(u.Run).Start();
@@ -278,10 +284,20 @@ namespace Tests
                 }
                 Thread.Sleep(simInterval);
             }
+            foreach (var partner1 in partners)
+            {
+                var tripthru = (GatewayClientMock)partner1.tripthru;
+                request += tripthru.requests.lastHour.Count;
+                rejects += tripthru.rejects.lastHour.Count;
+                cancels += tripthru.cancels.lastHour.Count;
+                completes += tripthru.completes.lastHour.Count;    
+            }
+
         }
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()
         {
+            PartnerTrip trip = null;
             foreach (PartnerFleet fleet in partner.PartnerFleets.Values)
             {
                 var i = 1;
@@ -290,6 +306,7 @@ namespace Tests
                     Console.WriteLine("Trip " + i++ + "/" + fleet.possibleTrips.Length);
                     TestTripLifecycleAndReturningDriver(fleet, tripStartEnd);
                 }
+                
             }
         }
 
@@ -298,11 +315,14 @@ namespace Tests
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
             TestTripLifecycle_FromNewToComplete(fleet, trip);
             ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
+
+        
+
         }
 
         public void TestTripLifecycle_FromNewToComplete(PartnerFleet fleet, PartnerTrip trip)
         {
-            int activeTrips, response, request;
+            int activeTrips, response;
             Assert.AreEqual(Status.New, trip.status,"The trip: " + trip.ID + " no is a new trip.");
             
             lock (fleet)
@@ -315,8 +335,6 @@ namespace Tests
             Assert.AreEqual(Status.Queued, trip.status, "The trip: " + trip.ID + " no is a Queued trip.");
             Assert.AreEqual(activeTrips, response, "The activeTrips");
             ValidateNextTripStatus(fleet, trip, Status.Dispatched);
-            if (trip.service == PartnerTrip.Origination.Foreign)
-                _request += 2;
             ValidateNextTripStatus(fleet, trip, Status.Enroute);
             ValidateNextTripStatus(fleet, trip, Status.PickedUp);
             ValidateNextTripStatus(fleet, trip, Status.Complete);
@@ -333,11 +351,9 @@ namespace Tests
                         if (tripsList.Contains(tripp.Key)) continue;
                         tripsList.Add(tripp.Key);
                         --_activeTrips;
-                        ++_completeTrips;
                     }catch
                     {}
                 }
-                Assert.AreEqual(_completeTrips, tripsList.Count, "The completeTrips");
             }
         }
 
@@ -389,11 +405,6 @@ namespace Tests
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
             } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
-            if (trip.service == PartnerTrip.Origination.Foreign && trip.status != startingStatus)
-                _request++;
-            if (DateTime.UtcNow > timeoutAt && trip.status == Status.Queued)
-                _rejects++;
-
         }
 
         private void ValidateOriginationAndService(PartnerTrip trip)

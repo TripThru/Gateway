@@ -31,7 +31,7 @@ namespace ServiceStack.TripThruGateway
                 Name = request.name,
                 CallbackUrl = request.callback_url
             });
-
+            
             return new Gateway.RegisterPartnerResponse
             {
                 result = resp.ResultCode

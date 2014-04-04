@@ -653,6 +653,7 @@ namespace ServiceStack.TripThruGateway
             public string DriverName { get; set; }
             public string PassengerName { get; set; }
             public Location DriverLocation { get; set; }
+            public Location DriverInitiaLocation { get; set; }
             public DateTime? PickupTime { get; set; }
             public DateTime? DropoffTime { get; set; }
             public VehicleType? VehicleType { get; set; }
