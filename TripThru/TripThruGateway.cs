@@ -926,7 +926,7 @@ namespace TripThruCore
 
         public PartnersUpdateThread(Dictionary<string, Gateway> partners)
         {
-            this._partners = partners;
+            _partners = partners;
             _worker = new Thread(StartThread);
             _worker.Start();
         }

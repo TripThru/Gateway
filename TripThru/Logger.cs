@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Permissions;
@@ -398,8 +398,9 @@ namespace Utils
                     splunkClient = new SplunkClient();
                     splunkClient.SetSource(id);
                 }
-
-                Logger.OpenLog("TripThruGateway");
+                if (filePath == null) return;
+                Logger.filePath = filePath;
+                file = new System.IO.StreamWriter(filePath + "TripThru-" + id + ".log");
             }
         }
 
