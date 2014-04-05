@@ -36,8 +36,7 @@ namespace Utils
             public SplunkClient()
             {
                 this.Source = "gateway";
-                this.MaxQueueItems = 10000;
-
+                this.MaxQueueItems = 500;
                 this.queue = new Queue<RequestLog>(MaxQueueItems);
                 this.sendEvent = new ManualResetEvent(false);
                 this.sendThread = new Thread(new ThreadStart(SendThread));
@@ -75,7 +74,7 @@ namespace Utils
             private void SendThread()
             {
                 System.Threading.Thread.CurrentThread.IsBackground = true;
-                var interval = new TimeSpan(0, 0, 10);
+                var interval = new TimeSpan(0, 0, 15);
                 while (true)
                 {
                     try
@@ -116,11 +115,6 @@ namespace Utils
                                         }
                                     }
                                 });
-                            }
-                            else
-                            {
-                                if (this.sendEvent.WaitOne(10000))
-                                    this.sendEvent.Reset();
                             }
                         }
                     }
