@@ -65,9 +65,13 @@ namespace TripThruCore
             public Location End { get; set; }
         }
     }
+
     public enum Status { New, Queued, Dispatched, Confirmed, Enroute, ArrivedAndWaiting, PickedUp, DroppedOff, Complete, Rejected, Cancelled };
+
     public enum VehicleType { Compact, Sedan };
+
     public enum PaymentMethod { Cash, Credit, Account };
+
     public class Zone
     {
         public Location Center { get; set; }
@@ -77,15 +81,18 @@ namespace TripThruCore
         {
 
         }
+
         public Zone(Location center, double radius)
         {
             this.Center = center;
             this.Radius = radius;
         }
+
         public double DegreesToRadians(double angle)
         {
             return Math.PI * angle / 180.0;
         }
+
         public bool IsInside(Location l)
         {
             double lat1 = DegreesToRadians(Center.Lat);
@@ -168,6 +175,7 @@ namespace TripThruCore
         public Location DriverLocation { get; set; } // no get/set so servicestack will ignore during serialization
         public Location PickupLocation { get; set; } // no get/set so servicestack will ignore during serialization
         public Location DropoffLocation { get; set; }  // no get/set so servicestack will ignore during serialization
+        public Location DriverInitiaLocation { get; set; }
         public DateTime? PickupTime { get; set; }
         public DateTime? DropoffTime { get; set; }
         public VehicleType? VehicleType { get; set; }
@@ -596,6 +604,7 @@ namespace TripThruCore
             public string driverID;
             public string driverName;
             public Location driverLocation;
+            public Location driverInitialLocation;
             public DateTime? pickupTime;
             public Location pickupLocation;
             public DateTime? dropoffTime;
@@ -609,7 +618,7 @@ namespace TripThruCore
             public string originatingPartnerName;
             public string servicingPartnerName;
             public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null, string originatingPartnerName = null,
-                string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null, string passengerName = null,
+                string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, Location driverInitialLocation = null, VehicleType? vehicleType = null, string passengerName = null,
                 DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
                 double? price = null, double? distance = null, double? driverRouteDuration = null, Result result = Result.OK
                  )
@@ -622,6 +631,7 @@ namespace TripThruCore
                 this.driverID = driverID;
                 this.driverName = driverName;
                 this.driverLocation = driverLocation;
+                this.driverInitialLocation = driverInitialLocation;
                 this.vehicleType = vehicleType;
                 this.ETA = ETA;
                 this.pickupTime = pickupTime;
