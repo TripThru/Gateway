@@ -139,6 +139,8 @@ namespace Tests
             Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
             Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.lastHour.Count, "Cancels are different");
             Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.lastHour.Count, "Completes are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.lastHour.Count, "Distances are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.lastHour.Count, "Fares are different");
         }
 
         [Test]
@@ -182,7 +184,7 @@ namespace Tests
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
-        static public int rejects, request, cancels, completes;
+        static public int rejects, request, cancels, completes, distance, fare;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
@@ -290,7 +292,9 @@ namespace Tests
                 request += tripthru.requests.lastHour.Count;
                 rejects += tripthru.rejects.lastHour.Count;
                 cancels += tripthru.cancels.lastHour.Count;
-                completes += tripthru.completes.lastHour.Count;    
+                completes += tripthru.completes.lastHour.Count;
+                distance += tripthru.distance.lastHour.Count;
+                fare += tripthru.fare.lastHour.Count;
             }
 
         }
@@ -338,7 +342,7 @@ namespace Tests
             ValidateNextTripStatus(fleet, trip, Status.Enroute);
             ValidateNextTripStatus(fleet, trip, Status.PickedUp);
             ValidateNextTripStatus(fleet, trip, Status.Complete);
-
+            
             lock (fleet)
             {
                 var trips = partner.tripsByID.Where(
