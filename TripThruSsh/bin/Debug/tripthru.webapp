@@ -7,6 +7,13 @@
                                     <path>/var/www/ServiceStack.TripThruGateway/Web</path>
                                  </web-application>
 <web-application>
+                                    <name>TripThru.DubaiTaxiCorporation</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.DubaiTaxiCorporation</vpath>
+                                    <path>/var/www/ServiceStack.DubaiTaxiCorporation/Web</path>
+                                 </web-application>
+<web-application>
                                     <name>TripThru.LuxorCab</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>

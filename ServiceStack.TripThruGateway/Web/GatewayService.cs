@@ -633,7 +633,7 @@ namespace ServiceStack.TripThruGateway
             public string DriverLocationAddress { get; set; }
 
             [ApiMember(Name = "ETA", Description = "Time that driver will arrive at destination. Either pickup location or dropoff location", ParameterType = "query", DataType = "DateTime", IsRequired = false)]
-            public DateTime ETA { get; set; }
+            public DateTime? ETA { get; set; }
 
 
             [ApiAllowableValues("Rating", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")]
