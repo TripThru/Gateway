@@ -145,6 +145,7 @@ namespace ServiceStack.TripThruGateway
                     passengerName = resp.PassengerName,
                     driverID = resp.DriverId,
                     driverLocation = resp.DriverLocation,
+                    driverInitialLocation = resp.DriverInitialLocation,
                     driverName = resp.DriverName,
                     dropoffTime = resp.DropoffTime,
                     dropoffLocation = resp.DropoffLocation,

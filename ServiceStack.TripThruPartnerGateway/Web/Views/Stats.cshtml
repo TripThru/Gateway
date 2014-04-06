@@ -1057,11 +1057,11 @@
                     if (tripId) {
                         var tripContainerId = getContainerTripId(tripId);
                         $("#updatingTripContainer").fadeIn();
-                        
+
                         if (activeTripsInfo[tripId] != null) {
                             setTripInfo(activeTripsInfo[tripId]);
                         }
-                        
+
                         $.get(baseUrl + 'tripstatus' + "?access_token=" + accessToken + "&tripid=" + tripId, function (data) {
                             if (data.result == "OK") {
                                 activeTripsInfo[tripId].fleetId = data.fleetId;
@@ -1077,7 +1077,7 @@
                                 activeTripsInfo[tripId].price = data.price;
                                 activeTripsInfo[tripId].distance = data.distance;
                                 activeTripsInfo[tripId].eta = data.eta;
-                                
+
                                 setTripInfo(activeTripsInfo[tripId]);
                                 updateTripLog();
                             }
@@ -1339,7 +1339,7 @@
                 if (initialMarker != null) {
                     initialMarker.setMap(null);
                 }
-                
+
                 driverPreviousLocation = null;
 
             }
