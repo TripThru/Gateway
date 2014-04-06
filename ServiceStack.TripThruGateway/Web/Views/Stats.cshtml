@@ -1346,7 +1346,8 @@
                                         }
                                         if (log.messages.length > 1) {
                                             for (i = 1; i < log.messages.length; i++) {
-                                                logString += '<li style="padding-left:' + log.messages[i].indent + 'px">';
+                                                var padding = log.messages[i].indent > 0 ? "padding-left:" + log.messages[i].indent + "px;" : "";
+                                                logString += '<li style="' + padding + '">';
 
                                                 if (log.messages[i].json) {
                                                     logString += '<span class="handle collapsed"></span>';
