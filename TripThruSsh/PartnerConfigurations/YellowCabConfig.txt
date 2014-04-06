@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : false,
+  "enabled" : true,
   "partner" : {
       "name" : "Yellow Cab",
       "clientId" : "yellow@tripthru.com",
@@ -57,5 +57,8 @@
             }
         ]
     }  
-  ]
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.YellowCab/"
+  }
 }

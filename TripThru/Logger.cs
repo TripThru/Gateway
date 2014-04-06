@@ -36,7 +36,7 @@ namespace Utils
             public SplunkClient()
             {
                 this.Source = "gateway";
-                this.MaxQueueItems = 500;
+                this.MaxQueueItems = 100;
                 this.queue = new Queue<RequestLog>(MaxQueueItems);
                 this.sendEvent = new ManualResetEvent(false);
                 this.sendThread = new Thread(new ThreadStart(SendThread));

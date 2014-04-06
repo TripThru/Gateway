@@ -1,8 +1,8 @@
-HomeUrl=http://192.168.0.125:8080/BookingsMetroCabofBoston/
-RelativeHomeUrl=/BookingsMetroCabofBoston/index.php
+HomeUrl=http://192.168.0.125:8080/BookingsYellowCab/
+RelativeHomeUrl=/BookingsYellowCab/index.php
 TripThruUrl=http://192.168.0.125/TripThru.TripThruGateway/
 TripThruAccessToken=jaosid1201231
-PartnerUrl=http://192.168.0.125/TripThru.MetroCabofBoston/
-PartnerAccessToken=metro12ondazazxx21
-PartnerName=MetroCabofBoston
-PartnerId=metro@tripthru.com
+PartnerUrl=http://192.168.0.125/TripThru.YellowCab/
+PartnerAccessToken=yellow12ondazazxx21
+PartnerName=YellowCab
+PartnerId=yellow@tripthru.com

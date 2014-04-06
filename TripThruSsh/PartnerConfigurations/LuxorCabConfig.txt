@@ -84,5 +84,8 @@
             }
         ]
     }  
-  ]
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.LuxorCab/"
+  }
 }

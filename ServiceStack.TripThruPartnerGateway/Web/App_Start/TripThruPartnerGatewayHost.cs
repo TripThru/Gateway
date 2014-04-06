@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Funq;
 using ServiceStack.Common.Utils;
 using ServiceStack.Razor;
@@ -50,20 +51,27 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
 
             container.RegisterAutoWiredAs<TripThruPartnerGateway.InitPartnerService, InitPartnerService>();
 
+            var configuration = 
+                JsonSerializer.DeserializeFromString<HostConfiguration>(
+                File.ReadAllText("~/PartnerConfiguration.txt".MapHostAbsolutePath()));
             //Authentication
-            Plugins.Add(new AuthFeature(() => new AuthUserSession(),
+            Plugins.Add(
+                new AuthFeature(() => new AuthUserSession(),
                     new IAuthProvider[] {
-                        new CustomCredentialsAuthProvider()
+                        new CustomCredentialsAuthProvider(
+                            new Dictionary<string, string>(){ {"tripthru", "optimize"} },
+                            configuration.host.virtualPath
+                        )
                     }
                 )
-            {
-                HtmlRedirect = "~/login.html",
-                ServiceRoutes = new Dictionary<Type, string[]> {
-                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"} },
+                {
+                    HtmlRedirect = "~/login.html",
+                    ServiceRoutes = new Dictionary<Type, string[]> {
+                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"}},
                         { typeof(AssignRolesService), new[]{"/assignroles"} },
                         { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
                     }
-            }
+                }
             );
 
             //Unhandled exceptions
@@ -103,27 +111,6 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
                 initPartners.Any(null);
             }
 
-        }
-    }
-
-    public class CustomCredentialsAuthProvider : CredentialsAuthProvider
-    {
-        private Dictionary<string, string> authenticatedUsers = new Dictionary<string, string>
-        {
-            {"tripthru", "optimize"}
-        };
-
-        public override bool TryAuthenticate(IServiceBase authService, string userName, string password)
-        {
-            return authenticatedUsers.ContainsKey(userName) && authenticatedUsers[userName] == password;
-        }
-
-        public override void OnAuthenticated(IServiceBase authService,
-            IAuthSession session, IOAuthTokens tokens, Dictionary<string, string> authInfo)
-        {
-            session.ReferrerUrl = "".MapHostAbsolutePath();
-            session.IsAuthenticated = true;
-            authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
         }
     }
 }

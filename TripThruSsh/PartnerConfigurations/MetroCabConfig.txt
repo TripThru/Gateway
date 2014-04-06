@@ -58,5 +58,8 @@
             }
         ]
     }  
-  ]
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.MetroCabofBoston/"
+  }
 }

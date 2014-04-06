@@ -164,6 +164,7 @@
     <Content Include="API.Sandbox\swagger-ui.min.js" />
     <Content Include="Scripts\prism.css" />
     <Content Include="Scripts\prism.js" />
+    <Content Include="HostConfig.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

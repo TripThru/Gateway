@@ -17,6 +17,7 @@ namespace ServiceStack.TripThruGateway
 
         [Api("GET latest log entries")]
         [Route("/log", "GET")]
+        [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Log : IReturn<LogResponse>
         {
             public string tripID { get; set; }
@@ -63,6 +64,8 @@ namespace ServiceStack.TripThruGateway
 
         [Api("Use GET /stats")]
         [Route("/stats", "GET")]
+        [Authenticate]
+        [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Stats : IReturn<StatsResponse>
         {
 
@@ -96,7 +99,6 @@ namespace ServiceStack.TripThruGateway
             public double FareLastHour { get; set; }
         }
 
-        [Authenticate]
         public class StatsService : Service
         {
             public StatsResponse Get(Stats request)

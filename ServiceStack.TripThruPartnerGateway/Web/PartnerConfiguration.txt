@@ -6,6 +6,7 @@
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
 	  "callbackUrl" : "http://192.168.0.106:17188/"
+	  "virtualPath" : ""
   },
   "fleets" : [
     {
@@ -53,5 +54,8 @@
             }
         ]
     }  
-  ]
+  ],
+  "host": {
+	  "virtualPath" : "/"
+	}
 }

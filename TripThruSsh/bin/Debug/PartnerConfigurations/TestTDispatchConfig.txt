@@ -1,1 +1,59 @@
-{"Partner":{"Name":"Test TDispatch","ClientId":"test_tdispatch@tripthru.com","AccessToken":"test_tdispatch12ondazazxx21","CallbackUrlMono":"http://192.168.0.125/TripThru.TestTDispatch/","WebUrl":"http://192.168.0.125:8080/BookingsTestTDispatch/","WebUrlRelative":"/BookingsTestTDispatch/index.php"},"Fleets":[{"Name":"Test TDispatch","BaseCost":0,"CostPerMile":0,"TripsPerHour":200,"PossibleTrips":[{"Start":{"Lat":29.114788,"Lng":-110.973587},"End":{"Lat":29.073987,"Lng":-110.97084}},{"Start":{"Lat":37.36286,"Lng":-121.761709},"End":{"Lat":37.370637,"Lng":-121.815782}},{"Start":{"Lat":37.36286,"Lng":-121.761709},"End":{"Lat":37.38114,"Lng":-121.872516}},{"Start":{"Lat":33.272495,"Lng":-111.7159},"End":{"Lat":33.283653,"Lng":-111.710428}},{"Start":{"Lat":42.433292,"Lng":-71.382811},"End":{"Lat":42.45413,"Lng":-71.401522}}],"Passengers":["Edward Hamilton","Patrick Hamilton","Brian Hamilton","Ann Hamilton"],"Location":{"Lat":48.837246,"Lng":2.347844}}],"TripThruUrlMono":"http://192.168.0.125/TripThru.TripThruGateway/","SimInterval":10,"Enabled":false}
+{
+ "tripThruUrlMono" : "TripThru.TripThruGateway/",
+ "simInterval" : 10,
+ "enabled" : disabled,
+ "partner" : {
+     "name" : "Test TDispatch",
+     "clientId" : "test_tdispatch@tripthru.com",
+     "accessToken" : "test_tdispatch12ondazazxx21",
+   "callbackUrlMono" : "TripThru.TestTDispatch/",
+	  "webUrl" : "BookingsTestTDispatch/",
+	  "webUrlRelative" : "/BookingsTestTDispatch/index.php"
+ },
+ "fleets" : [
+   {
+       "name" : "Test TDispatch",
+       "tripsPerHour" : 200,
+"location" : {
+"lat" : 48.837246,
+           "lng" : 2.347844
+       },
+       "possibleTrips" : [
+           {
+"description" : "Daniel/Rafael - Mexico",
+               "start" : { "lat": 29.114788, "lng": -110.973587},
+               "end"   : { "lat": 29.073987, "lng": -110.97084}
+           },
+           {
+"description" : "Edward - San Jose",
+               "start" : { "lat" : 37.362860, "lng" : -121.761709},
+               "end"   : { "lat" : 37.370637, "lng" : -121.815782}
+           },
+{
+"description" : "Edward - San Jose",
+               "start" : { "lat" : 37.362860, "lng" : -121.761709},
+               "end"   : { "lat" : 37.381140, "lng" : -121.872516}
+           },
+{
+"description" : "James - Arizona",
+               "start" : { "lat" : 33.272495, "lng" : -111.715900},
+               "end"   : { "lat" : 33.283653, "lng" : -111.710428}
+           },
+{
+"description" : "Joanna - Concord",
+               "start" : { "lat" : 42.433292, "lng" : -71.382811},
+               "end"   : { "lat" : 42.454130, "lng" : -71.401522}
+           }
+       ],
+       "passengers" : [
+           "Edward Hamilton",
+           "Patrick Hamilton",
+           "Brian Hamilton",
+           "Ann Hamilton"
+       ]
+   }  
+ ],
+  "host" : {
+		"virtualPath" : "/TripThru.TestTDispatch/"
+  }
+}

@@ -62,10 +62,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TripThruGatewayConfigurations\HostConfig.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PartnerConfigurations\DubaiTaxiCorporation.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\DubaiConfiguration.txt">
+    <Content Include="PartnerConfigurations\DubaiConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PartnerConfigurations\LesTaxiBlues.png">
@@ -83,7 +86,7 @@
     <Content Include="PartnerConfigurations\MetroCabConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\LuxorCab.txt">
+    <Content Include="PartnerConfigurations\LuxorCabConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PartnerConfigurations\TestTDispatch.png">

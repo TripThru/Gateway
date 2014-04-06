@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
+using System.IO;
 using ServiceStack.Common;
 using ServiceStack.Razor;
 using ServiceStack.ServiceHost;
@@ -55,17 +56,23 @@ namespace ServiceStack.TripThruGateway
                             MetadataCustomPath = "/stats"
                           });
 
-
+            var configuration = 
+                JsonSerializer.DeserializeFromString<HostConfiguration>(
+                File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
             //Authentication
-		    Plugins.Add(new AuthFeature(() => new AuthUserSession(),
+		    Plugins.Add(
+                new AuthFeature(() => new AuthUserSession(),
                     new IAuthProvider[] {
-                        new CustomCredentialsAuthProvider()
+                        new CustomCredentialsAuthProvider(
+                            new Dictionary<string, string>(){ {"tripthru", "optimize"} },
+                            configuration.host.virtualPath
+                        )
                     }
                 )
                 {
                     HtmlRedirect = "~/login.html",
                     ServiceRoutes = new Dictionary<Type, string[]> {
-                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"} },
+                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"}},
                         { typeof(AssignRolesService), new[]{"/assignroles"} },
                         { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
                     }
@@ -114,10 +121,13 @@ namespace ServiceStack.TripThruGateway
 
     public class CustomCredentialsAuthProvider : CredentialsAuthProvider
     {
-        private Dictionary<string, string> authenticatedUsers = new Dictionary<string, string>
+        private Dictionary<string, string> authenticatedUsers;
+        private string referrerUrl;
+        public CustomCredentialsAuthProvider(Dictionary<string, string> usersWithPassword, string referrerUrl)
         {
-            {"tripthru", "optimize"}
-        };
+            this.authenticatedUsers = usersWithPassword;
+            this.referrerUrl = referrerUrl;
+        }
 
         public override bool TryAuthenticate(IServiceBase authService, string userName, string password)
         {
@@ -127,9 +137,19 @@ namespace ServiceStack.TripThruGateway
         public override void OnAuthenticated(IServiceBase authService,
             IAuthSession session, IOAuthTokens tokens, Dictionary<string, string> authInfo)
         {
-            session.ReferrerUrl = "/TripThru.TripThruGateway/";
+            session.ReferrerUrl = referrerUrl;
             session.IsAuthenticated = true;
             authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
+        }
+    }
+
+    public class HostConfiguration
+    {
+        public Host host { get; set; }
+
+        public class Host
+        {
+            public string virtualPath { get; set; }
         }
     }
 }
