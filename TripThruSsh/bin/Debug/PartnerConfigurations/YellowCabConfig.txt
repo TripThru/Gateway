@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : true,
+  "enabled" : false,
   "partner" : {
       "name" : "Yellow Cab",
       "clientId" : "yellow@tripthru.com",

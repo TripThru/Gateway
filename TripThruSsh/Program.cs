@@ -36,7 +36,7 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            var env = environments["sandbox"];
+            var env = environments["vagrant"];
             var localPath = "Z:\\WindowsDev\\Gateway\\";
             var remoteFilePath = "/home/tripservice/servicestack/";
             var host = env.host;

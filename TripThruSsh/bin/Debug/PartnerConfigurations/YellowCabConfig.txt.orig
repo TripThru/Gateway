@@ -1,7 +1,10 @@
+<<<<<<< HEAD
+{"Partner":{"Name":"Yellow Cab","ClientId":"yellow@tripthru.com","AccessToken":"yellow12ondazazxx21","CallbackUrlMono":"http://54.201.134.194/TripThru.YellowCab/","WebUrl":"http://54.201.134.194:8080/BookingsYellowCab/","WebUrlRelative":"/BookingsYellowCab/index.php"},"Fleets":[{"Name":"Yellow Cab - SF","BaseCost":3,"CostPerMile":3,"TripsPerHour":200,"PossibleTrips":[{"Start":{"Lat":37.782551,"Lng":-122.445368},"End":{"Lat":37.786956,"Lng":-122.440279}}],"VehicleTypes":["Compact","Sedan"],"Drivers":["Eduardo Lozano","Edward Hamilton","Steven Thompson","Bartomeu Astor","Matthias Randulf","Ahoth Achab","Mattias Ohannes"],"Passengers":["George Washington","Abraham Lincoln","Herbert Hoover","John Kennedy","Jimmy Carter","Richard Nixon"],"Location":{"Lat":37.78906,"Lng":-122.402127},"Coverage":[{"Center":{"Lat":37.78906,"Lng":-122.402127},"Radius":50}]}],"TripThruUrlMono":"http://54.201.134.194/TripThru.TripThruGateway/","SimInterval":10,"Enabled":true}
+=======
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : false,
+  "enabled" : true,
   "partner" : {
       "name" : "Yellow Cab",
       "clientId" : "yellow@tripthru.com",
@@ -59,3 +62,4 @@
     }  
   ]
 }
+>>>>>>> 72867115a21a7ce3cb646e2528a230a197b5628c

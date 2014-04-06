@@ -352,10 +352,10 @@ namespace TripThruCore
         }
         public class RegisterPartnerRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public string name;
-            public string callback_url; // TODO: This should actually be a string, since we're not yet integrated I'm just using an object pointer
-            public string accessToken; //Todo: Lets assume for now that in Gateway service we retrieve an access token after registering partner in DB
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string name { get; set; }
+            public string callback_url { get; set; } // TODO: This should actually be a string, since we're not yet integrated I'm just using an object pointer
+            public string accessToken { get; set; } //Todo: Lets assume for now that in Gateway service we retrieve an access token after registering partner in DB
 
             public RegisterPartnerRequest(string clientID, string name, string callback_url, string accessToken)
             {
@@ -383,14 +383,14 @@ namespace TripThruCore
             {
                 return "PartnerID = " + partnerID + ", Result = " + result;
             }
-            public Result result;
-            public string partnerID;
+            public Result result { get; set; }
+            public string partnerID { get; set; }
         }
         public class GetPartnerInfoRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public List<Zone> coverage;
-            public List<VehicleType> vehicleTypes;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public List<Zone> coverage { get; set; }
+            public List<VehicleType> vehicleTypes { get; set; }
             public List<string> fleets { get; set; }
             // DispatchTrip must be supported.
             // GetPartnerInfo is not request as TripThru can provide some of these details
@@ -413,9 +413,9 @@ namespace TripThruCore
         }
         public class GetPartnerInfoResponse
         {
-            public Result result;
-            public List<Fleet> fleets;
-            public List<VehicleType> vehicleTypes;
+            public Result result { get; set; }
+            public List<Fleet> fleets { get; set; }
+            public List<VehicleType> vehicleTypes { get; set; }
             public GetPartnerInfoResponse(List<Fleet> fleets = null, List<VehicleType> vehicleTypes = null, Result result = Result.OK)
             {
                 this.fleets = fleets;
@@ -429,23 +429,23 @@ namespace TripThruCore
         }
         public class DispatchTripRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public string passengerID;
-            public string passengerName;
-            public int? luggage;
-            public int? persons;
-            public Location pickupLocation;
-            public DateTime pickupTime;
-            public Location dropoffLocation;
-            public List<Location> waypoints;
-            public PaymentMethod? paymentMethod;
-            public VehicleType? vehicleType;
-            public double? maxPrice;
-            public int? minRating;
-            public string tripID;
-            public string partnerID;
-            public string fleetID;
-            public string driverID;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string passengerID { get; set; }
+            public string passengerName { get; set; }
+            public int? luggage { get; set; }
+            public int? persons { get; set; }
+            public Location pickupLocation { get; set; }
+            public DateTime pickupTime { get; set; }
+            public Location dropoffLocation { get; set; }
+            public List<Location> waypoints { get; set; }
+            public PaymentMethod? paymentMethod { get; set; }
+            public VehicleType? vehicleType { get; set; }
+            public double? maxPrice { get; set; }
+            public int? minRating { get; set; }
+            public string tripID { get; set; }
+            public string partnerID { get; set; }
+            public string fleetID { get; set; }
+            public string driverID { get; set; }
             public DispatchTripRequest(string clientID, string tripID, Location pickupLocation, DateTime pickupTime, string passengerID = null, string passengerName = null,
                 int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
                 PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
@@ -482,26 +482,26 @@ namespace TripThruCore
             {
                 return "Result = " + result;
             }
-            public Result result;
+            public Result result { get; set; }
         }
         public class QuoteTripRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public string passengerID;
-            public string passengerName;
-            public int? luggage;
-            public int? persons;
-            public Location pickupLocation;
-            public DateTime pickupTime;
-            public Location dropoffLocation;
-            public List<Location> waypoints;
-            public PaymentMethod? paymentMethod;
-            public VehicleType? vehicleType;
-            public double? maxPrice;
-            public int? minRating;
-            public string partnerID;
-            public string fleetID;
-            public string driverID;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string passengerID { get; set; }
+            public string passengerName { get; set; }
+            public int? luggage { get; set; }
+            public int? persons { get; set; }
+            public Location pickupLocation { get; set; }
+            public DateTime pickupTime { get; set; }
+            public Location dropoffLocation { get; set; }
+            public List<Location> waypoints { get; set; }
+            public PaymentMethod? paymentMethod { get; set; }
+            public VehicleType? vehicleType { get; set; }
+            public double? maxPrice { get; set; }
+            public int? minRating { get; set; }
+            public string partnerID { get; set; }
+            public string fleetID { get; set; }
+            public string driverID { get; set; }
             public QuoteTripRequest(string clientID, Location pickupLocation, DateTime pickupTime, string passengerID = null, string passengerName = null,
                 int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
                 PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
@@ -530,8 +530,8 @@ namespace TripThruCore
         public class QuoteTripResponse
         {
 
-            public Result result;
-            public List<Quote> quotes;
+            public Result result { get; set; }
+            public List<Quote> quotes { get; set; }
             public QuoteTripResponse(List<Quote> quotes = null, Result result = Result.OK)
             {
                 this.quotes = quotes;
@@ -544,8 +544,8 @@ namespace TripThruCore
         }
         public class GetTripsRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public Status? status;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public Status? status { get; set; }
             public GetTripsRequest(string clientID, Status? status = null)
             {
                 this.clientID = clientID;
@@ -558,8 +558,8 @@ namespace TripThruCore
         }
         public class GetTripsResponse
         {
-            public Result result;
-            public List<Trip> trips;
+            public Result result { get; set; }
+            public List<Trip> trips { get; set; }
             public GetTripsResponse(List<Trip> trips, Result result = Result.OK)
             {
                 this.trips = trips;
@@ -573,8 +573,8 @@ namespace TripThruCore
         }
         public class GetTripStatusRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public string tripID;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string tripID { get; set; }
             public GetTripStatusRequest(string clientID, string tripID)
             {
                 this.clientID = clientID;
@@ -587,27 +587,27 @@ namespace TripThruCore
         }
         public class GetTripStatusResponse
         {
-            public Result result;
-            public string partnerID;
-            public string partnerName;
-            public string fleetID;
-            public string fleetName;
-            public string passengerName;
-            public string driverID;
-            public string driverName;
-            public Location driverLocation;
-            public DateTime? pickupTime;
-            public Location pickupLocation;
-            public DateTime? dropoffTime;
-            public Location dropoffLocation;
-            public VehicleType? vehicleType;
-            public Status? status;
-            public DateTime? ETA; // in minutes;
-            public double? price;
-            public double? distance;
-            public double? driverRouteDuration;
-            public string originatingPartnerName;
-            public string servicingPartnerName;
+            public Result result { get; set; }
+            public string partnerID { get; set; }
+            public string partnerName { get; set; }
+            public string fleetID { get; set; }
+            public string fleetName { get; set; }
+            public string passengerName { get; set; }
+            public string driverID { get; set; }
+            public string driverName { get; set; }
+            public Location driverLocation { get; set; }
+            public DateTime? pickupTime { get; set; }
+            public Location pickupLocation { get; set; }
+            public DateTime? dropoffTime { get; set; }
+            public Location dropoffLocation { get; set; }
+            public VehicleType? vehicleType { get; set; }
+            public Status? status { get; set; }
+            public DateTime? ETA { get; set; } // in minutes;
+            public double? price { get; set; }
+            public double? distance { get; set; }
+            public double? driverRouteDuration { get; set; }
+            public string originatingPartnerName { get; set; }
+            public string servicingPartnerName { get; set; }
             public GetTripStatusResponse(string partnerID = null, string partnerName = null, string fleetID = null, string fleetName = null, string originatingPartnerName = null,
                 string servicingPartnerName = null, string driverID = null, string driverName = null, Location driverLocation = null, VehicleType? vehicleType = null, string passengerName = null,
                 DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
@@ -660,11 +660,11 @@ namespace TripThruCore
         }
         public class UpdateTripStatusRequest
         {
-            public string clientID;  // TODO: TripThru needs to know who's making the call
-            public string tripID;
-            public Status status;
-            public Location driverLocation;
-            public DateTime? eta;
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string tripID { get; set; }
+            public Status status { get; set; }
+            public Location driverLocation { get; set; }
+            public DateTime? eta { get; set; }
             public UpdateTripStatusRequest(string clientID, string tripID, Status status, Location driverLocation = null, DateTime? eta = null)
             {
                 this.clientID = clientID;
@@ -680,7 +680,7 @@ namespace TripThruCore
         }
         public class UpdateTripStatusResponse
         {
-            public Result result;
+            public Result result { get; set; }
             public UpdateTripStatusResponse(Result result = Result.OK)
             {
                 this.result = result;

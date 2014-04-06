@@ -134,8 +134,7 @@ namespace Tests
                 simInterval : new TimeSpan(0, 0, 1), 
                 partners: new List<Partner>(){libA.partner, libB.partner});
 
-
-            Assert.AreEqual(Test_TripLifeCycle_Base.request, tripthru.requests.lastHour.Count, "Request are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.lastHour.Count, "Request are different");
             Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
             Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.lastHour.Count, "Cancels are different");
             Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.lastHour.Count, "Completes are different");
@@ -182,7 +181,7 @@ namespace Tests
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
-        static public int rejects, request, cancels, completes;
+        public static int rejects, requests, cancels, completes;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
@@ -287,7 +286,7 @@ namespace Tests
             foreach (var partner1 in partners)
             {
                 var tripthru = (GatewayClientMock)partner1.tripthru;
-                request += tripthru.requests.lastHour.Count;
+                requests += tripthru.requests.lastHour.Count;
                 rejects += tripthru.rejects.lastHour.Count;
                 cancels += tripthru.cancels.lastHour.Count;
                 completes += tripthru.completes.lastHour.Count;    
