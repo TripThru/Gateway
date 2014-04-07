@@ -610,7 +610,8 @@ namespace TripThruCore
             public string driverID { get; set; }
             public string driverName { get; set; }
             public Location driverLocation { get; set; }
-            public Location driverInitialLocation;
+            public Location driverInitialLocation { get; set; }
+            public DateTime? pickupTime { get; set; }
             public Location pickupLocation { get; set; }
             public DateTime? dropoffTime { get; set; }
             public Location dropoffLocation { get; set; }
