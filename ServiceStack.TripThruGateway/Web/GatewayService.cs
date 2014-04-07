@@ -207,6 +207,7 @@ namespace ServiceStack.TripThruGateway
             public PartnerResponse Post(PartnerRequest request)
             {
                 var accessToken = request.access_token;
+                var message = ValidatePartner(request);
                 request.access_token = null;
                 PartnerResponse partnerResponse = new PartnerResponse
                 {
@@ -216,7 +217,6 @@ namespace ServiceStack.TripThruGateway
                 try
                 {
                     PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                    var message = ValidatePartner(request);
                     if (acct != null && message == null)
                     {
                         Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
@@ -303,6 +303,7 @@ namespace ServiceStack.TripThruGateway
             public PartnersResponse Get(Partners request)
             {
                 var accessToken = request.access_token;
+                var message = ValidatePartners(request);
                 request.access_token = null;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 PartnersResponse partnersResponse = new PartnersResponse
@@ -310,7 +311,6 @@ namespace ServiceStack.TripThruGateway
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
-                var message = ValidatePartners(request);
                 var clientId = "none";
                 try
                 {
@@ -455,8 +455,8 @@ namespace ServiceStack.TripThruGateway
         {
             public QuotesResponse Get(Quotes request)
             {
-                var message = ValidateQuote(request);
                 var accessToken = request.access_token;
+                var message = ValidateQuote(request);
                 request.access_token = null;
                 QuotesResponse quotesResponse = new QuotesResponse
                 {
@@ -640,13 +640,13 @@ namespace ServiceStack.TripThruGateway
             public DispatchResponse Post(Dispatch request)
             {
                 var accessToken = request.access_token;
+                var message = ValidateDispatch(request);
                 request.access_token = null;
                 DispatchResponse dispatchResponse = new DispatchResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
-                var message = ValidateDispatch(request);
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
@@ -828,6 +828,7 @@ namespace ServiceStack.TripThruGateway
             {
                 Logger.Disable();
                 var accessToken = request.access_token;
+                var message = ValidateTripStatusGet(request);
                 request.access_token = null;
                 Logger.BeginRequest("GetTripStatus received", request);
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
@@ -837,7 +838,6 @@ namespace ServiceStack.TripThruGateway
                 };
 
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var message = ValidateTripStatusGet(request);
                 var clientId = "none";
                 try
                 {
@@ -937,6 +937,7 @@ namespace ServiceStack.TripThruGateway
             public TripStatusResponse Put(TripStatus request)
             {
                 var accessToken = request.access_token;
+                var message = ValidateTripStatusPut(request);
                 request.access_token = null;
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
                 {
@@ -944,7 +945,6 @@ namespace ServiceStack.TripThruGateway
                     ResultCode = Gateway.Result.UnknownError
                 };
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var message = ValidateTripStatusPut(request);
                 var clientId = "none";
                 try
                 {
