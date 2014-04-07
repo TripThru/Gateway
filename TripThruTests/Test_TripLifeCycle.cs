@@ -140,6 +140,20 @@ namespace Tests
             Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.lastHour.Count, "Completes are different");
             Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.lastHour.Count, "Distances are different");
             Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.lastHour.Count, "Fares are different");
+
+            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.last24Hrs.Count, "Request are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
+            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.last24Hrs.Count, "Cancels are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.last24Hrs.Count, "Completes are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.last24Hrs.Count, "Distances are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.last24Hrs.Count, "Fares are different");
+
+            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.allTime.value, "Request are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.allTime.value, "Rejects are different.");
+            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.allTime.value, "Cancels are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.allTime.value, "Completes are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.allTime.value, "Distances are different");
+            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.allTime.value, "Fares are different");
         }
 
         [Test]
@@ -183,7 +197,7 @@ namespace Tests
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
-        static public int rejects, request, cancels, completes, distance, fare;
+        static public int rejects, requests, cancels, completes, distance, fare;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
