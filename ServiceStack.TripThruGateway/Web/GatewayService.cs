@@ -266,11 +266,11 @@ namespace ServiceStack.TripThruGateway
             private string ValidatePartner(PartnerRequest request)
             {
                 if (request.access_token.IsNullOrEmpty())
-                    return "Acces Token is Requiered";
+                    return "Access Token is Required";
                 if (request.Name.IsNullOrEmpty())
-                    return "Name is Requiered";
+                    return "Name is Required";
                 if (request.CallbackUrl.IsNullOrEmpty())
-                    return "CallbackUrl is Requiered";
+                    return "CallbackUrl is Required";
                 return null;
             }
         }
@@ -386,7 +386,7 @@ namespace ServiceStack.TripThruGateway
             private string ValidatePartners(Partners partners)
             {
                 if (partners.access_token.IsNullOrEmpty())
-                    return "Acces Token is Requiered";
+                    return "Access Token is Required";
                 return null;
             }
         }
@@ -415,9 +415,9 @@ namespace ServiceStack.TripThruGateway
             [ApiAllowableValues("Persons", "1", "2", "3", "4", "5", "6", "7")]
             [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false)]
             public int? Persons { get; set; }
-            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false)]
+            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = true)]
             public double? DropoffLat { get; set; }
-            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false)]
+            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = true)]
             public double? DropoffLng { get; set; }
             [ApiAllowableValues("PaymentMethod", typeof(PaymentMethod))]
             [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false)]
@@ -553,13 +553,17 @@ namespace ServiceStack.TripThruGateway
             private string ValidateQuote(Quotes quote)
             {
                 if (quote.access_token.IsNullOrEmpty())
-                    return "Acces Token is Requiered.";
+                    return "Access Token is Required.";
                 if (quote.PickupTime == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupTime is Required.";
                 if (quote.PickupLat == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupLat is Required.";
                 if (quote.PickupLng == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupLng is Required.";
+                if (quote.DropoffLat == null)
+                    return "DropoffLat is Required.";
+                if (quote.DropoffLng == null)
+                    return "DropoffLng is Required.";
                 return null;
             }
 
@@ -732,15 +736,19 @@ namespace ServiceStack.TripThruGateway
             private string ValidateDispatch(Dispatch dispatch)
             {
                 if (dispatch.access_token.IsNullOrEmpty())
-                    return "Acces Token is Requiered.";
+                    return "Access Token is Required.";
                 if (dispatch.TripId.IsNullOrEmpty())
                     return "Trip Id is requiered";
                 if (dispatch.PickupTime == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupTime is Required.";
                 if (dispatch.PickupLat == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupLat is Required.";
                 if (dispatch.PickupLng == null)
-                    return "PickupTime is Requiered.";
+                    return "PickupLng is Required.";
+                if (dispatch.DropoffLat == null)
+                    return "DropoffLat is Required.";
+                if (dispatch.DropoffLng == null)
+                    return "DropoffLng is Required.";
                 return null;
             }
         }
@@ -824,7 +832,7 @@ namespace ServiceStack.TripThruGateway
 
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var message = ValidateTripStatus(request);
+                var message = ValidateTripStatusGet(request);
                 var clientId = "none";
                 try
                 {
@@ -930,7 +938,7 @@ namespace ServiceStack.TripThruGateway
                 };
                 var accessToken = request.access_token;
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var message = ValidateTripStatus(request);
+                var message = ValidateTripStatusPut(request);
                 var clientId = "none";
                 try
                 {
@@ -1014,12 +1022,33 @@ namespace ServiceStack.TripThruGateway
                 return tripStatusResponse;
             }
 
-            private string ValidateTripStatus(TripStatus tripStatus)
+            private string ValidateTripStatusGet(TripStatus tripStatus)
             {
                 if (tripStatus.access_token.IsNullOrEmpty())
-                    return "Acces Token is Requiered";
+                    return "Access Token is Required";
                 if (tripStatus.TripId.IsNullOrEmpty())
-                    return "Trip Id is Requiered";
+                    return "Trip Id is Required";
+                return null;
+            }
+
+            private string ValidateTripStatusPut(TripStatus tripStatus)
+            {
+                if (tripStatus.access_token.IsNullOrEmpty())
+                    return "Access Token is Required";
+                if (tripStatus.TripId.IsNullOrEmpty())
+                    return "Trip Id is Required";
+                if (tripStatus.Status == null)
+                    return "Trip Id is Required";
+                if (tripStatus.DriverLocationLat == null)
+                    return "DriverLocationLat is Required";
+                if (tripStatus.DriverLocationLng == null)
+                    return "DriverLocationLng is Required";
+                if (tripStatus.DriverLocationAddress == null)
+                    return "DriverLocationAddress is Required";
+                if (tripStatus.ETA == null)
+                    return "ETA is Required";
+                if (tripStatus.Rating == null)
+                    return "Rating is Required";
                 return null;
             }
 

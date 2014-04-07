@@ -57,5 +57,8 @@
             }
         ]
     }  
-  ]
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.YellowCab/"
+  }
 }
