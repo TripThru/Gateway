@@ -137,7 +137,7 @@ namespace ServiceStack.TripThruGateway
         public override void OnAuthenticated(IServiceBase authService,
             IAuthSession session, IOAuthTokens tokens, Dictionary<string, string> authInfo)
         {
-            session.ReferrerUrl = "/stats";
+            session.ReferrerUrl = referrerUrl;
             session.IsAuthenticated = true;
             authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
         }
