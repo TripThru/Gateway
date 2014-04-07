@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
+using ServiceStack.DataAnnotations;
 
 namespace TripThruCore.Models
 {
     public interface Storage
     {
         void CreatePartnerAccount(PartnerAccount account);
-        bool RegisterPartner(PartnerAccount account, Partner partner);
+        void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
+        List<PartnerAccount> GetPartnerAccounts();
     }
 
     public class SqliteStorage : Storage
@@ -20,13 +22,9 @@ namespace TripThruCore.Models
         {
             dbFactory = new OrmLiteConnectionFactory(
                 sqliteFile, false, SqliteDialect.Provider);
-
-        }
-        private void Init()
-        {
-            using(var db = dbFactory.Open()){
+            using (var db = dbFactory.Open())
+            {
                 db.CreateTableIfNotExists<PartnerAccount>();
-                db.CreateTableIfNotExists<Partner>();
             }
         }
         public void CreatePartnerAccount(PartnerAccount account)
@@ -38,40 +36,70 @@ namespace TripThruCore.Models
                     db.Insert(account);
             }
         }
-        public bool RegisterPartner(PartnerAccount account, Partner partner)
+        public void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
             using (var db = dbFactory.Open())
             {
                 var acc = db.Select<PartnerAccount>(x => x.ClientId == account.ClientId);
                 if (acc.Count == 0)
-                    return false;
-                var part = db.Select<Partner>(x => x.ClientId == partner.ClientId);
-                if (part.Count == 0)
-                    db.Insert(partner);
-                else
-                    db.Update(partner);
-                return true;
+                    return;
+                var existingAccount = acc.First();
+                existingAccount.PartnerName = partnerName;
+                existingAccount.CallbackUrl = callbackUrl;
+                db.Update(existingAccount);
+            }
+        }
+        public List<PartnerAccount> GetPartnerAccounts()
+        {
+            using (var db = dbFactory.Open())
+            {
+                return db.Select<PartnerAccount>();
             }
         }
     }
 
+    [Alias("Account")]
     public class PartnerAccount
     {
-        public string Name { get; set; }
+        [AutoIncrement]
+        [PrimaryKey]
+        public Int32 Id { get; set; }
         public string ClientId { get; set; } //Provided by TripThru upon registration
         public string ClientSecret { get; set; } //Provided by TripThru upon registration
         public string UserName { get; set; } //For web login
         public string Password { get; set; } //For web login
         public string Email { get; set; } //For web login
-        public string AccessToken { get; set; }
+        public string AccessToken { get; set; } //For them to authenticate with them
         public string RefreshToken { get; set; }
+        public string PartnerName { get; set; }
         public string CallbackUrl { get; set; }
+        public string TripThruAccessToken { get; set; } //For us to authenticate with them
     }
 
-    public class Partner
+    public class StorageManager
     {
-        public string ClientId { get; set; }
-        public string Name { get; set; }
-        public string CallbackUrl { get; set; }
+
+        private static Storage _storage;
+        public static void OpenStorage(Storage storage){
+            _storage = storage;
+        }
+        public static void CreatePartnerAccount(PartnerAccount account)
+        {
+            if (_storage == null)
+                return;
+            _storage.CreatePartnerAccount(account);
+        }
+        public static void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
+        {
+            if (_storage == null)
+                return;
+            _storage.RegisterPartner(account, partnerName, callbackUrl);
+        }
+        public static List<PartnerAccount> GetPartnerAccounts()
+        {
+            if (_storage == null)
+                return null;
+            return _storage.GetPartnerAccounts();
+        }
     }
 }

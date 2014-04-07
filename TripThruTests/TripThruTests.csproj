@@ -98,6 +98,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App_Data\db.sqlite" />
     <None Include="packages.config" />
     <None Include="Test_GeoData\Geo-Location-Addresses.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -110,7 +111,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\sqlite3.dll" />
+    <Content Include="sqlite3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test_Configurations\ForeignTripsEnoughDriversA.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -131,6 +134,7 @@
     <Content Include="Test_Configurations\Partners\MetroCabConfig.txt" />
     <Content Include="Test_Configurations\Partners\YellowCabConfig.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

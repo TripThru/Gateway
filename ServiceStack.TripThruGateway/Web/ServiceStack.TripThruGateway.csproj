@@ -148,6 +148,7 @@
     <Content Include="App_Data\Geo-Location-Names.csv" />
     <Content Include="App_Data\Geo-Routes.csv" />
     <Content Include="App_Data\Geo-Location-Addresses.csv" />
+    <Content Include="App_Data\db.sqlite" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flipCounter-medium.png" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -175,7 +176,9 @@
     <Content Include="Scripts\prism.css" />
     <Content Include="Scripts\prism.js" />
     <Content Include="HostConfig.txt" />
-    <Content Include="App_Data\sqlite3.dll" />
+    <Content Include="sqlite3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
