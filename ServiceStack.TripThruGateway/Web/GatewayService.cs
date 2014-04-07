@@ -234,10 +234,11 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("RegisterPartner received from unknown user", request);
+                        
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("RegisterPartner received from unknown user", request);
                             msg = "POST /partner called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             partnerResponse = new PartnerResponse
@@ -249,6 +250,8 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+
+                            Logger.BeginRequest("RegisterPartner received with wrong parameters", request);
                             msg = message;
                             partnerResponse.Message = message;
                         }
@@ -345,10 +348,11 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
+                        
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
                             msg = "GET /partners called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             partnersResponse = new PartnersResponse
@@ -360,6 +364,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+                            Logger.BeginRequest("GetPartnerInfo received with wrong parameters", request);
                             msg = message;
                             partnersResponse.Message = msg;
                         }
@@ -512,10 +517,10 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("QuoteTrip received from unknown user", request);
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("QuoteTrip received from unknown user", request);
                             msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             quotesResponse = new QuotesResponse
@@ -527,6 +532,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+                            Logger.BeginRequest("QuoteTrip received with wrong parameters", request);
                             msg = message;
                             quotesResponse.Message = message;
                         }
@@ -696,10 +702,10 @@ namespace ServiceStack.TripThruGateway
                     else
                     {
 
-                        Logger.BeginRequest("DispatchTrip received from unknown user", request, request.TripId);
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("DispatchTrip received from unknown user", request, request.TripId);
                             msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             dispatchResponse = new DispatchResponse
@@ -711,6 +717,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+                            Logger.BeginRequest("DispatchTrip received with wrong parameters", request, request.TripId);
                             msg = message;
                             dispatchResponse.Message = message;
                         }
@@ -828,7 +835,7 @@ namespace ServiceStack.TripThruGateway
             {
                 Logger.Disable();
                 var accessToken = request.access_token;
-                var message = ValidateTripStatusGet(request);
+                var message = ValidateTripStatus(request);
                 request.access_token = null;
                 Logger.BeginRequest("GetTripStatus received", request);
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
@@ -892,10 +899,10 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("GetTripStatus received from unknown user", request, request.TripId);
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("GetTripStatus received from unknown user", request, request.TripId);
                             msg = "GET /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             tripStatusResponse = new TripStatusResponse
@@ -907,6 +914,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+                            Logger.BeginRequest("GetTripStatus received with wrong parameters", request, request.TripId);
                             msg = message;
                             tripStatusResponse.Message = message;
                         }
@@ -937,7 +945,7 @@ namespace ServiceStack.TripThruGateway
             public TripStatusResponse Put(TripStatus request)
             {
                 var accessToken = request.access_token;
-                var message = ValidateTripStatusPut(request);
+                var message = ValidateTripStatus(request);
                 request.access_token = null;
                 TripStatusResponse tripStatusResponse = new TripStatusResponse
                 {
@@ -988,10 +996,10 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        Logger.BeginRequest("UpdateTripStatus received from unknown user", request, request.TripId);
                         string msg;
                         if (message == null)
                         {
+                            Logger.BeginRequest("UpdateTripStatus received from unknown user", request, request.TripId);
                             msg = "PUT /trip/status called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
                             tripStatusResponse = new TripStatusResponse
@@ -1003,6 +1011,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
+                            Logger.BeginRequest("UpdateTripStatus received with wrong parameters", request);
                             msg = message;
                             tripStatusResponse.Message = msg;
                         }
@@ -1028,33 +1037,12 @@ namespace ServiceStack.TripThruGateway
                 return tripStatusResponse;
             }
 
-            private string ValidateTripStatusGet(TripStatus tripStatus)
+            private string ValidateTripStatus(TripStatus tripStatus)
             {
                 if (tripStatus.access_token.IsNullOrEmpty())
                     return "Access Token is Required";
                 if (tripStatus.TripId.IsNullOrEmpty())
                     return "Trip Id is Required";
-                return null;
-            }
-
-            private string ValidateTripStatusPut(TripStatus tripStatus)
-            {
-                if (tripStatus.access_token.IsNullOrEmpty())
-                    return "Access Token is Required";
-                if (tripStatus.TripId.IsNullOrEmpty())
-                    return "Trip Id is Required";
-                if (tripStatus.Status == null)
-                    return "Trip Id is Required";
-                if (tripStatus.DriverLocationLat == null)
-                    return "DriverLocationLat is Required";
-                if (tripStatus.DriverLocationLng == null)
-                    return "DriverLocationLng is Required";
-                if (tripStatus.DriverLocationAddress == null)
-                    return "DriverLocationAddress is Required";
-                if (tripStatus.ETA == null)
-                    return "ETA is Required";
-                if (tripStatus.Rating == null)
-                    return "Rating is Required";
                 return null;
             }
 
