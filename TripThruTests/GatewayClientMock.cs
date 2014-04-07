@@ -47,10 +47,16 @@ namespace TripThruTests
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
             requests++;
-            requests ++; //Assuming Tripthru will quote itself in AutoDispatch
+            requests++; //Assuming Tripthru will quote itself in AutoDispatch
             Gateway.DispatchTripResponse resp = server.DispatchTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
+            if (resp.result == Result.OK)
+            {
+                var resp1 = GetTripStatus(new GetTripStatusRequest(request.clientID, request.tripID));
+                if (resp1.distance != null) distance = distance + resp1.distance.Value;
+                if (resp1.price != null) fare = fare + resp1.price.Value;
+            }
             Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
             {
                 result = resp.result,

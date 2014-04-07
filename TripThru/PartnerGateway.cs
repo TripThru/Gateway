@@ -228,6 +228,7 @@ namespace TripThruCore
                 driverID: t.driver != null ? t.driver.ID : null,
                 driverName: t.driver != null ? t.driver.name : null,
                 driverLocation: t.driver != null ? t.driver.location : null,
+                driverInitialLocation: t.driverInitiaLocation ?? null,
                 dropoffTime: t.dropoffTime,
                 dropoffLocation: t.dropoffLocation,
                 vehicleType: t.vehicleType,
@@ -361,6 +362,7 @@ namespace TripThruCore
     {
         private Status _status;
         public Location driverLocation;
+        public Location driverInitiaLocation;
         public string passengerID;
         public string passengerName;
         public Origination origination;
@@ -401,7 +403,11 @@ namespace TripThruCore
                 Logger.Log("Trip status changed from " + _status + " to " + status + (driverLocation != null ? (" and driver's location has changed to " + driverLocation) : "") + (eta != null ? (" and eta has changed to " + eta) : ""));
                 _status = status;
                 if (driverLocation != null)
+                {
                     this.driverLocation = driverLocation;
+                    if (status == Status.Dispatched)
+                        this.driverInitiaLocation = driverLocation;
+                }
                 if (eta != null)
                     this.ETA = eta;
                 if (IsOneOfTheActiveTrips())
@@ -807,6 +813,7 @@ namespace TripThruCore
                     DriverLocation = t.driver != null ? t.driver.location : null,
                     DriverName = t.driver != null ? t.driver.name : null,
                     DropoffLocation = t.dropoffLocation,
+                    DriverInitiaLocation = t.driverInitiaLocation ?? null,
                     DropoffTime = t.dropoffTime,
                     Id = t.ID,
                     OriginatingPartnerId = this.ID,

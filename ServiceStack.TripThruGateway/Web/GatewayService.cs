@@ -655,7 +655,7 @@ namespace ServiceStack.TripThruGateway
             public string DriverName { get; set; }
             public string PassengerName { get; set; }
             public Location DriverLocation { get; set; }
-            public Location DriverInitiaLocation { get; set; }
+            public Location DriverInitialLocation { get; set; }
             public DateTime? PickupTime { get; set; }
             public DateTime? DropoffTime { get; set; }
             public VehicleType? VehicleType { get; set; }
@@ -703,6 +703,7 @@ namespace ServiceStack.TripThruGateway
                                 PassengerName = response.passengerName,
                                 DriverId = response.driverID,
                                 DriverLocation = response.driverLocation,
+                                DriverInitialLocation = response.driverInitialLocation,
                                 DriverName = response.driverName,
                                 DropoffTime = response.dropoffTime,
                                 DropoffLocation = response.dropoffLocation,

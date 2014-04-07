@@ -52,8 +52,5 @@
            "Ann Hamilton"
        ]
    }  
- ],
-  "host" : {
-		"virtualPath" : "/TripThru.TestTDispatch/"
-  }
+ ]
 }
