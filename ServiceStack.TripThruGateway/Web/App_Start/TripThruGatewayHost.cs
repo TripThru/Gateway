@@ -64,7 +64,10 @@ namespace ServiceStack.TripThruGateway
                 new AuthFeature(() => new AuthUserSession(),
                     new IAuthProvider[] {
                         new CustomCredentialsAuthProvider(
-                            new Dictionary<string, string>(){ {"tripthru", "optimize"} },
+                            new Dictionary<string, string>(){ 
+                                {"tripthru", "optimize"},
+                                {"gogocabi", "coolapp"}
+                            },
                             configuration.host.virtualPath
                         )
                     }

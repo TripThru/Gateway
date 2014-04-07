@@ -10,6 +10,7 @@ using System.IO;
 using RestSharp;
 using ServiceStack.Text;
 using ServiceStack.Redis;
+using TripThruCore.Models;
 
 namespace TripThruCore
 {
@@ -46,7 +47,6 @@ namespace TripThruCore
         public TripThru(bool enableTDispatch = true)
             : base("TripThru", "TripThru")
         {
-            //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
             InitializePersistantDataObjects();
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
 
@@ -207,6 +207,16 @@ namespace TripThruCore
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
+
+            var accounts = StorageManager.GetPartnerAccounts();
+            if(accounts != null)
+                foreach (PartnerAccount account in accounts)
+                {
+                    if (!partnerAccounts.ContainsKey(account.ClientId))
+                        partnerAccounts[account.ClientId] = account;
+                    if (!clientIdByAccessToken.ContainsKey(account.AccessToken))
+                        clientIdByAccessToken[account.AccessToken] = account.ClientId;
+                }
         }
         public override string GetName(string clientID)
         {

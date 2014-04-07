@@ -8,20 +8,9 @@ using ServiceStack;
 using ServiceStack.Text;
 using System.Runtime.Serialization;
 using ServiceStack.ServiceModel;
+using TripThruCore.Models;
 namespace TripThruCore
 {
-    public class PartnerAccount
-    {
-        public string Name { get; set; }
-        public string ClientId { get; set; } //Provided by TripThru upon registration
-        public string ClientSecret { get; set; } //Provided by TripThru upon registration
-        public string UserName { get; set; } //For web login
-        public string Password { get; set; } //For web login
-        public string Email { get; set; } //For web login
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
-        public string CallbackUrl { get; set; }
-    }
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }

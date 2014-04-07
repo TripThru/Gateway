@@ -3,6 +3,7 @@ using System.Linq;
 using ServiceStack.Common;
 using Utils;
 using TripThruCore;
+using TripThruCore.Models;
 
 
 namespace ServiceStack.TripThruGateway
@@ -178,7 +179,6 @@ namespace ServiceStack.TripThruGateway
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
-            public long? Id { get; set; }
         }
 
         public class PartnerService : Service
@@ -201,15 +201,15 @@ namespace ServiceStack.TripThruGateway
                     if (acct != null && !request.CallbackUrl.IsNullOrEmpty() && !request.Name.IsNullOrEmpty())
                     {
                         Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
-                        acct.Name = request.Name;
+                        acct.PartnerName = request.Name;
                         acct.CallbackUrl = request.CallbackUrl;
                         gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
+                        StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
 
                         partnerResponse = new PartnerResponse
                         {
                             Result = "OK",
-                            ResultCode = Gateway.Result.OK,
-                            Id = -1 // what is this used for
+                            ResultCode = Gateway.Result.OK
                         };
                     }
                     else

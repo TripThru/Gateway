@@ -79,6 +79,7 @@ namespace ServiceStack.TripThruPartnerGateway
                     new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
                         _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));
 
+                var lastHealthCheck = DateTime.UtcNow;
                 while (true)
                 {
                     try
@@ -86,6 +87,11 @@ namespace ServiceStack.TripThruPartnerGateway
                         lock (_partner)
                         {
                             _partner.Update();
+                            if (DateTime.UtcNow > lastHealthCheck + new TimeSpan(0, 1, 0))
+                            {
+                                _partner.HealthCheck();
+                                lastHealthCheck = DateTime.UtcNow;
+                            }
                         }
                         MapTools.WriteGeoData();
                     }
