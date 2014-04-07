@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using ServiceStack.Text;
 using Utils;
+using TripThruCore.Models;
 
 namespace TripThruCore
 {
@@ -334,7 +335,6 @@ namespace TripThruCore
                     f.Simulate();
                 lastSim = DateTime.UtcNow;
                 Logger.EndRequest(null);
-                HealthCheck();
             }
         }
 

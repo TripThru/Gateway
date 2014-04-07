@@ -1,1 +1,64 @@
-{"Partner":{"Name":"Yellow Cab","ClientId":"yellow@tripthru.com","AccessToken":"yellow12ondazazxx21","CallbackUrlMono":"http://192.168.0.125/TripThru.YellowCab/","WebUrl":"http://192.168.0.125:8080/BookingsYellowCab/","WebUrlRelative":"/BookingsYellowCab/index.php"},"Fleets":[{"Name":"Yellow Cab - SF","BaseCost":3,"CostPerMile":3,"TripsPerHour":200,"PossibleTrips":[{"Start":{"Lat":37.782551,"Lng":-122.445368},"End":{"Lat":37.786956,"Lng":-122.440279}}],"VehicleTypes":["Compact","Sedan"],"Drivers":["Eduardo Lozano","Edward Hamilton","Steven Thompson","Bartomeu Astor","Matthias Randulf","Ahoth Achab","Mattias Ohannes"],"Passengers":["George Washington","Abraham Lincoln","Herbert Hoover","John Kennedy","Jimmy Carter","Richard Nixon"],"Location":{"Lat":37.78906,"Lng":-122.402127},"Coverage":[{"Center":{"Lat":37.78906,"Lng":-122.402127},"Radius":50}]}],"TripThruUrlMono":"http://192.168.0.125/TripThru.TripThruGateway/","SimInterval":10,"Enabled":true,"host":{"virtualPath":"/TripThru.YellowCab/"}}
+{
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
+  "simInterval" : 10,
+  "enabled" : true,
+  "partner" : {
+      "name" : "Yellow Cab",
+      "clientId" : "yellow@tripthru.com",
+      "accessToken" : "yellow12ondazazxx21",
+    "callbackUrlMono" : "TripThru.YellowCab/",
+	  "webUrl" : "BookingsYellowCab/",
+	  "webUrlRelative" : "/BookingsYellowCab/index.php"
+  },
+  "fleets" : [
+    {
+        "name" : "Yellow Cab - SF",
+        "baseCost" : 3.00,
+        "costPerMile" : 3.00,
+        "tripsPerHour" : 200,
+		"location" : {
+			"lat" : 37.78906,
+            "lng" : -122.402127
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 37.782551, "lng" : -122.445368},
+                "end"   : { "lat" : 37.786956, "lng" : -122.440279}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Eduardo Lozano",
+            "Edward Hamilton",
+            "Steven Thompson",
+            "Bartomeu Astor",
+            "Matthias Randulf",
+            "Ahoth Achab",
+            "Mattias Ohannes"
+        ],
+        "passengers" : [
+            "George Washington",
+			"Abraham Lincoln",
+			"Herbert Hoover",
+			"John Kennedy",
+			"Jimmy Carter",
+			"Richard Nixon"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+					"lat" : 37.78906,
+					"lng" : -122.402127
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.YellowCab/"
+  }
+}

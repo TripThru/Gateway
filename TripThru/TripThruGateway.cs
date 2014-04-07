@@ -10,6 +10,7 @@ using System.IO;
 using RestSharp;
 using ServiceStack.Text;
 using ServiceStack.Redis;
+using TripThruCore.Models;
 
 namespace TripThruCore
 {
@@ -28,6 +29,7 @@ namespace TripThruCore
         public RedisDictionary<string, string> servicingPartnerByTrip;
         private RedisDictionary<string, List<Zone>> partnerCoverage;
         public readonly TimeSpan missedBookingPeriod = new TimeSpan(0, 30, 0);
+        private SqliteStorage storage;
 
         List<Zone> GetPartnerCoverage(string partnerID)
         {
@@ -46,7 +48,7 @@ namespace TripThruCore
         public TripThru(bool enableTDispatch = true)
             : base("TripThru", "TripThru")
         {
-            //            partners = new RedisStore<string, Gateway>(redis, MemberInfoGetting.GetMemberName(() => partners));
+            storage = new SqliteStorage("");   
             InitializePersistantDataObjects();
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
 
@@ -86,6 +88,7 @@ namespace TripThruCore
                     ClientId = "TripThru",
                     ClientSecret = "23noiasdn2123"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -100,6 +103,7 @@ namespace TripThruCore
                     ClientId = "testclient@tripthru.com",
                     ClientSecret = "demo12345"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -115,6 +119,7 @@ namespace TripThruCore
                     ClientId = "luxor@tripthru.com",
                     ClientSecret = "23noiasdn2123"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -129,6 +134,7 @@ namespace TripThruCore
                     ClientId = "yellow@tripthru.com",
                     ClientSecret = "12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -144,6 +150,7 @@ namespace TripThruCore
                     ClientId = "metro@tripthru.com",
                     ClientSecret = "12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -159,6 +166,7 @@ namespace TripThruCore
                     ClientId = "les@tripthru.com",
                     ClientSecret = "12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -174,6 +182,7 @@ namespace TripThruCore
                     ClientId = "dubai@tripthru.com",
                     ClientSecret = "12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -189,6 +198,7 @@ namespace TripThruCore
                     ClientId = "test_tdispatch@tripthru.com",
                     ClientSecret = "test_tdispatch12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }
@@ -204,6 +214,22 @@ namespace TripThruCore
                     ClientId = "web@tripthru.com",
                     ClientSecret = "web12ondazazxx21"
                 };
+                storage.CreatePartnerAccount(partnerAccount);
+                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
+                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
+            }
+            {
+                PartnerAccount partnerAccount = new PartnerAccount
+                {
+                    UserName = "GoGoCabi",
+                    Password = "coolapp",
+                    Email = "",
+                    AccessToken = "iUaySN4P1v3a1m5kQ3K1XvCIa8NkV1Psr",
+                    RefreshToken = "",
+                    ClientId = "gogocabi@tripthru.com",
+                    ClientSecret = ""
+                };
+                storage.CreatePartnerAccount(partnerAccount);
                 partnerAccounts[partnerAccount.ClientId] = partnerAccount;
                 clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
             }

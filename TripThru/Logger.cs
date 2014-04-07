@@ -15,7 +15,7 @@ namespace Utils
         {
             private RestClient restClient;
             private string requestUrl;
-            public Queue<RequestLog> queue;
+            public FixedSizeQueue queue;
             private ManualResetEvent sendEvent;
             private Thread sendThread;
 
@@ -37,7 +37,7 @@ namespace Utils
             {
                 this.Source = "gateway";
                 this.MaxQueueItems = 100;
-                this.queue = new Queue<RequestLog>(MaxQueueItems);
+                this.queue = new FixedSizeQueue(MaxQueueItems);
                 this.sendEvent = new ManualResetEvent(false);
                 this.sendThread = new Thread(new ThreadStart(SendThread));
 

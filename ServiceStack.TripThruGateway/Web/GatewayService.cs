@@ -3,6 +3,7 @@ using System.Linq;
 using ServiceStack.Common;
 using Utils;
 using TripThruCore;
+using TripThruCore.Models;
 
 
 namespace ServiceStack.TripThruGateway
