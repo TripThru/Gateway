@@ -420,6 +420,7 @@ namespace Tests
             {
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
+                trip.ID = null;
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
             } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
