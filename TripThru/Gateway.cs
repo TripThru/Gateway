@@ -868,8 +868,8 @@ namespace TripThruCore
                     cancelsAllTime: (long)cancels.allTime.value, cancelsLast24Hrs: (long)cancels.last24Hrs.Count, cancelsLastHour: (long)cancels.lastHour.Count,
                     exceptionsAllTime: (long)exceptions.allTime.value, exceptionsLast24Hrs: (long)exceptions.last24Hrs.Count, exceptionsLastHour: (long)exceptions.lastHour.Count,
                     tripsAllTime: (long)completes.allTime.value, tripsLast24Hrs: (long)completes.last24Hrs.Count, tripsLastHour: (long)completes.lastHour.Count,
-                    distanceAllTime: distance.allTime.value, distanceLast24Hours: distance.last24Hrs.Count, distanceLastHour: distance.lastHour.Count,
-                    fareAllTime: fare.allTime.value, fareLast24Hrs: fare.last24Hrs.Count, fareLastHour: fare.lastHour.Count);
+                    distanceAllTime: distance.allTime.value, distanceLast24Hours: distance.last24Hrs.Value, distanceLastHour: distance.lastHour.Value,
+                    fareAllTime: fare.allTime.value, fareLast24Hrs: fare.last24Hrs.Value, fareLastHour: fare.lastHour.Value);
                 return resp;
             }
             catch (Exception e)

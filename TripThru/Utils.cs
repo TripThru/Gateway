@@ -599,6 +599,14 @@ namespace Utils
         {
             return o.count;
         }
+
+        public double Value
+        {
+            get
+            {
+                return this.count.value;
+            }
+        }
     }
 
     public class RedisExpiryList<T> : IEnumerable<Pair<DateTime, T>>
