@@ -149,7 +149,6 @@
     <Content Include="App_Data\Geo-Location-Names.csv" />
     <Content Include="App_Data\Geo-Routes.csv" />
     <Content Include="App_Data\Geo-Location-Addresses.csv" />
-    <Content Include="App_Data\db.sqlite" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flipCounter-medium.png" />
     <Content Include="Scripts\jquery-1.10.2.js" />
