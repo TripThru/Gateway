@@ -55,7 +55,7 @@ namespace ServiceStack.TripThruGateway
                             new GatewayClient(
                                 account.ClientId,
                                 account.PartnerName,
-                                account.PartnerName,
+                                account.TripThruAccessToken,
                                 account.CallbackUrl
                             )
                         );
