@@ -29,7 +29,7 @@ namespace ServiceStack.TripThruGateway
             {
                 Logger.OpenLog("TripThruGateway");
 
-                StorageManager.OpenStorage(new SqliteStorage("~/../Db/db.sqlite".MapHostAbsolutePath()));
+                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
                 PartnerAccount partnerAccount = new PartnerAccount
                 {
                     UserName = "GoGoCabi",
