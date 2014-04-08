@@ -18,7 +18,6 @@
  *
  ******************************************************************************
 */
-
 defined('INDEX_CALL') or die('You cannot access this page directly.');
 
 if (isset($_REQUEST['fedit'])) {
@@ -960,7 +959,7 @@ $fields = '';
             }
         })
 
-function getLocation()
+    function getLocation()
       {
 
       if (navigator.geolocation)
@@ -971,6 +970,7 @@ function getLocation()
         x.innerHTML="Geolocation is not supported by this browser.";
         }
       }
+      
     function showPosition(position)
       {
 

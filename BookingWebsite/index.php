@@ -44,7 +44,6 @@ if (isset($_GET['p']) && $_GET['p'] != '') {
 ob_start();
 include 'pages/header.php';
 $header = ob_get_clean();
-
 ob_start();
 
 switch ($page) {

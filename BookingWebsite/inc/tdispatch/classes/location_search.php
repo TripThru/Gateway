@@ -22,24 +22,31 @@
 class LocationSearch {
 
     public function search(TDispatch $td, $q = "", $limit = 10, $type = "") {
-        $data = array(
-            "access_token" => $td->getToken(),
-            "q" => $q, //	string	Query string to search locations. Required
-            "limit" => $limit, //	int	Limit number of locations. Optional
-            "type" => $type //	string	Should be 'pickup' if location is going to be used for a pickup. Optional.
-        );
-        $url = $td->getFullApiUrl() . 'locations/search?' . http_build_query($data);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-        $result = curl_exec($ch);
-        $res = json_decode($result, true);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
+        $url2 = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . $q . '&sensor=false';
+
+        $json = file_get_contents(str_replace(" ", "%20", $url2));
+        $obj = json_decode($json);
+
+        $count = 0;
+
+        $jsonNew = new stdClass();
+        $jsonNew->locations = array();
+        $jsonNew->status = $obj->status;
+        foreach ($obj->results as $key) {
+            if(++$count > 5)
+                break;
+            $jsonTemp = new stdClass();
+            $jsonTemp->address = $key->formatted_address;
+            $jsonTemp->location = array('lat' => $key->geometry->location->lat, 'lng' => $key->geometry->location->lng);
+            $jsonTemp->postcode = "";
+            array_push($jsonNew->locations, $jsonTemp);
+        }
+        $jsonss = json_encode($jsonNew);
+
+        $res = $jsonNew;
 		
-        if (!isset($res['status']) || $res['status'] !== 'OK') {
+        if (!isset($res->status) || $res->status !== 'OK') {
             $td->setError($res);
             return false;
         }

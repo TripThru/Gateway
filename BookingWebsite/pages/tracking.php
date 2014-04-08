@@ -227,9 +227,15 @@ text-overflow: ellipsis;
 					setTripInfo(data);
                     if(!$.isEmptyObject(data.driverLocation))
                     {
+
                         var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
 						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
 						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+						var driverInitialLocation = new google.maps.LatLng(data.driverInitialLocation.lat,data.driverInitialLocation.lng);
+						
+
+						var directionsDisplay = null;
+						var directionsDisplay2 = null;
 						
                         //Setup google maps for first time
                         var mapOptions = {
@@ -260,6 +266,92 @@ text-overflow: ellipsis;
 							icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
 							title: 'Destination'
 						});
+
+						initialMarker = new google.maps.Marker({
+								position: driverInitialLocation,
+								map: map,
+								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=bus|FFFF00",
+								title: 'Initial'
+							});
+						                            var routes = [];
+                                switch (data.status) {
+                                    case "Enroute":
+                                        routes = [{ origin: driverInitialLocation, destination: driverLocation }];
+                                        break;
+                                    case "PickedUp":
+                                        routes = [{ origin: driverInitialLocation, destination: pickupLocation }, { origin: pickupLocation, destination: driverLocation }];
+                                        break;
+                                    case "Complete":
+                                        routes = [{ origin: driverInitialLocation, destination: pickupLocation }, { origin: pickupLocation, destination: dropoffLocation }];
+                                        break;
+                                }
+
+                                var rendererOptions = {
+                                    preserveViewport: true,
+                                    suppressMarkers: true,
+                                    polylineOptions: {
+                                        strokeColor: "#8B0000",
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 5
+                                    },
+                                };
+
+                                var rendererOptions2 = {
+                                    preserveViewport: true,
+                                    suppressMarkers: true,
+                                    polylineOptions: {
+                                        strokeColor: "#008000",
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 5
+                                    },
+                                };
+                                var directionsService = new google.maps.DirectionsService();
+                                var directionsService2 = new google.maps.DirectionsService();
+
+                                var boleanFirst = true;
+
+                                if (directionsDisplay != null) {
+                                    directionsDisplay.setMap(null);
+                                    directionsDisplay = null;
+                                }
+                                if (directionsDisplay2 != null) {
+                                    directionsDisplay2.setMap(null);
+                                    directionsDisplay2 = null;
+                                }
+
+                                routes.forEach(function (route) {
+                                    var request = {
+                                        origin: route.origin,
+                                        destination: route.destination,
+                                        travelMode: google.maps.TravelMode.DRIVING
+                                    };
+
+                                    if (boleanFirst) {
+                                        directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+                                        directionsDisplay.setMap(map);
+                                    }
+                                    else {
+                                        directionsDisplay2 = new google.maps.DirectionsRenderer(rendererOptions2);
+                                        directionsDisplay2.setMap(map);
+                                    }
+
+                                    if (boleanFirst) {
+                                        directionsService.route(request, function (result, status) {
+                                            console.log(result);
+                                            if (status == google.maps.DirectionsStatus.OK) {
+                                                directionsDisplay.setDirections(result);
+                                            }
+                                        });
+                                        boleanFirst = false;
+                                    } else {
+                                        directionsService2.route(request, function (result, status) {
+                                            console.log(result);
+                                            if (status == google.maps.DirectionsStatus.OK) {
+                                                directionsDisplay2.setDirections(result);
+                                            }
+                                        });
+                                    }
+                                });
                     }else{
                         $(".tracking_map").text("Driver location unavailable");
                     }
@@ -331,9 +423,12 @@ text-overflow: ellipsis;
 				function updateMap(data){
 					if(!$.isEmptyObject(data.driverLocation))
 					{
+						var directionsDisplay = null;
+						var directionsDisplay2 = null;
 						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
 						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
 						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
+						var driverInitialLocation = new google.maps.LatLng(data.driverInitialLocation.lat,data.driverInitialLocation.lng);
 
 						if(!map){
 
@@ -345,6 +440,13 @@ text-overflow: ellipsis;
 							};
 							map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
 							
+							initialMarker = new google.maps.Marker({
+								position: driverInitialLocation,
+								map: map,
+								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=bus|FFFF00",
+								title: 'Initial'
+							});
+
 							driverMarker = new google.maps.Marker({
 								position: driverLocation,
 								map: map,
@@ -366,90 +468,92 @@ text-overflow: ellipsis;
 								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=cafe|FFFF00",
 								title: 'Destination'
 							});
+
+
 						}
 						//Setup google maps center and new vehicle location
 						driverMarker.setPosition(driverLocation);
 
-						//Here
 							
-							var routes = [];
-							switch(data.status)
-							{
-								case "Enroute":
-									if(driverLocationInitial == null)
-										driverLocationInitial = driverLocation;
-									routes = [{origin: driverLocationInitial, destination: driverLocation}];
-									break;
-								case "PickedUp":
-									if(driverLocationInitial != null)
-										routes = [{origin: driverLocationInitial, destination: pickupLocation},{origin: pickupLocation, destination: driverLocation}];
-									else
-										routes = [{origin: pickupLocation, destination: driverLocation}];
-									break;
-								case "Complete":
-									if(driverLocationInitial != null)
-										routes = [{origin: driverLocationInitial, destination: pickupLocation},{origin: pickupLocation, destination: dropoffLocation}];
-									else
-										routes = [{origin: pickupLocation, destination: dropoffLocation}];
-									break;
-							}
+                            var routes = [];
+                                switch (data.status) {
+                                    case "Enroute":
+                                        routes = [{ origin: driverInitialLocation, destination: driverLocation }];
+                                        break;
+                                    case "PickedUp":
+                                        routes = [{ origin: driverInitialLocation, destination: pickupLocation }, { origin: pickupLocation, destination: driverLocation }];
+                                        break;
+                                    case "Complete":
+                                        routes = [{ origin: driverInitialLocation, destination: pickupLocation }, { origin: pickupLocation, destination: dropoffLocation }];
+                                        break;
+                                }
 
-							var rendererOptions = {
-							    preserveViewport: true,         
-							    suppressMarkers:true,
-							    polylineOptions: {
-							      strokeColor: "#8B0000",
-							      strokeOpacity: 0.8,
-							      strokeWeight: 5
-							    },
-							};
+                                var rendererOptions = {
+                                    preserveViewport: true,
+                                    suppressMarkers: true,
+                                    polylineOptions: {
+                                        strokeColor: "#8B0000",
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 5
+                                    },
+                                };
 
-							var rendererOptions2 = {
-							    preserveViewport: true,         
-							    suppressMarkers:true,
-							    polylineOptions: {
-							      strokeColor: "#008000",
-							      strokeOpacity: 0.8,
-							      strokeWeight: 5
-							    },
-							};
-							var directionsService = new google.maps.DirectionsService();
+                                var rendererOptions2 = {
+                                    preserveViewport: true,
+                                    suppressMarkers: true,
+                                    polylineOptions: {
+                                        strokeColor: "#008000",
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 5
+                                    },
+                                };
+                                var directionsService = new google.maps.DirectionsService();
+                                var directionsService2 = new google.maps.DirectionsService();
 
-							var boleanFirst = true;
+                                var boleanFirst = true;
 
-							routes.forEach(function(route){
-							    var request = {
-							        origin: route.origin,
-							        destination: route.destination,
-							        travelMode: google.maps.TravelMode.DRIVING
-							    };
+                                if (directionsDisplay != null) {
+                                    directionsDisplay.setMap(null);
+                                    directionsDisplay = null;
+                                }
+                                if (directionsDisplay2 != null) {
+                                    directionsDisplay2.setMap(null);
+                                    directionsDisplay2 = null;
+                                }
 
-							    var directionsDisplay;
+                                routes.forEach(function (route) {
+                                    var request = {
+                                        origin: route.origin,
+                                        destination: route.destination,
+                                        travelMode: google.maps.TravelMode.DRIVING
+                                    };
 
-							    if(boleanFirst)
-							    {
-							    	if(driverLocationInitial != null)
-							        	directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
-							        else
-							        	directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions2);
-							        directionsDisplay.setMap(map);
-							        boleanFirst = false;
-						    	}
-						    	else
-						    	{
-						    		directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions2);
-							        directionsDisplay.setMap(map);
-						    	}
+                                    if (boleanFirst) {
+                                        directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+                                        directionsDisplay.setMap(map);
+                                    }
+                                    else {
+                                        directionsDisplay2 = new google.maps.DirectionsRenderer(rendererOptions2);
+                                        directionsDisplay2.setMap(map);
+                                    }
 
-							    directionsService.route(request, function(result, status) {
-							        console.log(result);
-
-							        if (status == google.maps.DirectionsStatus.OK) {
-							            directionsDisplay.setDirections(result);
-							        }
-							    });
-							});
-						//Here
+                                    if (boleanFirst) {
+                                        directionsService.route(request, function (result, status) {
+                                            console.log(result);
+                                            if (status == google.maps.DirectionsStatus.OK) {
+                                                directionsDisplay.setDirections(result);
+                                            }
+                                        });
+                                        boleanFirst = false;
+                                    } else {
+                                        directionsService2.route(request, function (result, status) {
+                                            console.log(result);
+                                            if (status == google.maps.DirectionsStatus.OK) {
+                                                directionsDisplay2.setDirections(result);
+                                            }
+                                        });
+                                    }
+                                });
 
 						map.setCenter(driverLocation);
 					}else{

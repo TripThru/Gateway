@@ -1,8 +1,8 @@
-HomeUrl=http://localhost/BookingWebsite/
+HomeUrl=http://localhost:81/BookingWebsite/
 RelativeHomeUrl=/BookingWebsite/index.php
-TripThruUrl=http://54.201.134.194/TripThru.TripThruGateway/
+TripThruUrl=http://localhost:17187/
 TripThruAccessToken=jaosid1201231
-PartnerUrl=http://54.201.134.194/TripThru.TestTDispatch/
-PartnerAccessToken=test_tdispatch12ondazazxx21
-PartnerName=Test TDispatch
-PartnerId=test_tdispatch@tripthru.com
+PartnerUrl=http://localhost:17188/
+PartnerAccessToken=luxor23noiasdn2123
+PartnerName=Luxor Cab
+PartnerId=luxor@tripthru.com
