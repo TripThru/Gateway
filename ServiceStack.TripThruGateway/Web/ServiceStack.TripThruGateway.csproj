@@ -139,6 +139,7 @@
     <Content Include="Content\Images\loading.gif" />
     <Content Include="Content\Images\Logo.png" />
     <Content Include="Custom Integrations\TDispatchOffices.txt" />
+    <Content Include="login.html" />
     <Content Include="Scripts\Custom Integrations\TDispatchOffices.txt" />
     <Content Include="default.htm" />
     <Content Include="Global.asax" />

@@ -66,7 +66,8 @@ namespace ServiceStack.TripThruGateway
                         new CustomCredentialsAuthProvider(
                             new Dictionary<string, string>(){ 
                                 {"tripthru", "optimize"},
-                                {"gogocabi", "coolapp"}
+                                {"gogocabi", "coolapp"},
+                                {"tomhalligan", "demo"}
                             },
                             configuration.host.virtualPath
                         )
