@@ -19,6 +19,34 @@
 <body>
 
     <style>
+        @@font-face {
+            font-family: "Arimo";
+            font-style: normal;
+            font-weight: 400;
+            src: local("Arimo"), url("http://themes.googleusercontent.com/static/fonts/arimo/v6/wZLYhRRxZWGToTRP78bqJQ.woff") format("woff");
+        }
+
+        @@font-face {
+            font-family: "Arimo";
+            font-style: normal;
+            font-weight: 700;
+            src: local("Arimo Bold"), local("Arimo-Bold"), url("http://themes.googleusercontent.com/static/fonts/arimo/v6/UnXpojilM3XslYxUnWuVe_esZW2xOQ-xsNqO47m55DA.woff") format("woff");
+        }
+
+        @@font-face {
+            font-family: "Arimo";
+            font-style: italic;
+            font-weight: 400;
+            src: local("Arimo Italic"), local("Arimo-Italic"), url("http://themes.googleusercontent.com/static/fonts/arimo/v6/8ezAIdgyp-Cm5_X7mWzP_g.woff") format("woff");
+        }
+
+        @@font-face {
+            font-family: "Arimo";
+            font-style: italic;
+            font-weight: 700;
+            src: local("Arimo Bold Italic"), local("Arimo-BoldItalic"), url("http://themes.googleusercontent.com/static/fonts/arimo/v6/_K7sg-ijHdmkwPzV9FiqaBsxEYwM7FgeyaSgU71cLG0.woff") format("woff");
+        }
+
         body {
             font-family: 'Open Sans',sans-serif;
             background: #f8f8f8;
@@ -43,11 +71,20 @@
         .logo {
             float: left;
             margin: 12px 55px 11px 11px;
+            font-size: 40px;
+            color: #0099ff;
+            font-family: 'Arimo';
+            letter-spacing: 0;
+            line-height: 1.3;
+            font-weight: bold;
+            font-style: italic;
         }
 
-            .logo a {
-                float: left;
-            }
+        .logo a {
+            /*
+            float: left;
+                */
+        }
 
         #head_nav {
             float: left;
@@ -414,7 +451,9 @@
     <div id="header_out">
         <div id="header">
             <div class="logo">
-                <img src="content/images/Logo.png" border="0" /></div>
+                <!--<img src="content/images/Logo.png" border="0" />-->
+                TripThru
+            </div>
             <ul id="head_nav">
                 <li><a class="active" href="#">Stats</a></li>
                 <li><a href="log">Log</a></li>
