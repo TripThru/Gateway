@@ -57,14 +57,11 @@
 
 <div id='body' class="swagger-ui-wrap">
         <p>----------------------------------------------------------------------------------------------------------------------</p>
-        <p>The Sandbox is currently integrated with many simulated partners and a few T Dispatch demo cab offices</p>
-        <p>You may download the T Dispatch driver app and login as TripThruDemoDriver password TripThru</p>
-        <p>You may then log into our T Dispatch demo cab office "sanfran" controller "TripThruDemo" password TripThruDemo</p>
-        <p>You can use the /partners services to get a list of simulated partners and their coverage areas.  The T Dispatch sanfran office is one of them</p>
-        <p>Once you know the areas covered by our simulated partners, you can dispatch pickup requests to them via the /dispatch services</p>
-        <p>If you log into your driver app and dispatch to the sanfran office you may receive the booking through your T Dispatch driver app</p>
-        <p>Use the /status services to monitor the progress of your booking.  The simulated partners function as any real partner would.</p>
-        <p>The routes are real and the ETAs, prices, and travel times realistic</p>
+        <p>Use the GET /partners service to get a list of simulated partners and their coverage areas.</p>
+        <p>Once you know the areas covered by our partners, you can dispatch pickup requests to them via the POST /dispatch service.</p>
+        <p>Dispatching to an area not covered by any of our partners will result in a reject. Alternatively, you can get a list of quotes via</p>
+        <p>GET /quotes, and then dispatch to the partner of your choice.  After dispatching, you can get the status of your trip via GET /tripstatus.</p>
+        <p>To get a list of all active trips use GET /trips.</p>
         <p>----------------------------------------------------------------------------------------------------------------------</p>
         <p><b>1. Enter your api_key</b></p>
         <form id='api_selector'>
