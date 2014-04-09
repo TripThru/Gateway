@@ -270,7 +270,7 @@ text-overflow: ellipsis;
 						initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=bus|FFFF00",
+								icon: "http://cen.uqroo.mx/imagenes/publish_x.png",
 								title: 'Initial'
 							});
 						                            var routes = [];
@@ -443,7 +443,7 @@ text-overflow: ellipsis;
 							initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=bus|FFFF00",
+								icon: "http://cen.uqroo.mx/imagenes/publish_x.png",
 								title: 'Initial'
 							});
 
