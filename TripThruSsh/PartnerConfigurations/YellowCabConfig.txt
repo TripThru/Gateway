@@ -15,7 +15,7 @@
         "name" : "Yellow Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 200,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
@@ -37,7 +37,19 @@
             "Bartomeu Astor",
             "Matthias Randulf",
             "Ahoth Achab",
-            "Mattias Ohannes"
+            "Mattias Ohannes",
+			"Alta J. Johnson",
+			"Joy B. Wright",
+			"Joseph A. Bethel",
+			"Rachael H. Hall",
+			"Bernice R. Gooch",
+			"Minerva C. Alton",
+			"Shannon R. Turnipseed",
+			"Herman E. Ackerman",
+			"Michael D. Peters",
+			"Kenneth M. Goss",
+			"Barry C. Dumas",
+			"Colleen G. McAllister"
         ],
         "passengers" : [
             "George Washington",

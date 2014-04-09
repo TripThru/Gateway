@@ -15,7 +15,7 @@
         "name" : "Metro Cab of Boston",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 200,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 42.356217,
             "lng" : -71.137512
@@ -41,7 +41,19 @@
             "Clyde Hariwini",
             "Flavio Ragnvald",
             "Kenaniah Sergei",
-            "Ezra Adilet"
+            "Ezra Adilet",
+			"David S. Chatman",
+			"Lilly A. Sabala",
+			"Jesus S. Jackson",
+			"Martha R. Martin",
+			"Donald G. Lillibridge",
+			"Clara B. Cantu",
+			"Michael P. Ruiz",
+			"Leland R. Elmore",
+			"Chris P. Gardner",
+			"Dessie R. Rivera",
+			"Kathy L. Griffin",
+			"Christopher B. Bell"
         ],
         "passengers" : [
             "Michael Glennon",
