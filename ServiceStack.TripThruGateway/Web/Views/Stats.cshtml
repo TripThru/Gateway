@@ -80,11 +80,11 @@
             font-style: italic;
         }
 
-        .logo a {
-            /*
+            .logo a {
+                /*
             float: left;
                 */
-        }
+            }
 
         #head_nav {
             float: left;
@@ -546,6 +546,13 @@
                     </span>
                 </div>
                 <div id="trip-info">
+                    <div>
+                        <p>
+                            <span style='font-weight: bold;'>TripID: </span>
+                            <span id="selectedTripID" />
+                        </p>
+                    </div>
+                    <br />
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Passenger: </span>
@@ -1152,6 +1159,7 @@
 
                         driverPreviousLocation = trip.driverLocation;
 
+                        var tripId = $(".activeTrip").find("#tripId").val();
                         var passengerName = trip.passengerName ? trip.passengerName : 'Not available';
                         var pickupTime = trip.pickupTime ? trip.pickupTime.split(".")[0] : 'Passenger waiting';
                         var status = trip.status ? trip.status : 'Not available';
@@ -1165,6 +1173,7 @@
                         var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
                         var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
+                        $("#selectedTripID").hide().html(tripId).fadeIn();
                         $("#selectedTripPassengerName").hide().html(passengerName).fadeIn();
                         $("#selectedTripPickupTime").hide().html(pickupTime).fadeIn();
                         $("#selectedTripPickupLocation").hide().html(pickupLocationName).fadeIn();
@@ -1242,7 +1251,7 @@
                                 initialMarker = new google.maps.Marker({
                                     position: driverInitialLocation,
                                     map: map,
-                                    icon: "http://cen.uqroo.mx/imagenes/publish_x.png",
+                                    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLXVyVt5ierOdKEkSeez1pTe_nwapdwGUxf877FLQ2v_cGzqWa",
                                     title: 'Initial'
                                 });
                             }
@@ -1354,6 +1363,7 @@
             }
 
             function clearTripInfo() {
+                $("#selectedTripID").hide().html('').fadeIn();
                 $("#selectedTripPassengerName").hide().html('').fadeIn();
                 $("#selectedTripPickupTime").hide().html('').fadeIn();
                 $("#selectedTripPickupLocation").hide().html('').fadeIn();

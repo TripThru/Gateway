@@ -55,6 +55,20 @@ text-overflow: ellipsis;
     <div class="account_fields_cont vehicle_tracking_page box-container">
         <h1>Track your vehicle</h1>
 		<div id="trip-info">
+            <div>
+                <p>
+                    <span style='font-weight: bold;'>TripID: </span>
+                    <span id="selectedTripID" />
+                </p>
+            </div>
+            <br />
+            <div>
+                <p>
+                    <span style='font-weight: bold;'>Partner ID: </span>
+                    <span id="selectedPartnerID" />
+                </p>
+            </div>
+            <br />
 			<div>
 				<p>
 					<span style='font-weight: bold;'>Passenger: </span>
@@ -270,7 +284,7 @@ text-overflow: ellipsis;
 						initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "http://cen.uqroo.mx/imagenes/publish_x.png",
+								icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLXVyVt5ierOdKEkSeez1pTe_nwapdwGUxf877FLQ2v_cGzqWa",
 								title: 'Initial'
 							});
 						                            var routes = [];
@@ -395,6 +409,8 @@ text-overflow: ellipsis;
 				}
 				
 				function setTripInfo(trip){
+                    var pk = getURLParameter("pk");
+                    var partnerId = getURLParameter("partnerId");
 					var passengerName = trip.passengerName ? trip.passengerName : 'Not available';
 					var pickupTime = trip.pickupTime ? new Date(trip.pickupTime) : (trip.resultCode != 'NotFound' ? 'Passenger waiting' : 'Not available');
 					var status = trip.status ? trip.status : (trip.resultCode == 'NotFound' ? 'Complete' : 'Not available');
@@ -407,6 +423,8 @@ text-overflow: ellipsis;
 					var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
 					var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
+                    $("#selectedTripID").hide().html(pk).fadeIn();
+                    $("#selectedPartnerID").hide().html(partnerId).fadeIn();
 					$("#selectedTripPassengerName").hide().html(passengerName).fadeIn();
 					$("#selectedTripPickupTime").hide().html(pickupTime).fadeIn();
 					$("#selectedTripPickupLocation").hide().html(pickupLocationName).fadeIn();
@@ -443,7 +461,7 @@ text-overflow: ellipsis;
 							initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "http://cen.uqroo.mx/imagenes/publish_x.png",
+								icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLXVyVt5ierOdKEkSeez1pTe_nwapdwGUxf877FLQ2v_cGzqWa",
 								title: 'Initial'
 							});
 

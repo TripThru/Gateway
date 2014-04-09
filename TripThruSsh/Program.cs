@@ -46,7 +46,7 @@ namespace TripThruSsh
         private static void Main(string[] args)
         {
             env = environments["vagrant"];
-            localPath = "Z:\\WindowsDev\\Gateway\\";
+            localPath = @"C:\Users\OscarErnesto\Documents\GitHub\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;
