@@ -15,7 +15,7 @@
         "name" : "Les Taxi Blues",
         "baseCost" : 5.00,
         "costPerMile" : 4.70,
-        "tripsPerHour" : 100,
+        "tripsPerHour" : 150,
 		"location" : {
 			"lat" : 48.837246,
             "lng" : 2.347844
@@ -28,6 +28,18 @@
 			{
                 "start" : { "lat" : 48.835975, "lng" : 2.345097},
                 "end"   : { "lat" : 48.837275, "lng" : 2.382433}
+            },
+            {
+                "start" : { "lat" : 37.800224, "lng" : -122.43352},
+                "end"   : { "lat" : 37.800066, "lng" : -122.436167}
+            },
+            {
+                "start" : { "lat" : 42.342634, "lng" : -71.122545},
+                "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+            },
+            {
+                "start" : { "lat" : 25.270751, "lng" : 55.314030},
+                "end"   : { "lat" : 25.279288, "lng" : 55.304331}
             }
         ],
         "vehicleTypes" : [
@@ -53,6 +65,16 @@
 			"Jolie Boivin",
 			"Maurice Lajeunesse",
 			"Eleanor Busque",
+			"Duane Garth",
+			"Gala Ciesielski",  
+			"Tomi Boring",  
+			"Lynda Scherer",  
+			"Deetta Goya",  
+			"Alexia Schiel",  
+			"Tynisha Pharris",  
+			"Nan Newland",  
+			"Lelia Marlar",  
+			"Dwana Mckie"  
         ],
         "passengers" : [
             "Daniel Corona"

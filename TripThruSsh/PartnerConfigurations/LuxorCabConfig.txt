@@ -15,23 +15,15 @@
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 100,
+        "tripsPerHour" : 150,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
         },
         "possibleTrips" : [
             {
-                "start" : { "lat" : 37.782551, "lng" : -122.445368},
-                "end"   : { "lat" : 37.786956, "lng" : -122.440279}
-            },
-            {
                 "start" : { "lat" : 37.800224, "lng" : -122.43352},
                 "end"   : { "lat" : 37.800066, "lng" : -122.436167}
-            },
-            {
-                "start" : { "lat" : 37.784345, "lng" : -122.422922},
-                "end"   : { "lat" : 37.785292, "lng" : -122.416257}
             },
             {
                 "start" : { "lat" : 48.835975, "lng" : 2.345097},
@@ -76,7 +68,17 @@
 			"James A. Birt",
 			"Margaret J. Kent",
 			"Gladys L. Serrano",
-			"Eddie J. Johnson"
+			"Eddie J. Johnson",
+			"Lynnette Queener",  
+			"Hulda Mckinnis",
+			"Elicia Kuhlman",  
+			"Doug Vanwingerden",  
+			"Orval Aubert",  
+			"Zoraida Timpson",  
+			"Whitney Ables",  
+			"Tandy Aponte",  
+			"Janeen Aguilera",  
+			"Isidra Bitter"  
         ],
         "passengers" : [
             "Elvis Presley",

@@ -15,16 +15,33 @@
         "name" : "Yellow Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 100,
+        "tripsPerHour" : 150,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
         },
         "possibleTrips" : [
             {
+                 "start" : { "lat" : 42.342634, "lng" : -71.122545},
+                 "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+             },
+			 {
                 "start" : { "lat" : 37.782551, "lng" : -122.445368},
                 "end"   : { "lat" : 37.786956, "lng" : -122.440279}
+            },
+			{
+                "start" : { "lat" : 48.835975, "lng" : 2.345097},
+                "end"   : { "lat" : 48.837275, "lng" : 2.382433}
+            },
+			{
+                "start" : { "lat" : 25.270751, "lng" : 55.314030},
+                "end"   : { "lat" : 25.279288, "lng" : 55.304331}
+            },
+            {
+                "start" : { "lat" : 37.784345, "lng" : -122.422922},
+                "end"   : { "lat" : 37.785292, "lng" : -122.416257}
             }
+
         ],
         "vehicleTypes" : [
             "compact",
@@ -49,7 +66,28 @@
 			"Michael D. Peters",
 			"Kenneth M. Goss",
 			"Barry C. Dumas",
-			"Colleen G. McAllister"
+			"Colleen G. McAllister",
+			"Karina Huntsman",  
+			"Geoffrey Cuomo",  
+			"Alease Linz",  
+			"Arnetta Agin",    
+			"Gregorio Timmerman",    
+			"Garret Kadel",    
+			"Christy Coplin",    
+			"Elias Alphin",    
+			"Ossie Chesnut",    
+			"Eufemia Adelman",    
+			"Tesha Mcbain",    
+			"Bobette Leeder",    
+			"Ching Owenby",    
+			"Tonie Millikin",    
+			"Tamatha Parsley",   
+			"Lawrence Soliman",    
+			"Palmira Rawlins",    
+			"Teresita Montesinos",    
+			"Robby Moses",    
+			"Roseanna Littlefield" 
+
         ],
         "passengers" : [
             "George Washington",

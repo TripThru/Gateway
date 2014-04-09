@@ -15,7 +15,7 @@
         "name" : "Dubai Taxi Corporation",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 100,
+        "tripsPerHour" : 150,
 		"location" : {
 			"lat" : 25.271139,
             "lng" : 55.307485
@@ -24,6 +24,22 @@
             {
                 "start" : { "lat" : 25.270751, "lng" : 55.314030},
                 "end"   : { "lat" : 25.279288, "lng" : 55.304331}
+            },
+            {
+                "start" : { "lat" : 42.342634, "lng" : -71.122545},
+                "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+            },
+			{
+                "start" : { "lat" : 37.800224, "lng" : -122.43352},
+                "end"   : { "lat" : 37.800066, "lng" : -122.436167}
+            },
+            {
+                "start" : { "lat" : 48.835975, "lng" : 2.345097},
+                "end"   : { "lat" : 48.837275, "lng" : 2.382433}
+            },
+			 {
+                "start" : { "lat" : 37.782551, "lng" : -122.445368},
+                "end"   : { "lat" : 37.786956, "lng" : -122.440279}
             }
         ],
         "vehicleTypes" : [
@@ -50,7 +66,17 @@
 			"Muta Abdul Awad",
 			"Fakhir Anbar Guirguis",
 			"Khuzama Maysa Srour",
-			"Sanaa Malakah Ganim"
+			"Sanaa Malakah Ganim",
+			"Jeannine Loyola",
+			"Jacquelyn Folts",
+			"Benton Aguila",
+			"Hisako Peake",
+			"Earlie Tapia",
+			"Gino Kampf",
+			"Temika Snipe",  
+			"Rena Dedrick",
+			"Angele Stoffel",  
+			"Leonor Chesson"
         ],
         "passengers" : [
             "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"

@@ -609,7 +609,7 @@ namespace TripThruCore
         public readonly TimeSpan retryInterval = new TimeSpan(0, 5, 0);
         public readonly TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
         public readonly TimeSpan removalAge = new TimeSpan(0, 5, 0);
-        public const int maxActiveTrips = 2;
+        public const int maxActiveTrips = 7;
 
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
