@@ -15,7 +15,7 @@
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 200,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127
@@ -64,7 +64,19 @@
             "Simon Shvarts",
             "Bob Toni",
             "Velimir Erebos",
-            "Maximillian Constantin"
+            "Maximillian Constantin",
+			"Kimberly H. Kennedy",
+			"Rodney M. Montgomery",
+			"James B. Racine",
+			"Patrick M. High",
+			"Marcella A. Sova",
+			"Maria K. Morrison",
+			"Lisa M. Nicholson",
+			"Edward P. Morton",
+			"James A. Birt",
+			"Margaret J. Kent",
+			"Gladys L. Serrano",
+			"Eddie J. Johnson"
         ],
         "passengers" : [
             "Elvis Presley",
