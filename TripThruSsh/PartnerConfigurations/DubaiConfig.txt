@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : true,
+  "enabled" : false,
   "partner" : {
       "name" : "Dubai Taxi Corporation",
       "clientId" : "dubai@tripthru.com",
@@ -15,7 +15,7 @@
         "name" : "Dubai Taxi Corporation",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 150,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 25.271139,
             "lng" : 55.307485

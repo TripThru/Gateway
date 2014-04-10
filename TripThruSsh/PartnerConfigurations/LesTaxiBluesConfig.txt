@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : true,
+  "enabled" : false,
   "partner" : {
       "name" : "Les Taxi Blues",
       "clientId" : "les@tripthru.com",
@@ -15,7 +15,7 @@
         "name" : "Les Taxi Blues",
         "baseCost" : 5.00,
         "costPerMile" : 4.70,
-        "tripsPerHour" : 150,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 48.837246,
             "lng" : 2.347844

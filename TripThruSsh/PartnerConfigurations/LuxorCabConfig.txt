@@ -1,7 +1,7 @@
 ﻿{
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : true,
+  "enabled" : false,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
@@ -15,7 +15,7 @@
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 150,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 37.78906,
             "lng" : -122.402127

@@ -19,6 +19,7 @@
 
 #Service stack
 server {
+	add_header P3P 'policyref="/w3c/p3p.xml", CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT", CP="CAO PSA OUR"';
 	listen   80; ## listen for ipv4; this line is default and implied
         listen 443;
         listen 127.0.0.1;

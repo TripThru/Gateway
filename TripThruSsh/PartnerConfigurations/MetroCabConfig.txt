@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : true,
+  "enabled" : false,
   "partner" : {
       "name" : "Metro Cab of Boston",
       "clientId" : "metro@tripthru.com",
@@ -15,7 +15,7 @@
         "name" : "Metro Cab of Boston",
         "baseCost" : 3.00,
         "costPerMile" : 3.00,
-        "tripsPerHour" : 150,
+        "tripsPerHour" : 100,
 		"location" : {
 			"lat" : 42.356217,
             "lng" : -71.137512
