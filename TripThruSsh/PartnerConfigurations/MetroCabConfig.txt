@@ -1,7 +1,7 @@
 {
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : false,
+  "enabled" : true,
   "partner" : {
       "name" : "Metro Cab of Boston",
       "clientId" : "metro@tripthru.com",

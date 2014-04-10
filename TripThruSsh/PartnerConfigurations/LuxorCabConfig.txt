@@ -1,7 +1,7 @@
 ﻿{
   "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
-  "enabled" : false,
+  "enabled" : true,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
