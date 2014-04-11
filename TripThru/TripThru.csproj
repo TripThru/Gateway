@@ -136,12 +136,12 @@
     <Compile Include="Gateway.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MapTools.cs" />
-    <Compile Include="Models.cs" />
     <Compile Include="PartnerGateway.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Storage.cs" />
     <Compile Include="TripThruGateway.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

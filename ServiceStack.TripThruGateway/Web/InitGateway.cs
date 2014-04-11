@@ -10,7 +10,7 @@ namespace ServiceStack.TripThruGateway
 	using System.Collections.Generic;
 	using ServiceStack.ServiceHost;
 	using ServiceStack.ServiceInterface;
-    using TripThruCore.Models;
+    using TripThruCore.Storage;
 
 
     public class InitGateway : IReturn<InitGatewayResponse>
@@ -45,8 +45,6 @@ namespace ServiceStack.TripThruGateway
 
                 GatewayService.gateway = new TripThru();
                 //Logger.OpenLog("TripThruGateway", "c:\\Users\\Edward\\");
-                MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
-                MapTools.LoadGeoData();
 
                 foreach (PartnerAccount account in StorageManager.GetPartnerAccounts())
                 {
@@ -60,6 +58,9 @@ namespace ServiceStack.TripThruGateway
                             )
                         );
                 }
+
+                MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+                MapTools.LoadGeoData();
             }
             catch (Exception e)
             {

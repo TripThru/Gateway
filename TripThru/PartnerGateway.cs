@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using ServiceStack.Text;
 using Utils;
-using TripThruCore.Models;
+using TripThruCore.Storage;
 
 namespace TripThruCore
 {

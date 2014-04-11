@@ -6,7 +6,7 @@ using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.DataAnnotations;
 
-namespace TripThruCore.Models
+namespace TripThruCore.Storage
 {
     public interface Storage
     {

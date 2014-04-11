@@ -8,7 +8,7 @@ using ServiceStack;
 using ServiceStack.Text;
 using System.Runtime.Serialization;
 using ServiceStack.ServiceModel;
-using TripThruCore.Models;
+using TripThruCore.Storage;
 namespace TripThruCore
 {
     public class PartnerConfiguration

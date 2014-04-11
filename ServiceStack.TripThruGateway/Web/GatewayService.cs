@@ -6,7 +6,7 @@ using ServiceStack.Common;
 using ServiceStack.Html;
 using Utils;
 using TripThruCore;
-using TripThruCore.Models;
+using TripThruCore.Storage;
 
 
 namespace ServiceStack.TripThruGateway

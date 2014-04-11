@@ -10,7 +10,7 @@ using System.IO;
 using RestSharp;
 using ServiceStack.Text;
 using ServiceStack.Redis;
-using TripThruCore.Models;
+using TripThruCore.Storage;
 
 namespace TripThruCore
 {
