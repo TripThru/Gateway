@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using ServiceStack;
 using ServiceStack.Text;
 using Tamir.SharpSsh;
 using System.Threading;
 using TripThruCore;
-using Utils;
 
 namespace TripThruSsh
 {
@@ -44,7 +39,6 @@ namespace TripThruSsh
         private static string webServer;
         private static string monoServer;
         private static List<PartnerConfiguration> partnerConfigurations;
-        static AutoResetEvent ev = new AutoResetEvent(false);
 
         private static void Main(string[] args)
         {
