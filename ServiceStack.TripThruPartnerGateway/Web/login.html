@@ -2,6 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>Login</title>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="Scripts/jquery.cookie.js"></script>
 </head>
 <body>
     <style>
@@ -169,6 +171,21 @@
             text-align: center;
         }
     </style>
+    <script>
+        $(document).ready(function () {
+            $("#login_container").submit(function (e) {
+                e.preventDefault();
+                var form = {
+                    username : $("#username").val(),
+                    password : $("#password").val()
+                };
+                $.post("auth/credentials", form, function (data) {
+                    $.cookie('ss-id', data.sessionId);
+                    window.location.href = 'stats';
+                });
+            });
+        });
+    </script>
     <div id="header_out">
         <div class="logo">
             <!--<img src="content/images/Logo.png" border="0" />-->
@@ -176,18 +193,16 @@
         </div>
     </div>
     <div id="main_container">
-        <form id="login_container" action="auth/credentials" method="post">
+        <form id="login_container">
             <br />
             <h1>Login</h1>
             <br />
-            <input class="login_container_text" name="UserName" type="text" placeholder="Username" />
-            <input class="login_container_text" name="Password" style="margin-left: 5px;" type="password" placeholder="Password" />
+            <input class="login_container_text" name="UserName" id="username" type="text" placeholder="Username" />
+            <input class="login_container_text" name="Password" id="password" style="margin-left: 5px;" type="password" placeholder="Password" />
             <br />
-            <input class="blue-button" type="submit" value="Login"/>
+            <input class="blue-button" type="submit" id="submit" value="Login"/>
             <input type="hidden" name="RememberMe" value="true" />
         </form>
     </div>
-
-
 </body>
 </html>
