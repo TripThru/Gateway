@@ -6,17 +6,17 @@
 
 <html>
 
-    <head>
-        <title>Log</title>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <link href="Scripts/prism.css" rel="stylesheet" />
-        <script type="text/javascript" src="Scripts/prism.js"></script>
-    </head>
+<head>
+    <title>Log</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link href="Scripts/prism.css" rel="stylesheet" />
+    <script type="text/javascript" src="Scripts/prism.js"></script>
+</head>
 
 
-    <body>
+<body>
 
-        <style>
+    <style>
             @@font-face {
                 font-family: "Arimo";
                 font-style: normal;
@@ -196,84 +196,90 @@
             }
         </style>
 
-        <div id="header_out">
-            <div id="header">
-                <div class="logo">
-                    <!--<img src="content/images/Logo.png" border="0" />-->
-                    TripThru
-                </div>
-                <ul id="head_nav">
-                    <li><a href="stats">Stats</a></li>
-                    <li><a class="active" href="#">Log</a></li>
-                </ul>
+    <div id="header_out">
+        <div id="header">
+            <div class="logo">
+                <!--<img src="content/images/Logo.png" border="0" />-->
+                TripThru
             </div>
+            <ul id="head_nav">
+                <li><a href="stats">Stats</a></li>
+                <li><a class="active" href="#">Log</a></li>
+            </ul>
+        <a href="http://www.tripthru.com"><img src="http://www.ctpltda.com/web/images/stories/home.png" width="50" height="50" align="right"/></a>
         </div>
+    </div>
 
-        <pre><code id=planets></code></pre>
+    <pre><code id=planets></code></pre>
 
-        <div class="box_container">
+    <div class="box_container">
             @if (Model.LogList.Count == 0)
             {
-                <h2 style="margin-top: 30px;">No recent log entries</h2>
+
+            <h2 style="margin-top: 30px;">No recent log entries</h2>
             }
             <ul class="request_list tree">
-                @for (var j = Model.LogList.Count - 1; j >= 0; j--)
+            @for (var j = Model.LogList.Count - 1; j >= 0; j--)
                 {
                     var entry = Model.LogList[j];
                     if (entry.Messages.Count > 0)
                     {
-                        <li class="request_block">
-                            @entry.Time.ToString() | @entry.Messages.First().Text
-                            <ul>
-                                @if (!entry.Request.IsNullOrEmpty())
-                                {
+
+                <li class="request_block">
+                    @entry.Time.ToString() | @entry.Messages.First().Text
+                    <ul>
+                        <br />
+                        @if (!entry.Request.IsNullOrEmpty())
+                        {
+                            <li>
+                                <span class="handle collapsed"></span>
+                                Request
+                                       
+                                <ul style="display: none;">
                                     <li>
-                                        <span class="handle collapsed"></span>
-                                        Request
-                                        <ul style="display: none;">
-                                            <li><pre style=" word-wrap: break-word;" class="prettyprint language-java"><code class="language-javascript">@PrettyPrint(entry.Request)</code></pre></li>
-                                        </ul>
+                                        <pre style="word-wrap: break-word;" class="prettyprint language-java"><code class="language-javascript">@PrettyPrint(entry.Request)</code></pre>
                                     </li>
-                                }
-                                @if (entry.Messages.Count > 1)
+                                </ul>
+                            </li>
+                        }
+                        @if (entry.Messages.Count > 1)
+                        {
+                            for (int i = 1; i < entry.Messages.Count; i++)
+                            {
+                                var log = entry.Messages.ElementAt(i);
+
+                                <li style="padding-left: @log.Indent.ToString()px;">
+                                @if (log.Json != null)
                                 {
-                                    for (int i = 1; i < entry.Messages.Count; i++)
-                                    {
-                                        var log = entry.Messages.ElementAt(i);
-                                        <li style="padding-left: @log.Indent.ToString()px;">
-                                            @if (log.Json != null)
-                                            {
-                                                <span class="handle collapsed"></span>
-                                            }
-
-                                            <p>@PrettyPrint(log.Text)</p>
-
-                                            @if (log.Json != null)
-                                            {
-                                                <ul style="display: none;">
-                                                    <li>
-                                                        <pre><code class="language-javascript">Request: @PrettyPrint(log.Json);
-                                    @if (i + 1 < entry.Messages.Count - 1 && entry.Messages.ElementAt(i + 1).Text.Contains("Response") && entry.Messages.ElementAt(i + 1).Json != null)
-                                    {
-                                        i++;
-                                        <span>Response: </span>@PrettyPrint(entry.Messages.ElementAt(i).Json);
-
-                                    }
-                                    </code></pre>
-                                    
-                                                    </li>
-                                                </ul>
-                                            }
-                                        </li>
-                                    }
+                                    <span class="handle collapsed"></span>
                                 }
-                            </ul>
-                        </li>
+
+                                <p>@PrettyPrint(log.Text)</p>
+
+                                @if (log.Json != null)
+                                {
+                                    <ul style="display: none;">
+                                        <li>
+                                            <pre><code class="language-javascript">Request: @PrettyPrint(log.Json)
+                                            @if (i + 1 < entry.Messages.Count - 1 && entry.Messages.ElementAt(i + 1).Text.Contains("Response") && entry.Messages.ElementAt(i + 1).Json != null)
+                                            {
+                                                i++;
+                                                <span>Response:</span>@PrettyPrint(entry.Messages.ElementAt(i).Json)
+                                            }
+                                            </code></pre>
+                                        </li>
+                                    </ul>
+                                }
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
                     }
                 }
-            </ul>
-        </div>
-        <script>
+        </ul>
+    </div>
+    <script>
             $(document).ready(function () {
                 $(".tree li:has(ul)").children(":first-child").click(function () {
                     $(this).toggleClass("collapsed expanded").siblings("ul").fadeToggle();
@@ -282,7 +288,7 @@
             });
         </script>
 
-    </body>
+</body>
 </html>
 @functions{
 
