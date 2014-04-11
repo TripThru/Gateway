@@ -284,7 +284,7 @@ text-overflow: ellipsis;
 						initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLXVyVt5ierOdKEkSeez1pTe_nwapdwGUxf877FLQ2v_cGzqWa",
+								icon: "http://www.mricons.com/store/png/113267_25418_16_flag_icon.png",
 								title: 'Initial'
 							});
 						                            var routes = [];
@@ -461,7 +461,7 @@ text-overflow: ellipsis;
 							initialMarker = new google.maps.Marker({
 								position: driverInitialLocation,
 								map: map,
-								icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLXVyVt5ierOdKEkSeez1pTe_nwapdwGUxf877FLQ2v_cGzqWa",
+								icon: "http://www.mricons.com/store/png/113267_25418_16_flag_icon.png",
 								title: 'Initial'
 							});
 

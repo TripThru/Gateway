@@ -79,14 +79,14 @@ namespace Utils
                 {
                     try
                     {
-                        if (queue.Count > 0)
+                        while (queue.Count > 0)
                         {
                             var logEntries = new List<string>();
                             RequestLog requestLog = null;
                             lock (locker)
                             {
                                 requestLog = this.queue.Dequeue();
-                                if(requestLog.Messages.Count > 0)
+                                if (requestLog.Messages.Count > 0)
                                     logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss"));
                                 foreach (Message msg in requestLog.Messages)
                                     logEntries.Add(msg.Text);
@@ -108,7 +108,7 @@ namespace Utils
                                 {
                                     if (response.ErrorMessage != null)
                                     {
-                                        Console.WriteLine("Splunk error: " + response.ErrorMessage + ", for: "+logEntries.First());
+                                        Console.WriteLine("Splunk error: " + response.ErrorMessage + ", for: " + logEntries.First());
                                         if (response.ErrorMessage.Contains("SendFailure") || response.ErrorMessage.Contains("ReceiveFailure"))
                                         {
                                             this.Enqueue(requestLog);
@@ -227,7 +227,7 @@ namespace Utils
                 return tabs;
             }
         }
-        static readonly object locker = new object(); 
+        static readonly object locker = new object();
         public static FixedSizeQueue Queue;
         public static Dictionary<object, RequestLog> requestLog;
         public static string filePath = null;
@@ -235,7 +235,7 @@ namespace Utils
         public static SplunkClient splunkClient;
         static RestRequest restReq;
         static Dictionary<object, int> numBegunRequests;
-        static Dictionary<object, bool> threadsEnabled; 
+        static Dictionary<object, bool> threadsEnabled;
         public static void BeginRequest(string msg, object request, string tripID = null)
         {
             lock (locker)
@@ -277,8 +277,6 @@ namespace Utils
                     Logger.Log("Response", response);
 
                 numBegunRequests[thread] = numBegunRequests[thread] - 1;
-                if (splunkEnabled)
-                    splunkClient.Enqueue(requestLog[thread]);
                 if (numBegunRequests[thread] == 0)
                 {
                     Logger.AddTag("Type", "INFO");
@@ -290,8 +288,8 @@ namespace Utils
                     if (splunkEnabled)
                     {
                         splunkClient.Enqueue(requestLog[thread]);
-                        Queue.Enqueue(requestLog[thread]);
                     }
+                    Queue.Enqueue(requestLog[thread]);
                     requestLog.Remove(thread);
                     numBegunRequests.Remove(thread);
                 }
@@ -325,7 +323,7 @@ namespace Utils
                 error.Tags.Add(
                     new Tag("Memory", (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
                 if (tags != null)
-                    foreach(var key in tags.Keys)
+                    foreach (var key in tags.Keys)
                         error.Tags.Add(new Tag(key, tags[key]));
                 error.Messages.Add(new Message(0, "End"));
                 error.Response = "";
@@ -356,7 +354,7 @@ namespace Utils
                     requestLog[thread].Messages.Add(new Message(requestLog[thread].Tab * 40, str, jsonString));
                 }
             }
-		}
+        }
 
         public static void Log(Message message)
         {
@@ -374,7 +372,7 @@ namespace Utils
         }
 
         public static bool splunkEnabled = true;
-        public static bool LogFileOpen() { return filePath != null;  }
+        public static bool LogFileOpen() { return filePath != null; }
 
         public static void OpenLog(string id, string filePath = null, bool splunkEnabled = true)
         {
