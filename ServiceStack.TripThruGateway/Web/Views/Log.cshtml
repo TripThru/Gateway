@@ -246,8 +246,9 @@
                             for (int i = 1; i < entry.Messages.Count; i++)
                             {
                                 var log = entry.Messages.ElementAt(i);
-
-                                <li style="padding-left: @log.Indent.ToString()px;">
+                                var padding = log.Indent == 0 ? "" : "padding-left:" + @log.Indent.ToString() + "px;"; 
+                                
+                                <li style="@padding">
                                 @if (log.Json != null)
                                 {
                                     <span class="handle collapsed"></span>
@@ -259,11 +260,11 @@
                                 {
                                     <ul style="display: none;">
                                         <li>
-                                            <pre><code class="language-javascript">Request: @PrettyPrint(log.Json)
+                                            <pre><code class="language-javascript">@("Request:\n" + PrettyPrint(log.Json))
                                             @if (i + 1 < entry.Messages.Count - 1 && entry.Messages.ElementAt(i + 1).Text.Contains("Response") && entry.Messages.ElementAt(i + 1).Json != null)
                                             {
                                                 i++;
-                                                <span>Response:</span>@PrettyPrint(entry.Messages.ElementAt(i).Json)
+                                                @("\nResponse:\n" + PrettyPrint(entry.Messages.ElementAt(i).Json))
                                             }
                                             </code></pre>
                                         </li>
