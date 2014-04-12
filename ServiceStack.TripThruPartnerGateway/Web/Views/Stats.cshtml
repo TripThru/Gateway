@@ -1,5 +1,7 @@
 ﻿@using System.CodeDom
 @using ServiceStack.Common
+@using ServiceStack.ServiceInterface.Auth;
+@using TripThruCore.Storage;
 @inherits ServiceStack.Razor.ViewPage<ServiceStack.TripThruGateway.GatewayService.StatsResponse>
 <html>
 <head>
@@ -455,7 +457,7 @@
                 <li><a class="active" href="#">Stats</a></li>
                 <li><a href="log">Log</a></li>
             </ul>
-            <a href="http://www.tripthru.com"><img src="http://www.ctpltda.com/web/images/stories/home.png" width="50" height="50" align="right"/></a>
+            <a href="http://www.tripthru.com"><img src="http://www.ctpltda.com/web/images/stories/home.png" width="50" height="50" align="right" /></a>
         </div>
     </div>
     <div id="main_container">
@@ -650,7 +652,17 @@
             //	containment: '#main_container'
             //});
             var baseUrl = "";
-            var accessToken = "jaosid1201231";
+            @{
+                var currentSession = GetSession<IAuthSession>();
+                var user = StorageManager.GetPartnerAccountByUsername(currentSession.UserName);
+                var accessToken = "";
+                if (user.Role == Storage.UserRole.admin)
+                {
+                    user = StorageManager.GetPartnerAccountByUsername("tripthru");
+                }
+                accessToken = user.AccessToken;
+            }
+            var accessToken = "@accessToken";
             var stats = null;
             var activeTripsChart = null;
             var activeTripsCount = [];
@@ -1125,7 +1137,7 @@
                     updatingTripLog = true;
                     updatingTripLogId = tripId;
                     tripId = tripId == 'All' ? '' : '&tripid=' + tripId;
-                    $.get(baseUrl + 'log?format=json' + tripId, function (data) {
+                    $.get(baseUrl + 'log?format=json&access_token=' + accessToken + tripId, function (data) {
                         if (data.result == "OK") {
                             var logs = [];
                             var initLog = false;
@@ -1497,7 +1509,7 @@
             function updateCharts() {
                 if (!updatingCharts) {
                     updatingCharts = true;
-                    $.get(baseUrl + 'stats?format=json', function (data) {
+                    $.get(baseUrl + 'stats?format=json&access_token=' + accessToken, function (data) {
                         if (data.result == "OK") {
                             if (stats == null || activeTripsChart == null) {
                                 initCharts(data);

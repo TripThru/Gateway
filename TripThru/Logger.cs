@@ -207,6 +207,8 @@ namespace Utils
             public int MaxTab { get; set; }
             public int Tab { get; set; }
             public string tripID { get; set; }
+            public string originID { get; set; }
+            public string destinationID { get; set; }
 
             public RequestLog(string request, string tripID = null)
             {
@@ -307,6 +309,32 @@ namespace Utils
                 if (!requestLog.ContainsKey(thread))
                     return;
                 requestLog[thread].Tags.Add(new Tag(name, value));
+            }
+        }
+        public static void SetOriginatingId(string orginatingId)
+        {
+            lock (locker)
+            {
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
+                if (!requestLog.ContainsKey(thread))
+                    return;
+                requestLog[thread].originID = orginatingId;
+            }
+        }
+        public static void SetServicingId(string servicingId)
+        {
+            lock (locker)
+            {
+                object thread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                if (requestLog == null || !threadsEnabled.ContainsKey(thread) ||
+                    (threadsEnabled.ContainsKey(thread) && !threadsEnabled[thread]))
+                    return;
+                if (!requestLog.ContainsKey(thread))
+                    return;
+                requestLog[thread].destinationID = servicingId;
             }
         }
 

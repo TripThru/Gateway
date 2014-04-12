@@ -75,143 +75,12 @@ namespace TripThruCore
 
         private void LoadUserAccounts()
         {
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "TripThru",
-                    Password = "password",
-                    Email = "tripthru@tripthru.com",
-                    AccessToken = "jaosid1201231",
-                    RefreshToken = "jaosid1201231",
-                    ClientId = "TripThru",
-                    ClientSecret = "23noiasdn2123"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Swagger Test Client",
-                    Password = "password",
-                    Email = "testclient@tripthru.com",
-                    AccessToken = "demo12345",
-                    RefreshToken = "demo12345",
-                    ClientId = "testclient@tripthru.com",
-                    ClientSecret = "demo12345"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Luxor Cab",
-                    Password = "password",
-                    Email = "partner1@tripthru.com",
-                    AccessToken = "luxor23noiasdn2123",
-                    RefreshToken = "23noiasdn2123",
-                    ClientId = "luxor@tripthru.com",
-                    ClientSecret = "23noiasdn2123"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Yellow Cab",
-                    Password = "password",
-                    Email = "yellowcab@tripthru.com",
-                    AccessToken = "yellow12ondazazxx21",
-                    RefreshToken = "12ondazazxx21",
-                    ClientId = "yellow@tripthru.com",
-                    ClientSecret = "12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Metro Cab of Boston",
-                    Password = "password",
-                    Email = "metro@tripthru.com",
-                    AccessToken = "metro12ondazazxx21",
-                    RefreshToken = "12ondazazxx21",
-                    ClientId = "metro@tripthru.com",
-                    ClientSecret = "12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Les Taxi Blues",
-                    Password = "password",
-                    Email = "lestaxi@tripthru.com",
-                    AccessToken = "les12ondazazxx21",
-                    RefreshToken = "12ondazazxx21",
-                    ClientId = "les@tripthru.com",
-                    ClientSecret = "12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Dubai Taxi Corporation",
-                    Password = "password",
-                    Email = "dubaitaxicorp@tripthru.com",
-                    AccessToken = "dubai12ondazazxx21",
-                    RefreshToken = "12ondazazxx21",
-                    ClientId = "dubai@tripthru.com",
-                    ClientSecret = "12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "Test TDispatch",
-                    Password = "password",
-                    Email = "test_tdispatch@tripthru.com",
-                    AccessToken = "test_tdispatch12ondazazxx21",
-                    RefreshToken = "test_tdispatch12ondazazxx21",
-                    ClientId = "test_tdispatch@tripthru.com",
-                    ClientSecret = "test_tdispatch12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "TripThruWeb",
-                    Password = "password",
-                    Email = "web@tripthru.com",
-                    AccessToken = "webondazazxx21",
-                    RefreshToken = "web12ondazazxx21",
-                    ClientId = "web@tripthru.com",
-                    ClientSecret = "web12ondazazxx21"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
-
             var accounts = StorageManager.GetPartnerAccounts();
             if(accounts != null)
                 foreach (PartnerAccount account in accounts)
                 {
+                    if (Storage.Storage.UserRole.partner != account.Role)
+                        continue;
                     if (!partnerAccounts.ContainsKey(account.ClientId))
                         partnerAccounts[account.ClientId] = account;
                     if (!clientIdByAccessToken.ContainsKey(account.AccessToken))
@@ -278,7 +147,8 @@ namespace TripThruCore
         public override RegisterPartnerResponse RegisterPartner(Gateway partner)
         {
             requests++;
-            partners.Add(partner.ID, partner);
+            if (!partners.ContainsKey(partner.ID))
+                partners.Add(partner.ID, partner);
             RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
             return response;
         }
@@ -320,8 +190,8 @@ namespace TripThruCore
                     RecordTripOriginatingAndServicingPartner(r, partner);
                     var partnerClientId = r.clientID; 
                     ChangeTheClientIDToTripThru(r);
-                    r.clientID = partnerClientId;
                     response = partner.DispatchTrip(r);
+                    r.clientID = partnerClientId;
                     if (response.result != Result.OK)
                         Logger.Log("DispatchTrip to " + partner.name + " failed");
                     else
@@ -365,6 +235,7 @@ namespace TripThruCore
             Logger.AddTag("Originating partner", r.clientID);
             servicingPartnerByTrip.Add(r.tripID, partner.ID);
             Logger.AddTag("Servicing partner", partner.name);
+            Logger.SetServicingId(partner.ID);
         }
 
         private void ChangeTheClientIDToTripThru(DispatchTripRequest r)
@@ -539,6 +410,7 @@ namespace TripThruCore
             if (partner != null)
             {
                 Logger.AddTag("Destination_partner", partner.name);
+                Logger.SetServicingId(partner.ID);
                 r.clientID = ID;
                 GetTripStatusResponse response = partner.GetTripStatus(r);
                 if (response.result == Result.OK)
@@ -605,6 +477,7 @@ namespace TripThruCore
             if (destPartner != null)
             {
                 Logger.AddTag("Destination partner", destPartner.name);
+                Logger.SetServicingId(destPartner.ID);
                 string originClientID = r.clientID;
                 ChangeClientIDToTripThru(r);
                 UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);

@@ -42,7 +42,7 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["sandbox"];
+            env = environments["vagrant"];
             localPath = "Z:\\WindowsDev\\Gateway\\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
@@ -228,7 +228,7 @@ namespace TripThruSsh
                 {
                     try
                     {
-                        var response = client.DownloadString(@config.Partner.CallbackUrlMono.ToString() + "log");
+                        var response = client.DownloadString(@config.Partner.CallbackUrlMono.ToString() + "log?access_token=jaosid1201231");
                         var analyzeResponse = JsonSerializer.DeserializeFromString<ResponseRequest>(response);
                         if (analyzeResponse.ResultCode.Equals("OK"))
                         {

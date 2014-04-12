@@ -9,6 +9,7 @@ using ServiceStack.Text;
 using ServiceStack.TripThruGateway;
 using TripThruCore;
 using Utils;
+using TripThruCore.Storage;
 
 namespace ServiceStack.TripThruPartnerGateway
 {
@@ -28,6 +29,7 @@ namespace ServiceStack.TripThruPartnerGateway
 	{
         public object Any(IReturn<InitPartner> request)
         {
+            StorageManager.OpenStorage(new SqliteStorage("~/App_Data/db.sqlite".MapHostAbsolutePath()));
             MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
             MapTools.LoadGeoData();
             MapTools.WriteGeoData();
