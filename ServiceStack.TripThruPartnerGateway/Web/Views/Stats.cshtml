@@ -1,7 +1,6 @@
-﻿@using System.CodeDom
-@using ServiceStack.Common
-@inherits ServiceStack.Razor.ViewPage<ServiceStack.TripThruGateway.GatewayService.StatsResponse>
+﻿
 <html>
+
 <head>
     <title>Tripthru</title>
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
@@ -14,7 +13,9 @@
     <script type="text/javascript" src="Scripts/prism.js"></script>
 </head>
 
+
 <body>
+
     <style>
         @@font-face {
             font-family: "Arimo";
@@ -501,46 +502,37 @@
                     <div class="box_container_title">Requests</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="requestsLastHour">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="requestsLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="requestsAllTime">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                 </div>
                 <div style="margin-left: 10px;" class="counters_container draggable">
                     <div class="box_container_title">Distance (km)</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="distanceLastHour">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="distanceLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="distanceAllTime">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                 </div>
                 <div style="margin-left: 10px;" class="counters_container draggable">
                     <div class="box_container_title">Fare $</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="fareLastHour">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="fareLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="fareAllTime">
-                        <input type="hidden" name="counter-value" value="0" />
-                    </div>
+                        <input type="hidden" name="counter-value" value="0" /></div>
                 </div>
             </div>
         </div>
@@ -644,10 +636,11 @@
             </div>
         </div>
     </div>
+
     <script>
         $(document).ready(function () {
             //$(".draggable").draggable({
-            //	containment: '#main_container'
+            //  containment: '#main_container'
             //});
             var baseUrl = "";
             var accessToken = "jaosid1201231";
@@ -695,7 +688,7 @@
             var updatingTrips = false;
             function updateTrips() {
                 if (!updatingTrips) {
-                    updaingTrips = true;
+                    updatingTrips = true;
                     if (activeTrips.length == 0) {
                         $("#noTrips").fadeOut();
                         $("#loadingTripsContainer").fadeIn();
@@ -765,7 +758,7 @@
                                                         "</div>"
                                                         );
                         $("#" + tripContainerId).slideDown();
-                        $('#triplog_trips').on('click', "#" + tripContainerId, function () {
+                        $('#triplog_trips').off('click', "#" + tripContainerId).on('click', "#" + tripContainerId, function () {
 
                             if (directionsDisplay != null) {
                                 directionsDisplay.setMap(null);
@@ -779,15 +772,16 @@
 
                             if (!$("#" + tripContainerId).hasClass("activeTrip")) {
                                 $("#triplog_trips>div.activeTrip").removeClass("activeTrip");
-                                $("#" + tripContainerId).toggleClass("activeTrip");
+                                $("#" + tripContainerId).addClass("activeTrip");
                                 setTripInfo(activeTripsInfo[trip.id]);
                                 updateSelectedTrip();
                                 clearLogs();
                             } else {
-                                $("#" + tripContainerId).toggleClass("activeTrip");
+                                $("#" + tripContainerId).removeClass("activeTrip");
                                 clearTripInfo();
                                 clearLogs();
                             }
+
                         });
 
 
@@ -867,9 +861,12 @@
             var directionsDisplay = null;
             var directionsDisplay2 = null;
             var driverPreviousLocation = null;
+            var setTripInfoBool = false;
             $(".tracking-map").text("Select a trip");
 
             function setTripInfo(trip) {
+                if (setTripInfoBool == true) { return; }
+                setTripInfoBool = true;
                 var tripId = $(".activeTrip").find("#tripId").val();
                 if (trip.id == tripId) {
 
@@ -1058,16 +1055,14 @@
 
                                     if (boleanFirst) {
                                         directionsService.route(request, function (result, status) {
-                                            console.log(result);
-                                            if (status == google.maps.DirectionsStatus.OK) {
+                                            if (status == google.maps.DirectionsStatus.OK && directionsDisplay != null) {
                                                 directionsDisplay.setDirections(result);
                                             }
                                         });
                                         boleanFirst = false;
                                     } else {
                                         directionsService2.route(request, function (result, status) {
-                                            console.log(result);
-                                            if (status == google.maps.DirectionsStatus.OK) {
+                                            if (status == google.maps.DirectionsStatus.OK && directionsDisplay2 != null) {
                                                 directionsDisplay2.setDirections(result);
                                             }
                                         });
@@ -1078,6 +1073,7 @@
                         }
                     }
                 }
+                setTripInfoBool = false;
             }
 
             function clearTripInfo() {
@@ -1692,5 +1688,6 @@
 
         });
     </script>
+
 </body>
 </html>
