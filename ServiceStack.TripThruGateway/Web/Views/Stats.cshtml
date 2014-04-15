@@ -707,7 +707,7 @@
                         $("#noTrips").fadeOut();
                         $("#loadingTripsContainer").fadeIn();
                     }
-                    $.get(baseUrl + 'trips?format=json', function (data) {
+                    $.get(baseUrl + 'trips?format=json&access_token=' + accessToken, function (data) {
                         if (data.result == "OK") {
                             var trips = [];
                             var selectedStatusCount = 0;

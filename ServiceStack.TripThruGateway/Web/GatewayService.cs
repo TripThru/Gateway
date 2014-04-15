@@ -54,26 +54,24 @@ namespace ServiceStack.TripThruGateway
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    if (acct != null || (user != null && user.Role == Storage.UserRole.admin)){
+                    if (!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin)){
                         if(acct == null)
                             acct = user;
-                        List<Logger.RequestLog> logList = null;
+                        IEnumerable<Logger.RequestLog> logList = Logger.Queue;
 
-                        if (acct.Role == Storage.UserRole.admin)
-                            logList = Logger.Queue.ToList();
-                        else
-                            logList = Logger.Queue.Where(log => log.originID == acct.ClientId ||
-                                                         log.destinationID == acct.ClientId).ToList();
+                        if (acct.Role != Storage.UserRole.admin)
+                            logList = logList.Where(log => log.originID == acct.ClientId ||
+                                                         log.destinationID == acct.ClientId);
                         if (request.tripID != null)
-                            logList = logList.Where(log => log.tripID == request.tripID).ToList();
+                            logList = logList.Where(log => log.tripID == request.tripID);
                         
-                        logList = logList.OrderBy(log => log.Time).ToList();
+                        logList = logList.OrderBy(log => log.Time);
 
                         logResponse = new LogResponse
                         {
                             Result = "OK",
                             ResultCode = Gateway.Result.OK,
-                            LogList = logList
+                            LogList = logList.ToList()
                         };
                     }
                     else
@@ -879,6 +877,12 @@ namespace ServiceStack.TripThruGateway
                 var clientId = "none";
                 try
                 {
+                    if (!accessToken.IsNullOrEmpty() && acct == null) {
+                        PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                        if (user != null && user.Role == Storage.UserRole.admin)
+                            acct = user;
+                    }
+
                     if (acct != null && message == null)
                     {
                         clientId = acct.ClientId;
@@ -1089,6 +1093,7 @@ namespace ServiceStack.TripThruGateway
         [Route("/trips", "GET")]
         public class Trips : IReturn<TripsResponse>
         {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string access_token { get; set; }
             [ApiAllowableValues("Status", typeof(Status))]
             [ApiMember(Name = "Status", Description = "Get a list of trips with given status", ParameterType = "query", DataType = "Status", IsRequired = false)]
@@ -1119,7 +1124,7 @@ namespace ServiceStack.TripThruGateway
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    if (acct != null || (user != null && user.Role == Storage.UserRole.admin))
+                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
                     {
                         if (acct == null)
                             acct = user;
@@ -1129,14 +1134,14 @@ namespace ServiceStack.TripThruGateway
                         {
                             List<Trip> trips = response.trips;
                             if (acct.Role != Storage.UserRole.admin)
-                                trips = response.trips.Where(
+                                trips = trips.Where(
                                             t => t.OriginatingPartnerId == acct.ClientId ||
                                                  t.ServicingPartnerId == acct.ClientId).ToList();
                             tripsResponse = new TripsResponse
                             {
                                 Result = "OK",
                                 ResultCode = response.result,
-                                Trips = response.trips
+                                Trips = trips
                             };
                         }
                         else

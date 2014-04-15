@@ -346,7 +346,7 @@ namespace TripThruCore
                 Logger.Log("Best quote " + bestQuote + " from " + partner.name);
             }
             else
-                Logger.Log("There are no partners to handle this trip within an exceptable service time"); 
+                Logger.Log("There are no partners to handle this trip within an acceptable service time"); 
             return partner;
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
