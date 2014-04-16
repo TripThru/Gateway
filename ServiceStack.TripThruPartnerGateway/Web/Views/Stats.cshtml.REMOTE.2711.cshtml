@@ -4,7 +4,6 @@
 @using TripThruCore.Storage;
 @inherits ServiceStack.Razor.ViewPage<ServiceStack.TripThruGateway.GatewayService.StatsResponse>
 <html>
-
 <head>
     <title>Tripthru</title>
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
@@ -17,9 +16,7 @@
     <script type="text/javascript" src="Scripts/prism.js"></script>
 </head>
 
-
 <body>
-
     <style>
         @@font-face {
             font-family: "Arimo";
@@ -460,7 +457,7 @@
                 <li><a class="active" href="#">Stats</a></li>
                 <li><a href="log">Log</a></li>
             </ul>
-            <a href="http://www.tripthru.com"><img src="http://www.ctpltda.com/web/images/stories/home.png" width="50" height="50" align="right"/></a>
+            <a href="http://www.tripthru.com"><img src="http://www.ctpltda.com/web/images/stories/home.png" width="50" height="50" align="right" /></a>
         </div>
     </div>
     <div id="main_container">
@@ -506,37 +503,46 @@
                     <div class="box_container_title">Requests</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="requestsLastHour">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="requestsLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="requestsAllTime">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                 </div>
                 <div style="margin-left: 10px;" class="counters_container draggable">
                     <div class="box_container_title">Distance (km)</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="distanceLastHour">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="distanceLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="distanceAllTime">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                 </div>
                 <div style="margin-left: 10px;" class="counters_container draggable">
                     <div class="box_container_title">Fare $</div>
                     <div class="box_container_subtitle">Last hour</div>
                     <div class="counter" id="fareLastHour">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">Last 24 hours</div>
                     <div class="counter" id="fareLast24Hrs">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                     <div class="box_container_subtitle">All time</div>
                     <div class="counter" id="fareAllTime">
-                        <input type="hidden" name="counter-value" value="0" /></div>
+                        <input type="hidden" name="counter-value" value="0" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -640,7 +646,6 @@
             </div>
         </div>
     </div>
-
     <script>
         $(document).ready(function () {
             //$(".draggable").draggable({
@@ -702,7 +707,7 @@
             var updatingTrips = false;
             function updateTrips() {
                 if (!updatingTrips) {
-                    updatingTrips = true;
+                    updaingTrips = true;
                     if (activeTrips.length == 0) {
                         $("#noTrips").fadeOut();
                         $("#loadingTripsContainer").fadeIn();
@@ -772,7 +777,7 @@
                                                         "</div>"
                                                         );
                         $("#" + tripContainerId).slideDown();
-                        $('#triplog_trips').off('click', "#" + tripContainerId).on('click', "#" + tripContainerId, function () {
+                        $('#triplog_trips').on('click', "#" + tripContainerId, function () {
 
                             if (directionsDisplay != null) {
                                 directionsDisplay.setMap(null);
@@ -786,12 +791,12 @@
 
                             if (!$("#" + tripContainerId).hasClass("activeTrip")) {
                                 $("#triplog_trips>div.activeTrip").removeClass("activeTrip");
-                                $("#" + tripContainerId).addClass("activeTrip");
+                                $("#" + tripContainerId).toggleClass("activeTrip");
                                 setTripInfo(activeTripsInfo[trip.id]);
                                 updateSelectedTrip();
                                 clearLogs();
                             } else {
-                                $("#" + tripContainerId).removeClass("activeTrip");
+                                $("#" + tripContainerId).toggleClass("activeTrip");
                                 clearTripInfo();
                                 clearLogs();
                             }
@@ -874,12 +879,9 @@
             var directionsDisplay = null;
             var directionsDisplay2 = null;
             var driverPreviousLocation = null;
-            var setTripInfoBool = false;
             $(".tracking-map").text("Select a trip");
 
             function setTripInfo(trip) {
-                if (setTripInfoBool == true) { return; }
-                setTripInfoBool = true;
                 var tripId = $(".activeTrip").find("#tripId").val();
                 if (trip.id == tripId) {
 
@@ -1068,6 +1070,7 @@
 
                                     if (boleanFirst) {
                                         directionsService.route(request, function (result, status) {
+                                            console.log(result);
                                             if (status == google.maps.DirectionsStatus.OK) {
                                                 directionsDisplay.setDirections(result);
                                             }
@@ -1075,6 +1078,7 @@
                                         boleanFirst = false;
                                     } else {
                                         directionsService2.route(request, function (result, status) {
+                                            console.log(result);
                                             if (status == google.maps.DirectionsStatus.OK) {
                                                 directionsDisplay2.setDirections(result);
                                             }
@@ -1086,7 +1090,6 @@
                         }
                     }
                 }
-                setTripInfoBool = false;
             }
 
             function clearTripInfo() {
@@ -1701,6 +1704,5 @@
 
         });
     </script>
-
 </body>
 </html>
