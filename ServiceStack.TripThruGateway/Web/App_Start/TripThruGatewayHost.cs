@@ -13,6 +13,9 @@ using ContentType = ServiceStack.Common.Web.ContentType;
 using ServiceStack.Api.Swagger;
 using ServiceStack.ServiceInterface;
 using ServiceStack.ServiceInterface.Auth;
+using TripThruCore.Storage;
+using Utils;
+using TripThruCore;
 
 
 namespace ServiceStack.TripThruGateway
@@ -56,33 +59,6 @@ namespace ServiceStack.TripThruGateway
                             MetadataCustomPath = "/stats"
                           });
 
-            var configuration = 
-                JsonSerializer.DeserializeFromString<HostConfiguration>(
-                File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
-            //Authentication
-		    Plugins.Add(
-                new AuthFeature(() => new AuthUserSession(),
-                    new IAuthProvider[] {
-                        new CustomCredentialsAuthProvider(
-                            new Dictionary<string, string>(){ 
-                                {"tripthru", "optimize"},
-                                {"gogocabi", "coolapp"},
-                                {"tomhalligan", "demo"}
-                            },
-                            configuration.host.virtualPath
-                        )
-                    }
-                )
-                {
-                    HtmlRedirect = "~/login.html",
-                    ServiceRoutes = new Dictionary<Type, string[]> {
-                        { typeof(AuthService), new[]{"/auth", "/auth/{provider}"}},
-                        { typeof(AssignRolesService), new[]{"/assignroles"} },
-                        { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
-                    }
-                }
-            );
-
             //Unhandled exceptions
             //Handle Exceptions occurring in Services:
             this.ServiceExceptionHandler = (request, exception) => {
@@ -113,16 +89,77 @@ namespace ServiceStack.TripThruGateway
                     return true; //Todo: fix this to actually validate the certificates
                 };
 
-            //Init
-		    using (var initPartners = container.Resolve<InitGatewayService>())
-		    {
-		        initPartners.Any(null);
-		    }
-
             Plugins.Add(new SwaggerFeature());
+
+            InitGateway();
 		}
+
+        public void InitGateway()
+        {
+
+            try
+            {
+                var configuration =
+                    JsonSerializer.DeserializeFromString<HostConfiguration>(
+                        File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
+
+
+                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                var accounts = StorageManager.GetPartnerAccounts();
+
+                //Authentication
+                var logins = new Dictionary<string, string>();
+                foreach (var account in accounts)
+                    if (account.UserName != null && account.Password != null)
+                        logins[account.UserName] = account.Password;
+
+                Plugins.Add(
+                    new AuthFeature(() => new AuthUserSession(),
+                            new IAuthProvider[] {
+                            new CustomCredentialsAuthProvider(
+                                logins,
+                                configuration.host.virtualPath
+                            )
+                        }
+                    )
+                    {
+                        HtmlRedirect = "~/login.html",
+                        ServiceRoutes = new Dictionary<Type, string[]> {
+                            { typeof(AuthService), new[]{"/auth", "/auth/{provider}"}},
+                            { typeof(AssignRolesService), new[]{"/assignroles"} },
+                            { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
+                        },
+                        IncludeAssignRoleServices = false
+                    }
+                );
+
+                Logger.OpenLog("TripThruGateway");
+                GatewayService.gateway = new TripThru();
+
+                foreach(var account in accounts)
+                    if (Storage.UserRole.partner == account.Role && account.CallbackUrl != null && account.PartnerName != null
+                        && account.TripThruAccessToken != null && account.ClientId != null)
+                        GatewayService.gateway.RegisterPartner(
+                            new GatewayClient(
+                                account.ClientId,
+                                account.PartnerName,
+                                account.TripThruAccessToken,
+                                account.CallbackUrl
+                            )
+                        );
+
+                MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+                MapTools.LoadGeoData();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+
 	}
 
+    
     public class CustomCredentialsAuthProvider : CredentialsAuthProvider
     {
         private Dictionary<string, string> authenticatedUsers;
@@ -143,6 +180,10 @@ namespace ServiceStack.TripThruGateway
         {
             session.ReferrerUrl = referrerUrl;
             session.IsAuthenticated = true;
+            var user = StorageManager.GetPartnerAccountByUsername(session.UserAuthName);
+            session.UserName = user.UserName;
+            session.Id = user.ClientId;
+            session.Roles = new List<string>() {user.Role.ToString()};
             authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
         }
     }

@@ -26,6 +26,7 @@ namespace ServiceStack.TripThruGateway
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Log : IReturn<LogResponse>
         {
+            public string access_token { get; set; }
             public string tripID { get; set; }
         }
 
@@ -47,18 +48,40 @@ namespace ServiceStack.TripThruGateway
                     ResultCode = Gateway.Result.OK,
                     LogList = new List<Logger.RequestLog>()
                 };
+                var accessToken = request.access_token;
+                request.access_token = null;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    List<Logger.RequestLog> logList =
-                        request.tripID != null
-                            ? Logger.Queue.Where(log => log.tripID == request.tripID).ToList().OrderBy(log => log.Time).ToList()
-                            : Logger.Queue.ToList();
-                    logResponse = new LogResponse
-                {
-                    Result = "OK",
-                    ResultCode = Gateway.Result.OK,
-                    LogList = logList
-                };
+                    if (!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin)){
+                        if(acct == null)
+                            acct = user;
+                        IEnumerable<Logger.RequestLog> logList = Logger.Queue;
+
+                        if (acct.Role != Storage.UserRole.admin)
+                            logList = logList.Where(log => log.originID == acct.ClientId ||
+                                                         log.destinationID == acct.ClientId);
+                        if (request.tripID != null)
+                            logList = logList.Where(log => log.tripID == request.tripID);
+                        
+                        logList = logList.OrderBy(log => log.Time);
+
+                        logResponse = new LogResponse
+                        {
+                            Result = "OK",
+                            ResultCode = Gateway.Result.OK,
+                            LogList = logList.ToList()
+                        };
+                    }
+                    else
+                    {
+                        logResponse = new LogResponse
+                        {
+                            Result = "Failed",
+                            ResultCode = Gateway.Result.AuthenticationError
+                        };
+                    }
                 }
                 catch (Exception e)
                 {
@@ -78,7 +101,7 @@ namespace ServiceStack.TripThruGateway
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Stats : IReturn<StatsResponse>
         {
-
+            
         }
 
         public class StatsResponse
@@ -214,15 +237,15 @@ namespace ServiceStack.TripThruGateway
                     Result = "Unknown",
                     ResultCode = Gateway.Result.AuthenticationError
                 };
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                     if (acct != null && message == null)
                     {
                         Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
                         acct.PartnerName = request.Name;
                         acct.CallbackUrl = request.CallbackUrl;
-                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, "jaosid1201231", request.CallbackUrl));
+                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, acct.TripThruAccessToken, request.CallbackUrl));
                         StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
 
                         partnerResponse = new PartnerResponse
@@ -262,6 +285,8 @@ namespace ServiceStack.TripThruGateway
                 finally
                 {
                     Logger.AddTag("RequestType", "RegisterPartner");
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID);
                     Logger.EndRequest(partnerResponse);
                 }
                 return partnerResponse;
@@ -385,6 +410,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "GetPartnerInfo");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(partnersResponse);
                 }
                 return partnersResponse;
@@ -554,6 +580,8 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "QuoteTrip");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID); //Should we have a list of servicing partners for this case?
                     Logger.EndRequest(quotesResponse);
                 }
                 return quotesResponse;
@@ -739,6 +767,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "DispatchTrip");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(dispatchResponse);
                 }
                 return dispatchResponse;
@@ -848,6 +877,12 @@ namespace ServiceStack.TripThruGateway
                 var clientId = "none";
                 try
                 {
+                    if (!accessToken.IsNullOrEmpty() && acct == null) {
+                        PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                        if (user != null && user.Role == Storage.UserRole.admin)
+                            acct = user;
+                    }
+
                     if (acct != null && message == null)
                     {
                         clientId = acct.ClientId;
@@ -936,6 +971,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "GetTripStatus");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(tripStatusResponse);
                     Logger.Enable();
                 }
@@ -1032,6 +1068,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "UpdateTripStatus");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(tripStatusResponse);
                 }
                 return tripStatusResponse;
@@ -1056,6 +1093,8 @@ namespace ServiceStack.TripThruGateway
         [Route("/trips", "GET")]
         public class Trips : IReturn<TripsResponse>
         {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
             [ApiAllowableValues("Status", typeof(Status))]
             [ApiMember(Name = "Status", Description = "Get a list of trips with given status", ParameterType = "query", DataType = "Status", IsRequired = false)]
             public Status? Status { get; set; }
@@ -1073,31 +1112,53 @@ namespace ServiceStack.TripThruGateway
             public TripsResponse Get(Trips request)
             {
                 Logger.Disable();
+                var accessToken = request.access_token;
+                request.access_token = null;
                 Logger.BeginRequest("GetTrips received", request);
                 TripsResponse tripsResponse = new TripsResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, request.Status));
-
-                    if (response.result == Gateway.Result.OK)
+                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
                     {
-                        tripsResponse = new TripsResponse
+                        if (acct == null)
+                            acct = user;
+                        var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, request.Status));
+
+                        if (response.result == Gateway.Result.OK)
                         {
-                            Result = "OK",
-                            ResultCode = response.result,
-                            Trips = response.trips
-                        };
+                            List<Trip> trips = response.trips;
+                            if (acct.Role != Storage.UserRole.admin)
+                                trips = trips.Where(
+                                            t => t.OriginatingPartnerId == acct.ClientId ||
+                                                 t.ServicingPartnerId == acct.ClientId).ToList();
+                            tripsResponse = new TripsResponse
+                            {
+                                Result = "OK",
+                                ResultCode = response.result,
+                                Trips = trips
+                            };
+                        }
+                        else
+                        {
+                            tripsResponse = new TripsResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result
+                            };
+                        }
                     }
                     else
                     {
                         tripsResponse = new TripsResponse
                         {
                             Result = "Failed",
-                            ResultCode = response.result
+                            ResultCode = Gateway.Result.AuthenticationError
                         };
                     }
                 }
@@ -1113,6 +1174,8 @@ namespace ServiceStack.TripThruGateway
                 finally
                 {
                     Logger.AddTag("RequestType", "GetTrips");
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID);
                     Logger.EndRequest(tripsResponse);
                     Logger.Enable();
                 }

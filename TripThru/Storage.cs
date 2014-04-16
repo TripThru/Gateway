@@ -8,11 +8,14 @@ using ServiceStack.DataAnnotations;
 
 namespace TripThruCore.Storage
 {
-    public interface Storage
+    public abstract class Storage
     {
-        void CreatePartnerAccount(PartnerAccount account);
-        void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
-        List<PartnerAccount> GetPartnerAccounts();
+        public enum UserRole { admin, partner, user }
+        public abstract void CreatePartnerAccount(PartnerAccount account);
+        public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
+        public abstract List<PartnerAccount> GetPartnerAccounts();
+        public abstract PartnerAccount GetPartnerAccountByUsername(string userName);
+        public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
     }
 
     public class SqliteStorage : Storage
@@ -27,7 +30,7 @@ namespace TripThruCore.Storage
                 db.CreateTableIfNotExists<PartnerAccount>();
             }
         }
-        public void CreatePartnerAccount(PartnerAccount account)
+        public override void CreatePartnerAccount(PartnerAccount account)
         {
             using (var db = dbFactory.Open())
             {
@@ -36,7 +39,7 @@ namespace TripThruCore.Storage
                     db.Insert(account);
             }
         }
-        public void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
+        public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
             using (var db = dbFactory.Open())
             {
@@ -49,11 +52,25 @@ namespace TripThruCore.Storage
                 db.Update(existingAccount);
             }
         }
-        public List<PartnerAccount> GetPartnerAccounts()
+        public override List<PartnerAccount> GetPartnerAccounts()
         {
             using (var db = dbFactory.Open())
             {
                 return db.Select<PartnerAccount>();
+            }
+        }
+        public override PartnerAccount GetPartnerAccountByUsername(string userName)
+        {
+            using (var db = dbFactory.Open())
+            {
+                return db.Select<PartnerAccount>().Where(x => x.UserName == userName).First();
+            }
+        }
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            using (var db = dbFactory.Open())
+            {
+                return db.Select<PartnerAccount>().Where(x => x.AccessToken == accessToken).First();
             }
         }
     }
@@ -74,6 +91,7 @@ namespace TripThruCore.Storage
         public string PartnerName { get; set; }
         public string CallbackUrl { get; set; }
         public string TripThruAccessToken { get; set; } //For us to authenticate with them
+        public Storage.UserRole Role { get; set; }
     }
 
     public class StorageManager
@@ -100,6 +118,19 @@ namespace TripThruCore.Storage
             if (_storage == null)
                 return null;
             return _storage.GetPartnerAccounts();
+        }
+
+        public static PartnerAccount GetPartnerAccountByUsername(string userName)
+        {
+            if (_storage == null)
+                return null;
+            return _storage.GetPartnerAccountByUsername(userName);
+        }
+        public static PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            if (_storage == null)
+                return null;
+            return _storage.GetPartnerAccountByAccessToken(accessToken);
         }
     }
 }

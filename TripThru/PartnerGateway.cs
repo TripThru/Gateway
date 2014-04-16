@@ -121,6 +121,7 @@ namespace TripThruCore
                     {
                         DispatchTripResponse response = new DispatchTripResponse();
                         Logger.Log("DispatchTrip successful on " + name + ", Response: " + response);
+                        Logger.SetServicingId(this.ID);
                         return response;
                     }
                 }
@@ -200,6 +201,7 @@ namespace TripThruCore
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
 
+            Logger.SetServicingId(this.ID);
             PartnerTrip t = tripsByID[r.tripID];
             DateTime? pickupTime = null;
             if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
@@ -251,6 +253,7 @@ namespace TripThruCore
             PartnerTrip t = tripsByID[r.tripID];
             UpdateTripStatusResponse response = new UpdateTripStatusResponse();
             t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
+            Logger.SetServicingId(this.ID);
             
             return response;
         }
@@ -271,21 +274,18 @@ namespace TripThruCore
 
             partnerAccounts.Clear();
             clientIdByAccessToken.Clear();
-            {
-                PartnerAccount partnerAccount = new PartnerAccount
-                {
-                    UserName = "TripThru",
-                    Password = "password",
-                    Email = "tripthru@tripthru.com",
-                    AccessToken = "jaosid1201231",
-                    RefreshToken = "jaosid1201231",
-                    ClientId = "TripThru",
-                    ClientSecret = "23noiasdn2123"
-                };
-                partnerAccounts[partnerAccount.ClientId] = partnerAccount;
-                clientIdByAccessToken[partnerAccount.AccessToken] = partnerAccount.ClientId;
-            }
 
+            var accounts = StorageManager.GetPartnerAccounts();
+            if (accounts != null)
+                foreach (PartnerAccount account in accounts)
+                {
+                    if (Storage.Storage.UserRole.partner != account.Role)
+                        continue;
+                    if (!partnerAccounts.ContainsKey(account.ClientId))
+                        partnerAccounts[account.ClientId] = account;
+                    if (!clientIdByAccessToken.ContainsKey(account.AccessToken))
+                        clientIdByAccessToken[account.AccessToken] = account.ClientId;
+                }
         }
         public override void Log()
         {
