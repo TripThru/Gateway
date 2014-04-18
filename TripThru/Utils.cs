@@ -318,7 +318,17 @@ namespace Utils
             this.elapse = elapse;
             this.distance = distance;
         }
-        public TimeSpan elapse;
+
+        private TimeSpan _elapseTimeSpan;
+
+        public TimeSpan elapse
+        {
+            get { return _elapseTimeSpan; }
+            set
+            {
+                _elapseTimeSpan = value;
+            }
+        }
         public double distance;
     }
 
@@ -368,9 +378,28 @@ namespace Utils
         }
 
         public static string GetKey(Location start, Location end) { return start.getID() + ":" + end.getID(); }        // Daniel, you will need to implement this
-        public Location start { get { return waypoints[0]; } }
-        public Location end { get { return waypoints[waypoints.Length - 1]; } }
-        public TimeSpan duration { get { return waypoints[waypoints.Length - 1].elapse; } set { this.duration = value;  } }
+
+        public Location start
+        {
+            get
+            {
+                if (waypoints != null && waypoints.Count() > 0)
+                    return waypoints[0];
+                return null;
+            }
+        }
+
+        public Location end
+        {
+            get
+            {
+                if(waypoints != null && waypoints.Count() > 0)
+                    return waypoints[waypoints.Length - 1];
+                return null;
+            }
+        }
+
+        public TimeSpan duration { get { return waypoints[waypoints.Length - 1].elapse; }  }
         public double distance { get { return waypoints[waypoints.Length - 1].distance; } }
         public Location GetCurrentWaypoint(DateTime start, DateTime current)
         {

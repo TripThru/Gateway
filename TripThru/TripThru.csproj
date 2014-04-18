@@ -49,6 +49,10 @@
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\ServiceStack.TripThruGateway\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -112,7 +116,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Net.Http.2.2.18\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
-    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime">
       <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Runtime.dll</HintPath>
     </Reference>
@@ -121,6 +127,7 @@
     <Reference Include="System.Threading.Tasks">
       <HintPath>..\ServiceStack.TripThruGateway\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Threading.Tasks.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Razor.Unofficial, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\System.Web.Razor.Unofficial.2.0.2\lib\net40\System.Web.Razor.Unofficial.dll</HintPath>

@@ -50,7 +50,7 @@ namespace Program
         {
             Logger.OpenLog("", "C:\\Users\\Edward\\");
 
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
 
             MapTools.LoadGeoData();
 
@@ -75,7 +75,7 @@ namespace Program
                     tripthru.RegisterPartner(partner);
                 }
             }
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
             MapTools.WriteGeoData();
 
 
@@ -94,7 +94,7 @@ namespace Program
                 p.Log();
             Logger.Untab();
             Logger.EndRequest(null);
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.csv", "../../App_Data/Geo-Routes.csv", "../../App_Data/Geo-Location-Addresses.csv");
+            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
 
             TimeSpan simInterval = new TimeSpan(0, 0, 10);
             while (DateTime.UtcNow < until)

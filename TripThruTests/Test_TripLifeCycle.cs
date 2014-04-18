@@ -23,8 +23,8 @@ namespace Tests
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;
-            MapTools.SetGeodataFilenames(locationNames: "Test_GeoData/Geo-Location-Names.csv",
-                routes: "Test_GeoData/Geo-Routes.csv",
+            MapTools.SetGeodataFilenames(locationNames: "Test_GeoData/Geo-Location-Names.txt",
+                routes: "Test_GeoData/Geo-Routes.txt",
                 locationAddresses: "Test_GeoData/Geo-Location-Addresses.csv");
             MapTools.LoadGeoData();
             Logger.Untab();

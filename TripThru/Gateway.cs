@@ -113,12 +113,9 @@ namespace TripThruCore
         }
         public Location(double lat, double lng, string address = null)
         {
-            this.Lng = lng;
-            this.Lat = lat;
-            if (address == null)
-                this.Address = MapTools.GetReverseGeoLoc(this);
-            else
-                this.Address = address;
+            Lng = lng;
+            Lat = lat;
+            Address = address;
         }
         public string getID()
         {
