@@ -20,7 +20,7 @@ namespace TripThruSsh
                      sshPort = 22
             }},
             {"vagrant", new Environment{
-                     host = "192.168.0.125",
+                     host = "192.168.1.125",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22

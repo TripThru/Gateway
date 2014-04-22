@@ -1,4 +1,5 @@
-﻿
+﻿<!DOCTYPE html>
+
 <html>
 
 <head>
@@ -51,6 +52,10 @@
             color: #525252;
             font-size: 15px;
             font-weight: 300;
+        }
+
+        img {
+             border: none;
         }
 
         h1 {
@@ -548,27 +553,27 @@
                     <div>
                         <p>
                             <span style='font-weight: bold;'>TripID: </span>
-                            <span id="selectedTripID" />
+                            <span id="selectedTripID" ></span>
                         </p>
                     </div>
                     <br />
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Passenger: </span>
-                            <span id="selectedTripPassengerName" />
+                            <span id="selectedTripPassengerName"></span>
                         </p>
                     </div>
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Pickup time: </span>
-                            <span id="selectedTripPickupTime" />
+                            <span id="selectedTripPickupTime" ></span>
                         </p>
                     </div>
                     <br />
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Pickup: </span>
-                            <span id="selectedTripPickupLocation" />
+                            <span id="selectedTripPickupLocation" ></span>
                         </p>
                     </div>
                     <br />
@@ -594,28 +599,28 @@
                     <div>
                         <p>
                             <span style='font-weight: bold;'>ETA: </span>
-                            <span id="selectedTripETA" />
+                            <span id="selectedTripETA" ></span>
                         </p>
                     </div>
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Fare: </span>$
-                            <span id="selectedTripFare" />
+                            <span id="selectedTripFare" ></span>
                         </p>
                     </div>
                     <br />
                     <div>
                         <p>
                             <span style='font-weight: bold;'>Driver: </span>
-                            <span id="selectedTripDriverName" />
+                            <span id="selectedTripDriverName" ></span>
                         </p>
                         <p>
                             <span style='font-weight: bold;'>Driver location: </span>
-                            <span id="selectedTripDriverLocation" />
+                            <span id="selectedTripDriverLocation" ></span>
                         </p>
                         <p>
                             <span style='font-weight: bold;'>Drop off: </span>
-                            <span id="selectedTripDropoffLocation" />
+                            <span id="selectedTripDropoffLocation" ></span>
                         </p>
                     </div>
                 </div>
@@ -663,6 +668,11 @@
                 fareLast24Hrs: 0,
                 fareAllTime: 0
             };
+
+            $.ajaxSetup({
+                // Disable caching of AJAX responses
+                cache: false
+            });
             $("#requestsLastHour").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
             $("#requestsLast24Hrs").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
             $("#requestsAllTime").flipCounter({ imagePath: "Scripts/flipCounter-medium.png", digitHeight: 20, digitWidth: 15, number: 0 });
@@ -693,6 +703,7 @@
                         $("#noTrips").fadeOut();
                         $("#loadingTripsContainer").fadeIn();
                     }
+
                     $.get(baseUrl + 'trips?format=json', function (data) {
                         if (data.result == "OK") {
                             var trips = [];
@@ -738,6 +749,8 @@
                         }
                         updatingTrips = false;
                     });
+
+
                 }
             }
 
@@ -749,11 +762,12 @@
                         activeTrips.push(trip.id);
                         activeTripsInfo[trip.id] = trip;
                         var tripContainerId = getContainerTripId(trip.id);
+                        var pickupAddress = activeTripsInfo[trip.id].pickupLocation.address ? activeTripsInfo[trip.id].pickupLocation.address : getAddress(trip.pickupLocation.lat, trip.pickupLocation.lng);;
                         $("#triplog_trips").prepend("<div style='display:none;' class='trip' id='" + tripContainerId + "'>" +
                                                             "<h2>" + trip.id + "</h2>" +
                                                             "<p><span style='font-weight: bold;'>Passenger: </span><span id='passengerName" + tripContainerId + "'>" + trip.passengerName + "</span></p>" +
                                                             "<p><span style='font-weight: bold;'>Time: </span><span id='pickupTime" + tripContainerId + "'>" + trip.pickupTime.split(".")[0] + "</span></p>" +
-                                                            "<p><span style='font-weight: bold;'>Pickup: </span><span id='pickupLocation" + tripContainerId + "'>" + trip.pickupLocation.address + "</span></p>" +
+                                                            "<p><span style='font-weight: bold;'>Pickup: </span><span id='pickupLocation" + tripContainerId + "'>" + pickupAddress + "</span></p>" +
                                                             "<input type='hidden' id='tripId' name='tripId' value='" + trip.id + "' />" +
                                                         "</div>"
                                                         );
@@ -790,16 +804,12 @@
                 activeTrips.forEach(function (trip) {
                     if ($.inArray(trip, dataTrips) == -1) {
                         activeTrips = $.grep(activeTrips, function (value) {
-                            if (value != trip) {
-                                var tripId = $(".activeTrip").find("#tripId").val();
-                                if (tripId === trip) {
-                                    $("#selectedTripStatus").hide().html('Completed').fadeIn();
-                                }
-                                return true;
-                            }
-                            return false;
+                            return value != trip;
                         });
-                        $("#" + getContainerTripId(trip)).slideUp().remove();
+                        var tripId = $(".activeTrip").find("#tripId").val();
+                        if (trip != tripId) {
+                            $("#" + getContainerTripId(trip)).slideUp().remove();
+                        }
                     }
                 });
             }
@@ -822,19 +832,51 @@
 
                         $.get(baseUrl + 'tripstatus' + "?format=json&access_token=" + accessToken + "&tripid=" + tripId, function (data) {
                             if (data.result == "OK") {
+
+                                if (activeTripsInfo[tripId].driverLocation == null) {
+                                    activeTripsInfo[tripId].driverLocation = data.driverLocation;
+                                }
+
+                                if (activeTripsInfo[tripId].pickupLocation.address == null) {
+                                    activeTripsInfo[tripId].pickupLocation.address = getAddress(data.pickupLocation.lat, data.pickupLocation.lng);
+                                }
+                                if (activeTripsInfo[tripId].dropoffLocation.address == null) {
+                                    activeTripsInfo[tripId].dropoffLocation.address = getAddress(data.dropoffLocation.lat, data.dropoffLocation.lng);
+                                }
+
+                                if (activeTripsInfo[tripId].driverLocation != null) {
+                                    if (activeTripsInfo[tripId].driverLocation.address == null || activeTripsInfo[tripId].driverLocation.lat != data.driverLocation.lat || activeTripsInfo[tripId].driverLocation.lng != data.driverLocation.lng) {
+                                        data.driverLocation.address = getAddress(data.driverLocation.lat, data.driverLocation.lng);
+                                    }
+                                }
+
+                                if (data.status != activeTripsInfo[tripId].status) {
+                                    updatedTripAudio.play();
+                                }
+
                                 activeTripsInfo[tripId].fleetId = data.fleetId;
                                 activeTripsInfo[tripId].fleetName = data.fleetName;
                                 activeTripsInfo[tripId].driverId = data.driverId;
                                 activeTripsInfo[tripId].driverName = data.driverName;
                                 activeTripsInfo[tripId].driverLocation = data.driverLocation;
                                 activeTripsInfo[tripId].driverInitialLocation = data.driverInitialLocation;
-                                if (data.status != activeTripsInfo[tripId].status) {
-                                    updatedTripAudio.play();
-                                }
+
                                 activeTripsInfo[tripId].status = data.status;
                                 activeTripsInfo[tripId].price = data.price;
                                 activeTripsInfo[tripId].distance = data.distance;
                                 activeTripsInfo[tripId].eta = data.eta;
+
+                                if (data.status === "Completed") {
+                                    activeTrips = $.grep(activeTrips, function (value) {
+                                        if (value != tripId) {
+                                            console.log("TripId: " + tripId);
+                                            console.log("trip: " + trip);
+                                            $("#selectedTripStatus").hide().html('Completed').fadeIn();
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+                                }
 
                                 setTripInfo(activeTripsInfo[tripId]);
                                 updateTripLog();
@@ -881,10 +923,12 @@
                         var eta = trip.eta ? trip.eta.split(".")[0] : 'Not available';
                         var fare = trip.price ? Math.round(trip.price).toFixed(2) : 'Not available';
                         var driverName = trip.driverName ? trip.driverName : 'Not available';
+
                         var pickupLocationName = trip.pickupLocation ? trip.pickupLocation.address : 'Not available';
                         var dropoffLocationName = trip.dropoffLocation ? trip.dropoffLocation.address : 'Not available';
                         var driverLocationName = trip.driverLocation ? trip.driverLocation.address : "Not available";
-                        var driverInitialName = trip.driverInitialLocation ? trip.driverInitialLocation.address : "Not available";
+
+
                         var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
                         var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
@@ -1684,6 +1728,24 @@
 
                 // return
                 return sHTML;
+            }
+
+            function getAddress(lat, lng) {
+                var urlJson = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=false";
+                var json;
+
+                $.ajax({
+                    url: urlJson,
+                    dataType: 'json',
+                    async: false,
+                    success: function (data) {
+                        json = data;
+                    }
+                });
+                if (json.status === "OK") {
+                    return json.results[0].formatted_address;
+                }
+                return "undefine";
             }
 
         });

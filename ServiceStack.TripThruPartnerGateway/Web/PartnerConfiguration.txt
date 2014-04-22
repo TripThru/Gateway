@@ -3,93 +3,76 @@
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
-      "name" : "Yellow Cab",
-      "clientId" : "yellow@tripthru.com",
-      "accessToken" : "yellow12ondazazxx21",
-    "callbackUrl" : "http://localhost:17188/"
-	  "webUrl" : "BookingsYellowCab/",
-	  "webUrlRelative" : "/BookingsYellowCab/index.php"
+      "name" : "Luxor Cab",
+      "clientId" : "luxor@tripthru.com",
+      "accessToken" : "luxor23noiasdn2123",
+	  "callbackUrl" : "http://localhost:17188/",
+	  "webUrl" : "BookingsLuxorCab/",
+	  "webUrlRelative" : "/BookingsLuxorCab/index.php"
   },
   "fleets" : [
     {
-        "name" : "Yellow Cab - SF",
+        "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
-        "costPerMile" : 3.00,
+        "costPerMile" : 2.70,
         "tripsPerHour" : 100,
 		"location" : {
-			"lat" : 37.78906,
-            "lng" : -122.402127
+			"lat" : 25.271139,
+            "Lng": 55.307485
         },
         "possibleTrips" : [
-			 {
-                "start" : { "lat" : 37.782551, "lng" : -122.445368},
-                "end"   : { "lat" : 37.786956, "lng" : -122.440279}
-            },
             {
-                "start" : { "lat" : 37.784345, "lng" : -122.422922},
-                "end"   : { "lat" : 37.785292, "lng" : -122.416257}
+                "start" : { "lat" : 37.800224, "lng" : -122.43352},
+                "end"   : { "lat" : 37.800066, "lng" : -122.436167}
             }
-
         ],
         "vehicleTypes" : [
             "compact",
             "sedan"
         ],
         "drivers" : [
-            "Eduardo Lozano",
-            "Edward Hamilton",
-            "Steven Thompson",
-            "Bartomeu Astor",
-            "Matthias Randulf",
-            "Ahoth Achab",
-            "Mattias Ohannes",
-			"Alta J. Johnson",
-			"Joy B. Wright",
-			"Joseph A. Bethel",
-			"Rachael H. Hall",
-			"Bernice R. Gooch",
-			"Minerva C. Alton",
-			"Shannon R. Turnipseed",
-			"Herman E. Ackerman",
-			"Michael D. Peters",
-			"Kenneth M. Goss",
-			"Barry C. Dumas",
-			"Colleen G. McAllister",
-			"Karina Huntsman",  
-			"Geoffrey Cuomo",  
-			"Alease Linz",  
-			"Arnetta Agin",    
-			"Gregorio Timmerman",    
-			"Garret Kadel",    
-			"Christy Coplin",    
-			"Elias Alphin",    
-			"Ossie Chesnut",    
-			"Eufemia Adelman",    
-			"Tesha Mcbain",    
-			"Bobette Leeder",    
-			"Ching Owenby",    
-			"Tonie Millikin",    
-			"Tamatha Parsley",   
-			"Lawrence Soliman",    
-			"Palmira Rawlins",    
-			"Teresita Montesinos",    
-			"Robby Moses",    
-			"Roseanna Littlefield" 
-
+            "Alex Goldman",
+            "Jason Fama",
+            "Simon Shvarts",
+            "Bob Toni",
+            "Velimir Erebos",
+            "Maximillian Constantin",
+			"Kimberly H. Kennedy",
+			"Rodney M. Montgomery",
+			"James B. Racine",
+			"Patrick M. High",
+			"Marcella A. Sova",
+			"Maria K. Morrison",
+			"Lisa M. Nicholson",
+			"Edward P. Morton",
+			"James A. Birt",
+			"Margaret J. Kent",
+			"Gladys L. Serrano",
+			"Eddie J. Johnson",
+			"Lynnette Queener",  
+			"Hulda Mckinnis",
+			"Elicia Kuhlman",  
+			"Doug Vanwingerden",  
+			"Orval Aubert",  
+			"Zoraida Timpson",  
+			"Whitney Ables",  
+			"Tandy Aponte",  
+			"Janeen Aguilera",  
+			"Isidra Bitter"  
         ],
         "passengers" : [
-            "George Washington",
-			"Abraham Lincoln",
-			"Herbert Hoover",
-			"John Kennedy",
-			"Jimmy Carter",
-			"Richard Nixon"
+            "Elvis Presley",
+            "John Riggins",
+            "Bart Star",
+            "Michelle Phieffer",
+            "Zong Zi Yi",
+            "Mickey Rourke"
         ],
         "coverage" : [
             {
                 "center" : {
-					"lat" : 37.78906,
-					"lng" : -122.402127
+                    "lat" : 25.271139,
+                    "Lng": 55.307485
                 },
                 "radius" : 50
             }

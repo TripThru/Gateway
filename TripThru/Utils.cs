@@ -306,14 +306,14 @@ namespace Utils
         public Waypoint()
         {
         }
-        public Waypoint(double lat, double lng, TimeSpan elapse, double distance, string name = null)
-            : base(lat, lng, name)
+        public Waypoint(double lat, double lng, TimeSpan elapse, double distance)
+            : base(lat, lng)
         {
             this.elapse = elapse;
             this.distance = distance;
         }
-        public Waypoint(Location l, TimeSpan elapse, double distance, string name = null)
-            : base(l.Lat, l.Lng, name)
+        public Waypoint(Location l, TimeSpan elapse, double distance)
+            : base(l.Lat, l.Lng)
         {
             this.elapse = elapse;
             this.distance = distance;

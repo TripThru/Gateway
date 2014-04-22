@@ -184,7 +184,6 @@ namespace ServiceStack.TripThruGateway
                 TripId = request.tripID,
                 DriverLocationLat = request.driverLocation != null ? (double?)request.driverLocation.Lat : null,
                 DriverLocationLng = request.driverLocation != null ? (double?)request.driverLocation.Lng : null,
-                DriverLocationAddress = request.driverLocation != null ? request.driverLocation.Address : null,
                 ETA = request.eta
             });
             Gateway.UpdateTripStatusResponse response;

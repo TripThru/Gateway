@@ -97,38 +97,6 @@ namespace Utils
             }
         }
 
-        public static void CsvLoadTripRoutes(string filename, bool lngFirst)
-        {
-            // load trip routes
-            Dictionary<string, LinkedList<Waypoint>> routes = new Dictionary<string, LinkedList<Waypoint>>();
-            using (CsvFileReader reader = new CsvFileReader(filename))
-            {
-                CsvRow row = new CsvRow();
-                while (reader.ReadRow(row, ','))
-                {
-                    string routeID = row[0];
-                    double distance = 0;
-                    double lat = Convert.ToDouble(lngFirst ? row[2] : row[1]);
-                    double lng = Convert.ToDouble(lngFirst ? row[1] : row[2]);
-                    if (routes.ContainsKey(routeID))
-                        distance = routes[routeID].First.Value.GetDistance(new Location(lat, lng, "null"));
-                    Waypoint waypoint = new Waypoint(lat, lng, TimeSpan.Parse(row[3]), distance, row[4].Replace("\"", ""));
-
-                    // Scenario #1
-                    if (!routes.ContainsKey(routeID))
-                        routes[routeID] = new LinkedList<Waypoint>();
-                    routes[routeID].AddLast(waypoint);
-
-                }
-            }
-            foreach (LinkedList<Waypoint> w in routes.Values)
-            {
-                Route r = new Route(w.ToArray());
-                string key = Route.GetKey(r.start, r.end);
-                MapTools.routes.Add(key, r);
-            }
-        }
-
         static string locationNames_Filename;
         static string routes_Filename;
         static string locationAddresses_Filename;
@@ -395,7 +363,7 @@ namespace Utils
 
         private static IEnumerable<Waypoint> IncreaseLocationsEnumerable(IEnumerable<Location> locations, double duration, double totalDuration, double distance, double totalDistance)
         {
-            const double maxStepLntLng = 0.0001;
+            const double maxStepLntLng = 0.0005;
             var wayPoints = new List<Waypoint>();
 
             var countDuration = totalDuration;

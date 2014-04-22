@@ -107,15 +107,14 @@ namespace TripThruCore
     {
         public Double Lat { get; set; }
         public Double Lng { get; set; }
-        public string Address { get; set; } // temp until we hookup with a geolocator serviced
+        //public string Address { get; set; } // temp until we hookup with a geolocator serviced
         public Location()
         {
         }
-        public Location(double lat, double lng, string address = null)
+        public Location(double lat, double lng)
         {
             Lng = lng;
             Lat = lat;
-            Address = address;
         }
         public string getID()
         {
@@ -123,8 +122,6 @@ namespace TripThruCore
         }
         public override string ToString()
         {
-            if (Address != null)
-                return Address;
             return "(" + Lat + ", " + Lng + ")";
         }
         public double DegreesToRadians(double angle)
