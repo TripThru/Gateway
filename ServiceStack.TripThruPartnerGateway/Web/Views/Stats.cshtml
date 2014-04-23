@@ -1551,65 +1551,68 @@
                 if (!updatingCharts) {
                     updatingCharts = true;
                     $.get(baseUrl + 'stats?format=json&access_token=' + accessToken, function (data) {
-                        if (data.result == "OK") {
-                            if (stats == null || activeTripsChart == null) {
-                                initCharts(data);
-                            } else {
-                                stats.series[2].data[3].update(data.exceptionsAllTime, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[2].data[2].update(data.cancelsAllTime, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[2].data[1].update(data.rejectsAllTime, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[2].data[0].update(data.tripsAllTime, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
+                        try {
+                            if (data.result == "OK") {
+                                if (stats == null || activeTripsChart == null) {
+                                    initCharts(data);
+                                } else {
+                                    stats.series[2].data[3].update(data.exceptionsAllTime, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[2].data[2].update(data.cancelsAllTime, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[2].data[1].update(data.rejectsAllTime, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[2].data[0].update(data.tripsAllTime, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
 
-                                stats.series[1].data[3].update(data.exceptionsLast24Hrs, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[1].data[2].update(data.cancelsLast24Hrs, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[1].data[1].update(data.rejectsLast24Hrs, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[1].data[0].update(data.tripsLast24Hrs, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
+                                    stats.series[1].data[3].update(data.exceptionsLast24Hrs, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[1].data[2].update(data.cancelsLast24Hrs, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[1].data[1].update(data.rejectsLast24Hrs, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[1].data[0].update(data.tripsLast24Hrs, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
 
-                                stats.series[0].data[3].update(data.exceptionsLastHour, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[0].data[2].update(data.cancelsLastHour, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[0].data[1].update(data.rejectsLastHour, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.series[0].data[0].update(data.tripsLastHour, false, {
-                                    duration: 1500,
-                                    easing: 'swing'
-                                });
-                                stats.redraw();
+                                    stats.series[0].data[3].update(data.exceptionsLastHour, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[0].data[2].update(data.cancelsLastHour, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[0].data[1].update(data.rejectsLastHour, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.series[0].data[0].update(data.tripsLastHour, false, {
+                                        duration: 1500,
+                                        easing: 'swing'
+                                    });
+                                    stats.redraw();
+                                }
+                                updateCounters(data);
                             }
-                            updateCounters(data);
+                        } catch (err) {
+                            updatingCharts = false;
                         }
-                        updatingCharts = false;
                     }).error(function (xhr, ajaxOptions, thrownError) {
                         updatingCharts = false;
                     });

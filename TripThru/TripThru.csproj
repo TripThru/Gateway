@@ -49,9 +49,8 @@
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\ServiceStack.TripThruGateway\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
@@ -155,9 +154,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="App_Data\db.sqlite" />
-    <None Include="App_Data\Geo-Location-Addresses.csv" />
-    <None Include="App_Data\Geo-Location-Names.csv" />
-    <None Include="App_Data\Geo-Routes.csv" />
     <None Include="packages.config" />
     <None Include="Scripts\jquery-2.1.0.min.map" />
   </ItemGroup>
@@ -166,6 +162,9 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\Geo-Location-Addresses.txt" />
+    <Content Include="App_Data\Geo-Location-Names.txt" />
+    <Content Include="App_Data\Geo-Routes.txt" />
     <Content Include="Custom Integrations\TDispatchOffices.txt" />
     <Content Include="Partner_Configurations\TestTDispatchConfig.txt" />
     <Content Include="Partner_Configurations\LesTaxiBluesConfig.txt" />

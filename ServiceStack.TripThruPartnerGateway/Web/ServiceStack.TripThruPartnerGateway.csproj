@@ -62,6 +62,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThru\packages\MySql.Data.6.6.4\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\ServiceStack.TripThruGateway\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="RestSharp">
       <HintPath>..\..\..\..\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThru\packages\RestSharp.104.4.0\lib\net4\RestSharp.dll</HintPath>
     </Reference>
@@ -104,6 +107,9 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Numerics">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -122,6 +128,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\Geo-Location-Addresses.txt" />
+    <Content Include="App_Data\Geo-Location-Names.txt" />
+    <Content Include="App_Data\Geo-Routes.txt" />
     <Content Include="Content\Css\default.css" />
     <Content Include="Content\Images\arrow_collapsed.gif" />
     <Content Include="Content\Images\arrow_expanded.gif" />
@@ -133,9 +142,6 @@
     <Content Include="Content\Images\btn-github.png" />
     <Content Include="login.html" />
     <Content Include="packages.config" />
-    <Content Include="App_Data\Geo-Location-Addresses.csv" />
-    <Content Include="App_Data\Geo-Location-Names.csv" />
-    <Content Include="App_Data\Geo-Routes.csv" />
     <Content Include="App_Data\db.sqlite" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="PartnerConfiguration.txt" />

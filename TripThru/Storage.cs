@@ -63,14 +63,16 @@ namespace TripThruCore.Storage
         {
             using (var db = dbFactory.Open())
             {
-                return db.Select<PartnerAccount>().Where(x => x.UserName == userName).First();
+                var acc = db.Select<PartnerAccount>().Where(x => x.UserName == userName);
+                return acc.Count() == 1 ? acc.First() : null;
             }
         }
         public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
             using (var db = dbFactory.Open())
             {
-                return db.Select<PartnerAccount>().Where(x => x.AccessToken == accessToken).First();
+                var acc = db.Select<PartnerAccount>().Where(x => x.AccessToken == accessToken);
+                return acc.Count() == 1 ? acc.First() : null;
             }
         }
     }
