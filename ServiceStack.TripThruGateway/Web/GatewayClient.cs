@@ -24,6 +24,13 @@ namespace ServiceStack.TripThruGateway
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.RegisterPartnerResponse
+                {
+                    result = Result.InvalidParameters
+                };
+
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.PartnerResponse resp = client.Post<GatewayService.PartnerResponse>(new GatewayService.PartnerRequest
             {
@@ -40,6 +47,13 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.GetPartnerInfoResponse
+                {
+                    result = Result.InvalidParameters
+                };
+
             Logger.BeginRequest("GetPartnerInfo sent to " + name, request);
 
             JsonServiceClient client = new JsonServiceClient(RootUrl);
@@ -60,6 +74,12 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.DispatchTripResponse
+                {
+                    result = Result.InvalidParameters
+                };
             Logger.BeginRequest("DispatchTrip sent to " + name, request);
             GatewayService.Dispatch dispatch = new GatewayService.Dispatch
             {
@@ -94,6 +114,12 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.QuoteTripResponse
+                {
+                    result = Result.InvalidParameters
+                };
             Logger.BeginRequest("QuoteTrip sent to " + name, request);
             GatewayService.Quotes quotes = new GatewayService.Quotes
             {
@@ -128,6 +154,12 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.GetTripStatusResponse
+                {
+                    result = Result.InvalidParameters
+                };
             Logger.BeginRequest("GetTripStatus sent to " + name, request);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.TripStatusResponse resp = client.Get<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
@@ -175,6 +207,12 @@ namespace ServiceStack.TripThruGateway
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.UpdateTripStatusResponse
+                {
+                    result = Result.InvalidParameters
+                };
             Logger.BeginRequest("UpdateTripStatus sent to " + name, request);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.TripStatusResponse resp = client.Put<GatewayService.TripStatusResponse>(new GatewayService.TripStatus

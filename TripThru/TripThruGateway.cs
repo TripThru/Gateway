@@ -34,12 +34,12 @@ namespace TripThruCore
         {
             if (!partnerCoverage.ContainsKey(partnerID))
             {
-
                 Gateway partner = partners[partnerID];
                 Gateway.GetPartnerInfoResponse resp = partner.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(ID));
                 List<Zone> coverage = new List<Zone>();
-                foreach (Fleet f in resp.fleets)
-                    coverage.AddRange(f.Coverage);
+                if (resp.result == Result.OK) 
+                    foreach (Fleet f in resp.fleets)
+                        coverage.AddRange(f.Coverage);
                 partnerCoverage.Add(partner.ID, coverage);
             }
             return partnerCoverage[partnerID];

@@ -10,8 +10,8 @@
     <title>Tripthru</title>
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
-    <script type="text/javascript" src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script type="text/javascript" src="http://code.highcharts.com/3.0.10/highcharts.js"></script>
+    <script type="text/javascript" src="http://code.highcharts.com/3.0.10/highcharts-more.js"></script>
     <script type="text/javascript" src="Scripts/jquery.easing.1.3.js"></script>
     <script type="text/javascript" src="Scripts/jquery.flipCounter.1.2.pack.js"></script>
     <link href="Scripts/prism.css" rel="stylesheet" />
@@ -1611,8 +1611,8 @@
                                 updateCounters(data);
                             }
                         } catch (err) {
-                            updatingCharts = false;
                         }
+                        updatingCharts = false;
                     }).error(function (xhr, ajaxOptions, thrownError) {
                         updatingCharts = false;
                     });
