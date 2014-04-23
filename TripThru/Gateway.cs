@@ -107,18 +107,14 @@ namespace TripThruCore
     {
         public Double Lat { get; set; }
         public Double Lng { get; set; }
-        public string Address { get; set; } // temp until we hookup with a geolocator serviced
+        //public string Address { get; set; } // temp until we hookup with a geolocator serviced
         public Location()
         {
         }
-        public Location(double lat, double lng, string address = null)
+        public Location(double lat, double lng)
         {
-            this.Lng = lng;
-            this.Lat = lat;
-            if (address == null)
-                this.Address = MapTools.GetReverseGeoLoc(this);
-            else
-                this.Address = address;
+            Lng = lng;
+            Lat = lat;
         }
         public string getID()
         {
@@ -126,8 +122,6 @@ namespace TripThruCore
         }
         public override string ToString()
         {
-            if (Address != null)
-                return Address;
             return "(" + Lat + ", " + Lng + ")";
         }
         public double DegreesToRadians(double angle)

@@ -30,7 +30,7 @@ namespace ServiceStack.TripThruPartnerGateway
         public object Any(IReturn<InitPartner> request)
         {
             StorageManager.OpenStorage(new SqliteStorage("~/App_Data/db.sqlite".MapHostAbsolutePath()));
-            MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.csv".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.csv".MapHostAbsolutePath());
+            MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
             MapTools.LoadGeoData();
             MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());

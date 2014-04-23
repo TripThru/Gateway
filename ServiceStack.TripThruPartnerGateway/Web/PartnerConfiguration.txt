@@ -1,27 +1,29 @@
 ﻿{
   "tripThruUrl" : "http://localhost:17187/",
   "simInterval" : 10,
+  "enabled" : true,
   "partner" : {
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrl" : "http://localhost:17188/"
-	  "virtualPath" : ""
+	  "callbackUrl" : "http://localhost:17188/",
+	  "webUrl" : "BookingsLuxorCab/",
+	  "webUrlRelative" : "/BookingsLuxorCab/index.php"
   },
   "fleets" : [
     {
         "name" : "Luxor Cab - SF",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
-        "tripsPerHour" : 200,
+        "tripsPerHour" : 100,
 		"location" : {
-			"lat" : 37.78906,
-            "lng" : -122.402127
+			"lat" : 25.271139,
+            "Lng": 55.307485
         },
         "possibleTrips" : [
             {
-                "start" : { "lat" : 42.342634, "lng" : -71.122545},
-                "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+                "start" : { "lat" : 37.800224, "lng" : -122.43352},
+                "end"   : { "lat" : 37.800066, "lng" : -122.436167}
             }
         ],
         "vehicleTypes" : [
@@ -34,7 +36,29 @@
             "Simon Shvarts",
             "Bob Toni",
             "Velimir Erebos",
-            "Maximillian Constantin"
+            "Maximillian Constantin",
+			"Kimberly H. Kennedy",
+			"Rodney M. Montgomery",
+			"James B. Racine",
+			"Patrick M. High",
+			"Marcella A. Sova",
+			"Maria K. Morrison",
+			"Lisa M. Nicholson",
+			"Edward P. Morton",
+			"James A. Birt",
+			"Margaret J. Kent",
+			"Gladys L. Serrano",
+			"Eddie J. Johnson",
+			"Lynnette Queener",  
+			"Hulda Mckinnis",
+			"Elicia Kuhlman",  
+			"Doug Vanwingerden",  
+			"Orval Aubert",  
+			"Zoraida Timpson",  
+			"Whitney Ables",  
+			"Tandy Aponte",  
+			"Janeen Aguilera",  
+			"Isidra Bitter"  
         ],
         "passengers" : [
             "Elvis Presley",
@@ -47,15 +71,15 @@
         "coverage" : [
             {
                 "center" : {
-                    "lat" : 37.78906,
-                    "lng" : -122.402127
+                    "lat" : 25.271139,
+                    "Lng": 55.307485
                 },
                 "radius" : 50
             }
         ]
     }  
   ],
-  "host": {
-	  "virtualPath" : "/"
-	}
+  "host" : {
+		"virtualPath" : "/"
+  }
 }

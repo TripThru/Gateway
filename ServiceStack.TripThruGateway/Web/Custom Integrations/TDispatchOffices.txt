@@ -3,7 +3,7 @@
 	[
 		{	
 			"ID":"52b4053948efcb7ac1137d41",
-			"enabled" : false,
+			"enabled" : true,
 			"name":"TripThru San Francisco",
 			"api_key":"ec1a72432c504ed470695943e3dfccd8",
 			"fleetAuthorizationCode":"52b4dd8149d943327b19c269",

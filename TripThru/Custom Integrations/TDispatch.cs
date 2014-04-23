@@ -720,8 +720,8 @@ namespace CustomIntegrations
 
                 response = new Gateway.GetTripStatusResponse(
                     partnerID: ID, partnerName: name, passengerName: booking.customerName,
-                    pickupLocation: new Location((double)booking.pickup_Location.location.lat, (double)booking.pickup_Location.location.lng, booking.pickup_Location.address),
-                    dropoffLocation: new Location((double)booking.dropoff_Location.location.lat, (double)booking.dropoff_Location.location.lng, booking.dropoff_Location.address),
+                    pickupLocation: new Location((double)booking.pickup_Location.location.lat, (double)booking.pickup_Location.location.lng),
+                    dropoffLocation: new Location((double)booking.dropoff_Location.location.lat, (double)booking.dropoff_Location.location.lng),
                     fleetID: booking.office.slug, fleetName: booking.office.name,
                     driverID: booking.driver != null ? booking.driver.pk : null,
                     driverName: booking.driver != null ? booking.driver.name : null,
