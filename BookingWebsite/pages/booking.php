@@ -56,10 +56,19 @@ if (isset($_POST['booking_form_type'])) {
                 'phone' => 'phone',
                 'email' => 'sanfranciscopassenger@tripthru.com'
             );
+
             $hour = $_POST['hours'];
+            ChromePhp::log($hour);
+            ChromePhp::log($_POST);
             $minutes = $_POST['minutes'];
             list($d, $m, $y) = explode('/', $_POST['date']);
-            $pickup_time = "{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00+00:00";
+            
+            $pickup_time = new DateTime("{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00");
+
+            $convertTimeZone = $_POST['time_zone'] . " hours";
+
+            $pickup_time->modify($convertTimeZone);
+
             $return_pickup_time = "{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00+00:00";
 
             $pickup_location = json_decode(stripslashes($_POST['locationobj']), true);
@@ -96,14 +105,14 @@ if (isset($_POST['booking_form_type'])) {
                         'lng' => $dropoff_location['location']['lng']
 				);
 				
-
-                $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time, $p_location, $d_location, $selected_partner_id);
+                ChromePhp::log($pickup_time->format('Y-m-d H:i:s'));
+                $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time->format('Y-m-d H:i:s'), $p_location, $d_location, $selected_partner_id);
                 if ($bk_resp) {
 					$_SESSION[$td->partnerId]['trips'][] = array(
 						'trip_id' => $trip_id, 
 						'pickup_location' => $pickup_location,
 						'dropoff_location' => $dropoff_location,
-						'pickup_time' => $pickup_time,
+						'pickup_time' => $pickup_time->format('Y-m-d H:i:s'),
                         'partner_id' => $selected_partner_id,
                         'partner_name' => $selected_partner_name
 					);
@@ -135,9 +144,16 @@ if (isset($_POST['booking_form_type'])) {
             $minutes = $_POST['minutes'];
 
             list($d, $m, $y) = explode('/', $_POST['date']);
-            $pickup_time = "{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00+00:00";
 
-            $return_pickup_time = "{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00+00:00";
+            $pickup_time = new DateTime("{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00");
+
+            $convertTimeZone = $_POST['time_zone'] . " hours";
+
+            $pickup_time->modify($convertTimeZone);
+
+            $return_pickup_time = new DateTime("{$y}-{$m}-{$d}T{$hour[0]}{$hour[1]}:{$minutes[0]}{$minutes[1]}:00");
+
+            $return_pickup_time->modify($convertTimeZone);
 
             $pickup_location = json_decode(stripslashes($_POST['locationobj']), true);
 
@@ -165,7 +181,7 @@ if (isset($_POST['booking_form_type'])) {
 
             $bookingPk = $_POST['bookingPk'];
             if ($td->Account_checkLogin()) {
-                $bk_resp = $td->Bookings_update($bookingPk, $customer, $passenger, $pickup_time, $return_pickup_time, $pickup_location, $way_points, $dropoff_location, $vehicle_type, $extra_instructions, $luggage, $passengers, $payment_method, $prepaid, $status, $price_rule, $customFieldBooking);
+                $bk_resp = $td->Bookings_update($bookingPk, $customer, $passenger, $pickup_time->format('Y-m-d H:i:s'), $return_pickup_time->format('Y-m-d H:i:s'), $pickup_location, $way_points, $dropoff_location, $vehicle_type, $extra_instructions, $luggage, $passengers, $payment_method, $prepaid, $status, $price_rule, $customFieldBooking);
                 if ($bk_resp) {
                     unset($_POST);
                     unset($_SESSION[$td->partnerId]['post_booking']);
@@ -256,6 +272,7 @@ $fields = '';
 ?>
 <form id="booking_form" name="booking_form" class="booking_form journey_form" method="post" autocomplete="off" action="<?php echo $td->getHomeUrl(); ?>" >
 	<input type="hidden" name="booking_form_type" value="<?php echo $booking_form_type; ?>" />
+    <input type="hidden" id ="time_zone" name="time_zone" value="" />
     <?php if (valueReturnBooking('bookingPk') != '') : ?>
         <input type = "hidden" name = "bookingPk" value = "<?php echo valueReturnBooking('bookingPk'); ?>" />
 <?php endif; ?>
@@ -443,6 +460,8 @@ $fields = '';
 </form>
 <script>
     $(function(){
+
+        document.getElementById("time_zone").value = ""  + ( (new Date().getTimezoneOffset() / 60) );
 
         //passengers
         $(".qt_bags_pass a").click(function(){
@@ -1034,5 +1053,6 @@ $fields = '';
         xhttp.send();
         return xhttp.responseXML;
       }
+
     getLocation();
 </script>

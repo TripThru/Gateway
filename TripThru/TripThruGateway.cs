@@ -432,6 +432,25 @@ namespace TripThruCore
             return new GetTripStatusResponse(result: Result.NotFound);
         }
 
+        public override GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
+        {
+            requests++;
+            GetRouteTripResponse getRouteTripResponse = new GetRouteTripResponse
+            {
+                result = Result.NotFound
+            };
+            if(activeTrips.ContainsKey(request.tripID))
+            getRouteTripResponse = new GetRouteTripResponse
+            {
+                result = Result.OK,
+                OriginatingPartnerId = activeTrips[request.tripID].OriginatingPartnerId,
+                ServicingPartnerId = activeTrips[request.tripID].ServicingPartnerId,
+                HistoryEnrouteList = activeTrips[request.tripID].GetEnrouteLocatinList(),
+                HistoryPickUpList = activeTrips[request.tripID].GetPickUpLocatinList()
+            };
+            return getRouteTripResponse;
+        }
+
         private void UpdateActiveTripWithNewTripStatus(GetTripStatusRequest r, GetTripStatusResponse response)
         {
             UpdateActiveTrip(new Trip
@@ -484,14 +503,31 @@ namespace TripThruCore
                 r.clientID = originClientID;
                 if (SuccesAndTripStillActive(r, response))
                 {
-                    activeTrips[r.tripID].Status = r.status;
-                    if (r.status == Status.Complete)
+                    if (r.driverLocation != null)
                     {
-                        GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
-                        DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
+                        if (r.status == Status.Dispatched)
+                            activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
                     }
-                    else if (r.status == Status.Cancelled || r.status == Status.Rejected)
-                        DeactivateTripAndUpdateStats(r.tripID, r.status);
+                    activeTrips[r.tripID].Status = r.status;
+                    switch (r.status)
+                    {
+                        case Status.Enroute:
+                            activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
+                            break;
+                        case Status.PickedUp:
+                            activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
+                            break;
+                        case Status.Complete:
+                        {
+                            GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
+                            DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
+                        }
+                            break;
+                        case Status.Rejected:
+                        case Status.Cancelled:
+                            DeactivateTripAndUpdateStats(r.tripID, r.status);
+                            break;
+                    }
                 }
                 else
                     Logger.Log("Request to destination partner failed, Result=" + response.result);

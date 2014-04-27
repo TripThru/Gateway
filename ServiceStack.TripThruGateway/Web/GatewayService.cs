@@ -1181,5 +1181,63 @@ namespace ServiceStack.TripThruGateway
 
         #endregion
 
+        #region RouteTrip
+
+        [Api("Use GET /routetrip")]
+        [Route("/routetrip", "GET")]
+        [Restrict(VisibilityTo = EndpointAttributes.None)]
+        public class RouteTrip : IReturn<RouteTripResponse>
+        {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "tripId", Description = "Trip ID", DataType = "string", IsRequired = true)]
+            public string tripId { get; set; }
+        }
+
+        public class RouteTripResponse
+        {
+            public Gateway.Result Result { get; set; }
+            public List<Location> HistoryEnrouteList { get; set; }
+            public List<Location> HistoryPickUpList { get; set; }
+        }
+
+        public class RouteTripService : Service
+        {
+            public RouteTripResponse Get(RouteTrip request)
+            {
+                var accessToken = request.access_token;
+                request.access_token = null;
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                var routeTripResponse = new RouteTripResponse
+                {
+                    Result = Gateway.Result.UnknownError
+                };
+                try
+                {
+                    if (acct == null)
+                        acct = user;
+
+                    var response = gateway.GetRouteTrip(new Gateway.GetRouteTripRequest(request.tripId));
+                    if (acct.Role != Storage.UserRole.admin && acct.ClientId != response.OriginatingPartnerId &&
+                        acct.ClientId != response.ServicingPartnerId)
+                        return routeTripResponse;
+                    routeTripResponse.Result = response.result;
+                    routeTripResponse.HistoryEnrouteList = response.HistoryEnrouteList;
+                    routeTripResponse.HistoryPickUpList = response.HistoryPickUpList;
+                }
+                catch (Exception e)
+                {
+                    routeTripResponse = new RouteTripResponse
+                    {
+                        Result = Gateway.Result.UnknownError
+                    };
+                }
+                return routeTripResponse;
+            }
+        }
+
+        #endregion
+
     }
 }
