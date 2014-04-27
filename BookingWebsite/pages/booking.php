@@ -58,8 +58,6 @@ if (isset($_POST['booking_form_type'])) {
             );
 
             $hour = $_POST['hours'];
-            ChromePhp::log($hour);
-            ChromePhp::log($_POST);
             $minutes = $_POST['minutes'];
             list($d, $m, $y) = explode('/', $_POST['date']);
             
@@ -105,7 +103,6 @@ if (isset($_POST['booking_form_type'])) {
                         'lng' => $dropoff_location['location']['lng']
 				);
 				
-                ChromePhp::log($pickup_time->format('Y-m-d H:i:s'));
                 $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time->format('Y-m-d H:i:s'), $p_location, $d_location, $selected_partner_id);
                 if ($bk_resp) {
 					$_SESSION[$td->partnerId]['trips'][] = array(
