@@ -123,8 +123,8 @@ namespace TripThruCore
                 else
                     return new DispatchTripResponse(result: Result.Rejected);
             }
-            if (r.fleetID != null)
-                return DispatchToSpecificFleet(r);
+            //if (r.fleetID != null)
+            //    return DispatchToSpecificFleet(r);
             else
                 return DispatchToFirstFleetThatServes(r);
             /*

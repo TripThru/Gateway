@@ -13,7 +13,7 @@
 			"passengerAccessToken":"53264e9849d9433eb214b5ab",
 			"passengerRefreshToken":"lR7nq3hXJbmkS2DKp9Q0XV1uiWV2igzz",
 			"passengerProxyPK":"52fd3ee248efcb2f518b4586",
-			"coverage":[{"Center":{"lat": 29.114788, "lng": -110.973587},"Radius":8000050}]
+			"coverage":[{"Center":{"lat": 37.362860, "lng": -121.761709},"Radius":30000}]
 		},
 		{
 			"ID":"529062d06e77c373a280eae1",
