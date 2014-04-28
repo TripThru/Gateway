@@ -155,8 +155,8 @@ namespace TripThruSsh
                 ssh.RunCommand("rm " + remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
                 var x = name + ".png";
                 var y = remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png";
-                //sftpBase.Put("PartnerConfigurations/" + name + ".png",
-                //    remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
+                sftpBase.Put("PartnerConfigurations/" + name + ".png",
+                    remoteFilePath + "BookingWebsite/images/taxi-cars_logo.png");
                 ssh.RunCommand("rm -rf /var/www/sanfran/Bookings" + name);
                 ssh.RunCommand("cp -a " + remoteFilePath + "BookingWebsite/ /var/www/sanfran/Bookings" + name);
             }
