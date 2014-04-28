@@ -25,7 +25,7 @@ namespace Tests
             MapTools.distance_and_time_scale = .05;
             MapTools.SetGeodataFilenames(locationNames: "Test_GeoData/Geo-Location-Names.txt",
                 routes: "Test_GeoData/Geo-Routes.txt",
-                locationAddresses: "Test_GeoData/Geo-Location-Addresses.csv");
+                locationAddresses: "Test_GeoData/Geo-Location-Addresses.txt");
             MapTools.LoadGeoData();
             Logger.Untab();
         }

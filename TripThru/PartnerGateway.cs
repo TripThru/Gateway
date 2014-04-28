@@ -112,8 +112,9 @@ namespace TripThruCore
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
             requests++;
-            if (r.partnerID != ID)
+            if (r.partnerID != null && r.partnerID != ID)
             {
+                Logger.Log("Dispatching trip to partner " + r.partnerID);
                 PartnerTrip trip = GetTrip(r, autoDispatch: false);
                 trip.origination = PartnerTrip.Origination.Local;
                 PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
@@ -135,6 +136,7 @@ namespace TripThruCore
         }
         private DispatchTripResponse DispatchToSpecificFleet(DispatchTripRequest r)
         {
+            Logger.Log("Dispatching to fleet " + r.fleetID);
             PartnerFleet f = PartnerFleets[r.fleetID];
             if (f.FleetServesLocation(r.pickupLocation))
             {
@@ -151,6 +153,7 @@ namespace TripThruCore
         }
         private DispatchTripResponse DispatchToFirstFleetThatServes(DispatchTripRequest r)
         {
+            Logger.Log("Dispatching to first fleet that serves");
             DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
             foreach (PartnerFleet f in PartnerFleets.Values)
             {
