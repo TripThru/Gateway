@@ -103,13 +103,13 @@ if (isset($_POST['booking_form_type'])) {
                         'lng' => $dropoff_location['location']['lng']
 				);
 				
-                $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time->format('Y-m-d H:i:s'), $p_location, $d_location, $selected_partner_id);
+                $bk_resp = $td->Dispatch($passenger, $trip_id, $pickup_time->format('Y-m-d H:i:s').'+00:00', $p_location, $d_location, $selected_partner_id);
                 if ($bk_resp) {
 					$_SESSION[$td->partnerId]['trips'][] = array(
 						'trip_id' => $trip_id, 
 						'pickup_location' => $pickup_location,
 						'dropoff_location' => $dropoff_location,
-						'pickup_time' => $pickup_time->format('Y-m-d H:i:s'),
+						'pickup_time' => $pickup_time->format('Y-m-d H:i:s').'+00:00',
                         'partner_id' => $selected_partner_id,
                         'partner_name' => $selected_partner_name
 					);

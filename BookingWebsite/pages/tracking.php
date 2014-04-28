@@ -419,7 +419,7 @@ text-overflow: ellipsis;
 					var driverName = trip.driverName ? trip.driverName : 'Not available';
                     var pickupLocationName = getAddress(trip.pickupLocation.lat,trip.pickupLocation.lng);
                     var dropoffLocationName = getAddress(trip.dropoffLocation.lat,trip.dropoffLocation.lng);
-					var driverLocationName = getAddress(trip.driverLocation.lat,trip.driverLocation.lng);
+					var driverLocationName = trip.driverLocation ? getAddress(trip.driverLocation.lat,trip.driverLocation.lng) : 'Not available';
 					var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
 					var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
@@ -454,11 +454,11 @@ text-overflow: ellipsis;
                     }
                     return "undefine";
                 }
+                var directionsDisplay = null;
+                var directionsDisplay2 = null;
 				function updateMap(data){
 					if(!$.isEmptyObject(data.driverLocation))
 					{
-						var directionsDisplay = null;
-						var directionsDisplay2 = null;
 						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
 						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
 						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);

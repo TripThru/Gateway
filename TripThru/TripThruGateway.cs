@@ -415,6 +415,8 @@ namespace TripThruCore
                 GetTripStatusResponse response = partner.GetTripStatus(r);
                 if (response.result == Result.OK)
                 {
+                    if (TripHasDriverInitialLocation(r.tripID))
+                        AddDriverInitialLocation(response, r.tripID);
                     if (TripHasNonActiveStatus(response))
                         DeactivateTripAndUpdateStats(r.tripID, (Status)response.status, response.price, response.distance);
                     else
@@ -430,6 +432,13 @@ namespace TripThruCore
             Logger.Log("Destination partner trip not found");
             Logger.AddTag("ClientId", r.clientID);
             return new GetTripStatusResponse(result: Result.NotFound);
+        }
+        private bool TripHasDriverInitialLocation(string tripId){
+            return activeTrips[tripId].DriverInitiaLocation != null;
+        }
+        private void AddDriverInitialLocation(GetTripStatusResponse response, string tripId)
+        {
+            response.driverInitialLocation = activeTrips[tripId].DriverInitiaLocation;
         }
 
         public override GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
@@ -503,11 +512,8 @@ namespace TripThruCore
                 r.clientID = originClientID;
                 if (SuccesAndTripStillActive(r, response))
                 {
-                    if (r.driverLocation != null)
-                    {
-                        if (r.status == Status.Dispatched || r.status == Status.Confirmed)
-                            activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
-                    }
+                    if (r.driverLocation != null && activeTrips[r.tripID].DriverInitiaLocation == null)
+                        activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
                     activeTrips[r.tripID].Status = r.status;
                     switch (r.status)
                     {
