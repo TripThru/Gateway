@@ -1,8 +1,8 @@
-HomeUrl=http://192.168.0.125:8080//BookingsYellowCab/
+HomeUrl=http://54.201.134.194:8080//BookingsYellowCab/
 RelativeHomeUrl=/BookingsYellowCab/index.php
-TripThruUrl=http://192.168.0.125/TripThru.TripThruGateway/
+TripThruUrl=http://54.201.134.194/TripThru.TripThruGateway/
 TripThruAccessToken=jaosid1201231
-PartnerUrl=http://192.168.0.125/TripThru.YellowCab/
+PartnerUrl=http://54.201.134.194/TripThru.YellowCab/
 PartnerAccessToken=yellow12ondazazxx21
 PartnerName=YellowCab
 PartnerId=yellow@tripthru.com
