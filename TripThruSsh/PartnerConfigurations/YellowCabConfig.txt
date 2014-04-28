@@ -60,12 +60,12 @@
             },
             "Name": "Yellow Cab - SF",
             "Passengers": [
-                "George Washington",
-                "Abraham Lincoln",
-                "Herbert Hoover",
-                "John Kennedy",
-                "Jimmy Carter",
-                "Richard Nixon"
+                "Robert Bilson",
+                "Jennifer Drew",
+                "Andre Martinez",
+                "Susan Rello",
+                "David Elk",
+                "Helen Sofer"
             ],
             "PossibleTrips": [
                 {

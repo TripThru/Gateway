@@ -81,12 +81,12 @@
 			"Isidra Bitter"  
         ],
         "passengers" : [
-            "Elvis Presley",
-            "John Riggins",
-            "Bart Star",
-            "Michelle Phieffer",
-            "Zong Zi Yi",
-            "Mickey Rourke"
+            "William Bosworth",
+            "Karl Morgan",
+            "Ramel Eigen",
+            "Allen Ford",
+            "Mary Jefferson",
+            "Jason Loughlin"
         ],
         "coverage" : [
             {
