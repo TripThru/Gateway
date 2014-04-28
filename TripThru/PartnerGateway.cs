@@ -88,7 +88,7 @@ namespace TripThruCore
             GetPartnerInfoResponse response = new GetPartnerInfoResponse(PartnerFleets, vehicleTypes);
             return response;
         }
-        public PartnerTrip GetTrip(DispatchTripRequest r)
+        public PartnerTrip GetTrip(DispatchTripRequest r, bool autoDispatch = true)
         {
             return new PartnerTrip(
                 partner: this,
@@ -105,29 +105,53 @@ namespace TripThruCore
                 maxPrice: r.maxPrice,
                 minRating: r.minRating,
                 fleet: r.fleetID == null ? null : this.PartnerFleets[r.fleetID],
-                driver: r.driverID == null ? null : this.PartnerFleets[r.fleetID].drivers[r.driverID]);
+                driver: r.driverID == null ? null : this.PartnerFleets[r.fleetID].drivers[r.driverID],
+                autoDispatch: autoDispatch
+                );
         }
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
-
             requests++;
-            if (r.fleetID != null)
+            if (r.partnerID != ID)
             {
-                PartnerFleet f = PartnerFleets[r.fleetID];
-                if (f.FleetServesLocation(r.pickupLocation))
-                {
-                    PartnerTrip trip = GetTrip(r);
-                    if (f.QueueTrip(trip))
-                    {
-                        DispatchTripResponse response = new DispatchTripResponse();
-                        Logger.Log("DispatchTrip successful on " + name + ", Response: " + response);
-                        Logger.SetServicingId(this.ID);
-                        return response;
-                    }
-                }
-                return new DispatchTripResponse(result: Result.Rejected);
+                PartnerTrip trip = GetTrip(r, autoDispatch: false);
+                trip.origination = PartnerTrip.Origination.Local;
+                PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
+                if (TryToDispatchToForeignProvider(trip))
+                    return new DispatchTripResponse(result: Result.OK);
+                else
+                    return new DispatchTripResponse(result: Result.Rejected);
             }
-            // Note: GetTrip populates the foreignTripID
+            if (r.fleetID != null)
+                return DispatchToSpecificFleet(r);
+            else
+                return DispatchToFirstFleetThatServes(r);
+            /*
+            {
+                DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
+                Logger.Log("DispatchTrip rejected on " + name + ", no available drivers -- Response: " + response);
+                return response;
+            }*/
+        }
+        private DispatchTripResponse DispatchToSpecificFleet(DispatchTripRequest r)
+        {
+            PartnerFleet f = PartnerFleets[r.fleetID];
+            if (f.FleetServesLocation(r.pickupLocation))
+            {
+                PartnerTrip trip = GetTrip(r);
+                if (f.QueueTrip(trip))
+                {
+                    DispatchTripResponse response = new DispatchTripResponse();
+                    Logger.Log("DispatchTrip successful on " + name + ", Response: " + response);
+                    Logger.SetServicingId(this.ID);
+                    return response;
+                }
+            }
+            return new DispatchTripResponse(result: Result.Rejected);
+        }
+        private DispatchTripResponse DispatchToFirstFleetThatServes(DispatchTripRequest r)
+        {
+            DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
             foreach (PartnerFleet f in PartnerFleets.Values)
             {
                 if (!f.FleetServesLocation(r.pickupLocation))
@@ -135,17 +159,48 @@ namespace TripThruCore
                 PartnerTrip trip = GetTrip(r);
                 if (f.QueueTrip(trip))
                 {
-                    DispatchTripResponse response = new DispatchTripResponse();
-                    Logger.Log("DispatchTrip successful on " + name + ", Response: " + response);
-                    return response;
+                    DispatchTripResponse resp = new DispatchTripResponse();
+                    Logger.Log("DispatchTrip successful on " + name + ", Response: " + resp);
+                    return resp;
                 }
             }
-            {
-                DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
-                Logger.Log("DispatchTrip rejected on " + name + ", no available drivers -- Response: " + response);
-                return response;
-            }
+            return response;
         }
+        private bool TryToDispatchToForeignProvider(PartnerTrip trip, string partnerID = null)
+        {
+            Logger.Log("TryToDispatchToForeignProvider: partnerID = " + partnerID);
+            Logger.Tab();
+            Gateway.DispatchTripRequest request = new Gateway.DispatchTripRequest(
+                clientID: ID,
+                tripID: trip.ID,
+                pickupLocation: trip.pickupLocation,
+                pickupTime: trip.pickupTime,
+                passengerID: trip.passengerID,
+                passengerName: trip.passengerName,
+                luggage: trip.luggage,
+                persons: trip.persons,
+                dropoffLocation: trip.dropoffLocation,
+                waypoints: trip.waypoints,
+                paymentMethod: trip.paymentMethod,
+                vehicleType: trip.vehicleType,
+                maxPrice: trip.maxPrice,
+                minRating: trip.minRating,
+                partnerID: partnerID == null ? preferedPartnerId : partnerID
+                );
+            Gateway.DispatchTripResponse response = tripthru.DispatchTrip(request);
+            if (response.result == Gateway.Result.OK)
+            {
+                // Actually, at this point its just in the partner's queue, until its dispatch to the partner's drivers -- so no status update. 
+                trip.service = PartnerTrip.Origination.Foreign;
+                Logger.Log("Trip was successfully dispatched through TripThru");
+
+            }
+            else
+                Logger.Log("Trip was rejected by TripThru");
+            Logger.Untab();
+            return response.result == Gateway.Result.OK;
+        }
+
         public PartnerTrip GetTrip(QuoteTripRequest r)
         {
             return new PartnerTrip(this, null, PartnerTrip.Origination.Foreign, r.pickupLocation, r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation,
@@ -387,9 +442,10 @@ namespace TripThruCore
         public DateTime? ETA;
         public double? distance;
         public Status? lastStatusNotifiedToPartner;
-        public Status status { get { return _status; } }
+        public Status status { get { return _status; } set { this._status = value; }}
         public enum Origination { Local, Foreign };
         public DateTime lastDispatchAttempt;
+        public bool autoDispatch;
 
         private bool TripStatusHasChanged(Status status, Location driverLocation, DateTime? eta)
         {
@@ -405,7 +461,7 @@ namespace TripThruCore
                 if (driverLocation != null)
                 {
                     this.driverLocation = driverLocation;
-                    if (status == Status.Dispatched)
+                    if (driverInitiaLocation == null)
                         this.driverInitiaLocation = driverLocation;
                 }
                 if (eta != null)
@@ -492,6 +548,7 @@ namespace TripThruCore
             this._status = t._status;
             this.partner = t.partner;
             this.lastDispatchAttempt = DateTime.MinValue;
+            this.autoDispatch = t.autoDispatch;
         }
         public override string ToString()
         {
@@ -521,7 +578,8 @@ namespace TripThruCore
             return s;
         }
         public PartnerTrip(Partner partner, string ID, Origination origination, Location pickupLocation, DateTime pickupTime, PaymentMethod? paymentMethod = null, string passengerID = null, string passengerName = null, Location dropoffLocation = null,
-           DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, TimeSpan? duration = null, TimeSpan? driverRouteDuration = null, double? price = null)
+           DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, TimeSpan? duration = null, TimeSpan? driverRouteDuration = null, double? price = null,
+            bool autoDispatch = true)
         {
             this.ID = ID;
             this.origination = origination;
@@ -542,6 +600,7 @@ namespace TripThruCore
             this.PartnerFleet = fleet;
             this.driver = driver;
             this.price = price;
+            this.autoDispatch = autoDispatch;
             this.UpdateTripStatus(notifyPartner: false, status: Status.New);
         }
     }
@@ -1078,11 +1137,15 @@ namespace TripThruCore
 
         private void ProcessStatusQueued(PartnerTrip t)
         {
-            if (DispatchRetryIntervalReached(t))
+            if (TripIsAutoDispatch(t) && DispatchRetryIntervalReached(t))
             {
                 DispatchTrip(t);
                 t.lastDispatchAttempt = DateTime.UtcNow;
             }
+        }
+        private bool TripIsAutoDispatch(PartnerTrip t)
+        {
+            return t.autoDispatch;
         }
 
         private static void StartTheAgeSinceCompletedClock_FromNow(PartnerTrip t)

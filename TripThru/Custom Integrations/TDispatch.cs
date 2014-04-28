@@ -544,6 +544,7 @@ namespace CustomIntegrations
                 string bookingPK = activeTrips[tripID].pk;
                 TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
                 TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
+                getBookingResponse.booking.sub_status = getBookingStatusResponse.booking.sub_status;
                 UpdateBooking(tripID, getBookingResponse.booking);
             }
 
@@ -553,7 +554,12 @@ namespace CustomIntegrations
 
         public void UpdateBooking(string tripID, TDispatchAPI.Booking value)
         {
-            if (activeTrips[tripID].status == value.status)
+            Status activeTrip = ConvertTDispatchStatusToTripThruStatus(activeTrips[tripID].status,
+                activeTrips[tripID].sub_status);
+            Status valueTrip = ConvertTDispatchStatusToTripThruStatus(value.status,
+                value.sub_status);
+
+            if (activeTrip == valueTrip)
                 return;
 
             Logger.BeginRequest("TDispatch trip " + tripID + " update", null, tripID);
@@ -566,10 +572,21 @@ namespace CustomIntegrations
             Logger.Log("BookingStatus changed ", value);
             Logger.Log("Notify originating partner through TripThru");
             Logger.Tab();
+            Location newLocation = null;
+
+            TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
+
+            if (getBookingStatusResponse.booking.driver != null)
+                if (getBookingStatusResponse.booking.driver.location != null)
+                    if (getBookingStatusResponse.booking.driver.location.lat != null)
+                        if (getBookingStatusResponse.booking.driver.location.lng != null)
+                            newLocation = new Location((double)getBookingStatusResponse.booking.driver.location.lat, (double)getBookingStatusResponse.booking.driver.location.lng);
+
             Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
                 clientID: ID,
                 tripID: tripID,
-                status: ConvertTDispatchStatusToTripThruStatus(value.status, value.sub_status));
+                status: ConvertTDispatchStatusToTripThruStatus(value.status, value.sub_status),
+                driverLocation: newLocation);
             tripthru.UpdateTripStatus(request);
             Logger.Untab();
             if (activeTrips[tripID].status == "completed" || activeTrips[tripID].status == "cancelled" ||
@@ -733,7 +750,7 @@ namespace CustomIntegrations
                     );
                 if (booking.pk == null)
                     booking.pk = bookingPK;
-                activeTrips[request.tripID] = booking;
+                //activeTrips[request.tripID] = booking;
             }
             else
             {

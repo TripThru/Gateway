@@ -415,6 +415,8 @@ namespace TripThruCore
                 GetTripStatusResponse response = partner.GetTripStatus(r);
                 if (response.result == Result.OK)
                 {
+                    if (TripHasDriverInitialLocation(r.tripID))
+                        AddDriverInitialLocation(response, r.tripID);
                     if (TripHasNonActiveStatus(response))
                         DeactivateTripAndUpdateStats(r.tripID, (Status)response.status, response.price, response.distance);
                     else
@@ -430,6 +432,32 @@ namespace TripThruCore
             Logger.Log("Destination partner trip not found");
             Logger.AddTag("ClientId", r.clientID);
             return new GetTripStatusResponse(result: Result.NotFound);
+        }
+        private bool TripHasDriverInitialLocation(string tripId){
+            return activeTrips[tripId].DriverInitiaLocation != null;
+        }
+        private void AddDriverInitialLocation(GetTripStatusResponse response, string tripId)
+        {
+            response.driverInitialLocation = activeTrips[tripId].DriverInitiaLocation;
+        }
+
+        public override GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
+        {
+            requests++;
+            GetRouteTripResponse getRouteTripResponse = new GetRouteTripResponse
+            {
+                result = Result.NotFound
+            };
+            if(activeTrips.ContainsKey(request.tripID))
+            getRouteTripResponse = new GetRouteTripResponse
+            {
+                result = Result.OK,
+                OriginatingPartnerId = activeTrips[request.tripID].OriginatingPartnerId,
+                ServicingPartnerId = activeTrips[request.tripID].ServicingPartnerId,
+                HistoryEnrouteList = activeTrips[request.tripID].GetEnrouteLocatinList(),
+                HistoryPickUpList = activeTrips[request.tripID].GetPickUpLocatinList()
+            };
+            return getRouteTripResponse;
         }
 
         private void UpdateActiveTripWithNewTripStatus(GetTripStatusRequest r, GetTripStatusResponse response)
@@ -484,14 +512,28 @@ namespace TripThruCore
                 r.clientID = originClientID;
                 if (SuccesAndTripStillActive(r, response))
                 {
+                    if (r.driverLocation != null && activeTrips[r.tripID].DriverInitiaLocation == null)
+                        activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
                     activeTrips[r.tripID].Status = r.status;
-                    if (r.status == Status.Complete)
+                    switch (r.status)
                     {
-                        GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
-                        DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
+                        case Status.Enroute:
+                            activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
+                            break;
+                        case Status.PickedUp:
+                            activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
+                            break;
+                        case Status.Complete:
+                        {
+                            GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
+                            DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
+                        }
+                            break;
+                        case Status.Rejected:
+                        case Status.Cancelled:
+                            DeactivateTripAndUpdateStats(r.tripID, r.status);
+                            break;
                     }
-                    else if (r.status == Status.Cancelled || r.status == Status.Rejected)
-                        DeactivateTripAndUpdateStats(r.tripID, r.status);
                 }
                 else
                     Logger.Log("Request to destination partner failed, Result=" + response.result);

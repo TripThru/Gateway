@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using ServiceStack.Razor.Compilation.CodeTransformers;
 using Utils;
 using ServiceStack.Redis;
 using ServiceStack;
@@ -173,6 +174,32 @@ namespace TripThruCore
         public double? Price { get; set; }
         public double? Distance { get; set; }
         public double? DriverRouteDuration { get; set; }
+
+        private List<Location> _historyEnrouteList = new List<Location>();
+        private List<Location> _historyPickUpList = new List<Location>();
+
+        public bool AddEnrouteLocationList(Location l)
+        {
+            _historyEnrouteList.Add(l);
+            return true;
+        }
+
+        public bool AddPickUpLocationList(Location l)
+        {
+            _historyPickUpList.Add(l);
+            return true;
+        }
+
+        public List<Location> GetEnrouteLocatinList()
+        {
+            return _historyEnrouteList;
+        }
+
+        public List<Location> GetPickUpLocatinList()
+        {
+            return _historyPickUpList;
+        } 
+
         public void Update(Trip trip)
         {
             this.FleetId = trip.FleetId;
@@ -568,6 +595,23 @@ namespace TripThruCore
                 return s;
             }
         }
+        public class GetRouteTripRequest
+        {
+            public string tripID { get; set; }
+
+            public GetRouteTripRequest(string tripID)
+            {
+                this.tripID = tripID;
+            }
+        }
+        public class GetRouteTripResponse
+        {
+            public Result result { get; set; }
+            public string OriginatingPartnerId { get; set; }
+            public string ServicingPartnerId { get; set; }
+            public List<Location> HistoryEnrouteList { get; set; }
+            public List<Location> HistoryPickUpList { get; set; }
+        }
         public class GetTripStatusRequest
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
@@ -737,6 +781,10 @@ namespace TripThruCore
         }
         virtual public void Log()
         {
+        }
+        virtual public GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
+        {
+            throw new Exception("Not supported");
         }
     }
 

@@ -55,6 +55,7 @@ namespace ServiceStack.TripThruGateway
                 };
 
             Logger.BeginRequest("GetPartnerInfo sent to " + name, request);
+            Logger.Log("RootURL: " + RootUrl);
 
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.PartnersResponse resp = client.Get<GatewayService.PartnersResponse>(new GatewayService.Partners
@@ -81,6 +82,7 @@ namespace ServiceStack.TripThruGateway
                     result = Result.InvalidParameters
                 };
             Logger.BeginRequest("DispatchTrip sent to " + name, request);
+            Logger.Log("RootURL: " + RootUrl);
             GatewayService.Dispatch dispatch = new GatewayService.Dispatch
             {
                 access_token = AccessToken,
@@ -121,6 +123,7 @@ namespace ServiceStack.TripThruGateway
                     result = Result.InvalidParameters
                 };
             Logger.BeginRequest("QuoteTrip sent to " + name, request);
+            Logger.Log("RootURL: " + RootUrl);
             GatewayService.Quotes quotes = new GatewayService.Quotes
             {
                 access_token = AccessToken,
@@ -161,6 +164,7 @@ namespace ServiceStack.TripThruGateway
                     result = Result.InvalidParameters
                 };
             Logger.BeginRequest("GetTripStatus sent to " + name, request);
+            Logger.Log("RootURL: " + RootUrl);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.TripStatusResponse resp = client.Get<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {
@@ -214,6 +218,7 @@ namespace ServiceStack.TripThruGateway
                     result = Result.InvalidParameters
                 };
             Logger.BeginRequest("UpdateTripStatus sent to " + name, request);
+            Logger.Log("RootURL: " + RootUrl);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             GatewayService.TripStatusResponse resp = client.Put<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {

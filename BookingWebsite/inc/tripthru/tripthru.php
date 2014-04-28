@@ -171,13 +171,10 @@ class TripThru {
 	public function Dispatch($passenger, $trip_id, $pickup_time, $pickup_location, $dropoff_location, $partnerId){
 		$url = '';
 		$access_token = '';
-		if($partnerId == $this->partnerId){
-			$url = $this->partnerUrl . 'dispatch';
-			$access_token = $this->tripthruAccessToken;
-		} else {
-			$url = $this->tripthruUrl . 'dispatch';
-			$access_token = $this->partnerAccessToken;
-		}
+		
+		$url = $this->partnerUrl . 'dispatch';
+		$access_token = $this->tripthruAccessToken;
+		
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -206,6 +203,7 @@ class TripThru {
 
         $result = curl_exec($ch);
         $res = json_decode($result, true);
+        var_dump($res);
         $info = curl_getinfo($ch);
 
         curl_close($ch);

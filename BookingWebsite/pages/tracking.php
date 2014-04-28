@@ -239,7 +239,7 @@ text-overflow: ellipsis;
 						return;
 					}
 					setTripInfo(data);
-                    if(!$.isEmptyObject(data.driverLocation))
+                    if(!$.isEmptyObject(data.driverLocation) && !$.isEmptyObject(data.driverInitialLocation) )
                     {
 
                         var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
@@ -417,9 +417,9 @@ text-overflow: ellipsis;
 					var eta = trip.eta ? new Date(trip.eta) : 'Not available';
 					var fare = trip.price ? Math.round(trip.price).toFixed(2) : 'Not available';
 					var driverName = trip.driverName ? trip.driverName : 'Not available';
-					var pickupLocationName = trip.pickupLocation ? trip.pickupLocation.address : 'Not available';
-					var dropoffLocationName = trip.dropoffLocation ? trip.dropoffLocation.address : 'Not available';
-					var driverLocationName = trip.driverLocation ? trip.driverLocation.address : "Not available";
+                    var pickupLocationName = getAddress(trip.pickupLocation.lat,trip.pickupLocation.lng);
+                    var dropoffLocationName = getAddress(trip.dropoffLocation.lat,trip.dropoffLocation.lng);
+					var driverLocationName = trip.driverLocation ? getAddress(trip.driverLocation.lat,trip.driverLocation.lng) : 'Not available';
 					var originatingPartnerName = trip.originatingPartnerName ? trip.originatingPartnerName : 'Not available';
 					var servicingPartnerName = trip.servicingPartnerName ? trip.servicingPartnerName : 'Not available';
 
@@ -437,12 +437,28 @@ text-overflow: ellipsis;
 					$("#selectedTripOriginatingPartner").hide().html(originatingPartnerName).fadeIn();
 					$("#selectedTripServicingPartner").hide().html(servicingPartnerName).fadeIn();
 				}
-				
+				function getAddress(lat, lng) {
+                    var urlJson = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=false";
+                    var json;
+
+                    $.ajax({
+                        url: urlJson,
+                        dataType: 'json',
+                        async: false,
+                        success: function (data) {
+                            json = data;
+                        }
+                    });
+                    if (json.status === "OK") {
+                        return json.results[0].formatted_address;
+                    }
+                    return "undefine";
+                }
+                var directionsDisplay = null;
+                var directionsDisplay2 = null;
 				function updateMap(data){
 					if(!$.isEmptyObject(data.driverLocation))
 					{
-						var directionsDisplay = null;
-						var directionsDisplay2 = null;
 						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
 						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
 						var dropoffLocation = new google.maps.LatLng(data.dropoffLocation.lat, data.dropoffLocation.lng);
