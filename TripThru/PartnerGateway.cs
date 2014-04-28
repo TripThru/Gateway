@@ -111,6 +111,28 @@ namespace TripThruCore
         {
 
             requests++;
+            if (r.partnerID != ID)
+            {
+                r.clientID = ID;
+                var response = tripthru.DispatchTrip(r);
+                if (response.result != Result.OK) return response;
+                PartnerTrip trip = new PartnerTrip(
+                    partner: this,
+                    ID: ID,
+                    origination: PartnerTrip.Origination.Local,
+                    pickupLocation: r.pickupLocation,
+                    pickupTime: r.pickupTime,
+                    passengerID: r.passengerID,
+                    passengerName: r.passengerName,
+                    dropoffLocation: r.dropoffLocation,
+                    paymentMethod: PaymentMethod.Cash,
+                    fleet: PartnerFleets.FirstOrDefault().Value
+                    );
+                trip.service = PartnerTrip.Origination.Foreign;
+                trip.status = Status.Dispatched;
+                PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
+                return response;
+            }
             if (r.fleetID != null)
             {
                 PartnerFleet f = PartnerFleets[r.fleetID];
@@ -140,6 +162,7 @@ namespace TripThruCore
                     return response;
                 }
             }
+
             {
                 DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
                 Logger.Log("DispatchTrip rejected on " + name + ", no available drivers -- Response: " + response);
@@ -387,7 +410,7 @@ namespace TripThruCore
         public DateTime? ETA;
         public double? distance;
         public Status? lastStatusNotifiedToPartner;
-        public Status status { get { return _status; } }
+        public Status status { get { return _status; } set { this._status = value; }}
         public enum Origination { Local, Foreign };
         public DateTime lastDispatchAttempt;
 

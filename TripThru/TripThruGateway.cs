@@ -505,7 +505,7 @@ namespace TripThruCore
                 {
                     if (r.driverLocation != null)
                     {
-                        if (r.status == Status.Dispatched)
+                        if (r.status == Status.Dispatched || r.status == Status.Confirmed)
                             activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
                     }
                     activeTrips[r.tripID].Status = r.status;
