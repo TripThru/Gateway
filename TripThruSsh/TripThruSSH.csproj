@@ -66,10 +66,10 @@
   <ItemGroup>
     <Content Include="DiffieHellman.dll" />
     <Content Include="Org.Mentalis.Security.dll" />
-    <Content Include="PartnerConfigurations\DubaiConfig.txt">
+    <Content Include="PartnerConfigurations\HubaiConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\YellowCabConfig.txt">
+    <Content Include="PartnerConfigurations\MellowConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TripThruGatewayConfigurations\HostConfig.txt">
@@ -81,7 +81,7 @@
     <Content Include="PartnerConfigurations\LesTaxiBlues.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\LesTaxiBluesConfig.txt">
+    <Content Include="PartnerConfigurations\LosTaxiBlusConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PartnerConfigurations\LuxorCab.png">
@@ -90,10 +90,10 @@
     <Content Include="PartnerConfigurations\MetroCabofBoston.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\MetroCabConfig.txt">
+    <Content Include="PartnerConfigurations\NetroConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="PartnerConfigurations\LuxorCabConfig.txt">
+    <Content Include="PartnerConfigurations\TuxorConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PartnerConfigurations\TestTDispatch.png">

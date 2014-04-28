@@ -7,38 +7,38 @@
                                     <path>/var/www/ServiceStack.TripThruGateway/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.DubaiTaxiCorporation</name>
+                                    <name>TripThru.HubaiTaxiCorporation</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
-                                    <vpath>/TripThru.DubaiTaxiCorporation</vpath>
-                                    <path>/var/www/ServiceStack.DubaiTaxiCorporation/Web</path>
+                                    <vpath>/TripThru.HubaiTaxiCorporation</vpath>
+                                    <path>/var/www/ServiceStack.HubaiTaxiCorporation/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.LesTaxiBlues</name>
+                                    <name>TripThru.LosTaxiBlus</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
-                                    <vpath>/TripThru.LesTaxiBlues</vpath>
-                                    <path>/var/www/ServiceStack.LesTaxiBlues/Web</path>
+                                    <vpath>/TripThru.LosTaxiBlus</vpath>
+                                    <path>/var/www/ServiceStack.LosTaxiBlus/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.LuxorCab</name>
+                                    <name>TripThru.Mellow</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
-                                    <vpath>/TripThru.LuxorCab</vpath>
-                                    <path>/var/www/ServiceStack.LuxorCab/Web</path>
+                                    <vpath>/TripThru.Mellow</vpath>
+                                    <path>/var/www/ServiceStack.Mellow/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.MetroCabofBoston</name>
+                                    <name>TripThru.Netro</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
-                                    <vpath>/TripThru.MetroCabofBoston</vpath>
-                                    <path>/var/www/ServiceStack.MetroCabofBoston/Web</path>
+                                    <vpath>/TripThru.Netro</vpath>
+                                    <path>/var/www/ServiceStack.Netro/Web</path>
                                  </web-application>
 <web-application>
-                                    <name>TripThru.YellowCab</name>
+                                    <name>TripThru.Tuxor</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
-                                    <vpath>/TripThru.YellowCab</vpath>
-                                    <path>/var/www/ServiceStack.YellowCab/Web</path>
+                                    <vpath>/TripThru.Tuxor</vpath>
+                                    <path>/var/www/ServiceStack.Tuxor/Web</path>
                                  </web-application>
 </apps>
