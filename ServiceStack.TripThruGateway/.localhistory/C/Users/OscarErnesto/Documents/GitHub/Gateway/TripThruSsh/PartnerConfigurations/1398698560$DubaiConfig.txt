@@ -1,0 +1,131 @@
+{
+    "Enabled": true,
+    "Fleets": [
+        {
+            "BaseCost": 3,
+            "CostPerMile": 3,
+            "Coverage": [
+                {
+                    "Center": {
+                        "Lat": 25.271139,
+                        "Lng": 55.307485
+                    },
+                    "Radius": 50
+                }
+            ],
+            "Drivers": [
+                "Hussean Widobe",
+                "Omar Sharief",
+                "Sheikh Hamdan",
+                "Mohammed Hamdan",
+                "Rashid Al Maktoum",
+                "Hamdan Widobe",
+                "Ayishah Janan Halabi",
+                "Hayud Munirah Sarkis",
+                "Asra Salwa Nazari",
+                "Hilel Sahl Harb",
+                "Jala Nahid Ba",
+                "Bahiya Baheera Kassis",
+                "Azhar Amro Saliba",
+                "Kawakib Walidah Sarraf",
+                "Khaldoon Harun Safar",
+                "Aliyah Shahirah Nassar",
+                "Muta Abdul Awad",
+                "Fakhir Anbar Guirguis",
+                "Khuzama Maysa Srour",
+                "Sanaa Malakah Ganim",
+                "Jeannine Loyola",
+                "Jacquelyn Folts",
+                "Benton Aguila",
+                "Hisako Peake",
+                "Earlie Tapia",
+                "Gino Kampf",
+                "Temika Snipe",
+                "Rena Dedrick",
+                "Angele Stoffel",
+                "Leonor Chesson"
+            ],
+            "Location": {
+                "Lat": 25.271139,
+                "Lng": 55.307485
+            },
+            "Name": "Dubai Taxi Corporation",
+            "Passengers": [
+                "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"
+            ],
+            "PossibleTrips": [
+                {
+                    "End": {
+                        "Lat": 25.279288,
+                        "Lng": 55.304331
+                    },
+                    "Start": {
+                        "Lat": 25.270751,
+                        "Lng": 55.31403
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 42.367561,
+                        "Lng": -71.129498
+                    },
+                    "Start": {
+                        "Lat": 42.342634,
+                        "Lng": -71.122545
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 37.800066,
+                        "Lng": -122.436167
+                    },
+                    "Start": {
+                        "Lat": 37.800224,
+                        "Lng": -122.43352
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 48.837275,
+                        "Lng": 2.382433
+                    },
+                    "Start": {
+                        "Lat": 48.835975,
+                        "Lng": 2.345097
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 37.786956,
+                        "Lng": -122.440279
+                    },
+                    "Start": {
+                        "Lat": 37.782551,
+                        "Lng": -122.445368
+                    }
+                }
+            ],
+            "TripsPerHour": 100,
+            "VehicleTypes": [
+                "Compact",
+                "Sedan"
+            ]
+        }
+    ],
+  "host" : {
+		"virtualPath" : "/TripThru.DubaiTaxiCorporation/"
+  },
+    "Partner": {
+        "AccessToken": "dubai12ondazazxx21",
+        "CallbackUrlMono": "TripThru.DubaiTaxiCorporation/",
+        "ClientId": "dubai@tripthru.com",
+        "Name": "Dubai Taxi Corporation",
+        "WebUrl": "/BookingsDubaiTaxiCorporation/",
+        "WebUrlRelative": "/BookingsDubaiTaxiCorporation/index.php"
+    },
+    "SimInterval": 10,
+    "TripThruUrlMono": "TripThru.TripThruGateway/",
+    "host": {
+        "virtualPath": "/TripThru.DubaiTaxiCorporation/"
+    }
+}

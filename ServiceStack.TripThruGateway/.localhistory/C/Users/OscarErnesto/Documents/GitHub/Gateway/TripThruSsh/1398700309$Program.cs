@@ -42,13 +42,8 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-<<<<<<< HEAD
-            env = environments["sandbox"];
-            localPath = "Z:\\WindowsDev\\Gateway\\";
-=======
             env = environments["vagrant"];
             localPath = @"C:\Users\OscarErnesto\Documents\GitHub\Gateway\";
->>>>>>> ChangeNames
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;
