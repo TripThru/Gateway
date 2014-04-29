@@ -10,6 +10,8 @@ namespace TripThruCore
 {
     public class Partner : GatewayServer
     {
+        static readonly object locker = new object();
+
         public readonly Dictionary<string, PartnerTrip> tripsByID;
         public readonly Dictionary<string, PartnerFleet> PartnerFleets;
         public DateTime lastSim;
@@ -111,24 +113,27 @@ namespace TripThruCore
         }
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
         {
-            requests++;
-            if (r.partnerID != null && r.partnerID != ID)
+            lock (locker)
             {
-                Logger.Log("Dispatching trip to partner " + r.partnerID);
-                PartnerTrip trip = GetTrip(r, autoDispatch: false);
-                trip.origination = PartnerTrip.Origination.Local;
-                PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
-                if (TryToDispatchToForeignProvider(trip, r.partnerID))
-                    return new DispatchTripResponse(result: Result.OK);
+                requests++;
+                if (r.partnerID != null && r.partnerID != ID)
+                {
+                    Logger.Log("Dispatching trip to partner " + r.partnerID);
+                    PartnerTrip trip = GetTrip(r, autoDispatch: false);
+                    trip.origination = PartnerTrip.Origination.Local;
+                    PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
+                    if (TryToDispatchToForeignProvider(trip, r.partnerID))
+                        return new DispatchTripResponse(result: Result.OK);
+                    else
+                        return new DispatchTripResponse(result: Result.Rejected);
+                }
+                else if (r.driverID != null)
+                    return DispatchToSpecificDriver(r);
+                else if (r.fleetID != null)
+                    return DispatchToSpecificFleet(r);
                 else
-                    return new DispatchTripResponse(result: Result.Rejected);
+                    return DispatchToFirstFleetThatServes(r);
             }
-            else if (r.driverID != null)
-                return DispatchToSpecificDriver(r);
-            else if (r.fleetID != null)
-                return DispatchToSpecificFleet(r);
-            else
-                return DispatchToFirstFleetThatServes(r);
         }
 
         private DispatchTripResponse DispatchToSpecificDriver(DispatchTripRequest r)
@@ -307,15 +312,18 @@ namespace TripThruCore
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
         {
             // Note: GetTrip populates the foreignTripID
-            requests++;
-            if (!tripsByID.ContainsKey(r.tripID))
-                return new UpdateTripStatusResponse(result: Result.NotFound);
-            PartnerTrip t = tripsByID[r.tripID];
-            UpdateTripStatusResponse response = new UpdateTripStatusResponse();
-            t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
-            Logger.SetServicingId(this.ID);
+            lock (locker)
+            {
+                requests++;
+                if (!tripsByID.ContainsKey(r.tripID))
+                    return new UpdateTripStatusResponse(result: Result.NotFound);
+                PartnerTrip t = tripsByID[r.tripID];
+                UpdateTripStatusResponse response = new UpdateTripStatusResponse();
+                t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
+                Logger.SetServicingId(this.ID);
 
-            return response;
+                return response;
+            }
         }
 
         public Partner(string ID, string name, Gateway tripthru, List<PartnerFleet> PartnerFleets = null, string preferedPartnerId = null)
@@ -1038,7 +1046,7 @@ namespace TripThruCore
 
         public void ProcessTrip(PartnerTrip t)
         {
-            Logger.LogDebug("Processing " + t);
+            //Logger.LogDebug("Processing " + t);
             lock (locker)
             {
                 switch (t.status)
