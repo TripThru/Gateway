@@ -37,7 +37,7 @@ namespace TripThruCore
                 Gateway partner = partners[partnerID];
                 Gateway.GetPartnerInfoResponse resp = partner.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(ID));
                 List<Zone> coverage = new List<Zone>();
-                if (resp.result == Result.OK) 
+                if (resp.result == Result.OK)
                     foreach (Fleet f in resp.fleets)
                         coverage.AddRange(f.Coverage);
                 partnerCoverage.Add(partner.ID, coverage);
@@ -76,7 +76,7 @@ namespace TripThruCore
         private void LoadUserAccounts()
         {
             var accounts = StorageManager.GetPartnerAccounts();
-            if(accounts != null)
+            if (accounts != null)
                 foreach (PartnerAccount account in accounts)
                 {
                     if (Storage.Storage.UserRole.partner != account.Role)
@@ -106,11 +106,11 @@ namespace TripThruCore
                     if (ServiceHasBeenEstablished(tripID))
                         return ServicingPartner(tripID);
                     else
-                        throw new Exception("Fatal Error: destination could not be found");
+                        throw new Exception("Fatal Error: Service has not been establish for tripID = " + tripID + ", TripOriginatedWithClient = " + TripOriginatedWithClient(clientID, tripID));
                 }
                 return OriginatingPartner(tripID);
             }
-            throw new Exception("Fatal Error: destination could not be found");
+            throw new Exception("Fatal Error: Origination has not been established for tripID = " + tripID);
 
         }
 
@@ -188,7 +188,7 @@ namespace TripThruCore
                 if (PartnerHasBeenSelected(partner))
                 {
                     RecordTripOriginatingAndServicingPartner(r, partner);
-                    var partnerClientId = r.clientID; 
+                    var partnerClientId = r.clientID;
                     ChangeTheClientIDToTripThru(r);
                     response = partner.DispatchTrip(r);
                     r.clientID = partnerClientId;
@@ -346,7 +346,7 @@ namespace TripThruCore
                 Logger.Log("Best quote " + bestQuote + " from " + partner.name);
             }
             else
-                Logger.Log("There are no partners to handle this trip within an acceptable service time"); 
+                Logger.Log("There are no partners to handle this trip within an acceptable service time");
             return partner;
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
@@ -433,7 +433,8 @@ namespace TripThruCore
             Logger.AddTag("ClientId", r.clientID);
             return new GetTripStatusResponse(result: Result.NotFound);
         }
-        private bool TripHasDriverInitialLocation(string tripId){
+        private bool TripHasDriverInitialLocation(string tripId)
+        {
             return activeTrips[tripId].DriverInitiaLocation != null;
         }
         private void AddDriverInitialLocation(GetTripStatusResponse response, string tripId)
@@ -448,15 +449,15 @@ namespace TripThruCore
             {
                 result = Result.NotFound
             };
-            if(activeTrips.ContainsKey(request.tripID))
-            getRouteTripResponse = new GetRouteTripResponse
-            {
-                result = Result.OK,
-                OriginatingPartnerId = activeTrips[request.tripID].OriginatingPartnerId,
-                ServicingPartnerId = activeTrips[request.tripID].ServicingPartnerId,
-                HistoryEnrouteList = activeTrips[request.tripID].GetEnrouteLocatinList(),
-                HistoryPickUpList = activeTrips[request.tripID].GetPickUpLocatinList()
-            };
+            if (activeTrips.ContainsKey(request.tripID))
+                getRouteTripResponse = new GetRouteTripResponse
+                {
+                    result = Result.OK,
+                    OriginatingPartnerId = activeTrips[request.tripID].OriginatingPartnerId,
+                    ServicingPartnerId = activeTrips[request.tripID].ServicingPartnerId,
+                    HistoryEnrouteList = activeTrips[request.tripID].GetEnrouteLocatinList(),
+                    HistoryPickUpList = activeTrips[request.tripID].GetPickUpLocatinList()
+                };
             return getRouteTripResponse;
         }
 
@@ -524,10 +525,10 @@ namespace TripThruCore
                             activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
                             break;
                         case Status.Complete:
-                        {
-                            GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
-                            DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
-                        }
+                            {
+                                GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
+                                DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
+                            }
                             break;
                         case Status.Rejected:
                         case Status.Cancelled:
@@ -571,9 +572,9 @@ namespace TripThruCore
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
             tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
             tags["LoggerQueue"] = Logger.Queue.Count.ToString();
-            if(Logger.splunkEnabled)
+            if (Logger.splunkEnabled)
                 tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
-            
+
 
             foreach (Trip trip in activeTrips.Values)
             {
@@ -583,7 +584,7 @@ namespace TripThruCore
                     tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
             }
 
-            Logger.LogDebug("Health check", null, tags);
+            Logger.LogDebug("Health check (tripthru latest)", null, tags);
         }
 
         public class Office

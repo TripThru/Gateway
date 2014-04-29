@@ -118,22 +118,24 @@ namespace TripThruCore
                 PartnerTrip trip = GetTrip(r, autoDispatch: false);
                 trip.origination = PartnerTrip.Origination.Local;
                 PartnerFleets.FirstOrDefault().Value.QueueTrip(trip);
-                if (TryToDispatchToForeignProvider(trip))
+                if (TryToDispatchToForeignProvider(trip, r.partnerID))
                     return new DispatchTripResponse(result: Result.OK);
                 else
                     return new DispatchTripResponse(result: Result.Rejected);
             }
-            //if (r.fleetID != null)
-            //    return DispatchToSpecificFleet(r);
+            else if (r.driverID != null)
+                return DispatchToSpecificDriver(r);
+            else if (r.fleetID != null)
+                return DispatchToSpecificFleet(r);
             else
                 return DispatchToFirstFleetThatServes(r);
-            /*
-            {
-                DispatchTripResponse response = new DispatchTripResponse(result: Result.Rejected);
-                Logger.Log("DispatchTrip rejected on " + name + ", no available drivers -- Response: " + response);
-                return response;
-            }*/
         }
+
+        private DispatchTripResponse DispatchToSpecificDriver(DispatchTripRequest r)
+        {
+            throw new Exception("Dispatch to specific driver not yet supported");
+        }
+
         private DispatchTripResponse DispatchToSpecificFleet(DispatchTripRequest r)
         {
             Logger.Log("Dispatching to fleet " + r.fleetID);
@@ -169,7 +171,7 @@ namespace TripThruCore
             }
             return response;
         }
-        private bool TryToDispatchToForeignProvider(PartnerTrip trip, string partnerID = null)
+        public bool TryToDispatchToForeignProvider(PartnerTrip trip, string partnerID = null)
         {
             Logger.Log("TryToDispatchToForeignProvider: partnerID = " + partnerID);
             Logger.Tab();
@@ -312,7 +314,7 @@ namespace TripThruCore
             UpdateTripStatusResponse response = new UpdateTripStatusResponse();
             t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
             Logger.SetServicingId(this.ID);
-            
+
             return response;
         }
 
@@ -389,7 +391,7 @@ namespace TripThruCore
         {
             if (SimUpdateIntervalReached())
             {
-                Logger.BeginRequest("", null);
+                Logger.BeginRequest("Sim Update", null);
                 foreach (PartnerFleet f in PartnerFleets.Values)
                     f.Simulate();
                 lastSim = DateTime.UtcNow;
@@ -409,9 +411,9 @@ namespace TripThruCore
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
             tags["LoggerQueue"] = Logger.Queue.Count.ToString();
-            if(Logger.splunkEnabled)
+            if (Logger.splunkEnabled)
                 tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
-            Logger.LogDebug("Health check", null, tags);
+            Logger.LogDebug("Health check (latest)", null, tags);
         }
     }
 
@@ -445,7 +447,7 @@ namespace TripThruCore
         public DateTime? ETA;
         public double? distance;
         public Status? lastStatusNotifiedToPartner;
-        public Status status { get { return _status; } set { this._status = value; }}
+        public Status status { get { return _status; } set { this._status = value; } }
         public enum Origination { Local, Foreign };
         public DateTime lastDispatchAttempt;
         public bool autoDispatch;
@@ -649,7 +651,7 @@ namespace TripThruCore
     }
     public class PartnerFleet : IDName
     {
-        static readonly object locker = new object(); 
+        static readonly object locker = new object();
         public Partner partner;
         public readonly Location location;
         public readonly List<Zone> coverage;
@@ -752,7 +754,7 @@ namespace TripThruCore
             DateTime eta = DateTime.UtcNow + driver.route.duration;
             Logger.Log(driver.name + " has a new route from " + driver.location + " to " + destination + ": ETA = " + eta);
             return eta;
- 
+
         }
         public void AddDriver(Driver d)
         {
@@ -801,7 +803,7 @@ namespace TripThruCore
             t.driver = availableDrivers.First();
             t.PartnerFleet = this;
             availableDrivers.RemoveFirst();
-            //throw new Exception("driver = " + t.driver + ", name = " + t.driver.name);
+            Logger.Log("Assigning to driver = " + t.driver + ", name = " + t.driver.name);
             if (t.driver == null)
                 throw new Exception("Invalid condition: driver object null");
             Logger.Log("Dispatched to " + t.driver.name);
@@ -853,7 +855,7 @@ namespace TripThruCore
                 passengerName: passenger.name,
                 dropoffLocation: route.end,
                 paymentMethod: PaymentMethod.Cash,
-                fleet:this
+                fleet: this
                 );
             Logger.Untab();
             return trip;
@@ -866,6 +868,10 @@ namespace TripThruCore
                     return false; // don't except from parters if no available drivers
                 Logger.Log("Queueing " + t);
                 queue.AddLast(t);
+                if (partner.activeTrips.ContainsKey(t.ID))
+                    throw new Exception("Trip " + t + ": already exist in activeTrips dictionary -- Existing trip = " + partner.activeTrips[t.ID]);
+                if (partner.tripsByID.ContainsKey(t.ID))
+                    throw new Exception("Trip " + t + ": already exist in tripsByID dictionary");
                 partner.tripsByID.Add(t.ID, t);
                 partner.activeTrips.Add(t.ID, new Trip
                 {
@@ -966,40 +972,7 @@ namespace TripThruCore
             Logger.Tab();
 
             if (!TryDispatchTripLocally(t) && TripOriginatedLocally(t))
-                TryToDispatchToForeignProvider(t);
-            Logger.Untab();
-        }
-
-        private void TryToDispatchToForeignProvider(PartnerTrip t)
-        {
-            Logger.Tab();
-            Gateway.DispatchTripRequest request = new Gateway.DispatchTripRequest(
-                clientID: partner.ID,
-                tripID: t.ID,
-                pickupLocation: t.pickupLocation,
-                pickupTime: t.pickupTime,
-                passengerID: t.passengerID,
-                passengerName: t.passengerName,
-                luggage: t.luggage,
-                persons: t.persons,
-                dropoffLocation: t.dropoffLocation,
-                waypoints: t.waypoints,
-                paymentMethod: t.paymentMethod,
-                vehicleType: t.vehicleType,
-                maxPrice: t.maxPrice,
-                minRating: t.minRating,
-                partnerID: partner.preferedPartnerId
-                );
-            Gateway.DispatchTripResponse response = partner.tripthru.DispatchTrip(request);
-            if (response.result == Gateway.Result.OK)
-            {
-                // Actually, at this point its just in the partner's queue, until its dispatch to the partner's drivers -- so no status update. 
-                t.service = PartnerTrip.Origination.Foreign;
-                Logger.Log("Trip was successfully dispatched through TripThru");
-
-            }
-            else
-                Logger.Log("Trip was rejected by TripThru");
+                partner.TryToDispatchToForeignProvider(t);
             Logger.Untab();
         }
 
@@ -1065,7 +1038,7 @@ namespace TripThruCore
 
         public void ProcessTrip(PartnerTrip t)
         {
-            //Logger.LogDebug("Processing " + t);
+            Logger.LogDebug("Processing " + t);
             lock (locker)
             {
                 switch (t.status)
@@ -1241,7 +1214,19 @@ namespace TripThruCore
 
         private static bool DriverWillBeLateIfHeDoesntLeaveNow(PartnerTrip t)
         {
-            return DateTime.UtcNow >= t.pickupTime - MapTools.GetRoute(t.driver.location, t.pickupLocation).duration;
+            Logger.Log("Entering: DriverWillBeLateIfHeDoesntLeaveNow");
+            if (t == null)
+                throw new Exception("null trip");
+            if (t.driver == null)
+                throw new Exception("Trip " + t + ": doesn't have a driver");
+            if (t.driver.location == null)
+                throw new Exception("Trip " + t + ": doesn't have a driver location");
+            if (t.pickupLocation == null)
+                throw new Exception("Trip " + t + ": doesn't have a pickup location");
+            Route route = MapTools.GetRoute(t.driver.location, t.pickupLocation);
+            if (route == null)
+                throw new Exception("Trip " + t + ": has null route");
+            return DateTime.UtcNow >= t.pickupTime - route.duration;
         }
 
         private bool DispatchRetryIntervalReached(PartnerTrip t)
