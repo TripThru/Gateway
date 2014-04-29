@@ -77,6 +77,7 @@ namespace TripThruCore
         {
             var accounts = StorageManager.GetPartnerAccounts();
             if (accounts != null)
+            {
                 foreach (PartnerAccount account in accounts)
                 {
                     if (Storage.Storage.UserRole.partner != account.Role)
@@ -86,6 +87,7 @@ namespace TripThruCore
                     if (!clientIdByAccessToken.ContainsKey(account.AccessToken))
                         clientIdByAccessToken[account.AccessToken] = account.ClientId;
                 }
+            }
         }
         public override string GetName(string clientID)
         {
@@ -584,7 +586,7 @@ namespace TripThruCore
                     tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
             }
 
-            Logger.LogDebug("Health check (tripthru latest)", null, tags);
+            Logger.LogDebug("Health check (tripthru latest 2)", null, tags);
         }
 
         public class Office
