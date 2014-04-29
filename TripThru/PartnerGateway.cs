@@ -1146,6 +1146,10 @@ namespace TripThruCore
 
         private static void UpdateTripDriverLocation(PartnerTrip t)
         {
+            if (t.driver == null)
+                throw new Exception("Driver is null for trip " + t);
+            if (t.driver.route == null)
+                throw new Exception("Driver route is null for trip " + t);
             t.driver.location = t.driver.route.GetCurrentWaypoint(t.driver.routeStartTime, DateTime.UtcNow);
         }
 
