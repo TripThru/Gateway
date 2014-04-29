@@ -66,15 +66,15 @@
 			"Maurice Lajeunesse",
 			"Eleanor Busque",
 			"Duane Garth",
-			"Gala Ciesielski",  
-			"Tomi Boring",  
-			"Lynda Scherer",  
-			"Deetta Goya",  
-			"Alexia Schiel",  
-			"Tynisha Pharris",  
-			"Nan Newland",  
-			"Lelia Marlar",  
-			"Dwana Mckie"  
+			"Gala Ciesielski",
+			"Tomi Boring",
+			"Lynda Scherer",
+			"Deetta Goya",
+			"Alexia Schiel",
+			"Tynisha Pharris",
+			"Nan Newland",
+			"Lelia Marlar",
+			"Dwana Mckie"
         ],
         "passengers" : [
             "Daniel Corona"
