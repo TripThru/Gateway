@@ -457,7 +457,7 @@ text-overflow: ellipsis;
                 var directionsDisplay = null;
                 var directionsDisplay2 = null;
 				function updateMap(data){
-					if(!$.isEmptyObject(data.driverLocation))
+					if(data.driverLocation != null && !$.isEmptyObject(data.driverLocation) && data.driverInitialLocation != null && !$.isEmptyObject(data.driverInitialLocation))
 					{
 						var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
 						var pickupLocation = new google.maps.LatLng(data.pickupLocation.lat, data.pickupLocation.lng);
