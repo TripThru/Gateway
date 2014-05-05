@@ -16,11 +16,13 @@ namespace ServiceStack.TripThruGateway
 
         public string AccessToken { get; set; } //Directly assing access token until authentication is implemented
         public string RootUrl { get; set; }
+        private TimeSpan? timeout;
 
         public GatewayClient(string ID, string name, string accessToken, string rootUrl) : base(ID, name)
         {
             AccessToken = accessToken;
             RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
+            timeout = new TimeSpan(0, 2, 0);
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
@@ -32,6 +34,7 @@ namespace ServiceStack.TripThruGateway
                 };
 
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.PartnerResponse resp = client.Post<GatewayService.PartnerResponse>(new GatewayService.PartnerRequest
             {
                 access_token = AccessToken,
@@ -58,6 +61,7 @@ namespace ServiceStack.TripThruGateway
             //Logger.Log("RootURL: " + RootUrl);
 
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.PartnersResponse resp = client.Get<GatewayService.PartnersResponse>(new GatewayService.Partners
             {
                 access_token = AccessToken,
@@ -105,6 +109,7 @@ namespace ServiceStack.TripThruGateway
                 TripId = request.tripID
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.DispatchResponse resp = client.Get<GatewayService.DispatchResponse>(dispatch);
             Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
             {
@@ -144,6 +149,7 @@ namespace ServiceStack.TripThruGateway
                 DriverId = request.driverID,
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.QuotesResponse resp = client.Get<GatewayService.QuotesResponse>(quotes);
             Gateway.QuoteTripResponse response = new Gateway.QuoteTripResponse
             {
@@ -166,6 +172,7 @@ namespace ServiceStack.TripThruGateway
             Logger.BeginRequest("GetTripStatus sent to " + name, request);
             //Logger.Log("RootURL: " + RootUrl);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.TripStatusResponse resp = client.Get<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {
                 access_token = AccessToken,
@@ -220,6 +227,7 @@ namespace ServiceStack.TripThruGateway
             Logger.BeginRequest("UpdateTripStatus sent to " + name, request);
             //Logger.Log("RootURL: " + RootUrl);
             JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
             GatewayService.TripStatusResponse resp = client.Put<GatewayService.TripStatusResponse>(new GatewayService.TripStatus
             {
                 access_token = AccessToken,

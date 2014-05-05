@@ -233,6 +233,7 @@ namespace TripThruCore
 
         private void RecordTripOriginatingAndServicingPartner(DispatchTripRequest r, Gateway partner)
         {
+            Logger.Log("RecordTripOriginatingAndServicingPartner: Request=" + r + ", partner=" + partner.name);
             originatingPartnerByTrip.Add(r.tripID, r.clientID);
             Logger.AddTag("Originating partner", r.clientID);
             servicingPartnerByTrip.Add(r.tripID, partner.ID);
