@@ -239,7 +239,7 @@ text-overflow: ellipsis;
 						return;
 					}
 					setTripInfo(data);
-                    if(!$.isEmptyObject(data.driverLocation) && !$.isEmptyObject(data.driverInitialLocation) )
+                    if(data.driverLocation != null && !$.isEmptyObject(data.driverLocation) && data.driverInitialLocation != null && !$.isEmptyObject(data.driverInitialLocation))
                     {
 
                         var driverLocation = new google.maps.LatLng(data.driverLocation.lat, data.driverLocation.lng);
