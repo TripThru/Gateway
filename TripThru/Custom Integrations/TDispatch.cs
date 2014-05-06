@@ -541,11 +541,18 @@ namespace CustomIntegrations
 
             foreach (string tripID in checkTrips)
             {
-                string bookingPK = activeTrips[tripID].pk;
-                TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
-                TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
-                getBookingResponse.booking.sub_status = getBookingStatusResponse.booking.sub_status;
-                UpdateBooking(tripID, getBookingResponse.booking);
+                try
+                {
+                    string bookingPK = activeTrips[tripID].pk;
+                    TDispatchAPI.GetBookingStatusResponse getBookingStatusResponse = api.GetBookingStatus(bookingPK);
+                    TDispatchAPI.GetBookingResponse getBookingResponse = api.GetBooking(bookingPK);
+                    getBookingResponse.booking.sub_status = getBookingStatusResponse.booking.sub_status;
+                    UpdateBooking(tripID, getBookingResponse.booking);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("TDispatch update exception for trip: " + tripID, e.ToString());
+                }
             }
 
             lastCheckStatus = DateTime.UtcNow;
