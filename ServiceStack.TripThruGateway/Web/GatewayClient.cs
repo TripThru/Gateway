@@ -22,7 +22,7 @@ namespace ServiceStack.TripThruGateway
         {
             AccessToken = accessToken;
             RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
-            timeout = new TimeSpan(0, 2, 0);
+            timeout = new TimeSpan(0, 5, 0);
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {

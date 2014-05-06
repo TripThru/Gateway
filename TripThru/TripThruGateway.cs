@@ -418,12 +418,14 @@ namespace TripThruCore
                 GetTripStatusResponse response = partner.GetTripStatus(r);
                 if (response.result == Result.OK)
                 {
-                    if (TripHasDriverInitialLocation(r.tripID))
-                        AddDriverInitialLocation(response, r.tripID);
                     if (TripHasNonActiveStatus(response))
                         DeactivateTripAndUpdateStats(r.tripID, (Status)response.status, response.price, response.distance);
                     else
+                    {
+                        if (TripHasDriverInitialLocation(r.tripID))
+                            AddDriverInitialLocation(response, r.tripID);
                         UpdateActiveTripWithNewTripStatus(r, response);
+                    }
                     MakeGetTripStatusResponse(r, partner, response);
                 }
                 else
