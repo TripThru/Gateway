@@ -879,7 +879,7 @@
                                 activeTripsInfo[tripId].distance = data.distance;
                                 activeTripsInfo[tripId].eta = data.eta;
 
-                                if (data.result || data.status === "Completed") {
+                                if (data.resultCode === "NotFound" || data.status === "Completed") {
                                     activeTrips = $.grep(activeTrips, function (value) {
                                         if (value != tripId) {
                                             console.log("TripId: " + tripId);
