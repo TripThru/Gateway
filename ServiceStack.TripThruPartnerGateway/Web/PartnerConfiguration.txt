@@ -1,5 +1,5 @@
 ﻿{
-  "tripThruUrl" : "http://192.168.0.125/TripThru.TripThruGateway/",
+  "tripThruUrl" : "http://192.168.0.106:17187/",
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
