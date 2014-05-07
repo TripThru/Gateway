@@ -755,7 +755,8 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString());
+                    Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString(),
+                        new Dictionary<string, string>() { { "TripID", request.TripId } });
                     dispatchResponse = new DispatchResponse
                     {
                         Result = "Failed",
@@ -767,6 +768,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "DispatchTrip");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.AddTag("TripID", request.TripId);
                     Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(dispatchResponse);
                 }
@@ -954,7 +956,8 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString());
+                    Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString(),
+                        new Dictionary<string, string>() { { "TripID", request.TripId } });
                     tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
@@ -966,6 +969,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "GetTripStatus");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.AddTag("TripID", request.TripId);
                     Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(tripStatusResponse);
                     Logger.Enable();
@@ -991,7 +995,6 @@ namespace ServiceStack.TripThruGateway
                     {
                         clientId = acct.ClientId;
                         Logger.BeginRequest("UpdateTripStatus(" + request.Status + ") received from " + acct.UserName, request, request.TripId);
-
                         Location driverLocation = null;
                         if (request.DriverLocationLat != null && request.DriverLocationLng != null)
                         {
@@ -1052,7 +1055,8 @@ namespace ServiceStack.TripThruGateway
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString());
+                    Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString(),
+                        new Dictionary<string, string>() { {"TripID", request.TripId} });
                     tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
@@ -1063,6 +1067,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "UpdateTripStatus");
                     Logger.AddTag("ClientId", clientId);
+                    Logger.AddTag("TripID", request.TripId);
                     Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(tripStatusResponse);
                 }
