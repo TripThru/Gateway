@@ -87,11 +87,13 @@ namespace Utils
                             {
                                 requestLog = this.queue.Dequeue();
                                 if (requestLog.Messages.Count > 0)
-                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss"));
+                                    logEntries.Add(requestLog.Created.ToString("yyyy-MM-ddTHH:mm:ss"));
                                 foreach (Message msg in requestLog.Messages)
                                     logEntries.Add(msg.Text);
                                 foreach (Tag tag in requestLog.Tags)
                                     logEntries.Add(tag.Name + "=" + tag.Value);
+                                if (requestLog.Closed != null)
+                                    logEntries.Add("Closed=" + requestLog.Closed.ToString("yyyy-MM-ddTHH:mm:ss"));
                             }
 
                             if (logEntries.Any())
@@ -163,7 +165,7 @@ namespace Utils
                 {
                     if (Count > 0)
                     {
-                        while (Peek().Time < expired)
+                        while (Peek().Created < expired)
                             Dequeue();
                     }
                 }
@@ -199,7 +201,8 @@ namespace Utils
 
         public class RequestLog
         {
-            public DateTime Time { get; set; }
+            public DateTime Created { get; set; }
+            public DateTime Closed { get; set; }
             public List<Message> Messages { get; set; }
             public List<Tag> Tags { get; set; }
             public string Request { get; set; }
@@ -213,7 +216,7 @@ namespace Utils
             public RequestLog(string request, string tripID = null)
             {
                 this.Request = request;
-                Time = DateTime.UtcNow;
+                Created = DateTime.UtcNow;
                 Messages = new List<Message>();
                 Tags = new List<Tag>();
                 MaxTab = 0;
@@ -227,6 +230,10 @@ namespace Utils
                     tabs += '\t';
                 //                tabs += "-----";
                 return tabs;
+            }
+            public void Close()
+            {
+                this.Closed = DateTime.UtcNow;
             }
         }
         static readonly object locker = new object();
@@ -287,6 +294,7 @@ namespace Utils
                     if (response != null)
                         json = JsonSerializer.SerializeToString(response);
                     requestLog[thread].Response = json;
+                    requestLog[thread].Close();
                     if (splunkEnabled)
                     {
                         splunkClient.Enqueue(requestLog[thread]);

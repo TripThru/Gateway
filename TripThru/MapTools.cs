@@ -298,7 +298,10 @@ namespace Utils
                 var status = doc.SelectSingleNode("//DirectionsResponse/status");
 
                 if (status == null || status.InnerText == "ZERO_RESULTS")
-                    return null;
+                {
+                    Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
+                    throw new Exception("Bad route request");
+                }
                 var waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
                 var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
 

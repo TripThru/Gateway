@@ -79,7 +79,7 @@ namespace TripThruGenerateFilesOfRoutes
         static void Main()
         {
 
-            var partnerConfigurations = GetPartnersConfigurations();
+            var locationsLists = GetLocationsLists();
 
             using (var sr = new StreamReader("App_Data\\Geo-Routes.txt"))
             {
@@ -100,10 +100,15 @@ namespace TripThruGenerateFilesOfRoutes
                                              new Dictionary<string, Pair<string, string>>();
             }
 
-            foreach (var possibleTrip in partnerConfigurations.SelectMany(partnerConfiguration => partnerConfiguration.Fleets.ElementAt(0).PossibleTrips))
-            {
-                MapTools.GetRoute(possibleTrip.Start, possibleTrip.End);
-            }
+            int tripCount = 0;
+            foreach (LocationsList locationList in locationsLists)
+                foreach (Location location in locationList.locations)
+                    foreach (Location l in locationList.locations.Where(l => !l.Equals(location)))
+                    {
+                        tripCount++;
+                        System.Threading.Thread.Sleep(2000);
+                        MapTools.GetRoute(location, l);
+                    }
 
             var routesString = JsonConvert.SerializeObject(MapTools.routes);
             var locationNamesString = JsonConvert.SerializeObject(MapTools.locationNames);
@@ -124,6 +129,10 @@ namespace TripThruGenerateFilesOfRoutes
             {
                 sr.Write(locationAddresses);
             }
+
+
+            Console.WriteLine(tripCount + " trips generated");
+            Console.ReadKey();
         }
 
         private static List<Location> DecodePolylinePoints(string encodedPoints)
@@ -183,10 +192,15 @@ namespace TripThruGenerateFilesOfRoutes
             return poly;
         }
 
-        private static IEnumerable<PartnerConfiguration> GetPartnersConfigurations()
+        private static List<LocationsList> GetLocationsLists()
         {
-            var partnerConfigurationsFiles = Directory.GetFiles("PartnerConfigurations/", "*.txt");
-            return partnerConfigurationsFiles.Select(partnerConfigurationFile => JsonConvert.DeserializeObject<PartnerConfiguration>(File.ReadAllText(partnerConfigurationFile))).ToList();
+            var locationsListsFiles = Directory.GetFiles("Locations/", "*.txt");
+            return locationsListsFiles.Select(tripsListFile => JsonConvert.DeserializeObject<LocationsList>(File.ReadAllText(tripsListFile))).ToList();
         }
+    }
+
+    class LocationsList
+    {
+        public List<Location> locations { get; set; }
     }
 }
