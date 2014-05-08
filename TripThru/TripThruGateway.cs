@@ -224,6 +224,7 @@ namespace TripThruCore
                 PassengerName = r.passengerName,
                 VehicleType = r.vehicleType
             };
+            trip.SetCreation(DateTime.UtcNow);
             activeTrips.Add(r.tripID, trip);
             Logger.AddTag("Passenger", r.passengerName);
             Logger.AddTag("Pickup_time", r.pickupTime.ToString());
@@ -587,6 +588,8 @@ namespace TripThruCore
                     tags["Bad Health"] = "Active trip " + trip + " has no originating partner";
                 if (!servicingPartnerByTrip.ContainsKey(trip.Id))
                     tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
+                if (trip.GetCreation() < DateTime.UtcNow - new TimeSpan(1, 0, 0))
+                    this.DeactivateTripAndUpdateStats(trip.Id, (Status)trip.Status, 0.0, 0.0);
             }
 
             Logger.LogDebug("Health check (tripthru latest 2)", null, tags);

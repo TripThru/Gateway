@@ -174,6 +174,7 @@ namespace TripThruCore
         public double? Price { get; set; }
         public double? Distance { get; set; }
         public double? DriverRouteDuration { get; set; }
+        private DateTime Creation { get; set; }
 
         private List<Location> _historyEnrouteList = new List<Location>();
         private List<Location> _historyPickUpList = new List<Location>();
@@ -212,6 +213,15 @@ namespace TripThruCore
             this.Price = trip.Price;
             this.Distance = trip.Distance;
             this.DriverRouteDuration = trip.DriverRouteDuration;
+        }
+
+        public void SetCreation(DateTime time)
+        {
+            this.Creation = time;
+        }
+        public DateTime GetCreation()
+        {
+            return this.Creation;
         }
     }
 
