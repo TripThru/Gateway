@@ -592,12 +592,12 @@ namespace TripThruCore
             foreach (Trip trip in activeTrips.Values)
             {
                 if (!originatingPartnerByTrip.ContainsKey(trip.Id))
-                    tags["Bad Health"] = "Active trip " + trip + " has no originating partner";
+                    Logger.LogDebug("Active trip " + trip + " has no originating partner");
                 if (!servicingPartnerByTrip.ContainsKey(trip.Id))
-                    tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
+                    Logger.LogDebug("Active trip " + trip + " has no servicing partner");
                 if (trip.GetCreation() < DateTime.UtcNow - new TimeSpan(1, 0, 0))
                 {
-                    tags["Bad Health"] = "Deactivating oldc trip " + trip;
+                    Logger.LogDebug("Deactivating bad trip " + trip.Id);
                     this.DeactivateTripAndUpdateStats(trip.Id, (Status)trip.Status, 0.0, 0.0);
                 }
             }
