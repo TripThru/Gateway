@@ -1,4 +1,4 @@
-{
+﻿{
     "Enabled": true,
     "Fleets": [
         {
@@ -7,8 +7,8 @@
             "Coverage": [
                 {
                     "Center": {
-                        "Lat": 37.78906,
-                        "Lng": -122.402127
+                        "Lat": 25.7871768,
+						"Lng": -80.1294254
                     },
                     "Radius": 50
                 }
@@ -55,10 +55,10 @@
                 "Roseanna Littlefield"
             ],
             "Location": {
-                "Lat": 37.78906,
-                "Lng": -122.402127
+                "Lat": 25.7871768,
+				"Lng": -80.1294254
             },
-            "Name": "Mellow",
+            "Name": "Miami Taxi",
             "Passengers": [
                 "Robert Bilson",
                 "Jennifer Drew",
@@ -134,8 +134,8 @@
 						"Lng": -80.2786931
                     },
                     "Start": {
-                        "Lat": 25.7871768,
-						"Lng": -80.1294254
+                        "Lat": 25.845224,
+						"Lng": -80.119744
                     }
                 },
                 {
@@ -157,19 +157,19 @@
         }
     ],
   "host" : {
-		"virtualPath" : "/TripThru.Mellow/"
+		"virtualPath" : "/TripThru.MiamiTaxi/"
   },
     "Partner": {
-        "AccessToken": "yellow12ondazazxx21",
-        "CallbackUrlMono": "TripThru.Mellow/",
-        "ClientId": "mellow@tripthru.com",
-        "Name": "Mellow",
-        "WebUrl": "/BookingsMellow/",
-        "WebUrlRelative": "/BookingsMellow/index.php"
+        "AccessToken": "miamitaxi12ondazazxx21",
+        "CallbackUrlMono": "TripThru.MiamiTaxi/",
+        "ClientId": "miamitaxi@tripthru.com",
+        "Name": "Miami Taxi",
+        "WebUrl": "/BookingsMiamiTaxi/",
+        "WebUrlRelative": "/BookingsMiamiTaxi/index.php"
     },
     "SimInterval": 10,
     "TripThruUrlMono": "TripThru.TripThruGateway/",
     "host": {
-        "virtualPath": "/TripThru.Mellow/"
+        "virtualPath": "/TripThru.MiamiTaxi/"
     }
 }

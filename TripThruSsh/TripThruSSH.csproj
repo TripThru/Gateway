@@ -81,6 +81,12 @@
     <Content Include="PartnerConfigurations\MellowConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="PartnerConfigurations\MiamiTaxi.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PartnerConfigurations\MiamiTaxiConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="PartnerConfigurations\Netro.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
