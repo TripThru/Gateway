@@ -35,6 +35,20 @@
                                     <path>/var/www/ServiceStack.Netro/Web</path>
                                  </web-application>
 <web-application>
+                                    <name>TripThru.NYTaxi</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.NYTaxi</vpath>
+                                    <path>/var/www/ServiceStack.NYTaxi/Web</path>
+                                 </web-application>
+<web-application>
+                                    <name>TripThru.TampaCab</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.TampaCab</vpath>
+                                    <path>/var/www/ServiceStack.TampaCab/Web</path>
+                                 </web-application>
+<web-application>
                                     <name>TripThru.Tuxor</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>
