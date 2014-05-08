@@ -362,8 +362,15 @@ namespace TripThruCore
             {
                 if (partner.ID == request.clientID)
                     continue;
-                if (PickupLocationIsServedByPartner(request, partner))
-                    RequestQuotesFromPartnerAndAdd(request, quotes, partner);
+                try
+                {
+                    if (PickupLocationIsServedByPartner(request, partner))
+                        RequestQuotesFromPartnerAndAdd(request, quotes, partner);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log("Exception quoting " + partner.name + ": " + e.ToString());
+                }
             }
             QuoteTripResponse response1 = new QuoteTripResponse(quotes);
             return response1;
