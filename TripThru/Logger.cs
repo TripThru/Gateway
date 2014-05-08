@@ -87,7 +87,7 @@ namespace Utils
                             {
                                 requestLog = this.queue.Dequeue();
                                 if (requestLog.Messages.Count > 0)
-                                    logEntries.Add(requestLog.Created.ToString("yyyy-MM-ddTHH:mm:ss"));
+                                    logEntries.Add(requestLog.Time.ToString("yyyy-MM-ddTHH:mm:ss"));
                                 foreach (Message msg in requestLog.Messages)
                                     logEntries.Add(msg.Text);
                                 foreach (Tag tag in requestLog.Tags)
@@ -165,7 +165,7 @@ namespace Utils
                 {
                     if (Count > 0)
                     {
-                        while (Peek().Created < expired)
+                        while (Peek().Time < expired)
                             Dequeue();
                     }
                 }
@@ -201,7 +201,7 @@ namespace Utils
 
         public class RequestLog
         {
-            public DateTime Created { get; set; }
+            public DateTime Time { get; set; }
             public DateTime Closed { get; set; }
             public List<Message> Messages { get; set; }
             public List<Tag> Tags { get; set; }
@@ -216,7 +216,7 @@ namespace Utils
             public RequestLog(string request, string tripID = null)
             {
                 this.Request = request;
-                Created = DateTime.UtcNow;
+                Time = DateTime.UtcNow;
                 Messages = new List<Message>();
                 Tags = new List<Tag>();
                 MaxTab = 0;

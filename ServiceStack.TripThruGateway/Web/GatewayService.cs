@@ -65,7 +65,7 @@ namespace ServiceStack.TripThruGateway
                         if (request.tripID != null)
                             logList = logList.Where(log => log.tripID == request.tripID);
                         
-                        logList = logList.OrderBy(log => log.Created);
+                        logList = logList.OrderBy(log => log.Time);
 
                         logResponse = new LogResponse
                         {
