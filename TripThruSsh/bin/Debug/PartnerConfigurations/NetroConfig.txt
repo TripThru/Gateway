@@ -1,1 +1,149 @@
-{"Partner":{"Name":"Netro","ClientId":"netro@tripthru.com","AccessToken":"metro12ondazazxx21","CallbackUrlMono":"http://54.201.134.194/TripThru.Netro/","WebUrl":"http://54.201.134.194:8080/BookingsNetro/","WebUrlRelative":"/BookingsNetro/index.php"},"Fleets":[{"Name":"Netro","BaseCost":3,"CostPerMile":3,"TripsPerHour":100,"PossibleTrips":[{"Start":{"Lat":37.782551,"Lng":-122.445368},"End":{"Lat":37.786956,"Lng":-122.440279}},{"Start":{"Lat":37.784345,"Lng":-122.422922},"End":{"Lat":37.785292,"Lng":-122.416257}},{"Start":{"Lat":48.843545,"Lng":2.385352},"End":{"Lat":48.839478,"Lng":2.317374}},{"Start":{"Lat":25.270751,"Lng":55.31403},"End":{"Lat":25.279288,"Lng":55.304331}},{"Start":{"Lat":42.342634,"Lng":-71.122545},"End":{"Lat":42.367561,"Lng":-71.129498}},{"Start":{"Lat":40.7524713,"Lng":-73.9772954},"End":{"Lat":40.7479425,"Lng":-73.9709596}},{"Start":{"Lat":26.1196017,"Lng":-80.1429035},"End":{"Lat":25.7950665,"Lng":-80.2786931}}],"VehicleTypes":["Compact","Sedan"],"Drivers":["Joanna Glennon","Ofer Matan","Ignas Thucydides","Clyde Hariwini","Flavio Ragnvald","Kenaniah Sergei","Ezra Adilet","David S. Chatman","Lilly A. Sabala","Jesus S. Jackson","Martha R. Martin","Donald G. Lillibridge","Clara B. Cantu","Michael P. Ruiz","Leland R. Elmore","Chris P. Gardner","Dessie R. Rivera","Kathy L. Griffin","Christopher B. Bell","Lacie Ridgell","Leonard Fife","Ross Dohrmann","Elliott Garvin","Sharmaine Grave","Nydia Empey","Luana Buchan","Jerri Christine","Inger Merck","Maryellen Legrand"],"Passengers":["Michael Glennon","William Glennon","Bernice Hamilton"],"Location":{"Lat":42.356217,"Lng":-71.137512},"Coverage":[{"Center":{"Lat":42.356217,"Lng":-71.137512},"Radius":50}]}],"TripThruUrlMono":"http://54.201.134.194/TripThru.TripThruGateway/","SimInterval":10,"Enabled":true,"host":{"virtualPath":"/TripThru.Netro/"}}
+{
+    "enabled": true,
+    "fleets": [
+        {
+            "baseCost": 3.0,
+            "costPerMile": 3.0,
+            "coverage": [
+                {
+                    "center": {
+                        "lat": 42.356217,
+                        "lng": -71.137512
+                    },
+                    "radius": 50
+                }
+            ],
+            "drivers": [
+                "Joanna Glennon",
+                "Ofer Matan",
+                "Ignas Thucydides",
+                "Clyde Hariwini",
+                "Flavio Ragnvald",
+                "Kenaniah Sergei",
+                "Ezra Adilet",
+                "David S. Chatman",
+                "Lilly A. Sabala",
+                "Jesus S. Jackson",
+                "Martha R. Martin",
+                "Donald G. Lillibridge",
+                "Clara B. Cantu",
+                "Michael P. Ruiz",
+                "Leland R. Elmore",
+                "Chris P. Gardner",
+                "Dessie R. Rivera",
+                "Kathy L. Griffin",
+                "Christopher B. Bell",
+                "Lacie Ridgell",
+                "Leonard Fife",
+                "Ross Dohrmann",
+                "Elliott Garvin",
+                "Sharmaine Grave",
+                "Nydia Empey",
+                "Luana Buchan",
+                "Jerri Christine",
+                "Inger Merck",
+                "Maryellen Legrand"
+            ],
+            "location": {
+                "lat": 42.356217,
+                "lng": -71.137512
+            },
+            "name": "Netro",
+            "passengers": [
+                "Michael Glennon",
+                "William Glennon",
+                "Bernice Hamilton"
+            ],
+            "possibleTrips": [
+                {
+                    "end": {
+                        "lat": 37.786956,
+                        "lng": -122.440279
+                    },
+                    "start": {
+                        "lat": 37.782551,
+                        "lng": -122.445368
+                    }
+                },
+                {
+                    "end": {
+                        "lat": 37.785292,
+                        "lng": -122.416257
+                    },
+                    "start": {
+                        "lat": 37.784345,
+                        "lng": -122.422922
+                    }
+                },
+                {
+                    "end": {
+                        "lat": 48.839478,
+                        "lng": 2.317374
+                    },
+                    "start": {
+                        "lat": 48.843545,
+                        "lng": 2.385352
+                    }
+                },
+                {
+                    "end": {
+                        "lat": 25.279288,
+                        "lng": 55.304331
+                    },
+                    "start": {
+                        "lat": 25.270751,
+                        "lng": 55.31403
+                    }
+                },
+                {
+                    "end": {
+                        "lat": 42.367561,
+                        "lng": -71.129498
+                    },
+                    "start": {
+                        "lat": 42.342634,
+                        "lng": -71.122545
+                    }
+                },
+                {
+                    "end": {
+                        "Lat": 40.7479425,
+						"Lng": -73.9709596
+                    },
+                    "start": {
+                        "Lat": 40.7524713,
+						"Lng": -73.9772954
+                    }
+                },
+                {
+                    "end": {
+                        "Lat": 25.7950665,
+						"Lng": -80.2786931
+                    },
+                    "start": {
+                        "Lat": 26.1196017,
+						"Lng": -80.1429035
+                    }
+                }
+            ],
+            "tripsPerHour": 100,
+            "vehicleTypes": [
+                "compact",
+                "sedan"
+            ]
+        }
+    ],
+    "host": {
+        "virtualPath": "/TripThru.Netro/"
+    },
+    "partner": {
+        "accessToken": "metro12ondazazxx21",
+        "callbackUrlMono": "TripThru.Netro/",
+        "clientId": "netro@tripthru.com",
+        "name": "Netro",
+        "webUrl": "BookingsNetro/",
+        "webUrlRelative": "/BookingsNetro/index.php"
+    },
+    "simInterval": 10,
+    "tripThruUrlMono": "TripThru.TripThruGateway/"
+}

@@ -596,7 +596,10 @@ namespace TripThruCore
                 if (!servicingPartnerByTrip.ContainsKey(trip.Id))
                     tags["Bad Health"] = "Active trip " + trip + " has no servicing partner";
                 if (trip.GetCreation() < DateTime.UtcNow - new TimeSpan(1, 0, 0))
+                {
+                    tags["Bad Health"] = "Deactivating oldc trip " + trip;
                     this.DeactivateTripAndUpdateStats(trip.Id, (Status)trip.Status, 0.0, 0.0);
+                }
             }
 
             Logger.LogDebug("Health check (tripthru latest 2)", null, tags);
