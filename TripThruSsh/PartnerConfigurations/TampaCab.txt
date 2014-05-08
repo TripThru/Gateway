@@ -1,4 +1,4 @@
-{
+﻿{
     "Enabled": true,
     "Fleets": [
         {
@@ -7,8 +7,8 @@
             "Coverage": [
                 {
                     "Center": {
-                        "Lat": 37.78906,
-                        "Lng": -122.402127
+                        "Lat": 26.1275183,
+						"Lng": -80.103452
                     },
                     "Radius": 50
                 }
@@ -55,10 +55,10 @@
                 "Roseanna Littlefield"
             ],
             "Location": {
-                "Lat": 37.78906,
-                "Lng": -122.402127
+                "Lat": 26.1275183,
+				"Lng": -80.103452
             },
-            "Name": "Mellow",
+            "Name": "Tampa Cab",
             "Passengers": [
                 "Robert Bilson",
                 "Jennifer Drew",
@@ -134,8 +134,8 @@
 						"Lng": -80.2786931
                     },
                     "Start": {
-                        "Lat": 25.7871768,
-						"Lng": -80.1294254
+                        "Lat": 26.122976,
+						"Lng": -80.10474
                     }
                 }
             ],
@@ -147,19 +147,19 @@
         }
     ],
   "host" : {
-		"virtualPath" : "/TripThru.Mellow/"
+		"virtualPath" : "/TripThru.TampaCab/"
   },
     "Partner": {
-        "AccessToken": "yellow12ondazazxx21",
-        "CallbackUrlMono": "TripThru.Mellow/",
-        "ClientId": "mellow@tripthru.com",
-        "Name": "Mellow",
-        "WebUrl": "/BookingsMellow/",
-        "WebUrlRelative": "/BookingsMellow/index.php"
+        "AccessToken": "tampa12ondazazxx21",
+        "CallbackUrlMono": "TripThru.TampaCab/",
+        "ClientId": "tampacab@tripthru.com",
+        "Name": "Tampa Cab",
+        "WebUrl": "/BookingsTampaCab/",
+        "WebUrlRelative": "/BookingsTampaCab/index.php"
     },
     "SimInterval": 10,
     "TripThruUrlMono": "TripThru.TripThruGateway/",
     "host": {
-        "virtualPath": "/TripThru.Mellow/"
+        "virtualPath": "/TripThru.TampaCab/"
     }
 }

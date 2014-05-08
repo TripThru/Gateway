@@ -1,4 +1,4 @@
-{
+﻿{
     "Enabled": true,
     "Fleets": [
         {
@@ -7,51 +7,49 @@
             "Coverage": [
                 {
                     "Center": {
-                        "Lat": 25.271139,
-                        "Lng": 55.307485
+                        "Lat": 40.769004,
+						"Lng": -73.981376
                     },
                     "Radius": 50
                 }
             ],
             "Drivers": [
-                "Hussean Widobe",
-                "Omar Sharief",
-                "Sheikh Hamdan",
-                "Mohammed Hamdan",
-                "Rashid Al Maktoum",
-                "Hamdan Widobe",
-                "Ayishah Janan Halabi",
-                "Hayud Munirah Sarkis",
-                "Asra Salwa Nazari",
-                "Hilel Sahl Harb",
-                "Jala Nahid Ba",
-                "Bahiya Baheera Kassis",
-                "Azhar Amro Saliba",
-                "Kawakib Walidah Sarraf",
-                "Khaldoon Harun Safar",
-                "Aliyah Shahirah Nassar",
-                "Muta Abdul Awad",
-                "Fakhir Anbar Guirguis",
-                "Khuzama Maysa Srour",
-                "Sanaa Malakah Ganim",
-                "Jeannine Loyola",
-                "Jacquelyn Folts",
-                "Benton Aguila",
-                "Hisako Peake",
-                "Earlie Tapia",
-                "Gino Kampf",
-                "Temika Snipe",
-                "Rena Dedrick",
-                "Angele Stoffel",
-                "Leonor Chesson"
+                "Alex Goldman",
+                "Jason Fama",
+                "Simon Shvarts",
+                "Bob Toni",
+                "Velimir Erebos",
+                "Maximillian Constantin",
+                "Kimberly H. Kennedy",
+                "Rodney M. Montgomery",
+                "James B. Racine",
+                "Patrick M. High",
+                "Marcella A. Sova",
+                "Maria K. Morrison",
+                "Lisa M. Nicholson",
+                "Edward P. Morton",
+                "James A. Birt",
+                "Margaret J. Kent",
+                "Gladys L. Serrano",
+                "Eddie J. Johnson",
+                "Lynnette Queener",
+                "Hulda Mckinnis",
+                "Elicia Kuhlman",
+                "Doug Vanwingerden",
+                "Orval Aubert",
+                "Zoraida Timpson",
+                "Whitney Ables",
+                "Tandy Aponte",
+                "Janeen Aguilera",
+                "Isidra Bitter"
             ],
             "Location": {
-                "Lat": 25.271139,
-                "Lng": 55.307485
+                "Lat": 40.769004,
+				"Lng": -73.981376
             },
-            "Name": "Hubai Taxi Corporation",
+            "Name": "NY Taxi",
             "Passengers": [
-                "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"
+                "Patrick Hughe"
             ],
             "PossibleTrips": [
                 {
@@ -104,26 +102,26 @@
                         "Lng": -122.445368
                     }
                 },
-                {
-                    "End": {
-                        "Lat": 40.797215,
-						"Lng": -73.96941
-                    },
-                    "Start": {
+				{
+					"End": {
                         "Lat": 40.727227,
 						"Lng": -74.003911
-                    }
-                },
-                {
-                    "End": {
-                        "Lat": 26.122976,
-						"Lng": -80.10474
                     },
                     "Start": {
-                        "Lat": 26.137129,
-						"Lng": -80.113431
+                        "Lat": 40.7650963,
+						"Lng": -73.9751487
                     }
-                }
+				},
+				{
+					"End": {
+                        "Lat": 25.836026,
+						"Lng": -80.184453
+                    },
+                    "Start": {
+                        "Lat": 26.1313537,
+						"Lng": -80.1366433
+                    }
+				}
             ],
             "TripsPerHour": 100,
             "VehicleTypes": [
@@ -133,19 +131,19 @@
         }
     ],
   "host" : {
-		"virtualPath" : "/TripThru.HubaiTaxiCorporation/"
+		"virtualPath" : "/TripThru.NYTaxi/"
   },
     "Partner": {
-        "AccessToken": "dubai12ondazazxx21",
-        "CallbackUrlMono": "TripThru.HubaiTaxiCorporation/",
-        "ClientId": "hubai@tripthru.com",
-        "Name": "Hubai Taxi Corporation",
-        "WebUrl": "/BookingsHubaiTaxiCorporation/",
-        "WebUrlRelative": "/BookingsHubaiTaxiCorporation/index.php"
+        "AccessToken": "nytaxi12ondazazxx21",
+        "CallbackUrlMono": "TripThru.NYTaxi/",
+        "ClientId": "nytaxi@tripthru.com",
+        "Name": "NY Taxi",
+        "WebUrl": "/BookingsNYTaxi/",
+        "WebUrlRelative": "/BookingsNYTaxi/index.php"
     },
     "SimInterval": 10,
     "TripThruUrlMono": "TripThru.TripThruGateway/",
     "host": {
-        "virtualPath": "/TripThru.HubaiTaxiCorporation/"
+        "virtualPath": "/TripThru.NYTaxi/"
     }
 }

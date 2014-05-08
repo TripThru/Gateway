@@ -84,6 +84,18 @@
     <Content Include="PartnerConfigurations\Netro.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="PartnerConfigurations\NYTaxi.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PartnerConfigurations\NYTaxi.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PartnerConfigurations\TampaCab.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PartnerConfigurations\TampaCab.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PartnerConfigurations\Tuxor.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
