@@ -28,6 +28,13 @@
                                     <path>/var/www/ServiceStack.Mellow/Web</path>
                                  </web-application>
 <web-application>
+                                    <name>TripThru.MiamiTaxi</name>
+                                    <vhost>*</vhost>
+                                    <vport>80</vport>
+                                    <vpath>/TripThru.MiamiTaxi</vpath>
+                                    <path>/var/www/ServiceStack.MiamiTaxi/Web</path>
+                                 </web-application>
+<web-application>
                                     <name>TripThru.Netro</name>
                                     <vhost>*</vhost>
                                     <vport>80</vport>

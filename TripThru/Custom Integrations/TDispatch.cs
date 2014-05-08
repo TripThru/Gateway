@@ -702,7 +702,7 @@ namespace CustomIntegrations
                     price = double.Parse(createResponse.fare.formatted_total_cost.Replace("$", ""));
                 }
                 catch (Exception e) { }
-                quotes.Add(new Quote(partnerID: ID, partnerName: name, fleetID: ID, fleetName: name, price: price, ETA: DateTime.UtcNow + new TimeSpan(0, 20, createResponse.fare.time_to_wait)));
+                quotes.Add(new Quote(partnerID: ID, partnerName: name, fleetID: ID, fleetName: name, price: price, ETA: DateTime.UtcNow + new TimeSpan(1, 0, createResponse.fare.time_to_wait)));
                 response = new Gateway.QuoteTripResponse(quotes, Result.OK);
             }
             Logger.EndRequest(response);
