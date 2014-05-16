@@ -82,6 +82,7 @@ namespace ServiceStack.TripThruPartnerGateway
                         _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));
 
                 var lastHealthCheck = DateTime.UtcNow;
+                Thread.Sleep(3000); //This Sleep to give other partners time to initialize
                 while (true)
                 {
                     try

@@ -414,14 +414,12 @@ namespace TripThruCore
 
         public override void Update()
         {
-            if (SimUpdateIntervalReached())
-            {
-                Logger.BeginRequest("Sim Update", null);
-                foreach (PartnerFleet f in PartnerFleets.Values)
-                    f.Simulate();
-                lastSim = DateTime.UtcNow;
-                Logger.EndRequest(null);
-            }
+            if (!SimUpdateIntervalReached()) return;
+            Logger.BeginRequest("Sim Update", null);
+            foreach (var f in PartnerFleets.Values)
+                f.Simulate();
+            lastSim = DateTime.UtcNow;
+            Logger.EndRequest(null);
         }
 
         private bool SimUpdateIntervalReached()

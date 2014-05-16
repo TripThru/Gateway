@@ -595,11 +595,6 @@ namespace TripThruCore
                     Logger.LogDebug("Active trip " + trip + " has no originating partner");
                 if (!servicingPartnerByTrip.ContainsKey(trip.Id))
                     Logger.LogDebug("Active trip " + trip + " has no servicing partner");
-                if (trip.GetCreation() < DateTime.UtcNow - new TimeSpan(1, 0, 0))
-                {
-                    Logger.LogDebug("Deactivating bad trip " + trip.Id);
-                    this.DeactivateTripAndUpdateStats(trip.Id, (Status)trip.Status, 0.0, 0.0);
-                }
             }
 
             Logger.LogDebug("Health check (tripthru latest 2)", null, tags);
