@@ -6,7 +6,7 @@
       "name" : "Luxor Cab",
       "clientId" : "luxor@tripthru.com",
       "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrl" : "http://192.168.0.106:17188/",
+	  "callbackUrl" : "http://localhost:17188/",
 	  "webUrl" : "BookingsLuxorCab/",
 	  "webUrlRelative" : "/BookingsLuxorCab/index.php"
   },

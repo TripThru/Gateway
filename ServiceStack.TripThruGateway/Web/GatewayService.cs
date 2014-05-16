@@ -756,7 +756,7 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString(),
-                        new Dictionary<string, string>() { { "TripID", request.TripId } });
+                        new Dictionary<string, string>() { { "TripID", request.TripId }, {"ClientId", clientId},{"Remote Ip", Request.RemoteIp} });
                     dispatchResponse = new DispatchResponse
                     {
                         Result = "Failed",
@@ -766,6 +766,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
+                    Logger.AddTag("Remote Ip", Request.RemoteIp);
                     Logger.AddTag("RequestType", "DispatchTrip");
                     Logger.AddTag("ClientId", clientId);
                     Logger.AddTag("TripID", request.TripId);
@@ -957,7 +958,7 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("GetTripStatus=" + e.Message, e.ToString(),
-                        new Dictionary<string, string>() { { "TripID", request.TripId } });
+                        new Dictionary<string, string>() { { "TripID", request.TripId }, { "ClientId", clientId }, { "RemoteIp", Request.RemoteIp } });
                     tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
@@ -967,6 +968,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
+                    Logger.AddTag("RemoteIp", Request.RemoteIp);
                     Logger.AddTag("RequestType", "GetTripStatus");
                     Logger.AddTag("ClientId", clientId);
                     Logger.AddTag("TripID", request.TripId);
@@ -1056,7 +1058,7 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("UpdateTripStatus=" + e.Message, e.ToString(),
-                        new Dictionary<string, string>() { {"TripID", request.TripId} });
+                        new Dictionary<string, string>() { { "TripID", request.TripId }, { "ClientId", clientId }, { "RemoteIp", Request.RemoteIp } });
                     tripStatusResponse = new TripStatusResponse
                     {
                         Result = "Failed",
@@ -1065,6 +1067,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 finally
                 {
+                    Logger.AddTag("RemoteIp", Request.RemoteIp);
                     Logger.AddTag("RequestType", "UpdateTripStatus");
                     Logger.AddTag("ClientId", clientId);
                     Logger.AddTag("TripID", request.TripId);

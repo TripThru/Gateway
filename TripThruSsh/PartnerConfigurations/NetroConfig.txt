@@ -145,5 +145,5 @@
         "webUrlRelative": "/BookingsNetro/index.php"
     },
     "simInterval": 10,
-    "tripThruUrlMono": "TripThru.TripThruGateway/"
+    "tripThruUrlMono" : "TripThru.TripThruGateway/"
 }

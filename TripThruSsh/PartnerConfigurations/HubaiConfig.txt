@@ -154,7 +154,7 @@
         "WebUrlRelative": "/BookingsHubaiTaxiCorporation/index.php"
     },
     "SimInterval": 10,
-    "TripThruUrlMono": "TripThru.TripThruGateway/",
+    "tripThruUrlMono" : "TripThru.TripThruGateway/",
     "host": {
         "virtualPath": "/TripThru.HubaiTaxiCorporation/"
     }

@@ -274,8 +274,8 @@ namespace TripThruCore
 
                     Logger.SetServicingId(this.ID);
                     PartnerTrip t = tripsByID[r.tripID];
-                    lock (t)
-                    {
+                    //lock (t)
+                    //{
                         DateTime? pickupTime = null;
                         if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
                             pickupTime = t.pickupTime; // Only if trip has been pickedup.
@@ -314,7 +314,7 @@ namespace TripThruCore
                             status: t.status,
                             passengerName: t.passengerName
                         );
-                    }
+                    //}
                 }
             }
             return response;
@@ -332,11 +332,11 @@ namespace TripThruCore
                 else
                 {
                     PartnerTrip t = tripsByID[r.tripID];
-                    lock (t)
-                    {
+                    //lock (t)
+                    //{
                         response = new UpdateTripStatusResponse();
                         t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
-                    }
+                    //}
                     Logger.SetServicingId(this.ID);
                 }
             }
@@ -511,8 +511,8 @@ namespace TripThruCore
             {
                 if (service == Origination.Foreign)
                 {
-                    Gateway.GetTripStatusResponse resp = GetStatsFromForeignServiceProvider();
-                    partner.DeactivateTripAndUpdateStats(ID, Status.Complete, resp.price, resp.distance);
+                    //Gateway.GetTripStatusResponse resp = GetStatsFromForeignServiceProvider();
+                    partner.DeactivateTripAndUpdateStats(ID, Status.Complete, 0, 0);
                 }
                 else
                     partner.DeactivateTripAndUpdateStats(ID, Status.Complete, PartnerFleet.GetPrice(this), PartnerFleet.GetDistance(this));

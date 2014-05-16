@@ -11,7 +11,7 @@ namespace TripThruSsh
     class Program
     {
 
-        private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
+        private static Boolean fullDeploy = false; //if true will upload and replace everything, else just update partner configuations
         private static Dictionary<string, Environment> environments = new Dictionary<string, Environment>{
             {"sandbox", new Environment{
                      host = "54.201.134.194",
@@ -20,7 +20,7 @@ namespace TripThruSsh
                      sshPort = 22
             }},
             {"vagrant", new Environment{
-                     host = "192.168.0.135",
+                     host = "192.168.0.125",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22
@@ -43,7 +43,7 @@ namespace TripThruSsh
         private static void Main(string[] args)
         {
             env = environments["sandbox"];
-            localPath = @"Z:\WindowsDev\Gateway\";
+            localPath = @"C:\Users\OscarErnesto\Documents\GitHub\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;
