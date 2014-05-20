@@ -29,7 +29,13 @@ namespace ServiceStack.TripThruPartnerGateway
 	{
         public object Any(IReturn<InitPartner> request)
         {
-            StorageManager.OpenStorage(new PostgresSql("localhost", "5432", "Users", "tripthru", "optimize"));
+
+            #if DEBUG
+                StorageManager.OpenStorage(new SqliteStorage("~/App_Data/db.sqlite".MapHostAbsolutePath()));
+            #else
+                StorageManager.OpenStorage(new PostgresSql("localhost", "5432", "Users", "tripthru", "optimize"));
+            #endif
+
             MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
             MapTools.LoadGeoData();
             MapTools.WriteGeoData();
