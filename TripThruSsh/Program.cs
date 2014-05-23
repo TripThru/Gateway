@@ -20,7 +20,7 @@ namespace TripThruSsh
                      sshPort = 22
             }},
             {"vagrant", new Environment{
-                     host = "192.168.0.125",
+                     host = "107.170.248.80",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22
@@ -42,7 +42,7 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["sandbox"];
+            env = environments["vagrant"];
             localPath = @"C:\Users\OscarErnesto\Documents\GitHub\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;

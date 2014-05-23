@@ -333,8 +333,9 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = request.access_token;
                 var message = ValidatePartners(request);
                 request.access_token = null;
-                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                PartnersResponse partnersResponse = new PartnersResponse
+                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                var user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                var partnersResponse = new PartnersResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
@@ -342,8 +343,10 @@ namespace ServiceStack.TripThruGateway
                 var clientId = "none";
                 try
                 {
-                    if (acct != null && message == null)
+                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
                     {
+                        if (acct == null)
+                            acct = user;
                         clientId = acct.ClientId;
                         Logger.BeginRequest("GetPartnerInfo received from " + acct.UserName, request);
                         var response = gateway.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(
@@ -373,7 +376,6 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        
                         string msg;
                         if (message == null)
                         {

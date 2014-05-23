@@ -164,12 +164,10 @@ namespace TripThruCore
             r.clientID = ID;
             foreach (Gateway p in partners.Values)
             {
-                GetPartnerInfoResponse response = p.GetPartnerInfo(r);
-                if (response.result == Result.OK)
-                {
-                    fleets.AddRange(response.fleets);
-                    vehicleTypes.AddRange(response.vehicleTypes);
-                }
+                var response = p.GetPartnerInfo(r);
+                if (response.result != Result.OK) continue;
+                fleets.AddRange(response.fleets);
+                vehicleTypes.AddRange(response.vehicleTypes);
             }
             GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
             return resp;
@@ -661,7 +659,7 @@ namespace TripThruCore
         {
             List<Fleet> fleets = new List<Fleet>();
             List<Zone> coverage = o.coverage;
-            fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
+            fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage, null));
             List<VehicleType> vehicleTypes = new List<VehicleType>();
 
             TDispatchIntegration partner = new TDispatchIntegration(tripThru, apiKey: o.api_key,
