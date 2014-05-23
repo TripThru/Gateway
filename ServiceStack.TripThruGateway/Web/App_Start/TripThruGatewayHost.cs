@@ -104,7 +104,11 @@ namespace ServiceStack.TripThruGateway
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
 
-                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                #if DEBUG
+                    StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                #else
+                    StorageManager.OpenStorage(new PostgresSql("localhost", "5432", "Users", "tripthru", "optimize"));
+                #endif
                 var accounts = StorageManager.GetPartnerAccounts();
 
                 //Authentication

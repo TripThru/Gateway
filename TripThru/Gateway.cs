@@ -232,11 +232,11 @@ namespace TripThruCore
         public string FleetId { get; set; }
         public string FleetName { get; set; }
         public List<Zone> Coverage { get; set; }
-        public Dictionary<string, Driver> Drivers { get; set; }
+        public int? Drivers { get; set; }
         public Fleet()
         {
         }
-        public Fleet(string partnerID, string partnerName, string fleetID, string fleetName, List<Zone> coverage, Dictionary<string, Driver> drivers)
+        public Fleet(string partnerID, string partnerName, string fleetID, string fleetName, List<Zone> coverage, int? drivers)
         {
             this.PartnerId = partnerID;
             this.PartnerName = partnerName;

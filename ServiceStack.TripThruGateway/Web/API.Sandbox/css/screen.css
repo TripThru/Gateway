@@ -1,3 +1,5 @@
+@import url('http://fonts.googleapis.com/css?family=Open+Sans:200,300,400,600');
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -72,7 +74,7 @@ h1 {
     font-size: 1.5em;
     line-height: 1.3em;
     padding: 10px 0 10px 0;
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-weight: bold;
 }
 
@@ -188,7 +190,7 @@ ol li {
 }
 
 .markdown ol, .markdown ul {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     margin: 5px 0 10px;
     padding: 0 0 0 18px;
     list-style-type: disc;
@@ -223,7 +225,7 @@ a {
 }
 
 b, strong {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-weight: bold;
 }
 
@@ -346,7 +348,7 @@ form.formtastic fieldset.inputs ol li.string input.title, form.formtastic fields
 }
 
 form.formtastic fieldset.inputs ol li.text textarea {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     height: 250px;
     padding: 4px;
     display: block;
@@ -390,7 +392,7 @@ form.fullwidth ol li.string input, form.fullwidth ol li.url input, form.fullwidt
 }
 
 body {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
 body #content_message {
@@ -465,7 +467,7 @@ body p#colophon {
     padding: 10px 0;
     font-size: 0.8em;
     border-top: 1px solid #dddddd;
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     color: #999999;
     font-style: italic;
 }
@@ -476,7 +478,7 @@ body p#colophon a {
 }
 
 body ul#resources {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-size: 0.9em;
 }
 
@@ -502,7 +504,7 @@ body ul#resources li.resource div.heading h2 {
     display: block;
     clear: none;
     float: left;
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-weight: bold;
 }
 
@@ -1627,7 +1629,7 @@ body ul#resources li.resource ul.endpoints li.endpoint ul.operations li.operatio
 
 
 .model-signature {
-    font-family: "Droid Sans", sans-serif;
+    font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-size: 1em;
     line-height: 1.5em;
 }

@@ -149,6 +149,18 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="API.Sandbox\css\bootstrap-theme.css" />
+    <Content Include="API.Sandbox\css\bootstrap-theme.min.css" />
+    <Content Include="API.Sandbox\css\bootstrap.css" />
+    <Content Include="API.Sandbox\css\bootstrap.min.css" />
+    <Content Include="API.Sandbox\css\tripthru.css" />
+    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="API.Sandbox\images\api.png" />
+    <Content Include="API.Sandbox\images\dashboard.png" />
+    <Content Include="API.Sandbox\images\settings.png" />
+    <Content Include="API.Sandbox\images\statistics.png" />
+    <Content Include="API.Sandbox\js\bootstrap.js" />
+    <Content Include="API.Sandbox\js\bootstrap.min.js" />
     <Content Include="App_Data\Geo-Location-Addresses.txt" />
     <Content Include="App_Data\Geo-Location-Names.txt" />
     <Content Include="App_Data\Geo-Routes.txt" />
@@ -165,6 +177,11 @@
     <Content Include="Content\Images\bg-body-1024.png" />
     <Content Include="Content\Images\btn-github.png" />
     <Content Include="packages.config" />
+    <Content Include="API.Sandbox\css\bootstrap-theme.css.map" />
+    <Content Include="API.Sandbox\css\bootstrap.css.map" />
+    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.woff" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flipCounter-medium.png" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -238,7 +255,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>55867</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://192.168.0.106:17187</IISUrl>
+          <IISUrl>http://localhost:17187</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

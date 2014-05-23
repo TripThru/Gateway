@@ -282,6 +282,15 @@ namespace ServiceStack.TripThruGateway
                         
                     }
                 }
+                catch(Exception e)
+                {
+                    Logger.LogDebug("RegisterPartner=" + e.Message, e.ToString());
+                    partnerResponse = new PartnerResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError
+                    };
+                }
                 finally
                 {
                     Logger.AddTag("RequestType", "RegisterPartner");
