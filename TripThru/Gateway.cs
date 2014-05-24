@@ -454,7 +454,6 @@ namespace TripThruCore
             public Result result { get; set; }
             public List<Fleet> fleets { get; set; }
             public List<VehicleType> vehicleTypes { get; set; }
-            public Dictionary<string, Driver> Drivers { get; set; }
             public GetPartnerInfoResponse(List<Fleet> fleets = null, List<VehicleType> vehicleTypes = null, Result result = Result.OK)
             {
                 this.fleets = fleets;

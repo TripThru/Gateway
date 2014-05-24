@@ -97,7 +97,7 @@ namespace ServiceStack.TripThruGateway
 
         [Api("Use GET /stats")]
         [Route("/stats", "GET")]
-        [Authenticate]
+        //[Authenticate]
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Stats : IReturn<StatsResponse>
         {
