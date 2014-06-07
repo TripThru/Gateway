@@ -110,7 +110,7 @@ namespace ServiceStack.TripThruGateway
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             client.Timeout = timeout;
-            GatewayService.TripResponse resp = client.Get<GatewayService.TripResponse>(dispatch);
+            GatewayService.TripResponse resp = client.Post<GatewayService.TripResponse>(dispatch);
             Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
             {
                 result = resp.ResultCode,
