@@ -19,8 +19,14 @@ namespace TripThruSsh
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22
             }},
-            {"vagrant", new Environment{
+            {"digital-ocean", new Environment{
                      host = "107.170.240.134",
+                     user = "tripservice",
+                     password = "Tr1PServ1CeSt@Ck",
+                     sshPort = 22
+            }},
+            {"vagrant", new Environment{
+                     host = "192.168.0.135",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22
