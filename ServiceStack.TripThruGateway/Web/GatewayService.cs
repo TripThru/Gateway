@@ -608,9 +608,9 @@ namespace ServiceStack.TripThruGateway
 
         #region Dispatch
 
-        [Api("Use POST or GET to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
-        [Route("/dispatch", "POST")]
-        public class Dispatch : IReturn<DispatchResponse>
+        [Api("Use POST to add trip to a fleet. Can be used in conjuction with /quotes")]
+        [Route("/trip", "POST")]
+        public class Trip : IReturn<TripResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string access_token { get; set; }
@@ -655,7 +655,7 @@ namespace ServiceStack.TripThruGateway
             public string PassengerId { get; set; }
         }
 
-        public class DispatchResponse
+        public class TripResponse
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
@@ -664,12 +664,12 @@ namespace ServiceStack.TripThruGateway
 
         public class DispatchService : Service
         {
-            public DispatchResponse Post(Dispatch request)
+            public TripResponse Post(Trip request)
             {
                 var accessToken = request.access_token;
-                var message = ValidateDispatch(request);
+                var message = ValidateTrip(request);
                 request.access_token = null;
-                DispatchResponse dispatchResponse = new DispatchResponse
+                TripResponse dispatchResponse = new TripResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
@@ -703,7 +703,7 @@ namespace ServiceStack.TripThruGateway
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            dispatchResponse = new DispatchResponse
+                            dispatchResponse = new TripResponse
                             {
                                 Result = "OK",
                                 ResultCode = response.result,
@@ -712,7 +712,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
-                            dispatchResponse = new DispatchResponse
+                            dispatchResponse = new TripResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result,
@@ -729,7 +729,7 @@ namespace ServiceStack.TripThruGateway
                             Logger.BeginRequest("DispatchTrip received from unknown user", request, request.TripId);
                             msg = "POST /dispatch called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
-                            dispatchResponse = new DispatchResponse
+                            dispatchResponse = new TripResponse
                             {
                                 Result = "Failed",
                                 ResultCode = Gateway.Result.AuthenticationError,
@@ -750,7 +750,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString(),
                         new Dictionary<string, string>() { { "TripID", request.TripId }, {"ClientId", clientId},{"Remote Ip", Request.RemoteIp} });
-                    dispatchResponse = new DispatchResponse
+                    dispatchResponse = new TripResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError,
@@ -769,7 +769,7 @@ namespace ServiceStack.TripThruGateway
                 return dispatchResponse;
             }
 
-            private string ValidateDispatch(Dispatch dispatch)
+            private string ValidateTrip(Trip dispatch)
             {
                 if (dispatch.access_token.IsNullOrEmpty())
                     return "Access Token is Required.";
@@ -1100,7 +1100,7 @@ namespace ServiceStack.TripThruGateway
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
-            public List<Trip> Trips { get; set; }
+            public List<TripThruCore.Trip> Trips { get; set; }
         }
 
         public class TripsService : Service
@@ -1128,7 +1128,7 @@ namespace ServiceStack.TripThruGateway
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            List<Trip> trips = response.trips;
+                            List<TripThruCore.Trip> trips = response.trips;
                             if (acct.Role != Storage.UserRole.admin)
                                 trips = trips.Where(
                                             t => t.OriginatingPartnerId == acct.ClientId ||
