@@ -87,7 +87,7 @@ namespace ServiceStack.TripThruGateway
                 };
             Logger.BeginRequest("DispatchTrip sent to " + name, request);
             //Logger.Log("RootURL: " + RootUrl);
-            GatewayService.Dispatch dispatch = new GatewayService.Dispatch
+            GatewayService.Trip dispatch = new GatewayService.Trip
             {
                 access_token = AccessToken,
                 PassengerId = request.passengerID,
@@ -110,7 +110,7 @@ namespace ServiceStack.TripThruGateway
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             client.Timeout = timeout;
-            GatewayService.DispatchResponse resp = client.Get<GatewayService.DispatchResponse>(dispatch);
+            GatewayService.TripResponse resp = client.Get<GatewayService.TripResponse>(dispatch);
             Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
             {
                 result = resp.ResultCode,

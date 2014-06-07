@@ -48,7 +48,7 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["vagrant"];
+            env = environments["digital-ocean"];
             localPath = @"Z:\Downloads\Gateway-75b335d0f347a4564d968261d166e5967345af6f\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;

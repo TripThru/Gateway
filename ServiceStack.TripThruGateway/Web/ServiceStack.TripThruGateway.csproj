@@ -148,6 +148,9 @@
     <Content Include="API.Sandbox\images\map.png" />
     <Content Include="API.Sandbox\images\money.png" />
     <Content Include="API.Sandbox\images\partners.png" />
+    <Content Include="API.Sandbox\images\report.png" />
+    <Content Include="API.Sandbox\images\settings.png" />
+    <Content Include="API.Sandbox\images\statistics.png" />
     <Content Include="App_Data\Geo-Location-Addresses.txt" />
     <Content Include="App_Data\Geo-Location-Names.txt" />
     <Content Include="App_Data\Geo-Routes.txt" />
