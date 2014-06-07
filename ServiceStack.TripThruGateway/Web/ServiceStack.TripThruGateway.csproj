@@ -58,18 +58,12 @@
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security">
-      <HintPath>..\packages\Npgsql.2.0.11\lib\Net40\Mono.Security.dll</HintPath>
-    </Reference>
     <Reference Include="MySql.Data, Version=6.6.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Users\DanielErnesto\Documents\Projects\ServiceStack.TripThru\packages\MySql.Data.6.6.4\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Npgsql">
-      <HintPath>..\packages\Npgsql.2.0.11\lib\Net40\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,10 +89,7 @@
     </Reference>
     <Reference Include="ServiceStack.OrmLite, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ServiceStack.OrmLite.PostgreSQL.3.9.71\lib\net35\ServiceStack.OrmLite.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.OrmLite.PostgreSQL">
-      <HintPath>..\packages\ServiceStack.OrmLite.PostgreSQL.3.9.71\lib\net35\ServiceStack.OrmLite.PostgreSQL.dll</HintPath>
+      <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\ServiceStack.OrmLite.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.OrmLite.Sqlite">
       <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\ServiceStack.OrmLite.Sqlite.dll</HintPath>
@@ -154,13 +145,9 @@
     <Content Include="API.Sandbox\css\bootstrap.css" />
     <Content Include="API.Sandbox\css\bootstrap.min.css" />
     <Content Include="API.Sandbox\css\tripthru.css" />
-    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="API.Sandbox\images\api.png" />
-    <Content Include="API.Sandbox\images\dashboard.png" />
-    <Content Include="API.Sandbox\images\settings.png" />
-    <Content Include="API.Sandbox\images\statistics.png" />
-    <Content Include="API.Sandbox\js\bootstrap.js" />
-    <Content Include="API.Sandbox\js\bootstrap.min.js" />
+    <Content Include="API.Sandbox\images\map.png" />
+    <Content Include="API.Sandbox\images\money.png" />
+    <Content Include="API.Sandbox\images\partners.png" />
     <Content Include="App_Data\Geo-Location-Addresses.txt" />
     <Content Include="App_Data\Geo-Location-Names.txt" />
     <Content Include="App_Data\Geo-Routes.txt" />
@@ -179,9 +166,6 @@
     <Content Include="packages.config" />
     <Content Include="API.Sandbox\css\bootstrap-theme.css.map" />
     <Content Include="API.Sandbox\css\bootstrap.css.map" />
-    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="API.Sandbox\fonts\glyphicons-halflings-regular.woff" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flipCounter-medium.png" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -255,7 +239,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>55867</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:17187</IISUrl>
+          <IISUrl>http://192.168.0.106:17187/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -1,8 +1,8 @@
-HomeUrl=http://192.168.0.135:8080/BookingsTuxor/
+HomeUrl=http://107.170.240.134:8080/BookingsTuxor/
 RelativeHomeUrl=/BookingsTuxor/index.php
-TripThruUrl=http://192.168.0.135/TripThru.TripThruGateway/
+TripThruUrl=http://107.170.240.134/TripThru.TripThruGateway/
 TripThruAccessToken=jaosid1201231
-PartnerUrl=http://192.168.0.135/TripThru.Tuxor/
+PartnerUrl=http://107.170.240.134/TripThru.Tuxor/
 PartnerAccessToken=luxor23noiasdn2123
 PartnerName=Tuxor
 PartnerId=tuxor@tripthru.com

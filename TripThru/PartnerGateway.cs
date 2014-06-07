@@ -86,8 +86,7 @@ namespace TripThruCore
                     FleetName = f.name,
                     PartnerId = this.ID,
                     PartnerName = this.name,
-                    Coverage = f.coverage,
-                    Drivers = f.drivers != null ? (int?)f.drivers.Count : null
+                    Coverage = f.coverage
                 });
             GetPartnerInfoResponse response = new GetPartnerInfoResponse(PartnerFleets, vehicleTypes);
             return response;

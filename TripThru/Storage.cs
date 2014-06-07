@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
@@ -11,28 +10,38 @@ namespace TripThruCore.Storage
 {
     public abstract class Storage
     {
-        readonly OrmLiteConnectionFactory _dbFactory;
-
         public enum UserRole { admin, partner, user }
+        public abstract void CreatePartnerAccount(PartnerAccount account);
+        public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
+        public abstract List<PartnerAccount> GetPartnerAccounts();
+        public abstract PartnerAccount GetPartnerAccountByUsername(string userName);
+        public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
+    }
 
-        protected Storage(OrmLiteConnectionFactory dbFactory)
+    public class SqliteStorage : Storage
+    {
+        OrmLiteConnectionFactory dbFactory;
+        public SqliteStorage(string sqliteFile)
         {
-            this._dbFactory = dbFactory;
+            dbFactory = new OrmLiteConnectionFactory(
+                sqliteFile, false, SqliteDialect.Provider);
+            using (var db = dbFactory.Open())
+            {
+                db.CreateTableIfNotExists<PartnerAccount>();
+            }
         }
-
-        public virtual void CreatePartnerAccount(PartnerAccount account)
+        public override void CreatePartnerAccount(PartnerAccount account)
         {
-            using (var db = _dbFactory.Open())
+            using (var db = dbFactory.Open())
             {
                 var acc = db.Select<PartnerAccount>(x => x.ClientId == account.ClientId);
                 if (acc.Count == 0)
                     db.Insert(account);
             }
         }
-
-        public virtual void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
+        public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
-            using (var db = _dbFactory.Open())
+            using (var db = dbFactory.Open())
             {
                 var acc = db.Select<PartnerAccount>(x => x.ClientId == account.ClientId);
                 if (acc.Count == 0)
@@ -43,51 +52,28 @@ namespace TripThruCore.Storage
                 db.Update(existingAccount);
             }
         }
-
-        public virtual List<PartnerAccount> GetPartnerAccounts()
+        public override List<PartnerAccount> GetPartnerAccounts()
         {
-            using (var db = _dbFactory.Open())
+            using (var db = dbFactory.Open())
             {
                 return db.Select<PartnerAccount>();
             }
         }
-
-        public virtual PartnerAccount GetPartnerAccountByUsername(string userName)
+        public override PartnerAccount GetPartnerAccountByUsername(string userName)
         {
-            using (var db = _dbFactory.Open())
+            using (var db = dbFactory.Open())
             {
                 var acc = db.Select<PartnerAccount>().Where(x => x.UserName == userName);
                 return acc.Count() == 1 ? acc.First() : null;
             }
         }
-
-        public virtual PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
-            using (var db = _dbFactory.Open())
+            using (var db = dbFactory.Open())
             {
                 var acc = db.Select<PartnerAccount>().Where(x => x.AccessToken == accessToken);
                 return acc.Count() == 1 ? acc.First() : null;
             }
-        }
-    }
-
-    public class SqliteStorage : Storage
-    {
-        public SqliteStorage(string sqliteFile) : base (new OrmLiteConnectionFactory(
-                sqliteFile, false, SqliteDialect.Provider))
-        {
-
-        }
-    }
-
-    public class PostgresSql : Storage
-    {
-        public PostgresSql(string server, string port, string database, string userId, string password)
-            : base(new OrmLiteConnectionFactory(
-                String.Format("Server={0};Port={1};Database={2};User Id={3};Password={4};", server, port,
-                database, userId, password), false, PostgreSqlDialect.Provider))
-        {
-            
         }
     }
 

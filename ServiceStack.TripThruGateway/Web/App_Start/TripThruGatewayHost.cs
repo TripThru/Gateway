@@ -43,12 +43,13 @@ namespace ServiceStack.TripThruGateway
 			JsConfig.EmitCamelCaseNames = true;
 
             Plugins.Add(new RazorFormat());
+            Plugins.Add(new CorsFeature());
             
 			SetConfig(new EndpointHostConfig
 				          {
                             GlobalResponseHeaders = {
 							    { "Access-Control-Allow-Origin", "*" },
-							    { "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE" },
+							    { "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" },
 							    { "Access-Control-Allow-Headers", "Content-Type" },
 						    },
                             DebugMode = true,
@@ -104,39 +105,8 @@ namespace ServiceStack.TripThruGateway
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
 
-                #if DEBUG
-                    StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
-                #else
-                    StorageManager.OpenStorage(new PostgresSql("localhost", "5432", "Users", "tripthru", "optimize"));
-                #endif
+                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
                 var accounts = StorageManager.GetPartnerAccounts();
-
-                //Authentication
-                var logins = new Dictionary<string, string>();
-                foreach (var account in accounts)
-                    if (account.UserName != null && account.Password != null)
-                        logins[account.UserName] = account.Password;
-
-                Plugins.Add(
-                    new AuthFeature(() => new AuthUserSession(),
-                            new IAuthProvider[] {
-                            new CustomCredentialsAuthProvider(
-                                logins,
-                                configuration.host.virtualPath
-                            )
-                        }
-                    )
-                    {
-                        HtmlRedirect = "~/login.html",
-                        ServiceRoutes = new Dictionary<Type, string[]> {
-                            { typeof(AuthService), new[]{"/auth", "/auth/{provider}"}},
-                            { typeof(AssignRolesService), new[]{"/assignroles"} },
-                            { typeof(UnAssignRolesService), new[]{"/unassignroles"} },
-                        },
-                        IncludeAssignRoleServices = false
-                    }
-                );
-
                 Logger.OpenLog("TripThruGateway");
                 GatewayService.gateway = new TripThru();
 

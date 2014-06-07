@@ -156,7 +156,6 @@ namespace TripThruCore
         }
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest r)
         {
-            Console.WriteLine("Enter GetPartnerInfo");
             if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
                 throw new Exception("Filters currently not supported");
             requests++;
@@ -165,11 +164,19 @@ namespace TripThruCore
             r.clientID = ID;
             foreach (Gateway p in partners.Values)
             {
-                Console.WriteLine("GetPartnerInfo : " + p.name);
-                var response = p.GetPartnerInfo(r);
-                if (response.result != Result.OK) continue;
-                fleets.AddRange(response.fleets);
-                vehicleTypes.AddRange(response.vehicleTypes);
+                try
+                {
+                    GetPartnerInfoResponse response = p.GetPartnerInfo(r);
+                    if (response.result == Result.OK)
+                    {
+                        fleets.AddRange(response.fleets);
+                        vehicleTypes.AddRange(response.vehicleTypes);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("Exception getting partner info from " + p.name + ": " + e.ToString());
+                }
             }
             GetPartnerInfoResponse resp = new GetPartnerInfoResponse(fleets, vehicleTypes);
             return resp;
@@ -661,7 +668,7 @@ namespace TripThruCore
         {
             List<Fleet> fleets = new List<Fleet>();
             List<Zone> coverage = o.coverage;
-            fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage, 0));
+            fleets.Add(new Fleet("TDispatch", "TDispatch", o.name, o.name, coverage));
             List<VehicleType> vehicleTypes = new List<VehicleType>();
 
             TDispatchIntegration partner = new TDispatchIntegration(tripThru, apiKey: o.api_key,

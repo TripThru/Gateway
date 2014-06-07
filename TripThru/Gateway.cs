@@ -232,18 +232,16 @@ namespace TripThruCore
         public string FleetId { get; set; }
         public string FleetName { get; set; }
         public List<Zone> Coverage { get; set; }
-        public int? Drivers { get; set; }
         public Fleet()
         {
         }
-        public Fleet(string partnerID, string partnerName, string fleetID, string fleetName, List<Zone> coverage, int? drivers)
+        public Fleet(string partnerID, string partnerName, string fleetID, string fleetName, List<Zone> coverage)
         {
             this.PartnerId = partnerID;
             this.PartnerName = partnerName;
             this.FleetId = fleetID;
             this.FleetName = fleetName;
             this.Coverage = coverage;
-            this.Drivers = drivers;
         }
 
         public override string ToString()
@@ -428,7 +426,6 @@ namespace TripThruCore
             public List<Zone> coverage { get; set; }
             public List<VehicleType> vehicleTypes { get; set; }
             public List<string> fleets { get; set; }
-            public Dictionary<string, Driver> Drivers { get; set; }
             // DispatchTrip must be supported.
             // GetPartnerInfo is not request as TripThru can provide some of these details
             public bool supportsQuoting;
@@ -436,13 +433,12 @@ namespace TripThruCore
             public bool supportsTracking;
             public bool supportsUpdateTripStatus;
             public bool supportsPayments;
-            public GetPartnerInfoRequest(string clientID, List<Zone> coverage = null, List<VehicleType> vehicleTypes = null, List<string> fleets = null, Dictionary<string, Driver> drivers = null)
+            public GetPartnerInfoRequest(string clientID, List<Zone> coverage = null, List<VehicleType> vehicleTypes = null, List<string> fleets = null)
             {
                 this.clientID = clientID;
                 this.coverage = coverage;
                 this.vehicleTypes = vehicleTypes;
                 this.fleets = fleets;
-                this.Drivers = drivers;
             }
             public override string ToString()
             {

@@ -97,7 +97,6 @@ namespace ServiceStack.TripThruGateway
 
         [Api("Use GET /stats")]
         [Route("/stats", "GET")]
-        //[Authenticate]
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Stats : IReturn<StatsResponse>
         {
@@ -282,15 +281,6 @@ namespace ServiceStack.TripThruGateway
                         
                     }
                 }
-                catch(Exception e)
-                {
-                    Logger.LogDebug("RegisterPartner=" + e.Message, e.ToString());
-                    partnerResponse = new PartnerResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.UnknownError
-                    };
-                }
                 finally
                 {
                     Logger.AddTag("RequestType", "RegisterPartner");
@@ -342,17 +332,18 @@ namespace ServiceStack.TripThruGateway
                 var accessToken = request.access_token;
                 var message = ValidatePartners(request);
                 request.access_token = null;
-                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
-                var partnersResponse = new PartnersResponse
+                PartnersResponse partnersResponse = new PartnersResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
                 var clientId = "none";
+
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
+                    if (accessToken != null && (acct != null || user != null))
                     {
                         if (acct == null)
                             acct = user;
@@ -385,6 +376,7 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
+                        
                         string msg;
                         if (message == null)
                         {

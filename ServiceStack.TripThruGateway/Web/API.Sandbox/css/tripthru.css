@@ -228,3 +228,14 @@ h2 {
         padding-bottom: 0;
     }
 }
+
+@media (max-width: 767px) {
+
+	.tripthru-image-wrapper {
+	  height: 12px !important;
+	}
+
+  img {
+    width: 12px !important;
+  }
+}

@@ -32,13 +32,13 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
             JsConfig.DateHandler = JsonDateHandler.ISO8601;
             JsConfig.EmitCamelCaseNames = true;
 
-            Plugins.Add(new RazorFormat());
+            Plugins.Add(new RazorFormat()); 
 
             SetConfig(new EndpointHostConfig
             {
                 GlobalResponseHeaders = {
 							    { "Access-Control-Allow-Origin", "*" },
-							    { "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE" },
+							    { "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" },
 							    { "Access-Control-Allow-Headers", "Content-Type" },
 						    },
                 DebugMode = true,
