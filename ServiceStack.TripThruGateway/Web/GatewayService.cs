@@ -201,7 +201,7 @@ namespace ServiceStack.TripThruGateway
         #region Partner
 
         [Api("Use POST to create a new Partner, GET to retrieve it and PUT to update name or callback url.")]
-        [Route("/partner", "GET, PUT, POST, DELETE", Summary = "Partners Service", Notes = "Register your network with TripThru")]
+        [Route("/partner", "POST", Summary = "Partners Service", Notes = "Register your network with TripThru")]
         public class PartnerRequest : IReturn<PartnerResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -221,11 +221,6 @@ namespace ServiceStack.TripThruGateway
 
         public class PartnerService : Service
         {
-            public PartnerResponse Get(PartnerRequest request) // this
-            {
-                return Post(request);
-            }
-
             public PartnerResponse Post(PartnerRequest request)
             {
                 var accessToken = request.access_token;
@@ -308,7 +303,7 @@ namespace ServiceStack.TripThruGateway
         #region Partners
 
         [Api("Use GET to get a list of partners or POST to create search for partners meeting the filter criteria.")]
-        [Route("/partners", "POST, GET")]
+        [Route("/partners", "GET")]
         public class Partners : IReturn<PartnersResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -614,7 +609,7 @@ namespace ServiceStack.TripThruGateway
         #region Dispatch
 
         [Api("Use POST or GET to dispatch a trip to a fleet. Can be used in conjuction with /quotes")]
-        [Route("/dispatch", "POST, GET")]
+        [Route("/dispatch", "POST")]
         public class Dispatch : IReturn<DispatchResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -669,11 +664,6 @@ namespace ServiceStack.TripThruGateway
 
         public class DispatchService : Service
         {
-            public DispatchResponse Get(Dispatch request)
-            {
-                return Post(request);
-            }
-
             public DispatchResponse Post(Dispatch request)
             {
                 var accessToken = request.access_token;
