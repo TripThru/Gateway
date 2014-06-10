@@ -606,7 +606,7 @@ namespace ServiceStack.TripThruGateway
 
         #endregion
 
-        #region Dispatch
+        #region Trip
 
         [Api("Use POST to add trip to a fleet. Can be used in conjuction with /quotes")]
         [Route("/trip", "POST")]
@@ -1118,12 +1118,14 @@ namespace ServiceStack.TripThruGateway
                 };
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
                 try
                 {
                     if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
                     {
                         if (acct == null)
                             acct = user;
+                        clientId = acct.ClientId;
                         var response = gateway.GetTrips(new Gateway.GetTripsRequest(null, request.Status));
 
                         if (response.result == Gateway.Result.OK)
@@ -1170,7 +1172,7 @@ namespace ServiceStack.TripThruGateway
                 finally
                 {
                     Logger.AddTag("RequestType", "GetTrips");
-                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetOriginatingId(clientId);
                     Logger.SetServicingId(gateway.ID);
                     Logger.EndRequest(tripsResponse);
                     Logger.Enable();
@@ -1240,5 +1242,179 @@ namespace ServiceStack.TripThruGateway
 
         #endregion
 
+        #region Driver
+        [Api("Use POST /driver")]
+        [Route("/driver", "POST")]
+        public class Driver : IReturn<DriverResponse>
+        {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiMember(Name = "Name", Description = "The driver's name.", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string Name { get; set; }
+            [ApiMember(Name = "Id", Description = "The driver's identifier.", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string Id { get; set; }
+            [ApiMember(Name = "NetworkId", Description = "Id of the network the driver belongs to", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string NetworkId { get; set; }
+            [ApiMember(Name = "FleetId", Description = "Id of the fleet the driver belongs to.", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string FleetId { get; set; }
+            public List<Shift> ShiftSchedule { get; set; }
+            [ApiMember(Name = "ShiftStartLocationLat", Description = "GPS coordinate latitude of where the driver's shift starts. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double ShiftStartLocationLat { get; set; }
+            [ApiMember(Name = "ShiftStartLocationLng", Description = "GPS coordinate longitude of where the driver's shift starts. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double ShiftStartLocationLng { get; set; }
+            [ApiMember(Name = "ShiftStartTime", Description = "Time that the shift will start. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
+            public DateTime ShiftStartTime { get; set; }
+            [ApiMember(Name = "ShiftEndLocationLat", Description = "GPS coordinate latitude of where the driver's shift ends. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double ShiftEndLocationLat { get; set; }
+            [ApiMember(Name = "ShiftEndLocationLng", Description = "GPS coordinate longitude of where the driver's shift ends. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double ShiftEndLocationLng { get; set; }
+            [ApiMember(Name = "ShiftEndTime", Description = "Time that the shift will end. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
+            public DateTime ShiftEndTime { get; set; }
+        }
+
+        public class DriverResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+        }
+
+        public class DriverService : Service
+        {
+            public DriverResponse Post(Driver request)
+            {
+                var accessToken = request.access_token;
+                request.access_token = null;
+                Logger.BeginRequest("GetDriver received", request);
+                DriverResponse driverResponse = new DriverResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
+                try
+                {
+                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
+                    {
+                        driverResponse = new DriverResponse
+                        {
+                            Result = "OK",
+                            ResultCode = Gateway.Result.OK
+                        };
+                    }
+                    else
+                    {
+                        driverResponse = new DriverResponse
+                        {
+                            Result = "Failed",
+                            ResultCode = Gateway.Result.AuthenticationError
+                        };
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("GetDriver=" + e.Message, e.ToString());
+                    driverResponse = new DriverResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError
+                    };
+                }
+                finally
+                {
+                    Logger.AddTag("RequestType", "GetDriver");
+                    Logger.SetOriginatingId(clientId);
+                    Logger.SetServicingId(gateway.ID);
+                    Logger.EndRequest(driverResponse);
+                }
+                return driverResponse;
+            }
+
+        }
+
+        #endregion
+
+        #region DriverStatus
+
+        [Api("Use POST /driverstatus")]
+        [Route("/driverstatus", "POST")]
+        public class DriverStatus : IReturn<DriverStatusResponse>
+        {
+            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public string access_token { get; set; }
+            [ApiAllowableValues("Status", typeof(TripThruCore.DriverStatus))]
+            [ApiMember(Name = "Status", Description = "Driver status code", ParameterType = "query", DataType = "Status", IsRequired = true, Verb = "POST")]
+            public TripThruCore.DriverStatus Status { get; set; }
+            [ApiMember(Name = "LocationLat", Description = "GPS coordinate latitude of where the driver is. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double LocationLat { get; set; }
+            [ApiMember(Name = "LocationLng", Description = "GPS coordinate longitude of where the driver is. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            public double LocationLng { get; set; }
+            [ApiMember(Name = "TripId", Description = "Id of trip currently served by the driver", ParameterType = "query", DataType = "string", IsRequired = false)]
+            public string TripId { get; set; }
+        }
+
+        public class DriverStatusResponse
+        {
+            public string Result { get; set; }
+            public Gateway.Result ResultCode { get; set; }
+        }
+
+        public class DriverStatusService : Service
+        {
+            public DriverStatusResponse Post(DriverStatus request)
+            {
+                var accessToken = request.access_token;
+                request.access_token = null;
+                Logger.BeginRequest("GetDriverStatus received", request);
+                DriverStatusResponse driverStatusResponse = new DriverStatusResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
+                PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
+                try
+                {
+                    if (accessToken != null && acct != null || (user != null && user.Role == Storage.UserRole.admin))
+                    {
+                        driverStatusResponse = new DriverStatusResponse
+                        {
+                            Result = "OK",
+                            ResultCode = Gateway.Result.OK
+                        };
+                    }
+                    else
+                    {
+                        driverStatusResponse = new DriverStatusResponse
+                        {
+                            Result = "Failed",
+                            ResultCode = Gateway.Result.AuthenticationError
+                        };
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("GetDriverStatus=" + e.Message, e.ToString());
+                    driverStatusResponse = new DriverStatusResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError
+                    };
+                }
+                finally
+                {
+                    Logger.AddTag("RequestType", "GetDriverStatus");
+                    Logger.SetOriginatingId(clientId);
+                    Logger.SetServicingId(gateway.ID);
+                    Logger.EndRequest(driverStatusResponse);
+                }
+                return driverStatusResponse;
+            }
+
+        }
+
+        #endregion
     }
 }

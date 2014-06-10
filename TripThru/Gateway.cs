@@ -149,6 +149,13 @@ namespace TripThruCore
         }
     }
 
+    public class Shift
+    {
+        public DateTime DateTime { get; set; }
+        public Location Location { get; set; }
+    }
+
+    public enum DriverStatus { Occupied, Enroute, Idle, OffDuty };
 
     public class Trip
     {
