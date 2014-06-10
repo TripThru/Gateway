@@ -201,7 +201,7 @@ namespace ServiceStack.TripThruGateway
         #region Partner
 
         [Api("Use POST to create a new Partner, GET to retrieve it and PUT to update name or callback url.")]
-        [Route("/partner", "POST", Summary = "Partners Service", Notes = "Register your network with TripThru")]
+        [Route("/partner", "POST", Summary = "Networks Service", Notes = "Register your network with TripThru")]
         public class PartnerRequest : IReturn<PartnerResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -300,17 +300,17 @@ namespace ServiceStack.TripThruGateway
 
         #endregion
 
-        #region Partners
+        #region Networks
 
         [Api("Use GET to get a list of partners or POST to create search for partners meeting the filter criteria.")]
-        [Route("/partners", "GET")]
-        public class Partners : IReturn<PartnersResponse>
+        [Route("/networks", "GET")]
+        public class Networks : IReturn<NetworksResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string access_token { get; set; }
         }
 
-        public class PartnersResponse
+        public class NetworksResponse
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
@@ -319,15 +319,15 @@ namespace ServiceStack.TripThruGateway
             public List<VehicleType> VehicleTypes { get; set; }
         }
 
-        public class PartnersService : Service
+        public class NetworksService : Service
         {
 
-            public PartnersResponse Get(Partners request)
+            public NetworksResponse Get(Networks request)
             {
                 var accessToken = request.access_token;
                 var message = ValidatePartners(request);
                 request.access_token = null;
-                PartnersResponse partnersResponse = new PartnersResponse
+                NetworksResponse networksResponse = new NetworksResponse
                 {
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
@@ -350,7 +350,7 @@ namespace ServiceStack.TripThruGateway
 
                         if (response.result == Gateway.Result.OK)
                         {
-                            partnersResponse = new PartnersResponse
+                            networksResponse = new NetworksResponse
                             {
                                 Result = "OK",
                                 ResultCode = Gateway.Result.OK,
@@ -361,7 +361,7 @@ namespace ServiceStack.TripThruGateway
                         }
                         else
                         {
-                            partnersResponse = new PartnersResponse
+                            networksResponse = new NetworksResponse
                             {
                                 Result = "Failed",
                                 ResultCode = response.result,
@@ -376,9 +376,9 @@ namespace ServiceStack.TripThruGateway
                         if (message == null)
                         {
                             Logger.BeginRequest("GetPartnerInfo received from unknown user", request);
-                            msg = "GET /partners called with invalid access token, ip: " + Request.RemoteIp +
+                            msg = "GET /Networks called with invalid access token, ip: " + Request.RemoteIp +
                                   ", Response = Authentication failed";
-                            partnersResponse = new PartnersResponse
+                            networksResponse = new NetworksResponse
                             {
                                 Result = "Failed",
                                 ResultCode = Gateway.Result.AuthenticationError,
@@ -389,7 +389,7 @@ namespace ServiceStack.TripThruGateway
                         {
                             Logger.BeginRequest("GetPartnerInfo received with wrong parameters", request);
                             msg = message;
-                            partnersResponse.Message = msg;
+                            networksResponse.Message = msg;
                         }
                         Logger.Log(msg);
                         
@@ -398,7 +398,7 @@ namespace ServiceStack.TripThruGateway
                 catch (Exception e)
                 {
                     Logger.LogDebug("GetPartnerInfo=" + e.Message, e.ToString());
-                    partnersResponse = new PartnersResponse
+                    networksResponse = new NetworksResponse
                     {
                         Result = "Failed",
                         ResultCode = Gateway.Result.UnknownError
@@ -409,14 +409,14 @@ namespace ServiceStack.TripThruGateway
                     Logger.AddTag("RequestType", "GetPartnerInfo");
                     Logger.AddTag("ClientId", clientId);
                     Logger.SetOriginatingId(acct.ClientId);
-                    Logger.EndRequest(partnersResponse);
+                    Logger.EndRequest(networksResponse);
                 }
-                return partnersResponse;
+                return networksResponse;
             }
 
-            private string ValidatePartners(Partners partners)
+            private string ValidatePartners(Networks networks)
             {
-                if (partners.access_token.IsNullOrEmpty())
+                if (networks.access_token.IsNullOrEmpty())
                     return "Access Token is Required";
                 return null;
             }

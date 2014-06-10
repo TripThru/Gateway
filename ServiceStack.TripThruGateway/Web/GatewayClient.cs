@@ -62,7 +62,7 @@ namespace ServiceStack.TripThruGateway
 
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             client.Timeout = timeout;
-            GatewayService.PartnersResponse resp = client.Get<GatewayService.PartnersResponse>(new GatewayService.Partners
+            GatewayService.NetworksResponse resp = client.Get<GatewayService.NetworksResponse>(new GatewayService.Networks
             {
                 access_token = AccessToken,
             });

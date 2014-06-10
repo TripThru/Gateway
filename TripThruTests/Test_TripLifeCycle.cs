@@ -163,7 +163,7 @@ namespace Tests
             var tripthru = new TripThru(enableTDispatch: false);
             TimeSpan maxLateness = new TimeSpan(0, 25, 0);
             double locationVerificationTolerance = 4;
-            string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
+            string[] filePaths = Directory.GetFiles("../../Test_Configurations/Networks/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
             List<Partner> partners = new List<Partner>();
