@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Odbc;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using Utils;
@@ -201,7 +202,7 @@ namespace ServiceStack.TripThruGateway
         #region Partner
 
         [Api("Use POST to create a new Partner, GET to retrieve it and PUT to update name or callback url.")]
-        [Route("/partner", "POST", Summary = "Networks Service", Notes = "Register your network with TripThru")]
+        [Route("/partner", "POST, OPTIONS", Summary = "Networks Service", Notes = "Register your network with TripThru")]
         public class PartnerRequest : IReturn<PartnerResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -286,6 +287,11 @@ namespace ServiceStack.TripThruGateway
                 return partnerResponse;
             }
 
+            public PartnerResponse Options(PartnerRequest request)
+            {
+                return new PartnerResponse();
+            }
+
             private string ValidatePartner(PartnerRequest request)
             {
                 if (request.access_token.IsNullOrEmpty())
@@ -303,7 +309,7 @@ namespace ServiceStack.TripThruGateway
         #region Networks
 
         [Api("Use GET to get a list of partners or POST to create search for partners meeting the filter criteria.")]
-        [Route("/networks", "GET")]
+        [Route("/networks", "GET,OPTIONS")]
         public class Networks : IReturn<NetworksResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -414,6 +420,12 @@ namespace ServiceStack.TripThruGateway
                 return networksResponse;
             }
 
+
+            public NetworksResponse Options(Networks request)
+            {
+                return new NetworksResponse();
+            }
+
             private string ValidatePartners(Networks networks)
             {
                 if (networks.access_token.IsNullOrEmpty())
@@ -427,7 +439,7 @@ namespace ServiceStack.TripThruGateway
         #region Quotes
 
         [Api(Description = "Use GET to get quotes for a possible trip.")]
-        [Route("/quotes", Verbs = "GET", Summary = @"get quotes for a possible trip", Notes = "The standard usage is to first get quotes for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
+        [Route("/quotes", Verbs = "GET, OPTIONS", Summary = @"get quotes for a possible trip", Notes = "The standard usage is to first get quotes for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
         public class Quotes : IReturn<QuotesResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -585,6 +597,11 @@ namespace ServiceStack.TripThruGateway
                 return quotesResponse;
             }
 
+            public QuotesResponse Options(Quotes request)
+            {
+                return new QuotesResponse();
+            }
+
             private string ValidateQuote(Quotes quote)
             {
                 if (quote.access_token.IsNullOrEmpty())
@@ -609,7 +626,7 @@ namespace ServiceStack.TripThruGateway
         #region Trip
 
         [Api("Use POST to add trip to a fleet. Can be used in conjuction with /quotes")]
-        [Route("/trip", "POST")]
+        [Route("/trip", "POST, OPTIONS")]
         public class Trip : IReturn<TripResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -769,6 +786,11 @@ namespace ServiceStack.TripThruGateway
                 return dispatchResponse;
             }
 
+            public TripResponse Options(Trip request)
+            {
+                return new TripResponse();
+            }
+
             private string ValidateTrip(Trip dispatch)
             {
                 if (dispatch.access_token.IsNullOrEmpty())
@@ -794,7 +816,7 @@ namespace ServiceStack.TripThruGateway
         #region TripStatus
 
         [Api("Use GET /tripstatus to get the trip status and PUT /tripstatus to update a trip status")]
-        [Route("/tripstatus", "GET, PUT")]
+        [Route("/tripstatus", "GET, PUT, OPTIONS")]
         public class TripStatus : IReturn<TripStatusResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -1070,6 +1092,11 @@ namespace ServiceStack.TripThruGateway
                 return tripStatusResponse;
             }
 
+            public TripStatusResponse Options(TripStatus request)
+            {
+                return new TripStatusResponse();
+            }
+
             private string ValidateTripStatus(TripStatus tripStatus)
             {
                 if (tripStatus.access_token.IsNullOrEmpty())
@@ -1086,7 +1113,7 @@ namespace ServiceStack.TripThruGateway
         #region Trips
 
         [Api("Use GET /trips")]
-        [Route("/trips", "GET")]
+        [Route("/trips", "GET, OPTIONS")]
         public class Trips : IReturn<TripsResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -1180,6 +1207,10 @@ namespace ServiceStack.TripThruGateway
                 return tripsResponse;
             }
 
+            public TripResponse Options(Trips request)
+            {
+                return new TripResponse();
+            }
         }
 
         #endregion
@@ -1244,7 +1275,7 @@ namespace ServiceStack.TripThruGateway
 
         #region Driver
         [Api("Use POST /driver")]
-        [Route("/driver", "POST")]
+        [Route("/driver", "POST, OPTIONS")]
         public class Driver : IReturn<DriverResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -1331,6 +1362,11 @@ namespace ServiceStack.TripThruGateway
                 return driverResponse;
             }
 
+            public DriverResponse Options(Driver request)
+            {
+                return new DriverResponse();
+            }
+
         }
 
         #endregion
@@ -1338,7 +1374,7 @@ namespace ServiceStack.TripThruGateway
         #region DriverStatus
 
         [Api("Use POST /driverstatus")]
-        [Route("/driverstatus", "POST")]
+        [Route("/driverstatus", "POST, OPTIONS")]
         public class DriverStatus : IReturn<DriverStatusResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
@@ -1411,6 +1447,11 @@ namespace ServiceStack.TripThruGateway
                     Logger.EndRequest(driverStatusResponse);
                 }
                 return driverStatusResponse;
+            }
+
+            public DriverStatusResponse Options(DriverStatus request)
+            {
+                return new DriverStatusResponse();
             }
 
         }
