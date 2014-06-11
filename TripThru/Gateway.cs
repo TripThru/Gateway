@@ -10,8 +10,12 @@ using ServiceStack.Text;
 using System.Runtime.Serialization;
 using ServiceStack.ServiceModel;
 using TripThruCore.Storage;
+using System.Collections.Concurrent;
 namespace TripThruCore
 {
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization.Attributes;
+    using MongoDB.Driver;
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }
@@ -179,9 +183,18 @@ namespace TripThruCore
         public Status? Status { get; set; }
         public DateTime? ETA { get; set; } // in minutes;
         public double? Price { get; set; }
-        public double? Distance { get; set; }
+        public TimeSpan OccupiedTime { get; set; }
+        public TimeSpan EnrouteTime { get; set; }
+        public TimeSpan IdleTime { get; set; }
+        public double? OccupiedDistance { get; set; }
+        public double? EnrouteDistance { get; set; }
+
         public double? DriverRouteDuration { get; set; }
         private DateTime Creation { get; set; }
+        public DateTime? LastUpdate { get; set; }
+        public DateTime? LastStatusChange;
+        public bool ServiceGoalMet { get; set; }
+        public TimeSpan Lateness { get; set; }
 
         private List<Location> _historyEnrouteList = new List<Location>();
         private List<Location> _historyPickUpList = new List<Location>();
@@ -206,7 +219,7 @@ namespace TripThruCore
         public List<Location> GetPickUpLocatinList()
         {
             return _historyPickUpList;
-        } 
+        }
 
         public void Update(Trip trip)
         {
@@ -218,7 +231,8 @@ namespace TripThruCore
             this.Status = trip.Status;
             this.ETA = trip.ETA;
             this.Price = trip.Price;
-            this.Distance = trip.Distance;
+            this.OccupiedDistance = trip.OccupiedDistance;
+
             this.DriverRouteDuration = trip.DriverRouteDuration;
         }
 
@@ -872,13 +886,54 @@ namespace TripThruCore
     {
         public class ActiveTrips
         {
-            private RedisDictionary<string, Trip> dict;
+            private ConcurrentDictionary<string, Trip> dict;
             public bool IsEmpty { get { return dict.IsEmpty; } }
             public int Count { get { return dict.Count; } }
             public IEnumerable<Trip> Values { get { return dict.Values; } }
-            public ActiveTrips(RedisClient redisClient, string id)
+
+            private MongoCollection<Trip> mongo;
+            private string RemoveSpecialCharacters(string input)
             {
-                dict = new RedisDictionary<string, Trip>(redisClient, id);
+
+                return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
+            }
+            public ActiveTrips(string id)
+            {
+
+
+                //if (!MongoDB.Bson.Serialization.BsonClassMap.IsClassMapRegistered(typeof(Trip)))
+                {
+                    MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+                    {
+                        cm.AutoMap();
+                        foreach (var mm in cm.AllMemberMaps)
+                            mm.SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                        cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                        cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
+
+                    });
+                }
+                var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
+                var database = server.GetDatabase(RemoveSpecialCharacters(id));
+                mongo = database.GetCollection<Trip>("trips");
+                dict = new ConcurrentDictionary<string, Trip>();
                 dict.Clear();
 
             }
@@ -888,17 +943,59 @@ namespace TripThruCore
             }
             public void Add(string id, Trip trip)
             {
-                dict.Add(id, trip);
+                InsertTrip(trip);
+                dict.TryAdd(id, trip);
+            }
+
+            private void InsertTrip(Trip trip)
+            {
+                trip.LastUpdate = DateTime.UtcNow;
+                mongo.Insert(trip);
             }
             public void Remove(string id)
             {
                 Logger.Log("Removing active trip " + id);
-                dict.Remove(id);
+
+                Trip trip;
+                dict.TryRemove(id, out trip);
+                SaveTrip(trip);
             }
+
+            public void SaveTrip(Trip trip)
+            {
+                trip.LastUpdate = DateTime.UtcNow;
+                mongo.Save(trip);
+            }
+
+
             public Trip this[string id]
             {
                 get { return dict[id]; }
             }
+            public void UpdateTrip(Trip trip)
+            {
+                if (ContainsKey(trip.Id))
+                {
+                    this[trip.Id].FleetId = trip.FleetId;
+                    this[trip.Id].FleetName = trip.FleetName;
+                    this[trip.Id].DriverId = trip.DriverId;
+                    this[trip.Id].DriverName = trip.DriverName;
+                    this[trip.Id].ETA = trip.ETA;
+                    this[trip.Id].Price = trip.Price;
+                    this[trip.Id].OccupiedDistance = trip.OccupiedDistance;
+                    if (trip.Status == Status.PickedUp)
+                    {
+                        this[trip.Id].OccupiedTime = DateTime.UtcNow - (DateTime)this[trip.Id].LastStatusChange;
+                    }
+                    if (trip.Status != this[trip.Id].Status)
+                    {
+                        this[trip.Id].Status = trip.Status;
+                        this[trip.Id].LastStatusChange = DateTime.UtcNow;
+                    }
+                    SaveTrip(this[trip.Id]);
+                }
+            }
+
         }
 
         public ActiveTrips activeTrips;
@@ -944,7 +1041,8 @@ namespace TripThruCore
             : base(ID, name)
         {
             JsConfig.AssumeUtc = true;
-            activeTrips = new ActiveTrips(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => activeTrips));
+
+            activeTrips = new ActiveTrips(ID);
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
@@ -952,7 +1050,8 @@ namespace TripThruCore
         {
             return MakeRejectRegisterPartnerResponse();
         }
-        protected RegisterPartnerResponse MakeRejectRegisterPartnerResponse(){
+        protected RegisterPartnerResponse MakeRejectRegisterPartnerResponse()
+        {
             RegisterPartnerResponse response;
             rejects++;
             response = new RegisterPartnerResponse(result: Result.Rejected);
@@ -960,13 +1059,31 @@ namespace TripThruCore
         }
         override public DispatchTripResponse DispatchTrip(DispatchTripRequest request)
         {
-            return MakeRejectDispatchResponse();
+
+            throw new Exception("not supported");
         }
-        protected DispatchTripResponse MakeRejectDispatchResponse()
+        protected DispatchTripResponse MakeRejectDispatchResponse(DispatchTripRequest r, Gateway client, Gateway partner)
         {
             DispatchTripResponse response;
             rejects++;
             response = new DispatchTripResponse(result: Result.Rejected);
+
+            var trip = new Trip
+            {
+                Id = r.tripID,
+                OriginatingPartnerName = client.name,
+                OriginatingPartnerId = client.ID,
+                ServicingPartnerName = partner == null ? null : partner.name,
+                ServicingPartnerId = partner == null ? null : partner.ID,
+                Status = Status.Rejected,
+                PickupLocation = r.pickupLocation,
+                PickupTime = r.pickupTime,
+                DropoffLocation = r.dropoffLocation,
+                PassengerName = r.passengerName,
+                VehicleType = r.vehicleType
+            };
+            activeTrips.SaveTrip(trip); // Hack: save trip should be moved somewhere else.
+
             return response;
         }
         public void DeactivateTripAndUpdateStats(string tripID, Status status, double? price = null, double? distance = null)
@@ -975,7 +1092,7 @@ namespace TripThruCore
                 return;
             Logger.Log("Deactivating trip " + tripID + " from " + name);
 
-            activeTrips.Remove(tripID);
+
             switch (status)
             {
                 case Status.Complete:
@@ -983,29 +1100,18 @@ namespace TripThruCore
                         completes++;
                         fare += (double)price;
                         this.distance += (double)distance;
+                        activeTrips[tripID].OccupiedTime = DateTime.UtcNow - (DateTime)activeTrips[tripID].LastStatusChange;
+                        activeTrips[tripID].OccupiedDistance = distance;
                         break;
                     }
                 case Status.Cancelled: cancels++; break;
                 case Status.Rejected: rejects++; break;
             }
+            activeTrips.Remove(tripID);
             if (garbageCleanup != null)
                 garbageCleanup.Add(tripID);
         }
 
-        public void UpdateActiveTrip(Trip trip)
-        {
-            if (activeTrips.ContainsKey(trip.Id))
-            {
-                activeTrips[trip.Id].FleetId = trip.FleetId;
-                activeTrips[trip.Id].FleetName = trip.FleetName;
-                activeTrips[trip.Id].DriverId = trip.DriverId;
-                activeTrips[trip.Id].DriverName = trip.DriverName;
-                activeTrips[trip.Id].Status = trip.Status;
-                activeTrips[trip.Id].ETA = trip.ETA;
-                activeTrips[trip.Id].Price = trip.Price;
-                activeTrips[trip.Id].Distance = trip.Distance;
-            }
-        }
         public void LogStats()
         {
             if ((DateTime.UtcNow - lastGetGatewayStats) > getGatewayStatsInterval)

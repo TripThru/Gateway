@@ -207,10 +207,10 @@ namespace TripThruCore
                         MakeTripAndAddItToActive(r, partner);
                 }
                 else
-                    response = MakeRejectDispatchResponse();
+                    response = MakeRejectDispatchResponse(r, partners[r.clientID], partner);
             }
             else
-                response = MakeRejectDispatchResponse();
+                response = MakeRejectDispatchResponse(r, partners[r.clientID], null);
             return response;
         }
 
@@ -470,6 +470,7 @@ namespace TripThruCore
                 result = Result.NotFound
             };
             if (activeTrips.ContainsKey(request.tripID))
+            {
                 getRouteTripResponse = new GetRouteTripResponse
                 {
                     result = Result.OK,
@@ -478,12 +479,14 @@ namespace TripThruCore
                     HistoryEnrouteList = activeTrips[request.tripID].GetEnrouteLocatinList(),
                     HistoryPickUpList = activeTrips[request.tripID].GetPickUpLocatinList()
                 };
+            }
             return getRouteTripResponse;
         }
 
         private void UpdateActiveTripWithNewTripStatus(GetTripStatusRequest r, GetTripStatusResponse response)
         {
-            UpdateActiveTrip(new Trip
+
+            Trip trip = new Trip
             {
                 Id = r.tripID,
                 FleetId = response.fleetID,
@@ -493,9 +496,13 @@ namespace TripThruCore
                 Status = response.status,
                 ETA = response.ETA,
                 Price = response.price,
-                Distance = response.distance,
+
                 DriverRouteDuration = response.driverRouteDuration
-            });
+
+            };
+            if (response.status == Status.PickedUp)
+                trip.EnrouteDistance = response.distance;
+            activeTrips.UpdateTrip(trip);
         }
 
         private void MakeGetTripStatusResponse(GetTripStatusRequest r, Gateway partner, GetTripStatusResponse response)
