@@ -173,9 +173,22 @@ namespace TripThruCore
         public string DriverId { get; set; }
         public string DriverName { get; set; }
         public string PassengerName { get; set; }
-        public Location DriverLocation { get; set; } // no get/set so servicestack will ignore during serialization
-        public Location PickupLocation { get; set; } // no get/set so servicestack will ignore during serialization
-        public Location DropoffLocation { get; set; }  // no get/set so servicestack will ignore during serialization
+        public Location DriverLocation { get; set; }
+        private Location _pickupLocation;
+        public double[] loc;
+        public Location PickupLocation 
+        { 
+            get
+            {
+                return this._pickupLocation;
+            }
+            set
+            {
+                this._pickupLocation = value;
+                this.loc = new double[]{value.Lng, value.Lat};
+            } 
+        }
+        public Location DropoffLocation { get; set; }
         public Location DriverInitiaLocation { get; set; }
         public DateTime? PickupTime { get; set; }
         public DateTime? DropoffTime { get; set; }
@@ -188,7 +201,6 @@ namespace TripThruCore
         public TimeSpan IdleTime { get; set; }
         public double? OccupiedDistance { get; set; }
         public double? EnrouteDistance { get; set; }
-
         public double? DriverRouteDuration { get; set; }
         private DateTime Creation { get; set; }
         public DateTime? LastUpdate { get; set; }
@@ -927,7 +939,7 @@ namespace TripThruCore
                         cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
                         cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
                         cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
-
+                        cm.GetMemberMap(c => c.loc);
                     });
                 }
                 var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
