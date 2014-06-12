@@ -434,7 +434,7 @@ namespace Utils
             return "(ID = " + ID + ", Name = " + name + ")";
         }
 
-        static long nextID = 0;
+        static public long nextID = 0;
         static public string GenerateUniqueID() { nextID++; return nextID.ToString(); }
         static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
 

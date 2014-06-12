@@ -17,6 +17,8 @@ namespace ServiceStack.TripThruPartnerGateway
 	using System.Collections.Generic;
 	using ServiceStack.ServiceHost;
 	using ServiceStack.ServiceInterface;
+    using MongoDB.Bson;
+    using MongoDB.Driver;
 
     public class InitPartner : IReturn<InitPartnerResponse>
     {

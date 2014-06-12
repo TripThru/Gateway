@@ -371,6 +371,8 @@ namespace TripThruCore
                     if (!clientIdByAccessToken.ContainsKey(account.AccessToken))
                         clientIdByAccessToken[account.AccessToken] = account.ClientId;
                 }
+
+            PartnerTrip.nextID = base.activeTrips.lastID;
         }
         public override void Log()
         {

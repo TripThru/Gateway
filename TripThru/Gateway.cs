@@ -16,6 +16,9 @@ namespace TripThruCore
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
     using MongoDB.Driver;
+    using MongoDB.Driver.Builders;
+    using MongoDB.Driver.GridFS;
+    using MongoDB.Driver.Linq;
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }
@@ -108,6 +111,8 @@ namespace TripThruCore
         }
 
     }
+
+    [BsonIgnoreExtraElements]
     public class Location
     {
         public Double Lat { get; set; }
@@ -902,6 +907,7 @@ namespace TripThruCore
             public bool IsEmpty { get { return dict.IsEmpty; } }
             public int Count { get { return dict.Count; } }
             public IEnumerable<Trip> Values { get { return dict.Values; } }
+            public long lastID { get; set; }
 
             private MongoCollection<Trip> mongo;
             private string RemoveSpecialCharacters(string input)
@@ -947,7 +953,21 @@ namespace TripThruCore
                 mongo = database.GetCollection<Trip>("trips");
                 dict = new ConcurrentDictionary<string, Trip>();
                 dict.Clear();
-
+                Trip lastTrip = null;
+                var lastTrips = mongo.AsQueryable<Trip>()
+                    .Where(c => c.Id.Contains(id)).OrderByDescending(c => c.LastUpdate).ThenByDescending(c => c.Id);
+                //To do: Find a proper way to query the last Id
+                long maxId = 0;
+                var limit = 30;
+                foreach (var trip in lastTrips)
+                {
+                    var tripId = long.Parse(trip.Id.SplitOnFirst('@')[0]);
+                    if (tripId > maxId)
+                        maxId = tripId;
+                    if (--limit == 0)
+                        break;
+                }
+                this.lastID = maxId;
             }
             public bool ContainsKey(string id)
             {
