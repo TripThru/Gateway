@@ -1132,7 +1132,8 @@ namespace TripThruCore
                         completes++;
                         fare += (double)price;
                         this.distance += (double)distance;
-                        activeTrips[tripID].OccupiedTime = DateTime.UtcNow - (DateTime)activeTrips[tripID].LastStatusChange;
+                        if (activeTrips[tripID].LastStatusChange != null)
+                            activeTrips[tripID].OccupiedTime = DateTime.UtcNow - (DateTime)activeTrips[tripID].LastStatusChange;
                         activeTrips[tripID].OccupiedDistance = distance;
                         break;
                     }
