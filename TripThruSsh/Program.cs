@@ -26,7 +26,7 @@ namespace TripThruSsh
                      sshPort = 22
             }},
             {"vagrant", new Environment{
-                     host = "192.168.0.135",
+                     host = "192.168.0.125",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
                      sshPort = 22
@@ -48,8 +48,8 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["digital-ocean"];
-            localPath = @"Z:\WindowsDev\Gateway\";
+            env = environments["vagrant"];
+            localPath = @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;

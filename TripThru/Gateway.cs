@@ -1006,28 +1006,27 @@ namespace TripThruCore
             }
             public void UpdateTrip(Trip trip)
             {
-                if (ContainsKey(trip.Id))
+                if (!ContainsKey(trip.Id)) return;
+                this[trip.Id].FleetId = trip.FleetId;
+                this[trip.Id].FleetName = trip.FleetName;
+                this[trip.Id].DriverId = trip.DriverId;
+                this[trip.Id].DriverName = trip.DriverName;
+                this[trip.Id].ETA = trip.ETA;
+                this[trip.Id].Price = trip.Price;
+                this[trip.Id].OccupiedDistance = trip.OccupiedDistance;
+                if (trip.Status == Status.PickedUp)
                 {
-                    this[trip.Id].FleetId = trip.FleetId;
-                    this[trip.Id].FleetName = trip.FleetName;
-                    this[trip.Id].DriverId = trip.DriverId;
-                    this[trip.Id].DriverName = trip.DriverName;
-                    this[trip.Id].ETA = trip.ETA;
-                    this[trip.Id].Price = trip.Price;
-                    this[trip.Id].OccupiedDistance = trip.OccupiedDistance;
-                    if (trip.Status == Status.PickedUp)
-                    {
-                        this[trip.Id].OccupiedTime = DateTime.UtcNow - (DateTime)this[trip.Id].LastStatusChange;
-                    }
-                    if (trip.Status != this[trip.Id].Status)
-                    {
-                        this[trip.Id].Status = trip.Status;
-                        this[trip.Id].LastStatusChange = DateTime.UtcNow;
-                    }
-                    SaveTrip(this[trip.Id]);
+                    var lastStatusChange = this[trip.Id].LastStatusChange;
+                    if (lastStatusChange != null)
+                        this[trip.Id].OccupiedTime = DateTime.UtcNow - (DateTime)lastStatusChange;
                 }
+                if (trip.Status != this[trip.Id].Status)
+                {
+                    this[trip.Id].Status = trip.Status;
+                    this[trip.Id].LastStatusChange = DateTime.UtcNow;
+                }
+                SaveTrip(this[trip.Id]);
             }
-
         }
 
         public ActiveTrips activeTrips;

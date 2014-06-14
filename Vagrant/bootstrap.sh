@@ -8,7 +8,7 @@ password=Tr1PServ1CeSt@Ck
 pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
 sudo useradd -m -p $pass $user
 
-sudo echo yourhostname > /etc/hostname
+sudo echo oscar32 > /etc/hostname
 
 sudo apt-get update -y
 
