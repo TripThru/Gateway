@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.DataAnnotations;
@@ -74,6 +77,56 @@ namespace TripThruCore.Storage
                 var acc = db.Select<PartnerAccount>().Where(x => x.AccessToken == accessToken);
                 return acc.Count() == 1 ? acc.First() : null;
             }
+        }
+    }
+
+    public class MongoDbStorage : Storage
+    {
+        private readonly MongoCollection<PartnerAccount> _mongo;
+        private MongoDatabase _database;
+
+        public MongoDbStorage(string databaseName)
+        {
+            var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
+            _database = server.GetDatabase(databaseName);
+            _mongo = _database.GetCollection<PartnerAccount>("networks");
+        }
+        public override void CreatePartnerAccount(PartnerAccount account)
+        {
+            _mongo.Insert(account);
+        }
+
+        public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.Id, account.Id);
+            var entity = _mongo.FindOne(query);
+            if(entity == null)
+                return;
+            var update = Update<PartnerAccount>.Set(e => e.PartnerName, partnerName);
+            _mongo.Update(query, update);
+            update = Update<PartnerAccount>.Set(e => e.CallbackUrl, callbackUrl);
+            _mongo.Update(query, update);
+            entity.CallbackUrl = callbackUrl;
+        }
+
+        public override List<PartnerAccount> GetPartnerAccounts()
+        {
+            var networks = _mongo.FindAll();
+            return networks.ToList();
+        }
+
+        public override PartnerAccount GetPartnerAccountByUsername(string userName)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.UserName, userName);
+            var network = _mongo.FindOne(query);
+            return network;
+        }
+
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.AccessToken, accessToken);
+            var network = _mongo.FindOne(query);
+            return network;
         }
     }
 

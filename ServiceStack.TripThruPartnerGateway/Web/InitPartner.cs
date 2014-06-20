@@ -31,11 +31,12 @@ namespace ServiceStack.TripThruPartnerGateway
 	{
         public object Any(IReturn<InitPartner> request)
         {
-            StorageManager.OpenStorage(new SqliteStorage("~/App_Data/db.sqlite".MapHostAbsolutePath()));
             MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
             MapTools.LoadGeoData();
             MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
+
+            StorageManager.OpenStorage(new MongoDbStorage(RemoveSpecialCharacters(configuration.Partner.ClientId)));
 
             TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl ?? configuration.TripThruUrlMono), configuration.partnerFleets);
 
@@ -47,6 +48,11 @@ namespace ServiceStack.TripThruPartnerGateway
             return new InitPartnerResponse();
 
 		}
+        private string RemoveSpecialCharacters(string input)
+        {
+
+            return new string(input.Where(Char.IsLetterOrDigit).ToArray());
+        }
 	}
 
     public class SimulationThread : IDisposable
