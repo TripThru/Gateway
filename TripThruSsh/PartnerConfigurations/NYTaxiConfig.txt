@@ -144,7 +144,7 @@
 		"virtualPath" : "/TripThru.NYTaxi/"
   },
     "Partner": {
-        "AccessToken": "nytaxi12ondazazxx21",
+        "AccessToken": "BHMRfjKXDowLrlCdVPdUJfcwkHQqedLxtWWJSTtMrWTlJpwlVw",
         "CallbackUrlMono": "TripThru.NYTaxi/",
         "ClientId": "nytaxi@tripthru.com",
         "Name": "NY Taxi",

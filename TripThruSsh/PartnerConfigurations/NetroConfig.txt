@@ -137,7 +137,7 @@
         "virtualPath": "/TripThru.Netro/"
     },
     "partner": {
-        "accessToken": "metro12ondazazxx21",
+        "accessToken": "GDOXwcwzgLCAltqzRIrEeMLbmqLmDBTZsotoeOXFvMWMOakLSS",
         "callbackUrlMono": "TripThru.Netro/",
         "clientId": "netro@tripthru.com",
         "name": "Netro",

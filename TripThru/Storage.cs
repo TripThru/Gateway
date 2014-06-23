@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using ServiceStack.OrmLite;
@@ -16,7 +17,7 @@ namespace TripThruCore.Storage
         public enum UserRole { admin, partner, user }
         public abstract void CreatePartnerAccount(PartnerAccount account);
         public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
-        public abstract List<PartnerAccount> GetPartnerAccounts();
+        public abstract IEnumerable<PartnerAccount> GetPartnerAccounts();
         public abstract PartnerAccount GetPartnerAccountByUsername(string userName);
         public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
     }
@@ -55,7 +56,7 @@ namespace TripThruCore.Storage
                 db.Update(existingAccount);
             }
         }
-        public override List<PartnerAccount> GetPartnerAccounts()
+        public override IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
             using (var db = dbFactory.Open())
             {
@@ -89,7 +90,7 @@ namespace TripThruCore.Storage
         {
             var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
             _database = server.GetDatabase(databaseName);
-            _mongo = _database.GetCollection<PartnerAccount>("networks");
+            _mongo = _database.GetCollection<PartnerAccount>("users");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
@@ -109,10 +110,10 @@ namespace TripThruCore.Storage
             entity.CallbackUrl = callbackUrl;
         }
 
-        public override List<PartnerAccount> GetPartnerAccounts()
+        public override IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
-            var networks = _mongo.FindAll();
-            return networks.ToList();
+            IEnumerable<PartnerAccount> networks = _mongo.FindAll();
+            return networks;
         }
 
         public override PartnerAccount GetPartnerAccountByUsername(string userName)
@@ -135,11 +136,17 @@ namespace TripThruCore.Storage
     {
         [AutoIncrement]
         [PrimaryKey]
-        public Int32 Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public string ClientId { get; set; } //Provided by TripThru upon registration
         public string ClientSecret { get; set; } //Provided by TripThru upon registration
         public string UserName { get; set; } //For web login
         public string Password { get; set; } //For web login
+        public string password_digest { get; set; }
+        public string remember_token { get; set; }
+        public DateTime created_at { get; set; }
+        public DateTime updated_at { get; set; }
         public string Email { get; set; } //For web login
         public string AccessToken { get; set; } //For them to authenticate with them
         public string RefreshToken { get; set; }
@@ -168,7 +175,7 @@ namespace TripThruCore.Storage
                 return;
             _storage.RegisterPartner(account, partnerName, callbackUrl);
         }
-        public static List<PartnerAccount> GetPartnerAccounts()
+        public static IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
             if (_storage == null)
                 return null;

@@ -5,7 +5,7 @@
   "partner" : {
       "name" : "Los Taxi Blus",
       "clientId" : "los@tripthru.com",
-      "accessToken" : "les12ondazazxx21",
+      "accessToken" : "lbxQSMwsRstKAjbHfemZuyhDQDUzODxPtygDYfMJgnhcaixuIt",
       "callbackUrlMono" : "TripThru.LosTaxiBlus/",
 	  "webUrl" : "BookingsLosTaxiBlus/",
 	  "webUrlRelative" : "/BookingsLosTaxiBlus/index.php"

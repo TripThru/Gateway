@@ -3,6 +3,6 @@ RelativeHomeUrl=/BookingsTuxor/index.php
 TripThruUrl=http://192.168.0.125/TripThru.TripThruGateway/
 TripThruAccessToken=jaosid1201231
 PartnerUrl=http://192.168.0.125/TripThru.Tuxor/
-PartnerAccessToken=luxor23noiasdn2123
+PartnerAccessToken=dIOEVOwGYgnyjSCwxuNmLMPqQAPHjeijdynibQPvaLYhscGczR
 PartnerName=Tuxor
 PartnerId=tuxor@tripthru.com
