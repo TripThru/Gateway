@@ -1,10 +1,10 @@
 ﻿{
-  "tripThruUrl" : "http://192.168.0.135/TripThru.TripThruGateway/",
+  "tripThruUrl" : "http://localhost:17187/TripThru.TripThruGateway/",
   "simInterval" : 10,
   "enabled" : true,
   "Partner": {
         "AccessToken": "dubai12ondazazxx21",
-        "CallbackUrlMono": "TripThru.HubaiTaxiCorporation/",
+        "CallbackUrlMono": "http://localhost:17188/TripThru.HubaiTaxiCorporation/",
         "ClientId": "hubai@tripthru.com",
         "Name": "Hubai Taxi Corporation",
         "WebUrl": "/BookingsHubaiTaxiCorporation/",

@@ -166,6 +166,17 @@ namespace TripThruCore
 
     public enum DriverStatus { Occupied, Enroute, Idle, OffDuty };
 
+    public class MongoDBLocationIndex
+    {
+        public string type { get; set; }
+        public Double[] coordinates { get; set; }
+        public MongoDBLocationIndex(Double lat, Double lng)
+        {
+            this.type = "Point";
+            this.coordinates = new Double[] { lng, lat };
+        }
+    }
+
     public class Trip
     {
         public string Id { get; set; }
@@ -180,7 +191,7 @@ namespace TripThruCore
         public string PassengerName { get; set; }
         public Location DriverLocation { get; set; }
         private Location _pickupLocation;
-        public double[] loc;
+        public MongoDBLocationIndex loc;
         public Location PickupLocation 
         { 
             get
@@ -190,7 +201,7 @@ namespace TripThruCore
             set
             {
                 this._pickupLocation = value;
-                this.loc = new double[]{value.Lng, value.Lat};
+                this.loc = new MongoDBLocationIndex(value.Lat, value.Lng);
             } 
         }
         public Location DropoffLocation { get; set; }
