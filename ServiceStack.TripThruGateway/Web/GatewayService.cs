@@ -628,7 +628,6 @@ namespace ServiceStack.TripThruGateway
 
         [Api(Description = "Use GET to get quote for a possible trip.")]
         [Route("/quote", Verbs = "GET, PUT, POST, OPTIONS", Summary = @"get quote for a possible trip", Notes = "The standard usage is to first get quote for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
-        [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class quote : IReturn<quoteResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
