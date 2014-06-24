@@ -420,7 +420,6 @@ namespace ServiceStack.TripThruGateway
                 return networksResponse;
             }
 
-
             public NetworksResponse Options(Networks request)
             {
                 return new NetworksResponse();

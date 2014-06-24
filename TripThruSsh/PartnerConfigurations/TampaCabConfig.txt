@@ -160,7 +160,7 @@
 		"virtualPath" : "/TripThru.TampaCab/"
   },
     "Partner": {
-        "AccessToken": "tampa12ondazazxx21",
+        "AccessToken": "kemscAtgywuQkSEMDThBjjUyvREwUzdGitzrSQaznGCSKZpCcS",
         "CallbackUrlMono": "TripThru.TampaCab/",
         "ClientId": "tampacab@tripthru.com",
         "Name": "Tampa Cab",

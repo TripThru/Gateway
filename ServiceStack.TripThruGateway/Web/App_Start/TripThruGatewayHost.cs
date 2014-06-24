@@ -60,8 +60,10 @@ namespace ServiceStack.TripThruGateway
                             MetadataCustomPath = "/stats"
                           });
 
+       
             //Unhandled exceptions
             //Handle Exceptions occurring in Services:
+            
             this.ServiceExceptionHandler = (request, exception) => {
 
                 //log your exceptions here
@@ -105,7 +107,7 @@ namespace ServiceStack.TripThruGateway
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
 
-                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                StorageManager.OpenStorage(new MongoDbStorage("TripThru"));
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
                 GatewayService.gateway = new TripThru();

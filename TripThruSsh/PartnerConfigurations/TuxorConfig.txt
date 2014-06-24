@@ -159,7 +159,7 @@
         "virtualPath": "/TripThru.Tuxor/"
     },
     "partner": {
-        "accessToken": "luxor23noiasdn2123",
+        "accessToken": "dIOEVOwGYgnyjSCwxuNmLMPqQAPHjeijdynibQPvaLYhscGczR",
         "callbackUrlMono": "TripThru.Tuxor/",
         "clientId": "tuxor@tripthru.com",
         "name": "Tuxor",
