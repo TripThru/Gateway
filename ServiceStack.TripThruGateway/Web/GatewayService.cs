@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Odbc;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
+using MongoDB.Bson;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using Utils;
@@ -242,7 +243,6 @@ namespace ServiceStack.TripThruGateway
                         acct.CallbackUrl = request.CallbackUrl;
                         gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, acct.TripThruAccessToken, request.CallbackUrl));
                         StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
-
                         partnerResponse = new PartnerResponse
                         {
                             Result = "OK",
@@ -414,7 +414,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "GetPartnerInfo");
                     Logger.AddTag("ClientId", clientId);
-                    Logger.SetOriginatingId(acct.ClientId);
+                    if (acct != null) Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(networksResponse);
                 }
                 return networksResponse;

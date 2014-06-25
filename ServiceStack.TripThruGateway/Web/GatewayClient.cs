@@ -32,8 +32,7 @@ namespace ServiceStack.TripThruGateway
                 {
                     result = Result.InvalidParameters
                 };
-
-            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            JsonServiceClient client = new JsonServiceClient(RootUrl); 
             client.Timeout = timeout;
             GatewayService.PartnerResponse resp = client.Post<GatewayService.PartnerResponse>(new GatewayService.PartnerRequest
             {
@@ -41,7 +40,6 @@ namespace ServiceStack.TripThruGateway
                 Name = request.name,
                 CallbackUrl = request.callback_url
             });
-            
             return new Gateway.RegisterPartnerResponse
             {
                 result = resp.ResultCode

@@ -48,8 +48,8 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["digital-ocean"];
-            localPath = @"Z:\WindowsDev\Gateway\";
+            env = environments["vagrant"];
+            localPath = @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;

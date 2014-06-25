@@ -88,7 +88,7 @@ namespace TripThruCore.Storage
 
         public MongoDbStorage(string databaseName)
         {
-            var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
+            var server = MongoServer.Create("mongodb://foo:bar@192.168.0.50:27017/");//7314
             _database = server.GetDatabase(databaseName);
             _mongo = _database.GetCollection<PartnerAccount>("users");
         }
