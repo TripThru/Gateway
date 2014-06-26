@@ -80,7 +80,6 @@ namespace ServiceStack.TripThruPartnerGateway
                 Logger.Log("Simulation started at " + DateTime.UtcNow);
                 Logger.EndRequest(null);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
-
                 _partner.tripthru.RegisterPartner(
                     new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
                         _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));

@@ -138,12 +138,12 @@
     },
     "partner": {
         "accessToken": "GDOXwcwzgLCAltqzRIrEeMLbmqLmDBTZsotoeOXFvMWMOakLSS",
-        "callbackUrlMono": "TripThru.Netro/",
+        "callbackUrlMono": "http://192.168.0.101:17188/",
         "clientId": "netro@tripthru.com",
         "name": "Netro",
         "webUrl": "BookingsNetro/",
         "webUrlRelative": "/BookingsNetro/index.php"
     },
     "simInterval": 10,
-    "tripThruUrlMono" : "TripThru.TripThruGateway/"
+    "tripThruUrlMono" : "http://192.168.0.101:17187/"
 }

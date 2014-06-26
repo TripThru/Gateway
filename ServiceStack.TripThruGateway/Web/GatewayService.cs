@@ -243,6 +243,7 @@ namespace ServiceStack.TripThruGateway
                         acct.CallbackUrl = request.CallbackUrl;
                         gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, acct.TripThruAccessToken, request.CallbackUrl));
                         StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
+
                         partnerResponse = new PartnerResponse
                         {
                             Result = "OK",
@@ -339,7 +340,6 @@ namespace ServiceStack.TripThruGateway
                     ResultCode = Gateway.Result.UnknownError
                 };
                 var clientId = "none";
-
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
@@ -503,7 +503,6 @@ namespace ServiceStack.TripThruGateway
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
-                
                 var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
