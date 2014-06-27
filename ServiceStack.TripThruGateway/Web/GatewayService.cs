@@ -490,7 +490,7 @@ namespace ServiceStack.TripThruGateway
             public Gateway.Result ResultCode { get; set; }
             public string Message { get; set; }
             public int? Count { get; set; }
-            public List<Quote> Quotes { get; set; }
+            public List<TripThruCore.Quote> Quotes { get; set; }
         }
 
         public class QuotesService : Service
@@ -628,65 +628,197 @@ namespace ServiceStack.TripThruGateway
 
         [Api(Description = "Use GET to get quote for a possible trip.")]
         [Route("/quote", Verbs = "GET, PUT, POST, OPTIONS", Summary = @"get quote for a possible trip", Notes = "The standard usage is to first get quote for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
-        public class quote : IReturn<quoteResponse>
+        public class Quote : IReturn<QuoteResponse>
         {
             [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string access_token { get; set; }
-            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
+            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true, Verb = "POST")]
+            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true, Verb = "PUT")]
             public DateTime PickupTime { get; set; }
-            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true)]
+            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "POST")]
+            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "PUT")]
             public double PickupLat { get; set; }
-            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
+            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "POST")]
+            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "PUT")]
             public double PickupLng { get; set; }
-            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false)]
+            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
             public string PassengerName { get; set; }
             [ApiAllowableValues("Luggage", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false)]
+            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "PUT")]
             public int? Luggage { get; set; }
             [ApiAllowableValues("Persons", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false)]
+            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "PUT")]
             public int? Persons { get; set; }
-            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = true)]
+            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "POST")]
+            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "PUT")]
             public double? DropoffLat { get; set; }
-            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = true)]
+            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "POST")]
+            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "PUT")]
             public double? DropoffLng { get; set; }
             [ApiAllowableValues("PaymentMethod", typeof(PaymentMethod))]
-            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false)]
+            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false, Verb = "PUT")]
             public PaymentMethod? PaymentMethod { get; set; }
             [ApiAllowableValues("VehicleType", typeof(VehicleType))]
-            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false)]
+            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false, Verb = "PUT")]
             public VehicleType? VehicleType { get; set; }
-            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false)]
+            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false, Verb = "PUT")]
             public double? MaxPrice { get; set; }
+            [ApiMember(Name = "Price", Description = "Price", ParameterType = "query", DataType = "double", IsRequired = true, Verb = "PUT")]
+            public double? Price { get; set; }
+            [ApiMember(Name = "ETA", Description = "Estimated time of arrival. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true, Verb = "PUT")]
+            public DateTime? ETA { get; set; }
             [ApiAllowableValues("MinRating", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false)]
+            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "PUT")]
             public int? MinRating { get; set; }
-            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner you wish to receive quote from.  Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
+            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner you wish to receive quote from.  Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
             public string PartnerId { get; set; }
-            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet you wish to receive quote from. Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
+            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet you wish to receive quote from. Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
             public string FleetId { get; set; }
-            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver you wish to receive quote from. Use this field only if you have a specific driver in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
+            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver you wish to receive quote from. Use this field only if you have a specific driver in mind.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver.", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
             public string DriverId { get; set; }
-            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false)]
+            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "POST")]
+            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
             public string PassengerId { get; set; }
             [ApiMember(Name = "TripId", Description = "Partner scope unique identifier of the trip that you will use to make queries about the trip.  Note: it only has to be unique to you.  TripThru will handle any cross-network uniqueness issues.", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string TripId { get; set; }
         }
 
-        public class quoteResponse
+        public class QuoteResponse
         {
             public string Result { get; set; }
             public Gateway.Result ResultCode { get; set; }
             public string Message { get; set; }
             public int? Count { get; set; }
-            public List<Quote> quote { get; set; }
+            public List<TripThruCore.Quote> Quotes { get; set; }
         }
 
         public class quoteService : Service
         {
-            public quoteResponse Post(quote request)
+            public QuoteResponse Post(Quote request)
             {
-                quoteResponse quoteResponse = new quoteResponse
+                var accessToken = request.access_token;
+                var message = ValidateQuote(request);
+                request.access_token = null;
+                QuoteResponse quotesResponse = new QuoteResponse
+                {
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
+                };
+
+                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
+                try
+                {
+                    if (acct != null && message == null)
+                    {
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("QuoteTrip received from " + acct.UserName, request);
+                        var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
+                            clientID: acct.ClientId,
+                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
+                            pickupTime: request.PickupTime,
+                            passengerID: request.PassengerId,
+                            passengerName: request.PassengerName,
+                            luggage: request.Luggage,
+                            persons: request.Persons,
+                            dropoffLocation: request.DropoffLat == null ? null : new Location((double)request.DropoffLat, (double)request.DropoffLng),
+                            paymentMethod: request.PaymentMethod,
+                            vehicleType: request.VehicleType,
+                            maxPrice: request.MaxPrice,
+                            minRating: request.MinRating,
+                            partnerID: request.PartnerId,
+                            fleetID: request.FleetId,
+                            driverID: request.DriverId
+                            ));
+                        if (response.result == Gateway.Result.OK)
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                Count = response.quotes.Count,
+                                Quotes = response.quotes,
+                                ResultCode = response.result,
+                                Result = "OK",
+                                Message = "OK"
+                            };
+                        }
+                        else
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result,
+                                Message = "Failed"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        string msg;
+                        if (message == null)
+                        {
+                            Logger.BeginRequest("QuoteTrip received from unknown user", request);
+                            msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
+                                  ", Response = Authentication failed";
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = Gateway.Result.AuthenticationError,
+                                Message = "Acces Token Invalid"
+                            };
+                        }
+                        else
+                        {
+                            Logger.BeginRequest("QuoteTrip received with wrong parameters", request);
+                            msg = message;
+                            quotesResponse.Message = message;
+                        }
+                        Logger.Log(msg);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
+                    quotesResponse = new QuoteResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError,
+                        Message = "Failed"
+                    };
+                }
+                finally
+                {
+                    Logger.AddTag("RequestType", "QuoteTrip");
+                    Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID); //Should we have a list of servicing partners for this case?
+                    Logger.EndRequest(quotesResponse);
+                }
+                return quotesResponse;
+            }
+
+            public QuoteResponse Get(Quote request)
+            {
+                QuoteResponse quoteResponse = new QuoteResponse
+                {
+                    Result = "OK",
+                    ResultCode = Gateway.Result.OK
+                };
+                return quoteResponse;
+            }
+            public QuoteResponse Put(Quote request)
+            {
+                QuoteResponse quoteResponse = new QuoteResponse
                 {
                     Result = "OK",
                     ResultCode = Gateway.Result.OK
@@ -694,28 +826,25 @@ namespace ServiceStack.TripThruGateway
                 return quoteResponse;
             }
 
-            public quoteResponse Get(quote request)
+            public QuoteResponse Options(Quote request)
             {
-                quoteResponse quoteResponse = new quoteResponse
-                {
-                    Result = "OK",
-                    ResultCode = Gateway.Result.OK
-                };
-                return quoteResponse;
+                return new QuoteResponse();
             }
-            public quoteResponse Put(quote request)
+            private string ValidateQuote(Quote quote)
             {
-                quoteResponse quoteResponse = new quoteResponse
-                {
-                    Result = "OK",
-                    ResultCode = Gateway.Result.OK
-                };
-                return quoteResponse;
-            }
-
-            public quoteResponse Options(quote request)
-            {
-                return new quoteResponse();
+                if (quote.access_token.IsNullOrEmpty())
+                    return "Access Token is Required.";
+                if (quote.PickupTime == null)
+                    return "PickupTime is Required.";
+                if (quote.PickupLat == null)
+                    return "PickupLat is Required.";
+                if (quote.PickupLng == null)
+                    return "PickupLng is Required.";
+                if (quote.DropoffLat == null)
+                    return "DropoffLat is Required.";
+                if (quote.DropoffLng == null)
+                    return "DropoffLng is Required.";
+                return null;
             }
         }
 
@@ -927,17 +1056,17 @@ namespace ServiceStack.TripThruGateway
             [ApiMember(Name = "Status", Description = "Trip status code", ParameterType = "query", DataType = "Status", IsRequired = false, Verb = "PUT")]
             public Status Status { get; set; }
 
-            [ApiMember(Name = "DriverLocationLat", Description = "GPS coordinate latitude of the driver location. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false)]
+            [ApiMember(Name = "DriverLocationLat", Description = "GPS coordinate latitude of the driver location. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = false, Verb = "PUT")]
             public double? DriverLocationLat { get; set; }
 
-            [ApiMember(Name = "DriverLocationLng", Description = "GPS coordinate longitude of the driver location. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false)]
+            [ApiMember(Name = "DriverLocationLng", Description = "GPS coordinate longitude of the driver location. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = false, Verb = "PUT")]
             public double? DriverLocationLng { get; set; }
 
-            [ApiMember(Name = "ETA", Description = "Time that driver will arrive at destination. Either pickup location or dropoff location", ParameterType = "query", DataType = "DateTime", IsRequired = false)]
+            [ApiMember(Name = "ETA", Description = "Time that driver will arrive at destination. Either pickup location or dropoff location", ParameterType = "query", DataType = "DateTime", IsRequired = false, Verb = "PUT")]
             public DateTime? ETA { get; set; }
 
             [ApiAllowableValues("Rating", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")]
-            [ApiMember(Name = "Rating", Description = "Rating of the trip from driver's or passenger's perspective", ParameterType = "query", DataType = "int", IsRequired = false)]
+            [ApiMember(Name = "Rating", Description = "Rating of the trip from driver's or passenger's perspective", ParameterType = "query", DataType = "int", IsRequired = false, Verb = "PUT")]
             public int? Rating { get; set; }
         }
 

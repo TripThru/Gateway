@@ -959,7 +959,7 @@ namespace TripThruCore
                         cm.GetMemberMap(c => c.loc);
                     });
                 }
-                var server = MongoServer.Create("mongodb://SG-TripThru-2816.servers.mongodirector.com:27017/");
+                var server = MongoServer.Create("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/");
                 var database = server.GetDatabase(RemoveSpecialCharacters(id));
                 mongo = database.GetCollection<Trip>("trips");
                 dict = new ConcurrentDictionary<string, Trip>();

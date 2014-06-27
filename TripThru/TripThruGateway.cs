@@ -538,11 +538,11 @@ namespace TripThruCore
                 ChangeClientIDToTripThru(r);
                 UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
                 r.clientID = originClientID;
-                if (SuccesAndTripStillActive(r, response))
-                {
-                    if (r.driverLocation != null && activeTrips[r.tripID].DriverInitiaLocation == null)
+                if (activeTrips.ContainsKey(r.tripID) && r.driverLocation != null){
+                    if (activeTrips[r.tripID].DriverInitiaLocation == null)
+                    {
                         activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
-                    activeTrips[r.tripID].Status = r.status;
+                    }
                     switch (r.status)
                     {
                         case Status.Enroute:
@@ -551,6 +551,13 @@ namespace TripThruCore
                         case Status.PickedUp:
                             activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
                             break;
+                    }
+                }
+                if (SuccesAndTripStillActive(r, response))
+                {
+                    activeTrips[r.tripID].Status = r.status;
+                    switch (r.status)
+                    {
                         case Status.Complete:
                             {
                                 GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
