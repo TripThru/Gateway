@@ -160,7 +160,7 @@
 		"virtualPath" : "/TripThru.Mellow/"
   },
     "Partner": {
-        "AccessToken": "yellow12ondazazxx21",
+        "AccessToken": "QBIHCRwsfffCKPdVtbeHGheVyyZRNkcJyGPKGNSLlljVwIdSCO",
         "CallbackUrlMono": "TripThru.Mellow/",
         "ClientId": "mellow@tripthru.com",
         "Name": "Mellow",

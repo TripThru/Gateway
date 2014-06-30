@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.DataAnnotations;
@@ -13,7 +17,7 @@ namespace TripThruCore.Storage
         public enum UserRole { admin, partner, user }
         public abstract void CreatePartnerAccount(PartnerAccount account);
         public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
-        public abstract List<PartnerAccount> GetPartnerAccounts();
+        public abstract IEnumerable<PartnerAccount> GetPartnerAccounts();
         public abstract PartnerAccount GetPartnerAccountByUsername(string userName);
         public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
     }
@@ -52,7 +56,7 @@ namespace TripThruCore.Storage
                 db.Update(existingAccount);
             }
         }
-        public override List<PartnerAccount> GetPartnerAccounts()
+        public override IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
             using (var db = dbFactory.Open())
             {
@@ -77,16 +81,72 @@ namespace TripThruCore.Storage
         }
     }
 
+    public class MongoDbStorage : Storage
+    {
+        private readonly MongoCollection<PartnerAccount> _mongo;
+        private MongoDatabase _database;
+
+        public MongoDbStorage(string databaseName)
+        {
+            var server = MongoServer.Create("mongodb://foo:bar@192.168.0.50:27017/");//7314
+            _database = server.GetDatabase(databaseName);
+            _mongo = _database.GetCollection<PartnerAccount>("users");
+        }
+        public override void CreatePartnerAccount(PartnerAccount account)
+        {
+            _mongo.Insert(account);
+        }
+
+        public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.Id, account.Id);
+            var entity = _mongo.FindOne(query);
+            if(entity == null)
+                return;
+            var update = Update<PartnerAccount>.Set(e => e.PartnerName, partnerName);
+            _mongo.Update(query, update);
+            update = Update<PartnerAccount>.Set(e => e.CallbackUrl, callbackUrl);
+            _mongo.Update(query, update);
+            entity.CallbackUrl = callbackUrl;
+        }
+
+        public override IEnumerable<PartnerAccount> GetPartnerAccounts()
+        {
+            IEnumerable<PartnerAccount> networks = _mongo.FindAll();
+            return networks;
+        }
+
+        public override PartnerAccount GetPartnerAccountByUsername(string userName)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.UserName, userName);
+            var network = _mongo.FindOne(query);
+            return network;
+        }
+
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.AccessToken, accessToken);
+            var network = _mongo.FindOne(query);
+            return network;
+        }
+    }
+
     [Alias("Account")]
     public class PartnerAccount
     {
         [AutoIncrement]
         [PrimaryKey]
-        public Int32 Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public string ClientId { get; set; } //Provided by TripThru upon registration
         public string ClientSecret { get; set; } //Provided by TripThru upon registration
         public string UserName { get; set; } //For web login
         public string Password { get; set; } //For web login
+        public string password_digest { get; set; }
+        public string remember_token { get; set; }
+        public DateTime created_at { get; set; }
+        public DateTime updated_at { get; set; }
         public string Email { get; set; } //For web login
         public string AccessToken { get; set; } //For them to authenticate with them
         public string RefreshToken { get; set; }
@@ -115,7 +175,7 @@ namespace TripThruCore.Storage
                 return;
             _storage.RegisterPartner(account, partnerName, callbackUrl);
         }
-        public static List<PartnerAccount> GetPartnerAccounts()
+        public static IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
             if (_storage == null)
                 return null;

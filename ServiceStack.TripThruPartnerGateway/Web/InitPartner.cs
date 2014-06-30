@@ -31,11 +31,12 @@ namespace ServiceStack.TripThruPartnerGateway
 	{
         public object Any(IReturn<InitPartner> request)
         {
-            StorageManager.OpenStorage(new SqliteStorage("~/App_Data/db.sqlite".MapHostAbsolutePath()));
             MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
             MapTools.LoadGeoData();
             MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
+
+            StorageManager.OpenStorage(new MongoDbStorage("TripThru"));
 
             TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl ?? configuration.TripThruUrlMono), configuration.partnerFleets);
 
@@ -47,6 +48,7 @@ namespace ServiceStack.TripThruPartnerGateway
             return new InitPartnerResponse();
 
 		}
+
 	}
 
     public class SimulationThread : IDisposable
@@ -78,7 +80,6 @@ namespace ServiceStack.TripThruPartnerGateway
                 Logger.Log("Simulation started at " + DateTime.UtcNow);
                 Logger.EndRequest(null);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
-
                 _partner.tripthru.RegisterPartner(
                     new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
                         _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));

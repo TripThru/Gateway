@@ -1,19 +1,13 @@
-<<<<<<< HEAD
-HomeUrl=http://54.201.134.194:8080//BookingsYellowCab/
-RelativeHomeUrl=/BookingsYellowCab/index.php
-TripThruUrl=http://54.201.134.194/TripThru.TripThruGateway/
-TripThruAccessToken=jaosid1201231
-PartnerUrl=http://54.201.134.194/TripThru.YellowCab/
-PartnerAccessToken=yellow12ondazazxx21
-PartnerName=YellowCab
-PartnerId=yellow@tripthru.com
-=======
-HomeUrl=http://192.168.0.125:8080/BookingsTuxor/
+HomeUrl=http://107.170.240.134:8080/BookingsTuxor/
 RelativeHomeUrl=/BookingsTuxor/index.php
-TripThruUrl=http://192.168.0.125/TripThru.TripThruGateway/
+TripThruUrl=http://107.170.240.134/TripThru.TripThruGateway/
 TripThruAccessToken=jaosid1201231
-PartnerUrl=http://192.168.0.125/TripThru.Tuxor/
+<<<<<<< HEAD
+PartnerUrl=http://107.170.240.134/TripThru.Tuxor/
 PartnerAccessToken=luxor23noiasdn2123
+=======
+PartnerUrl=http://192.168.0.125/TripThru.Tuxor/
+PartnerAccessToken=dIOEVOwGYgnyjSCwxuNmLMPqQAPHjeijdynibQPvaLYhscGczR
+>>>>>>> mongoDB
 PartnerName=Tuxor
 PartnerId=tuxor@tripthru.com
->>>>>>> ChangeNames

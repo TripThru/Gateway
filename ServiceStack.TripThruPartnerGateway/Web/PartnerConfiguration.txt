@@ -1,158 +1,149 @@
 ﻿{
-  "tripThruUrl" : "http://localhost:17187/TripThru.TripThruGateway/",
-  "simInterval" : 10,
-  "enabled" : true,
-  "Partner": {
-        "AccessToken": "dubai12ondazazxx21",
-        "CallbackUrlMono": "http://localhost:17188/TripThru.HubaiTaxiCorporation/",
-        "ClientId": "hubai@tripthru.com",
-        "Name": "Hubai Taxi Corporation",
-        "WebUrl": "/BookingsHubaiTaxiCorporation/",
-        "WebUrlRelative": "/BookingsHubaiTaxiCorporation/index.php"
-    },
-  "Fleets": [
+    "enabled": true,
+    "fleets": [
         {
-            "BaseCost": 3,
-            "CostPerMile": 3,
-            "Coverage": [
+            "baseCost": 3.0,
+            "costPerMile": 3.0,
+            "coverage": [
                 {
-                    "Center": {
-                        "Lat": 25.271139,
-                        "Lng": 55.307485
+                    "center": {
+                        "lat": 42.356217,
+                        "lng": -71.137512
                     },
-                    "Radius": 50
+                    "radius": 50
                 }
             ],
-            "Drivers": [
-                "Hussean Widobe",
-                "Omar Sharief",
-                "Sheikh Hamdan",
-                "Mohammed Hamdan",
-                "Rashid Al Maktoum",
-                "Hamdan Widobe",
-                "Ayishah Janan Halabi",
-                "Hayud Munirah Sarkis",
-                "Asra Salwa Nazari",
-                "Hilel Sahl Harb",
-                "Jala Nahid Ba",
-                "Bahiya Baheera Kassis",
-                "Azhar Amro Saliba",
-                "Kawakib Walidah Sarraf",
-                "Khaldoon Harun Safar",
-                "Aliyah Shahirah Nassar",
-                "Muta Abdul Awad",
-                "Fakhir Anbar Guirguis",
-                "Khuzama Maysa Srour",
-                "Sanaa Malakah Ganim",
-                "Jeannine Loyola",
-                "Jacquelyn Folts",
-                "Benton Aguila",
-                "Hisako Peake",
-                "Earlie Tapia",
-                "Gino Kampf",
-                "Temika Snipe",
-                "Rena Dedrick",
-                "Angele Stoffel",
-                "Leonor Chesson"
+            "drivers": [
+                "Joanna Glennon",
+                "Ofer Matan",
+                "Ignas Thucydides",
+                "Clyde Hariwini",
+                "Flavio Ragnvald",
+                "Kenaniah Sergei",
+                "Ezra Adilet",
+                "David S. Chatman",
+                "Lilly A. Sabala",
+                "Jesus S. Jackson",
+                "Martha R. Martin",
+                "Donald G. Lillibridge",
+                "Clara B. Cantu",
+                "Michael P. Ruiz",
+                "Leland R. Elmore",
+                "Chris P. Gardner",
+                "Dessie R. Rivera",
+                "Kathy L. Griffin",
+                "Christopher B. Bell",
+                "Lacie Ridgell",
+                "Leonard Fife",
+                "Ross Dohrmann",
+                "Elliott Garvin",
+                "Sharmaine Grave",
+                "Nydia Empey",
+                "Luana Buchan",
+                "Jerri Christine",
+                "Inger Merck",
+                "Maryellen Legrand"
             ],
-            "Location": {
-                "Lat": 25.271139,
-                "Lng": 55.307485
+            "location": {
+                "lat": 42.356217,
+                "lng": -71.137512
             },
-            "Name": "Hubai Taxi Corporation",
-            "Passengers": [
-                "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"
+            "name": "Netro",
+            "passengers": [
+                "Michael Glennon",
+                "William Glennon",
+                "Bernice Hamilton"
             ],
-            "PossibleTrips": [
+            "possibleTrips": [
                 {
-                    "End": {
-                        "Lat": 25.279288,
-                        "Lng": 55.304331
+                    "end": {
+                        "lat": 37.786956,
+                        "lng": -122.440279
                     },
-                    "Start": {
-                        "Lat": 25.270751,
-                        "Lng": 55.31403
+                    "start": {
+                        "lat": 37.782551,
+                        "lng": -122.445368
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 42.367561,
-                        "Lng": -71.129498
+                    "end": {
+                        "lat": 37.785292,
+                        "lng": -122.416257
                     },
-                    "Start": {
-                        "Lat": 42.342634,
-                        "Lng": -71.122545
+                    "start": {
+                        "lat": 37.784345,
+                        "lng": -122.422922
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 37.800066,
-                        "Lng": -122.436167
+                    "end": {
+                        "lat": 48.839478,
+                        "lng": 2.317374
                     },
-                    "Start": {
-                        "Lat": 37.800224,
-                        "Lng": -122.43352
+                    "start": {
+                        "lat": 48.843545,
+                        "lng": 2.385352
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 48.837275,
-                        "Lng": 2.382433
+                    "end": {
+                        "lat": 25.279288,
+                        "lng": 55.304331
                     },
-                    "Start": {
-                        "Lat": 48.835975,
-                        "Lng": 2.345097
+                    "start": {
+                        "lat": 25.270751,
+                        "lng": 55.31403
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 37.786956,
-                        "Lng": -122.440279
+                    "end": {
+                        "lat": 42.367561,
+                        "lng": -71.129498
                     },
-                    "Start": {
-                        "Lat": 37.782551,
-                        "Lng": -122.445368
+                    "start": {
+                        "lat": 42.342634,
+                        "lng": -71.122545
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 40.797215,
-						"Lng": -73.96941
+                    "end": {
+                        "Lat": 40.7479425,
+                        "Lng": -73.9709596
                     },
-                    "Start": {
-                        "Lat": 40.727227,
-						"Lng": -74.003911
+                    "start": {
+                        "Lat": 40.7524713,
+                        "Lng": -73.9772954
                     }
                 },
                 {
-                    "End": {
-                        "Lat": 26.122976,
-						"Lng": -80.10474
-                    },
-                    "Start": {
-                        "Lat": 26.137129,
-						"Lng": -80.113431
-                    }
-                },
-                {
-                    "End": {
+                    "end": {
                         "Lat": 25.7950665,
-						"Lng": -80.2786931
+                        "Lng": -80.2786931
                     },
-                    "Start": {
-                        "Lat": 25.845224,
-						"Lng": -80.119744
+                    "start": {
+                        "Lat": 26.1196017,
+                        "Lng": -80.1429035
                     }
                 }
             ],
-            "TripsPerHour": 100,
-            "VehicleTypes": [
-                "Compact",
-                "Sedan"
+            "tripsPerHour": 100,
+            "vehicleTypes": [
+                "compact",
+                "sedan"
             ]
         }
     ],
-  "host" : {
-		"virtualPath" : "/"
-  }
+    "host": {
+        "virtualPath": "/TripThru.Netro/"
+    },
+    "partner": {
+        "accessToken": "GDOXwcwzgLCAltqzRIrEeMLbmqLmDBTZsotoeOXFvMWMOakLSS",
+        "callbackUrlMono": "http://192.168.0.101:17188/",
+        "clientId": "netro@tripthru.com",
+        "name": "Netro",
+        "webUrl": "BookingsNetro/",
+        "webUrlRelative": "/BookingsNetro/index.php"
+    },
+    "simInterval": 10,
+    "tripThruUrlMono" : "http://192.168.0.101:17187/"
 }

@@ -60,8 +60,10 @@ namespace ServiceStack.TripThruGateway
                             MetadataCustomPath = "/stats"
                           });
 
+       
             //Unhandled exceptions
             //Handle Exceptions occurring in Services:
+            
             this.ServiceExceptionHandler = (request, exception) => {
 
                 //log your exceptions here
@@ -104,14 +106,13 @@ namespace ServiceStack.TripThruGateway
                     JsonSerializer.DeserializeFromString<HostConfiguration>(
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
-
-                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                StorageManager.OpenStorage(new MongoDbStorage("TripThru"));
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
                 GatewayService.gateway = new TripThru();
-
                 foreach(var account in accounts)
-                    if (Storage.UserRole.partner == account.Role && account.CallbackUrl != null && account.PartnerName != null
+                    if (Storage.UserRole.partner == account.Role && account.CallbackUrl != null &&
+                        account.PartnerName != null
                         && account.TripThruAccessToken != null && account.ClientId != null)
                         GatewayService.gateway.RegisterPartner(
                             new GatewayClient(
@@ -119,9 +120,8 @@ namespace ServiceStack.TripThruGateway
                                 account.PartnerName,
                                 account.TripThruAccessToken,
                                 account.CallbackUrl
-                            )
-                        );
-
+                                )
+                            );
                 MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
                 MapTools.LoadGeoData();
             }

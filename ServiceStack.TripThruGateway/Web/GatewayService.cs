@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Odbc;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
+using MongoDB.Bson;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using Utils;
@@ -339,7 +340,6 @@ namespace ServiceStack.TripThruGateway
                     ResultCode = Gateway.Result.UnknownError
                 };
                 var clientId = "none";
-
                 PartnerAccount acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
@@ -414,12 +414,11 @@ namespace ServiceStack.TripThruGateway
                 {
                     Logger.AddTag("RequestType", "GetPartnerInfo");
                     Logger.AddTag("ClientId", clientId);
-                    Logger.SetOriginatingId(acct.ClientId);
+                    if (acct != null) Logger.SetOriginatingId(acct.ClientId);
                     Logger.EndRequest(networksResponse);
                 }
                 return networksResponse;
             }
-
 
             public NetworksResponse Options(Networks request)
             {
@@ -505,7 +504,6 @@ namespace ServiceStack.TripThruGateway
                     Result = "Unknown",
                     ResultCode = Gateway.Result.UnknownError
                 };
-                
                 var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try

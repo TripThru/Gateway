@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -49,9 +50,7 @@ namespace TripThruCore
         {
             InitializePersistantDataObjects();
             garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
-
             LoadUserAccounts();
-
             if (enableTDispatch)
                 LoadTDispatchIntegrations();
 
@@ -886,6 +885,7 @@ namespace TripThruCore
 
         public PartnersUpdateThread(Dictionary<string, Gateway> partners)
         {
+            Console.WriteLine("UPDATETHREAD");
             _partners = partners;
             _worker = new Thread(StartThread);
             _worker.Start();
