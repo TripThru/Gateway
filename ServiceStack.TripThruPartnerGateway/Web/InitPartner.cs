@@ -46,7 +46,6 @@ namespace ServiceStack.TripThruPartnerGateway
                 StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", configuration.Partner.ClientId));
             }
 
-            var accounts = StorageManager.GetPartnerAccounts();
             var account = StorageManager.GetPartnerAccountByClientId(configuration.Partner.ClientId);
             if (account != null)
             {

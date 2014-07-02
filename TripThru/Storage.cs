@@ -168,7 +168,7 @@ namespace TripThruCore.Storage
 
         public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
-            var query = Query<PartnerAccount>.EQ(e => e.Id, account.Id);
+            var query = Query<PartnerAccount>.EQ(e => e.ClientId, account.ClientId);
             var entity = _partners.FindOne(query);
             if(entity == null)
                 return;
@@ -233,24 +233,16 @@ namespace TripThruCore.Storage
     }
 
     [Alias("Account")]
+    [BsonIgnoreExtraElements]
     public class PartnerAccount
     {
         [AutoIncrement]
         [PrimaryKey]
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        [BsonIgnore]
+        public Int32 Id { get; set; }
         public string ClientId { get; set; } //Provided by TripThru upon registration
-        public string ClientSecret { get; set; } //Provided by TripThru upon registration
         public string UserName { get; set; } //For web login
-        public string Password { get; set; } //For web login
-        public string password_digest { get; set; }
-        public string remember_token { get; set; }
-        public DateTime created_at { get; set; }
-        public DateTime updated_at { get; set; }
-        public string Email { get; set; } //For web login
         public string AccessToken { get; set; } //For them to authenticate with them
-        public string RefreshToken { get; set; }
         public string PartnerName { get; set; }
         public string CallbackUrl { get; set; }
         public string TripThruAccessToken { get; set; } //For us to authenticate with them
