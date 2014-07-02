@@ -9,6 +9,13 @@ using MongoDB.Driver.Builders;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
+using MongoDB.Driver.GridFS;
+using MongoDB.Driver.Linq;
+using ServiceStack.Text;
 
 namespace TripThruCore.Storage
 {
@@ -19,7 +26,15 @@ namespace TripThruCore.Storage
         public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
         public abstract IEnumerable<PartnerAccount> GetPartnerAccounts();
         public abstract PartnerAccount GetPartnerAccountByUsername(string userName);
+        public abstract PartnerAccount GetPartnerAccountByClientId(string clientId);
         public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
+        public abstract long GetLastTripId();
+        public abstract void InsertTrip(Trip trip);
+        public abstract void SaveTrip(Trip trip);
+        protected string RemoveSpecialCharacters(string input)
+        {
+            return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
+        }
     }
 
     public class SqliteStorage : Storage
@@ -71,6 +86,14 @@ namespace TripThruCore.Storage
                 return acc.Count() == 1 ? acc.First() : null;
             }
         }
+        public override PartnerAccount GetPartnerAccountByClientId(string clientId)
+        {
+            using (var db = dbFactory.Open())
+            {
+                var acc = db.Select<PartnerAccount>().Where(x => x.ClientId == clientId);
+                return acc.Count() == 1 ? acc.First() : null;
+            }
+        }
         public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
             using (var db = dbFactory.Open())
@@ -79,55 +102,133 @@ namespace TripThruCore.Storage
                 return acc.Count() == 1 ? acc.First() : null;
             }
         }
+        public override long GetLastTripId()
+        {
+            return 0;
+        }
+        public override void InsertTrip(Trip trip)
+        {
+            
+        }
+        public override void SaveTrip(Trip trip)
+        {
+            
+        }
     }
 
     public class MongoDbStorage : Storage
     {
-        private readonly MongoCollection<PartnerAccount> _mongo;
-        private MongoDatabase _database;
-
-        public MongoDbStorage(string databaseName)
+        private readonly MongoCollection<PartnerAccount> _partners;
+        private readonly MongoCollection<Trip> _trips;
+        private MongoDatabase _tripsDatabase;
+        private readonly string _tripsDatabaseId;
+        private MongoDatabase _networksDatabase;
+        private readonly string _networksDatabaseId = "TripThru";
+        public MongoDbStorage(string tripsDatabaseConnectionString, string tripsDatabaseName)
         {
-            var server = MongoServer.Create("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/");//7314
-            _database = server.GetDatabase(databaseName);
-            _mongo = _database.GetCollection<PartnerAccount>("users");
+            _tripsDatabaseId = RemoveSpecialCharacters(tripsDatabaseName);
+            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+            {
+                cm.AutoMap();
+                foreach (var mm in cm.AllMemberMaps)
+                    mm.SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.loc);
+            });
+            var server = MongoServer.Create(tripsDatabaseConnectionString);
+
+            _networksDatabase = server.GetDatabase(_networksDatabaseId);
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
+
+            _tripsDatabase = server.GetDatabase(_tripsDatabaseId);
+            _trips = _tripsDatabase.GetCollection<Trip>("trips");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
-            _mongo.Insert(account);
+            _partners.Insert(account);
         }
 
         public override void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
             var query = Query<PartnerAccount>.EQ(e => e.Id, account.Id);
-            var entity = _mongo.FindOne(query);
+            var entity = _partners.FindOne(query);
             if(entity == null)
                 return;
             var update = Update<PartnerAccount>.Set(e => e.PartnerName, partnerName);
-            _mongo.Update(query, update);
+            _partners.Update(query, update);
             update = Update<PartnerAccount>.Set(e => e.CallbackUrl, callbackUrl);
-            _mongo.Update(query, update);
+            _partners.Update(query, update);
             entity.CallbackUrl = callbackUrl;
         }
 
         public override IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
-            IEnumerable<PartnerAccount> networks = _mongo.FindAll();
+            IEnumerable<PartnerAccount> networks = _partners.FindAll();
             return networks;
         }
 
         public override PartnerAccount GetPartnerAccountByUsername(string userName)
         {
             var query = Query<PartnerAccount>.EQ(e => e.UserName, userName);
-            var network = _mongo.FindOne(query);
+            var network = _partners.FindOne(query);
             return network;
         }
 
+        public override PartnerAccount GetPartnerAccountByClientId(string clientId)
+        {
+            var query = Query<PartnerAccount>.EQ(e => e.ClientId, clientId);
+            var network = _partners.FindOne(query);
+            return network;
+        }
         public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
             var query = Query<PartnerAccount>.EQ(e => e.AccessToken, accessToken);
-            var network = _mongo.FindOne(query);
+            var network = _partners.FindOne(query);
             return network;
+        }
+
+        public override long GetLastTripId()
+        {
+            var lastTrips = _trips.AsQueryable<Trip>()
+                .Where(c => c.Id.Contains(this._tripsDatabaseId)).OrderByDescending(c => c.LastUpdate).ThenByDescending(c => c.Id);
+            //To do: Find a proper way to query the last Id
+            long maxId = 0;
+            var limit = 30;
+            foreach (var trip in lastTrips)
+            {
+                var tripId = long.Parse(trip.Id.SplitOnFirst('@')[0]);
+                if (tripId > maxId)
+                    maxId = tripId;
+                if (--limit == 0)
+                    break;
+            }
+            return maxId;
+        }
+        public override void InsertTrip(Trip trip)
+        {
+            this._trips.Insert(trip);
+        }
+        public override void SaveTrip(Trip trip)
+        {
+            this._trips.Save(trip);
         }
     }
 
@@ -188,11 +289,33 @@ namespace TripThruCore.Storage
                 return null;
             return _storage.GetPartnerAccountByUsername(userName);
         }
+        public static PartnerAccount GetPartnerAccountByClientId(string clientId)
+        {
+            if (_storage == null)
+                return null;
+            return _storage.GetPartnerAccountByClientId(clientId);
+        }
         public static PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
             if (_storage == null)
                 return null;
             return _storage.GetPartnerAccountByAccessToken(accessToken);
+        }
+        public static long GetLastTripId()
+        {
+            if (_storage == null)
+                return 0;
+            return _storage.GetLastTripId();
+        }
+        public static void InsertTrip(Trip trip)
+        {
+            if (_storage != null)
+                _storage.InsertTrip(trip);
+        }
+        public static void SaveTrip(Trip trip)
+        {
+            if (_storage != null)
+                _storage.SaveTrip(trip);
         }
     }
 }

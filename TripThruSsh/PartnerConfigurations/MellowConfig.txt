@@ -160,10 +160,9 @@
 		"virtualPath" : "/TripThru.Mellow/"
   },
     "Partner": {
-        "AccessToken": "QBIHCRwsfffCKPdVtbeHGheVyyZRNkcJyGPKGNSLlljVwIdSCO",
         "CallbackUrlMono": "TripThru.Mellow/",
         "ClientId": "mellow@tripthru.com",
-        "Name": "Mellow",
+		"Name": "Mellow",
         "WebUrl": "/BookingsMellow/",
         "WebUrlRelative": "/BookingsMellow/index.php"
     },

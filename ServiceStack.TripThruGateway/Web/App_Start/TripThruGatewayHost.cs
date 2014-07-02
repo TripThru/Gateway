@@ -106,7 +106,10 @@ namespace ServiceStack.TripThruGateway
                     JsonSerializer.DeserializeFromString<HostConfiguration>(
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
-                StorageManager.OpenStorage(new MongoDbStorage("TripThru"));
+                //StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                //StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", "TripThru"));
+                StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
+
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
                 GatewayService.gateway = new TripThru();

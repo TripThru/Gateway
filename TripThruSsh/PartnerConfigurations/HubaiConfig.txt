@@ -146,10 +146,9 @@
 		"virtualPath" : "/TripThru.HubaiTaxiCorporation/"
   },
     "Partner": {
-        "AccessToken": "vgpKiwzASYpnWhHscmeNMjsSUScsFUWJMNHSRmZDylWRNqWhyP",
         "CallbackUrlMono": "TripThru.HubaiTaxiCorporation/",
-        "ClientId": "hubai@tripthru.com",
-        "Name": "Hubai Taxi Corporation",
+        "ClientId" : "hubai@tripthru.com",
+		"Name" : "Hubai Taxi Corporation",
         "WebUrl": "/BookingsHubaiTaxiCorporation/",
         "WebUrlRelative": "/BookingsHubaiTaxiCorporation/index.php"
     },

@@ -11,14 +11,9 @@ using System.Runtime.Serialization;
 using ServiceStack.ServiceModel;
 using TripThruCore.Storage;
 using System.Collections.Concurrent;
+using MongoDB.Bson.Serialization.Attributes;
 namespace TripThruCore
 {
-    using MongoDB.Bson;
-    using MongoDB.Bson.Serialization.Attributes;
-    using MongoDB.Driver;
-    using MongoDB.Driver.Builders;
-    using MongoDB.Driver.GridFS;
-    using MongoDB.Driver.Linq;
     public class PartnerConfiguration
     {
         public ConfigPartner Partner { get; set; }
@@ -919,66 +914,12 @@ namespace TripThruCore
             public int Count { get { return dict.Count; } }
             public IEnumerable<Trip> Values { get { return dict.Values; } }
             public long lastID { get; set; }
-
-            private MongoCollection<Trip> mongo;
-            private string RemoveSpecialCharacters(string input)
-            {
-
-                return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
-            }
             public ActiveTrips(string id)
             {
-
-
-                //if (!MongoDB.Bson.Serialization.BsonClassMap.IsClassMapRegistered(typeof(Trip)))
-                {
-                    MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
-                    {
-                        cm.AutoMap();
-                        foreach (var mm in cm.AllMemberMaps)
-                            mm.SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
-                        cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
-                        cm.GetMemberMap(c => c.loc);
-                    });
-                }
-                var server = MongoServer.Create("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/");
-                var database = server.GetDatabase(RemoveSpecialCharacters(id));
-                mongo = database.GetCollection<Trip>("trips");
                 dict = new ConcurrentDictionary<string, Trip>();
                 dict.Clear();
-                Trip lastTrip = null;
-                var lastTrips = mongo.AsQueryable<Trip>()
-                    .Where(c => c.Id.Contains(id)).OrderByDescending(c => c.LastUpdate).ThenByDescending(c => c.Id);
-                //To do: Find a proper way to query the last Id
-                long maxId = 0;
-                var limit = 30;
-                foreach (var trip in lastTrips)
-                {
-                    var tripId = long.Parse(trip.Id.SplitOnFirst('@')[0]);
-                    if (tripId > maxId)
-                        maxId = tripId;
-                    if (--limit == 0)
-                        break;
-                }
-                this.lastID = maxId;
+                var lastDbTripId = StorageManager.GetLastTripId();
+                this.lastID = lastDbTripId;
             }
             public bool ContainsKey(string id)
             {
@@ -993,7 +934,7 @@ namespace TripThruCore
             private void InsertTrip(Trip trip)
             {
                 trip.LastUpdate = DateTime.UtcNow;
-                mongo.Insert(trip);
+                StorageManager.InsertTrip(trip);
             }
             public void Remove(string id)
             {
@@ -1007,7 +948,7 @@ namespace TripThruCore
             public void SaveTrip(Trip trip)
             {
                 trip.LastUpdate = DateTime.UtcNow;
-                mongo.Save(trip);
+                StorageManager.SaveTrip(trip);
             }
 
 

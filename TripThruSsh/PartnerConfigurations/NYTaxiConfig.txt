@@ -144,10 +144,9 @@
 		"virtualPath" : "/TripThru.NYTaxi/"
   },
     "Partner": {
-        "AccessToken": "BHMRfjKXDowLrlCdVPdUJfcwkHQqedLxtWWJSTtMrWTlJpwlVw",
         "CallbackUrlMono": "TripThru.NYTaxi/",
         "ClientId": "nytaxi@tripthru.com",
-        "Name": "NY Taxi",
+		"Name": "NY Taxi",
         "WebUrl": "/BookingsNYTaxi/",
         "WebUrlRelative": "/BookingsNYTaxi/index.php"
     },

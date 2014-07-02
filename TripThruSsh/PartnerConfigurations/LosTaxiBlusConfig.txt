@@ -3,9 +3,8 @@
   "simInterval" : 10,
   "enabled" : true,
   "partner" : {
-      "name" : "Los Taxi Blus",
-      "clientId" : "los@tripthru.com",
-      "accessToken" : "lbxQSMwsRstKAjbHfemZuyhDQDUzODxPtygDYfMJgnhcaixuIt",
+      "ClientId": "los@tripthru.com",
+	  "Name": "Los Taxi Blus",
       "callbackUrlMono" : "TripThru.LosTaxiBlus/",
 	  "webUrl" : "BookingsLosTaxiBlus/",
 	  "webUrlRelative" : "/BookingsLosTaxiBlus/index.php"

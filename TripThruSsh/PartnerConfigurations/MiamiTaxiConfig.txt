@@ -160,10 +160,9 @@
 		"virtualPath" : "/TripThru.MiamiTaxi/"
   },
     "Partner": {
-        "AccessToken": "qkPHjrHxWHrCnBvkSMMhCxgfiuoqCOvSqEzdzZhwQHhXPlXwNr",
         "CallbackUrlMono": "TripThru.MiamiTaxi/",
-        "ClientId": "miamitaxi@tripthru.com",
-        "Name": "Miami Taxi",
+        "ClientId" : "miamitaxi@tripthru.com",
+		"Name": "Miami Taxi",
         "WebUrl": "/BookingsMiamiTaxi/",
         "WebUrlRelative": "/BookingsMiamiTaxi/index.php"
     },

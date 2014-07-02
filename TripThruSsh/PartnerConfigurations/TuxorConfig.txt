@@ -159,10 +159,9 @@
         "virtualPath": "/TripThru.Tuxor/"
     },
     "partner": {
-        "accessToken": "dIOEVOwGYgnyjSCwxuNmLMPqQAPHjeijdynibQPvaLYhscGczR",
         "callbackUrlMono": "TripThru.Tuxor/",
         "clientId": "tuxor@tripthru.com",
-        "name": "Tuxor",
+		"name": "Tuxor",
         "webUrl": "BookingsTuxor/",
         "webUrlRelative": "/BookingsTuxor/index.php"
     },

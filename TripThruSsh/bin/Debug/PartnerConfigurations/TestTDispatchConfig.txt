@@ -4,8 +4,7 @@
  "enabled" : disabled,
  "partner" : {
      "name" : "Test TDispatch",
-     "clientId" : "test_tdispatch@tripthru.com",
-     "accessToken" : "test_tdispatch12ondazazxx21",
+	 "clientid": "testtdispatch@tripthru.com",
    "callbackUrlMono" : "TripThru.TestTDispatch/",
 	  "webUrl" : "BookingsTestTDispatch/",
 	  "webUrlRelative" : "/BookingsTestTDispatch/index.php"
