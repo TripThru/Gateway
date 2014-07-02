@@ -119,7 +119,8 @@ namespace ServiceStack.TripThruGateway
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
                 GatewayService.gateway = new TripThru();
-                foreach(var account in accounts)
+                foreach (var account in accounts)
+                {
                     if (Storage.UserRole.partner == account.Role && account.CallbackUrl != null &&
                         account.PartnerName != null
                         && account.TripThruAccessToken != null && account.ClientId != null)
@@ -131,6 +132,7 @@ namespace ServiceStack.TripThruGateway
                                 account.CallbackUrl
                                 )
                             );
+                }
                 MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
                 MapTools.LoadGeoData();
             }

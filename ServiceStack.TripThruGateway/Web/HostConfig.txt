@@ -1,4 +1,4 @@
 ﻿{
 	"virtualPath" : "/",
-	"debug" : true
+	"debug" : false
 }

@@ -21,7 +21,7 @@ namespace TripThruCore.Storage
 {
     public abstract class Storage
     {
-        public enum UserRole { admin, partner, user }
+        public enum UserRole { admin, partner, demo }
         public abstract void CreatePartnerAccount(PartnerAccount account);
         public abstract void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl);
         public abstract IEnumerable<PartnerAccount> GetPartnerAccounts();
