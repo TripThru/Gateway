@@ -11,7 +11,7 @@ namespace TripThruSsh
     class Program
     {
 
-        private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
+        private static Boolean fullDeploy = false; //if true will upload and replace everything, else just update partner configuations
         private static Dictionary<string, Environment> environments = new Dictionary<string, Environment>{
             {"sandbox", new Environment{
                      host = "54.201.134.194",
@@ -245,7 +245,7 @@ namespace TripThruSsh
                 {
                     try
                     {
-                        var response = client.DownloadString(@config.Partner.CallbackUrlMono.ToString() + "log?access_token=SZJTBPJyFblcqCBbncRNuDOdVMeNFRaabdMGqOhCaxPIzzYBYU");
+                        var response = client.DownloadString(@config.Partner.CallbackUrlMono.ToString());
                         var analyzeResponse = JsonSerializer.DeserializeFromString<ResponseRequest>(response);
                         if (analyzeResponse.ResultCode.Equals("OK"))
                         {
