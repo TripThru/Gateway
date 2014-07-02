@@ -1,5 +1,4 @@
 ﻿{
-	"host": {
-	  "virtualPath" : "/"
-	}
+	"virtualPath" : "/",
+	"debug" : true
 }

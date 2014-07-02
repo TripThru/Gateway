@@ -52,7 +52,7 @@ namespace ServiceStack.TripThruPartnerGateway.App_Start
             container.RegisterAutoWiredAs<TripThruPartnerGateway.InitPartnerService, InitPartnerService>();
 
             var configuration = 
-                JsonSerializer.DeserializeFromString<HostConfiguration>(
+                JsonSerializer.DeserializeFromString<TripThruCore.PartnerConfiguration>(
                 File.ReadAllText("~/PartnerConfiguration.txt".MapHostAbsolutePath()));
             //Authentication
             Plugins.Add(

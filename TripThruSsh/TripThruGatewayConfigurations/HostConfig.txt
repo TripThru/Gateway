@@ -1,5 +1,4 @@
 ﻿{
-	"host" : {
-	  "virtualPath" : "/TripThru.TripThruGateway/"
-	}
+	"virtualPath" : "/TripThru.TripThruGateway/",
+	"debug": false
 }

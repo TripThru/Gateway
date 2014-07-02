@@ -36,9 +36,15 @@ namespace ServiceStack.TripThruPartnerGateway
             MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
-            //StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
-            //StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", configuration.Partner.ClientId));
-            StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", configuration.Partner.ClientId));
+            if (configuration.host.debug)
+            {
+                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                //StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", configuration.Partner.ClientId));
+            }
+            else
+            {
+                StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", configuration.Partner.ClientId));
+            }
 
             var accounts = StorageManager.GetPartnerAccounts();
             var account = StorageManager.GetPartnerAccountByClientId(configuration.Partner.ClientId);

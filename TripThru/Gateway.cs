@@ -24,7 +24,7 @@ namespace TripThruCore
         public List<PartnerFleet> partnerFleets;
         public string preferedPartnerId { get; set; }
         public Boolean Enabled { get; set; }
-        public Host host { get; set; }
+        public HostConfiguration host { get; set; }
 
         public class ConfigPartner
         {
@@ -57,11 +57,13 @@ namespace TripThruCore
             public Location Start { get; set; }
             public Location End { get; set; }
         }
+    }
 
-        public class Host
-        {
-            public string virtualPath { get; set; }
-        }
+
+    public class HostConfiguration
+    {
+        public string virtualPath { get; set; }
+        public bool debug { get; set; }
     }
 
     public enum Status { New, Queued, Dispatched, Confirmed, Enroute, ArrivedAndWaiting, PickedUp, DroppedOff, Complete, Rejected, Cancelled };

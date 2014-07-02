@@ -106,9 +106,15 @@ namespace ServiceStack.TripThruGateway
                     JsonSerializer.DeserializeFromString<HostConfiguration>(
                         File.ReadAllText("~/HostConfig.txt".MapHostAbsolutePath()));
 
-                //StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
-                //StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", "TripThru"));
-                StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
+                if (configuration.debug)
+                {
+                    StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                    //StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
+                }
+                else
+                {
+                    StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/", "TripThru"));
+                }
 
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
@@ -162,16 +168,6 @@ namespace ServiceStack.TripThruGateway
             session.Id = user.ClientId;
             session.Roles = new List<string>() {user.Role.ToString()};
             authService.SaveSession(session, new TimeSpan(7, 0, 0, 0));
-        }
-    }
-
-    public class HostConfiguration
-    {
-        public Host host { get; set; }
-
-        public class Host
-        {
-            public string virtualPath { get; set; }
         }
     }
 }

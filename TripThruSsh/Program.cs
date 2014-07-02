@@ -17,19 +17,22 @@ namespace TripThruSsh
                      host = "54.201.134.194",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
-                     sshPort = 22
+                     sshPort = 22,
+                     debug = false
             }},
             {"digital-ocean", new Environment{
                      host = "107.170.240.134",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
-                     sshPort = 22
+                     sshPort = 22,
+                     debug = false
             }},
             {"vagrant", new Environment{
                      host = "192.168.0.135",
                      user = "tripservice",
                      password = "Tr1PServ1CeSt@Ck",
-                     sshPort = 22
+                     sshPort = 22,
+                     debug = true
             }}
         };
 
@@ -82,6 +85,7 @@ namespace TripThruSsh
                     configuration.TripThruUrlMono = monoServer + configuration.TripThruUrlMono;
                     configuration.Partner.CallbackUrlMono = monoServer + configuration.Partner.CallbackUrlMono;
                     configuration.Partner.WebUrl = webServer + configuration.Partner.WebUrl;
+                    configuration.host.debug = env.debug;
 
                     string configStr = JsonSerializer.SerializeToString<PartnerConfiguration>(configuration);
                     File.WriteAllText(partnerConfigurationFile, configStr);
@@ -125,6 +129,14 @@ namespace TripThruSsh
         private static void UpdateTripThruGatewayConfiguration()
         {
             ssh.RunCommand("rm " + remoteFilePath + "ServiceStack.TripThruGateway/Web/HostConfig.txt");
+            var configuration = JsonSerializer.DeserializeFromString<HostConfiguration>(
+                File.ReadAllText("TripThruGatewayConfigurations/HostConfig.txt"));
+
+            configuration.debug = env.debug;
+
+            string configStr = JsonSerializer.SerializeToString<HostConfiguration>(configuration);
+            File.WriteAllText("TripThruGatewayConfigurations/HostConfig.txt", configStr);
+
             sftpBase.Put("TripThruGatewayConfigurations/HostConfig.txt",
                         remoteFilePath + "ServiceStack.TripThruGateway/Web/HostConfig.txt");
         }
@@ -149,9 +161,7 @@ namespace TripThruSsh
                 bookingwebConfig.WriteLine("HomeUrl=" + configuration.Partner.WebUrl);
                 bookingwebConfig.WriteLine("RelativeHomeUrl=" + configuration.Partner.WebUrlRelative);
                 bookingwebConfig.WriteLine("TripThruUrl=" + configuration.TripThruUrlMono);
-                bookingwebConfig.WriteLine("TripThruAccessToken=" + "jaosid1201231"); //fixed tripthru access token
                 bookingwebConfig.WriteLine("PartnerUrl=" + configuration.Partner.CallbackUrlMono);
-                bookingwebConfig.WriteLine("PartnerAccessToken=" + configuration.Partner.AccessToken);
                 bookingwebConfig.WriteLine("PartnerName=" + name);
                 bookingwebConfig.WriteLine("PartnerId=" + configuration.Partner.ClientId);
                 bookingwebConfig.Flush();
@@ -305,5 +315,6 @@ namespace TripThruSsh
         public string user { get; set; }
         public string password { get; set; }
         public int sshPort { get; set; }
+        public bool debug { get; set; }
     }
 }
