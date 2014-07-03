@@ -126,7 +126,7 @@ namespace TripThruCore.Storage
         private readonly string _networksDatabaseId = "TripThru";
         public MongoDbStorage(string tripsDatabaseConnectionString, string tripsDatabaseName)
         {
-            _tripsDatabaseId = RemoveSpecialCharacters(tripsDatabaseName);
+            _tripsDatabaseId = tripsDatabaseName;
             MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
             {
                 cm.AutoMap();
@@ -158,7 +158,7 @@ namespace TripThruCore.Storage
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
             _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
 
-            _tripsDatabase = server.GetDatabase(_tripsDatabaseId);
+            _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
             _trips = _tripsDatabase.GetCollection<Trip>("trips");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
