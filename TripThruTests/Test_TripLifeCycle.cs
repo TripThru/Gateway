@@ -8,6 +8,7 @@ using TripThruTests;
 using Utils;
 using TripThruCore;
 using System.Threading;
+using TripThruCore.Storage;
 
 namespace Tests
 {
@@ -20,6 +21,7 @@ namespace Tests
         {
             Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
+            StorageManager.OpenStorage(new SqliteStorage("App_Data/db.sqlite"));
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;

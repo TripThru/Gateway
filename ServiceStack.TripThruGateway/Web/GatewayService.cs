@@ -505,11 +505,13 @@ namespace ServiceStack.TripThruGateway
                     ResultCode = Gateway.Result.UnknownError
                 };
                 var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                var user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 var clientId = "none";
                 try
                 {
-                    if (acct != null && message == null)
-                    {
+                    if ((!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin)) && message == null){
+                        if(acct == null)
+                            acct = user;
                         clientId = acct.ClientId;
                         Logger.BeginRequest("QuoteTrip received from " + acct.UserName, request);
                         var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
