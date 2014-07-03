@@ -541,17 +541,22 @@ namespace TripThruCore
             Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
             if (destPartner != null)
             {
+                UpdateTripStatusResponse response = null;
                 Logger.AddTag("Destination partner", destPartner.name);
                 Logger.SetServicingId(destPartner.ID);
-                string originClientID = r.clientID;
-                ChangeClientIDToTripThru(r);
-                UpdateTripStatusResponse response = destPartner.UpdateTripStatus(r);
-                r.clientID = originClientID;
+                if (ShouldForwardTripUpdate(r, destPartner))
+                {
+                    string originClientID = r.clientID;
+                    ChangeClientIDToTripThru(r);
+                    response = destPartner.UpdateTripStatus(r);
+                    r.clientID = originClientID;
+                }
+                else
+                    response = new UpdateTripStatusResponse(result: Result.OK);
+                
                 if (activeTrips.ContainsKey(r.tripID) && r.driverLocation != null){
                     if (activeTrips[r.tripID].DriverInitiaLocation == null)
-                    {
                         activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
-                    }
                     switch (r.status)
                     {
                         case Status.Enroute:
@@ -586,6 +591,11 @@ namespace TripThruCore
             Logger.Log("Destination partner trip not found");
             Logger.AddTag("ClientId", r.clientID);
             return new UpdateTripStatusResponse(result: Result.NotFound);
+        }
+
+        private bool ShouldForwardTripUpdate(UpdateTripStatusRequest r, Gateway destinationPartner)
+        {
+            return r.clientID != destinationPartner.ID;
         }
 
         private bool SuccesAndTripStillActive(UpdateTripStatusRequest r, UpdateTripStatusResponse response)
