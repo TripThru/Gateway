@@ -510,7 +510,7 @@ namespace TripThruCore
                 if (IsOneOfTheActiveTrips())
                 {
                     partner.activeTrips[ID].Status = status;
-                    if (TripHasForeignDependency() && lastStatusNotifiedToPartner != status && notifyPartner)
+                    if (lastStatusNotifiedToPartner != status && notifyPartner)
                         NotifyForeignPartner(status, driverLocation, eta);
                 }
                 else
