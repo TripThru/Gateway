@@ -373,7 +373,7 @@ namespace TripThruCore
             if (accounts != null)
                 foreach (PartnerAccount account in accounts)
                 {
-                    if (Storage.Storage.UserRole.partner != account.Role)
+                    if (Storage.Storage.UserRole.partner != account.Role && account.ClientId != "TripThru")
                         continue;
                     if (!partnerAccounts.ContainsKey(account.ClientId))
                         partnerAccounts[account.ClientId] = account;
