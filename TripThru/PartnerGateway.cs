@@ -500,11 +500,7 @@ namespace TripThruCore
                 Logger.Log("Trip status changed from " + _status + " to " + status + (driverLocation != null ? (" and driver's location has changed to " + driverLocation) : "") + (eta != null ? (" and eta has changed to " + eta) : ""));
                 _status = status;
                 if (driverLocation != null)
-                {
-                    this.driverLocation = driverLocation;
-                    if (driverInitiaLocation == null)
-                        this.driverInitiaLocation = driverLocation;
-                }
+                    UpdateDriverLocation(driverLocation);
                 if (eta != null)
                     this.ETA = eta;
                 if (IsOneOfTheActiveTrips())
@@ -530,6 +526,12 @@ namespace TripThruCore
                 partner.DeactivateTripAndUpdateStats(ID, status);
 
             lastStatusNotifiedToPartner = status;
+        }
+        private void UpdateDriverLocation(Location location)
+        {
+            this.driverLocation = driverLocation;
+            if (driverInitiaLocation == null)
+                this.driverInitiaLocation = driverLocation;
         }
         private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
         {
