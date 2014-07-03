@@ -196,10 +196,15 @@ namespace TripThruCore
                 if (PartnerHasBeenSelected(partner))
                 {
                     RecordTripOriginatingAndServicingPartner(r, partner);
-                    var partnerClientId = r.clientID;
-                    ChangeTheClientIDToTripThru(r);
-                    response = partner.DispatchTrip(r);
-                    r.clientID = partnerClientId;
+                    if (TripIsLocal(r))
+                        response = new DispatchTripResponse(result: Result.OK);
+                    else
+                    {
+                        var partnerClientId = r.clientID;
+                        ChangeTheClientIDToTripThru(r);
+                        response = partner.DispatchTrip(r);
+                        r.clientID = partnerClientId;
+                    }
                     if (response.result != Result.OK)
                         Logger.Log("DispatchTrip to " + partner.name + " failed");
                     else
@@ -211,6 +216,11 @@ namespace TripThruCore
             else
                 response = MakeRejectDispatchResponse(r, partners[r.clientID], null);
             return response;
+        }
+
+        private bool TripIsLocal(DispatchTripRequest r)
+        {
+            return r.clientID == r.partnerID;
         }
 
         private void MakeTripAndAddItToActive(DispatchTripRequest r, Gateway partner)
