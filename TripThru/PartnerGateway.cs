@@ -516,7 +516,6 @@ namespace TripThruCore
             {
                 if (service == Origination.Foreign)
                 {
-                    //Gateway.GetTripStatusResponse resp = GetStatsFromForeignServiceProvider();
                     partner.DeactivateTripAndUpdateStats(ID, Status.Complete, 0, 0);
                 }
                 else
