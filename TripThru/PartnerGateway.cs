@@ -178,6 +178,10 @@ namespace TripThruCore
             }
             return response;
         }
+        public bool CreateLocalTripInTripThru(PartnerTrip trip)
+        {
+            return TryToDispatchToForeignProvider(trip, this.ID);
+        }
         public bool TryToDispatchToForeignProvider(PartnerTrip trip, string partnerID = null)
         {
             Logger.Log("TryToDispatchToForeignProvider: partnerID = " + partnerID);
@@ -202,9 +206,14 @@ namespace TripThruCore
             Gateway.DispatchTripResponse response = tripthru.DispatchTrip(request);
             if (response.result == Gateway.Result.OK)
             {
-                // Actually, at this point its just in the partner's queue, until its dispatch to the partner's drivers -- so no status update. 
-                trip.service = PartnerTrip.Origination.Foreign;
-                Logger.Log("Trip was successfully dispatched through TripThru");
+                if (partnerID == this.ID)
+                    Logger.Log("Local trip was successfully created in TripThru");
+                else
+                {
+                    // Actually, at this point its just in the partner's queue, until its dispatch to the partner's drivers -- so no status update. 
+                    trip.service = PartnerTrip.Origination.Foreign;
+                    Logger.Log("Trip was successfully dispatched through TripThru");
+                }
 
             }
             else
@@ -808,7 +817,7 @@ namespace TripThruCore
             }
             if (t.status != Status.Queued)
                 throw new Exception("Invalid 'Dispatch' status");
-            if (ThereAreAvailableDrivers())
+            if (ThereAreAvailableDrivers() && partner.CreateLocalTripInTripThru(t))
             {
                 DispatchToFirstAvailableDriver(t);
                 t.UpdateTripStatus(notifyPartner: true, status: Status.Dispatched, driverLocation: t.driver.location, eta: t.pickupTime);
