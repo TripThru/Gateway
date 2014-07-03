@@ -135,7 +135,7 @@
     ],
     "host": {
         "virtualPath": "/TripThru.Netro/",
-		"debug": false
+		"debug": true
     },
     "partner": {
         "callbackUrlMono": "http://192.168.0.101:17188/",

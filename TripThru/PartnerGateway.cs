@@ -818,8 +818,13 @@ namespace TripThruCore
             }
             if (t.status != Status.Queued)
                 throw new Exception("Invalid 'Dispatch' status");
-            if (ThereAreAvailableDrivers() && partner.CreateLocalTripInTripThru(t))
+
+            var readyForDispatch = true;
+            if (ThereAreAvailableDrivers())
             {
+                if (TripOriginatedLocally(t))
+                    readyForDispatch = partner.CreateLocalTripInTripThru(t);
+                if (!readyForDispatch) return false;
                 DispatchToFirstAvailableDriver(t);
                 t.UpdateTripStatus(notifyPartner: true, status: Status.Dispatched, driverLocation: t.driver.location, eta: t.pickupTime);
                 return true;

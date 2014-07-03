@@ -211,10 +211,16 @@ namespace TripThruCore
                         MakeTripAndAddItToActive(r, partner);
                 }
                 else
+                {
                     response = MakeRejectDispatchResponse(r, partners[r.clientID], partner);
+                    Logger.Log("DispatchTrip failed: No partner found.");
+                }
             }
             else
+            {
                 response = MakeRejectDispatchResponse(r, partners[r.clientID], null);
+                Logger.Log("DispatchTrip failed: Trip already active");
+            }
             return response;
         }
 
