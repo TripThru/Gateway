@@ -528,9 +528,9 @@ namespace TripThruCore
         }
         private void UpdateDriverLocation(Location location)
         {
-            this.driverLocation = driverLocation;
+            this.driverLocation = location;
             if (driverInitiaLocation == null)
-                this.driverInitiaLocation = driverLocation;
+                this.driverInitiaLocation = location;
         }
         private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
         {
