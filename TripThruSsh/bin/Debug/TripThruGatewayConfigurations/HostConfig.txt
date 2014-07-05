@@ -1,1 +1,4 @@
-{"virtualPath":"/TripThru.TripThruGateway/","debug":false}
+﻿{
+	"virtualPath" : "/TripThru.TripThruGateway/",
+	"debug": false
+}
