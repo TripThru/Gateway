@@ -25,6 +25,7 @@ namespace TripThruCore
         public string preferedPartnerId { get; set; }
         public Boolean Enabled { get; set; }
         public HostConfiguration host { get; set; }
+        public string UrlsTrips { get; set; }
 
         public class ConfigPartner
         {

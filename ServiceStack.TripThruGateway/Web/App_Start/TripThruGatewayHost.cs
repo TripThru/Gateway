@@ -108,8 +108,8 @@ namespace ServiceStack.TripThruGateway
 
                 if (configuration.debug)
                 {
-                    StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
-                    //StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
+                    //StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                    StorageManager.OpenStorage(new MongoDbStorage("mongodb://192.168.0.106:27017/", "TripThru"));
                 }
                 else
                 {

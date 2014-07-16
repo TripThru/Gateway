@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using TripThruCore;
 using Utils;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace TripThruGenerateFilesOfRoutes
 {
@@ -76,63 +79,217 @@ namespace TripThruGenerateFilesOfRoutes
             return wayPoints;
         }
 
+        //static void Main()
+        //{
+
+        //    var locationsLists = GetLocationsLists();
+
+        //    using (var sr = new StreamReader("App_Data\\Geo-Routes.txt"))
+        //    {
+        //        var lines = sr.ReadToEnd();
+        //        MapTools.routes = JsonConvert.DeserializeObject<Dictionary<string, Route>>(lines) ??
+        //                          new Dictionary<string, Route>();
+        //    }
+        //    using (var sr = new StreamReader("App_Data\\Geo-Location-Names.txt"))
+        //    {
+        //        var lines = sr.ReadToEnd();
+        //        MapTools.locationNames = JsonConvert.DeserializeObject<Dictionary<string, string>>(lines) ??
+        //                                 new Dictionary<string, string>();
+        //    }
+        //    using (var sr = new StreamReader("App_Data\\Geo-Location-Addresses.txt"))
+        //    {
+        //        var lines = sr.ReadToEnd();
+        //        MapTools.locationAddresses = JsonConvert.DeserializeObject<Dictionary<string, Pair<string, string>>>(lines) ??
+        //                                     new Dictionary<string, Pair<string, string>>();
+        //    }
+
+        //    int tripCount = 0;
+        //    foreach (LocationsList locationList in locationsLists)
+        //        foreach (Location location in locationList.locations)
+        //            foreach (Location l in locationList.locations.Where(l => !l.Equals(location)))
+        //            {
+        //                tripCount++;
+        //                System.Threading.Thread.Sleep(2000);
+        //                MapTools.GetRoute(location, l);
+        //            }
+
+        //    var routesString = JsonConvert.SerializeObject(MapTools.routes);
+        //    var locationNamesString = JsonConvert.SerializeObject(MapTools.locationNames);
+        //    var locationAddresses = JsonConvert.SerializeObject(MapTools.locationAddresses);
+
+        //    File.WriteAllText("App_Data\\Geo-Routes.txt", String.Empty);
+        //    using (var sr = new StreamWriter("App_Data\\Geo-Routes.txt"))
+        //    {
+        //        sr.Write(routesString);
+        //    }
+        //    File.WriteAllText("App_Data\\Geo-Location-Names.txt", String.Empty);
+        //    using (var sr = new StreamWriter("App_Data\\Geo-Location-Names.txt"))
+        //    {
+        //        sr.Write(locationNamesString);
+        //    }
+        //    File.WriteAllText("App_Data\\Geo-Location-Addresses.txt", String.Empty);
+        //    using (var sr = new StreamWriter("App_Data\\Geo-Location-Addresses.txt"))
+        //    {
+        //        sr.Write(locationAddresses);
+        //    }
+
+
+        //    Console.WriteLine(tripCount + " trips generated");
+        //    Console.ReadKey();
+        //}
+
         static void Main()
         {
+            const string host = "mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/";
+            const string database = "TripThru";
+            const string nameCollection = "trips";
+            const string pathTripData = @"C:\Users\OscarErnesto\Downloads\tripData2013\trip_data_1.csv\trip_data_1.csv";
+            const string pathTripFare = @"C:\Users\OscarErnesto\Downloads\faredata2013\trip_fare_1.csv\trip_fare_1.csv";
+            const string pathRandomsNames =
+                @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\Db\FakeName.csv";
 
-            var locationsLists = GetLocationsLists();
+            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+            {
+                cm.AutoMap();
+                foreach (var mm in cm.AllMemberMaps)
+                    mm.SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.loc);
+            });
 
-            using (var sr = new StreamReader("App_Data\\Geo-Routes.txt"))
+            MongoCollection<Trip> trips;
+            var server = MongoServer.Create(host);
+            var tripsDatabase = server.GetDatabase(database);
+            trips = tripsDatabase.GetCollection<Trip>(nameCollection);
+            var tripReader = new StreamReader(File.OpenRead(pathTripData));
+            var fareReader = new StreamReader(File.OpenRead(pathTripFare));
+            var namesReader = new StreamReader(File.OpenRead(pathRandomsNames));
+
+            var r = new Random(DateTime.Now.Millisecond);
+
+            var listNames = new Dictionary<string, string>();
+            var listPassengerNames = new Dictionary<string, string>();
+
+            var countLines = 1;
+
+            namesReader.ReadLine();
+            tripReader.ReadLine();
+            fareReader.ReadLine();
+            int re = 0;
+            while (re < 1000)
             {
-                var lines = sr.ReadToEnd();
-                MapTools.routes = JsonConvert.DeserializeObject<Dictionary<string, Route>>(lines) ??
-                                  new Dictionary<string, Route>();
-            }
-            using (var sr = new StreamReader("App_Data\\Geo-Location-Names.txt"))
-            {
-                var lines = sr.ReadToEnd();
-                MapTools.locationNames = JsonConvert.DeserializeObject<Dictionary<string, string>>(lines) ??
-                                         new Dictionary<string, string>();
-            }
-            using (var sr = new StreamReader("App_Data\\Geo-Location-Addresses.txt"))
-            {
-                var lines = sr.ReadToEnd();
-                MapTools.locationAddresses = JsonConvert.DeserializeObject<Dictionary<string, Pair<string, string>>>(lines) ??
-                                             new Dictionary<string, Pair<string, string>>();
+                tripReader.ReadLine();
+                fareReader.ReadLine();
+                re++;
             }
 
-            int tripCount = 0;
-            foreach (LocationsList locationList in locationsLists)
-                foreach (Location location in locationList.locations)
-                    foreach (Location l in locationList.locations.Where(l => !l.Equals(location)))
+            while (countLines <= 5000)
+            {
+                var trip = new Trip();
+                var tripLine = tripReader.ReadLine();
+                var fareLine = fareReader.ReadLine();
+                if (tripLine == null) continue;
+                var tripValues = tripLine.Split(',');
+                if (fareLine == null) continue;
+                var fareValues = fareLine.Split(',');
+
+                if (!listNames.ContainsKey(tripValues[0]))
+                {
+                    var identity = namesReader.ReadLine();
+                    if (identity != null)
                     {
-                        tripCount++;
-                        System.Threading.Thread.Sleep(2000);
-                        MapTools.GetRoute(location, l);
+                        var name = identity.Split('\t');
+                        var completeName = name[3] + " " + name[4] + " " + name[5];
+                        listNames.Add(tripValues[0], completeName);
                     }
+                }
+                if (!listPassengerNames.ContainsKey(tripValues[1]))
+                {
+                    var identity = namesReader.ReadLine();
+                    if (identity != null)
+                    {
+                        var name = identity.Split('\t');
+                        var completeName = name[3] + " " + name[4] + " " + name[5];
+                        listPassengerNames.Add(tripValues[1], completeName);
+                    }
+                }
 
-            var routesString = JsonConvert.SerializeObject(MapTools.routes);
-            var locationNamesString = JsonConvert.SerializeObject(MapTools.locationNames);
-            var locationAddresses = JsonConvert.SerializeObject(MapTools.locationAddresses);
 
-            File.WriteAllText("App_Data\\Geo-Routes.txt", String.Empty);
-            using (var sr = new StreamWriter("App_Data\\Geo-Routes.txt"))
-            {
-                sr.Write(routesString);
+                try
+                {
+                    trip.Id = countLines + "d@nytaxi@tripthru.com";
+                    trip.DriverName = listNames[tripValues[0]];
+                    var lat = Convert.ToDouble(tripValues[13]);
+                    var lng = Convert.ToDouble(tripValues[12]);
+                    if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
+                        trip.DropoffLocation = new Location(lat, lng);
+                    else
+                    {
+                        Console.WriteLine("Incomplete Trip");
+                        continue;
+                    }
+                    trip.DriverInitiaLocation = new Location(40.769004, -73.981376);
+                    trip.DropoffTime = Convert.ToDateTime(tripValues[6]).AddYears(1).AddMonths(5);
+                    trip.DropoffTime = trip.DropoffTime.Value.AddDays(-1 * trip.DropoffTime.Value.Day);
+                    trip.DropoffTime = trip.DropoffTime.Value.AddDays(r.Next(1, 31)); 
+                    trip.EnrouteDistance = Convert.ToDouble(tripValues[9]);
+                    trip.FleetId = "30";
+                    trip.FleetName = "NY Taxi";
+                    trip.OriginatingPartnerId = "nytaxi@tripthru.com";
+                    trip.OriginatingPartnerName = "NY Taxi";
+                    trip.PassengerName = listPassengerNames[tripValues[1]];
+                    lat = Convert.ToDouble(tripValues[11]);
+                    lng = Convert.ToDouble(tripValues[10]);
+                    if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
+                        trip.PickupLocation = new Location(lat, lng);
+                    else
+                    {
+                        Console.WriteLine("Incomplete Trip");
+                        continue;
+                    }
+                    trip.PickupTime = Convert.ToDateTime(tripValues[5]).AddYears(1).AddMonths(5);
+                    trip.PickupTime = trip.PickupTime.Value.AddDays(-1 * trip.PickupTime.Value.Day);
+                    trip.PickupTime = trip.PickupTime.Value.AddDays(trip.DropoffTime.Value.Day);
+                    trip.LastUpdate = trip.DropoffTime;
+                    trip.Price = Convert.ToDouble(fareValues[10]);
+                    trip.ServicingPartnerId = "nytaxi@tripthru.com";
+                    trip.ServicingPartnerName = "NY Taxi";
+                    trip.Status = Status.Complete;
+
+                    trips.Insert(trip);
+                    Console.WriteLine(trip.Id);
+                    countLines++;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("ERROR Incomplete Trip");
+                }
             }
-            File.WriteAllText("App_Data\\Geo-Location-Names.txt", String.Empty);
-            using (var sr = new StreamWriter("App_Data\\Geo-Location-Names.txt"))
+            foreach (var variable in listNames)
             {
-                sr.Write(locationNamesString);
+                Console.WriteLine(variable.Value);
             }
-            File.WriteAllText("App_Data\\Geo-Location-Addresses.txt", String.Empty);
-            using (var sr = new StreamWriter("App_Data\\Geo-Location-Addresses.txt"))
-            {
-                sr.Write(locationAddresses);
-            }
-
-
-            Console.WriteLine(tripCount + " trips generated");
-            Console.ReadKey();
+            Console.WriteLine(listNames.Count);
+            Console.WriteLine(listPassengerNames.Count);
+            Console.ReadLine();
         }
 
         private static List<Location> DecodePolylinePoints(string encodedPoints)

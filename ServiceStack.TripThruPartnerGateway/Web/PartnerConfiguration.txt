@@ -1,5 +1,7 @@
 ﻿{
     "enabled": true,
+	"UrlsTrips": "~/../../Db/trip_data_8.csv",
+	"UrlsNames": "~/../../Db/FakeName.csv",
     "fleets": [
         {
             "baseCost": 3.0,
@@ -138,11 +140,11 @@
 		"debug": true
     },
     "partner": {
-        "callbackUrlMono": "http://192.168.0.101:17188/",
+        "callbackUrlMono": "http://localhost:17188/",
         "webUrl": "BookingsNetro/",
         "webUrlRelative": "/BookingsNetro/index.php",
 		"clientId": "netro@tripthru.com"
     },
     "simInterval": 10,
-    "tripThruUrlMono" : "http://192.168.0.101:17187/"
+    "tripThruUrlMono" : "http://localhost:17187/"
 }

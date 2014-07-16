@@ -38,8 +38,8 @@ namespace ServiceStack.TripThruPartnerGateway
 
             if (configuration.host.debug)
             {
-                StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
-                //StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", configuration.Partner.ClientId));
+                //StorageManager.OpenStorage(new SqliteStorage("~/../../Db/db.sqlite".MapHostAbsolutePath()));
+                StorageManager.OpenStorage(new MongoDbStorage("mongodb://192.168.0.106:27017/", configuration.Partner.ClientId));
             }
             else
             {
@@ -103,6 +103,7 @@ namespace ServiceStack.TripThruPartnerGateway
 
                 var lastHealthCheck = DateTime.UtcNow;
                 Thread.Sleep(new TimeSpan(0,3,0)); //This Sleep to give other partners time to initialize
+                Console.WriteLine("Simulation Start.");
                 while (true)
                 {
                     try

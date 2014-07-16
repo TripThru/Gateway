@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using ServiceStack.Common.Utils;
 using ServiceStack.Text;
 using Utils;
 using TripThruCore.Storage;
@@ -54,6 +55,10 @@ namespace TripThruCore
                 if (vehicleTypes == null)
                     vehicleTypes = new List<VehicleType>();
 
+                string urlTrips = null;
+                if (configuration.UrlsTrips != null)
+                    urlTrips = configuration.UrlsTrips.MapHostAbsolutePath();
+
                 var fleet = new PartnerFleet(
                     name: partnerFleet.Name,
                     location: location,
@@ -61,6 +66,7 @@ namespace TripThruCore
                     drivers: drivers,
                     vehicleTypes: vehicleTypes,
                     possibleTrips: trips,
+                    urlTripsFile: urlTrips,
                     baseCost: partnerFleet.BaseCost,
                     costPerMile: partnerFleet.CostPerMile,
                     tripsPerHour: partnerFleet.TripsPerHour,
@@ -697,6 +703,13 @@ namespace TripThruCore
         public LinkedList<Driver> availableDrivers;
         public LinkedList<Driver> returningDrivers;
         public Pair<Location, Location>[] possibleTrips;
+
+        public StreamReader TripReader;
+        public StreamReader NameReader;
+
+        public Dictionary<string, string>listDriverNames = new Dictionary<string, string>();
+        public Dictionary<string, string> listPassengerNames = new Dictionary<string, string>();
+
         public LinkedList<PartnerTrip> queue;
         public Passenger[] passengers;
         public readonly double tripsPerHour;
@@ -710,11 +723,11 @@ namespace TripThruCore
         public readonly TimeSpan retryInterval = new TimeSpan(0, 5, 0);
         public readonly TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
         public readonly TimeSpan removalAge = new TimeSpan(0, 5, 0);
-        public const int maxActiveTrips = 5;
+        public int maxActiveTrips = 5;
 
 
         public PartnerFleet(string name, Location location, List<Zone> coverage, List<Driver> drivers, List<VehicleType> vehicleTypes,
-            List<Pair<Location, Location>> possibleTrips, double costPerMile, double baseCost, double tripsPerHour, List<Passenger> passengers, Partner partner = null)
+            List<Pair<Location, Location>> possibleTrips, double costPerMile, double baseCost, double tripsPerHour, List<Passenger> passengers, Partner partner = null, string urlTripsFile = null, string urlNamesFile = null)
             : base(name)
         {
             this.coverage = coverage;
@@ -727,6 +740,30 @@ namespace TripThruCore
             this.passengers = passengers.ToArray();
             this.possibleTrips = possibleTrips.ToArray();
 
+            if (urlTripsFile != null)
+            {
+                try
+                {
+                    TripReader = new StreamReader(File.OpenRead(urlTripsFile));
+                    TripReader.ReadLine();
+                    TripReader.ReadLine();
+                    maxActiveTrips = 100;
+                    try
+                    {
+                        if (urlNamesFile != null)
+                            NameReader = new StreamReader(File.OpenRead(urlNamesFile));
+                    }
+                    catch
+                    {
+                        NameReader = null;
+                    }
+                }
+                catch
+                {
+                    TripReader = null;
+                }
+                
+            }
 
             List<Pair<Location, Location>> coveredTrips = new List<Pair<Location, Location>>();
             foreach (Pair<Location, Location> trip in possibleTrips)
@@ -876,10 +913,77 @@ namespace TripThruCore
 
         private void GenerateRandomTrip(DateTime now)
         {
-            Passenger passenger = passengers[random.Next(passengers.Length)];
-            Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
-            DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
-            QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+            var possibleTrip = GetPossibleTrip();
+            if (possibleTrip == null)
+            {
+                Passenger passenger = passengers[random.Next(passengers.Length)];
+                Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
+                DateTime pickupTime = now + new TimeSpan(0, random.Next((int) tripMaxAdvancedNotice.TotalMinutes), 0);
+                QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+            }
+            else
+            {
+                Passenger passenger = GetPassenger(possibleTrip);
+                Pair<Location, Location> fromTo = getLocationPair(possibleTrip);
+                DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
+                QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+            }
+        }
+
+
+
+        private string[] GetPossibleTrip()
+        {
+            if (TripReader == null) return null;
+            while (!TripReader.EndOfStream)
+            {
+                var tripLine = TripReader.ReadLine();
+                if (tripLine == null) continue;
+                var tripValues = tripLine.Split(',');
+                try
+                {
+                    var latDrop = Convert.ToDouble(tripValues[13]);
+                    var lngDrop = Convert.ToDouble(tripValues[12]);
+                    var latPick = Convert.ToDouble(tripValues[11]);
+                    var lngPick = Convert.ToDouble(tripValues[10]);
+                    if (CoordinateRange(latDrop) && CoordinateRange(lngDrop) && CoordinateRange(latPick) && CoordinateRange(lngPick))
+                    {
+                        return tripValues;
+                    }
+
+                }
+                catch (Exception)
+                {
+                        
+                }
+            }
+            return null;
+        }
+        private Pair<Location, Location> getLocationPair(string[] valueStrings)
+        {
+            var latDrop = Convert.ToDouble(valueStrings[13]);
+            var lngDrop = Convert.ToDouble(valueStrings[12]);
+            var latPick = Convert.ToDouble(valueStrings[11]);
+            var lngPick = Convert.ToDouble(valueStrings[10]);
+            return new Pair<Location, Location>(new Location(latPick,lngPick), new Location(latDrop, lngDrop));
+        }
+        private Passenger GetPassenger(IList<string> valueStrings)
+        {
+            if (NameReader == null || NameReader.EndOfStream) return passengers[random.Next(passengers.Length)];
+            var completeName = "";
+            if (listPassengerNames.ContainsKey(valueStrings[0])) return new Passenger(completeName);
+            var identity = NameReader.ReadLine();
+            if (identity == null) return new Passenger(completeName);
+            var split = identity.Split('\t');
+            completeName = split[3] + " " + split[4] + " " + split[5];
+            listPassengerNames.Add(valueStrings[0], completeName);
+            return new Passenger(completeName);
+        }
+
+
+        private static bool CoordinateRange(double coordinate)
+        {
+            return coordinate > -180 && coordinate < 180;
         }
 
         public PartnerTrip GenerateTrip(Passenger passenger, DateTime pickupTime, Pair<Location, Location> fromTo)
