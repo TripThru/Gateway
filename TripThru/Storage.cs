@@ -16,6 +16,7 @@ using MongoDB.Driver.Builders;
 using MongoDB.Driver.GridFS;
 using MongoDB.Driver.Linq;
 using ServiceStack.Text;
+using Utils;
 
 namespace TripThruCore.Storage
 {
@@ -31,6 +32,8 @@ namespace TripThruCore.Storage
         public abstract long GetLastTripId();
         public abstract void InsertTrip(Trip trip);
         public abstract void SaveTrip(Trip trip);
+        public abstract Route GetRoute(string id);
+        public abstract void SaveRoute(Route route);
         protected string RemoveSpecialCharacters(string input)
         {
             return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
@@ -114,12 +117,21 @@ namespace TripThruCore.Storage
         {
             
         }
+        public override Route GetRoute(string id)
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveRoute(Route route)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class MongoDbStorage : Storage
     {
         private readonly MongoCollection<PartnerAccount> _partners;
         private readonly MongoCollection<Trip> _trips;
+        private readonly MongoCollection<Route> _routes;
         private MongoDatabase _tripsDatabase;
         private readonly string _tripsDatabaseId;
         private MongoDatabase _networksDatabase;
@@ -153,6 +165,13 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.loc);
             });
+            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Route>(cm =>
+            {
+                cm.AutoMap();
+                foreach (var mm in cm.AllMemberMaps)
+                    mm.SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.waypoints).SetIgnoreIfNull(true);
+            });
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
@@ -160,6 +179,7 @@ namespace TripThruCore.Storage
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
             _trips = _tripsDatabase.GetCollection<Trip>("trips");
+            _routes = _tripsDatabase.GetCollection<Route>("routes");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
@@ -229,6 +249,18 @@ namespace TripThruCore.Storage
         public override void SaveTrip(Trip trip)
         {
             this._trips.Save(trip);
+        }
+        public override Route GetRoute(string id)
+        {
+            var routes = this._routes.AsQueryable<Route>().Where(r => r.Id == id).ToList();
+            if (routes.Count > 0)
+                return routes[0];
+            else
+                return null;
+        }
+        public override void SaveRoute(Route route)
+        {
+            this._routes.Save(route);
         }
     }
 
@@ -308,6 +340,18 @@ namespace TripThruCore.Storage
         {
             if (_storage != null)
                 _storage.SaveTrip(trip);
+        }
+        public static Route GetRoute(string id)
+        {
+            if (_storage != null)
+                return _storage.GetRoute(id);
+            else
+                return null;
+        }
+        public static void SaveRoute(Route route)
+        {
+            if (_storage != null)
+                _storage.SaveRoute(route);
         }
     }
 }

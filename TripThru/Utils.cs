@@ -369,12 +369,10 @@ namespace Utils
 
     public class Route
     {
-        public Route()
-        {
-        }
         public Route(Waypoint[] waypoints)
         {
             this.waypoints = waypoints;
+            this.Id = GetKey(waypoints[0], waypoints[waypoints.Length - 1]);
         }
 
         public static string GetKey(Location start, Location end) { return start.getID() + ":" + end.getID(); }        // Daniel, you will need to implement this
@@ -408,7 +406,8 @@ namespace Utils
             for (waypoint = 0; elapse > waypoints[waypoint].elapse && waypoint < waypoints.Length - 1; waypoint++) ;
             return waypoints[waypoint];
         }
-        public Waypoint[] waypoints;
+        public Waypoint[] waypoints {get; set;}
+        public string Id { get; set; }
     }
     public class IDName
     {

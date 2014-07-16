@@ -626,7 +626,6 @@ namespace TripThruCore
             tags["ActiveTrips"] = this.activeTrips.Count.ToString();
             tags["OriginatingPartnerByTrip"] = this.originatingPartnerByTrip.Count.ToString();
             tags["ServicingPartnerByTrip"] = this.servicingPartnerByTrip.Count.ToString();
-            tags["Routes"] = MapTools.routes.Count.ToString();
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
             tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();

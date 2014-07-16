@@ -1,1 +1,174 @@
-{"Partner":{"Name":"Miami Taxi","ClientId":"miamitaxi@tripthru.com","CallbackUrlMono":"http://107.170.240.134/TripThru.MiamiTaxi/","WebUrl":"http://107.170.240.134:8080//BookingsMiamiTaxi/","WebUrlRelative":"/BookingsMiamiTaxi/index.php"},"Fleets":[{"Name":"Miami Taxi","BaseCost":3,"CostPerMile":3,"TripsPerHour":100,"PossibleTrips":[{"Start":{"Lat":42.342634,"Lng":-71.122545},"End":{"Lat":42.367561,"Lng":-71.129498}},{"Start":{"Lat":37.782551,"Lng":-122.445368},"End":{"Lat":37.786956,"Lng":-122.440279}},{"Start":{"Lat":48.835975,"Lng":2.345097},"End":{"Lat":48.837275,"Lng":2.382433}},{"Start":{"Lat":25.270751,"Lng":55.31403},"End":{"Lat":25.279288,"Lng":55.304331}},{"Start":{"Lat":37.784345,"Lng":-122.422922},"End":{"Lat":37.785292,"Lng":-122.416257}},{"Start":{"Lat":40.773009,"Lng":-73.8763203},"End":{"Lat":40.7479425,"Lng":-73.9709596}},{"Start":{"Lat":25.845224,"Lng":-80.119744},"End":{"Lat":25.7950665,"Lng":-80.2786931}},{"Start":{"Lat":26.122976,"Lng":-80.10474},"End":{"Lat":26.1313537,"Lng":-80.1366433}}],"VehicleTypes":["Compact","Sedan"],"Drivers":["Eduardo Lozano","Edward Hamilton","Steven Thompson","Bartomeu Astor","Matthias Randulf","Ahoth Achab","Mattias Ohannes","Alta J. Johnson","Joy B. Wright","Joseph A. Bethel","Rachael H. Hall","Bernice R. Gooch","Minerva C. Alton","Shannon R. Turnipseed","Herman E. Ackerman","Michael D. Peters","Kenneth M. Goss","Barry C. Dumas","Colleen G. McAllister","Karina Huntsman","Geoffrey Cuomo","Alease Linz","Arnetta Agin","Gregorio Timmerman","Garret Kadel","Christy Coplin","Elias Alphin","Ossie Chesnut","Eufemia Adelman","Tesha Mcbain","Bobette Leeder","Ching Owenby","Tonie Millikin","Tamatha Parsley","Lawrence Soliman","Palmira Rawlins","Teresita Montesinos","Robby Moses","Roseanna Littlefield"],"Passengers":["Robert Bilson","Jennifer Drew","Andre Martinez","Susan Rello","David Elk","Helen Sofer"],"Location":{"Lat":25.7871768,"Lng":-80.1294254},"Coverage":[{"Center":{"Lat":25.7871768,"Lng":-80.1294254},"Radius":50}]}],"TripThruUrlMono":"http://107.170.240.134/TripThru.TripThruGateway/","SimInterval":10,"Enabled":true,"host":{"virtualPath":"/TripThru.MiamiTaxi/","debug":false}}
+﻿{
+    "Enabled": true,
+    "Fleets": [
+        {
+            "BaseCost": 3,
+            "CostPerMile": 3,
+            "Coverage": [
+                {
+                    "Center": {
+                        "Lat": 25.7871768,
+						"Lng": -80.1294254
+                    },
+                    "Radius": 50
+                }
+            ],
+            "Drivers": [
+                "Eduardo Lozano",
+                "Edward Hamilton",
+                "Steven Thompson",
+                "Bartomeu Astor",
+                "Matthias Randulf",
+                "Ahoth Achab",
+                "Mattias Ohannes",
+                "Alta J. Johnson",
+                "Joy B. Wright",
+                "Joseph A. Bethel",
+                "Rachael H. Hall",
+                "Bernice R. Gooch",
+                "Minerva C. Alton",
+                "Shannon R. Turnipseed",
+                "Herman E. Ackerman",
+                "Michael D. Peters",
+                "Kenneth M. Goss",
+                "Barry C. Dumas",
+                "Colleen G. McAllister",
+                "Karina Huntsman",
+                "Geoffrey Cuomo",
+                "Alease Linz",
+                "Arnetta Agin",
+                "Gregorio Timmerman",
+                "Garret Kadel",
+                "Christy Coplin",
+                "Elias Alphin",
+                "Ossie Chesnut",
+                "Eufemia Adelman",
+                "Tesha Mcbain",
+                "Bobette Leeder",
+                "Ching Owenby",
+                "Tonie Millikin",
+                "Tamatha Parsley",
+                "Lawrence Soliman",
+                "Palmira Rawlins",
+                "Teresita Montesinos",
+                "Robby Moses",
+                "Roseanna Littlefield"
+            ],
+            "Location": {
+                "Lat": 25.7871768,
+				"Lng": -80.1294254
+            },
+            "Name": "Miami Taxi",
+            "Passengers": [
+                "Robert Bilson",
+                "Jennifer Drew",
+                "Andre Martinez",
+                "Susan Rello",
+                "David Elk",
+                "Helen Sofer"
+            ],
+            "PossibleTrips": [
+                {
+                    "End": {
+                        "Lat": 42.367561,
+                        "Lng": -71.129498
+                    },
+                    "Start": {
+                        "Lat": 42.342634,
+                        "Lng": -71.122545
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 37.786956,
+                        "Lng": -122.440279
+                    },
+                    "Start": {
+                        "Lat": 37.782551,
+                        "Lng": -122.445368
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 48.837275,
+                        "Lng": 2.382433
+                    },
+                    "Start": {
+                        "Lat": 48.835975,
+                        "Lng": 2.345097
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 25.279288,
+                        "Lng": 55.304331
+                    },
+                    "Start": {
+                        "Lat": 25.270751,
+                        "Lng": 55.31403
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 37.785292,
+                        "Lng": -122.416257
+                    },
+                    "Start": {
+                        "Lat": 37.784345,
+                        "Lng": -122.422922
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 40.7479425,
+						"Lng": -73.9709596
+                    },
+                    "Start": {
+                        "Lat": 40.773009,
+						"Lng": -73.8763203
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 25.7950665,
+						"Lng": -80.2786931
+                    },
+                    "Start": {
+                        "Lat": 25.845224,
+						"Lng": -80.119744
+                    }
+                },
+                {
+                    "End": {
+                        "Lat": 26.1313537,
+						"Lng": -80.1366433
+                    },
+                    "Start": {
+                        "Lat": 26.122976,
+						"Lng": -80.10474
+                    }
+                }
+            ],
+            "TripsPerHour": 100,
+            "VehicleTypes": [
+                "Compact",
+                "Sedan"
+            ]
+        }
+    ],
+  "host" : {
+		"virtualPath" : "/TripThru.MiamiTaxi/"
+  },
+    "Partner": {
+        "CallbackUrlMono": "TripThru.MiamiTaxi/",
+        "ClientId" : "miamitaxi@tripthru.com",
+		"Name": "Miami Taxi",
+        "WebUrl": "/BookingsMiamiTaxi/",
+        "WebUrlRelative": "/BookingsMiamiTaxi/index.php"
+    },
+    "SimInterval": 10,
+    "tripThruUrlMono" : "TripThru.TripThruGateway/",
+    "host": {
+        "virtualPath": "/TripThru.MiamiTaxi/"
+    }
+}

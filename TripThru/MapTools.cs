@@ -12,6 +12,7 @@ using System.IO;
 //using RestSharp;
 using TripThruCore;
 using Newtonsoft.Json;
+using TripThruCore.Storage;
 
 namespace Utils
 {
@@ -76,25 +77,11 @@ namespace Utils
         }
         public static Dictionary<string, Pair<string, string>> locationAddresses = new Dictionary<string, Pair<string, string>>();
         public static Dictionary<string, string> locationNames = new Dictionary<string, string>();
-        public static Dictionary<string, Route> routes = new Dictionary<string, Route>();
 
         public static void ClearCache()
         {
             locationAddresses.Clear();
             locationNames.Clear();
-            routes.Clear();
-        }
-
-        public static void SpeedUpRoutesForTesting(double scale)
-        {
-            foreach (Route route in routes.Values)
-            {
-                foreach (Waypoint waypoint in route.waypoints)
-                {
-                    waypoint.distance *= scale;
-                    waypoint.elapse = new TimeSpan((long)(waypoint.elapse.Ticks * scale));
-                }
-            }
         }
 
         static string locationNames_Filename;
@@ -113,17 +100,6 @@ namespace Utils
         {
             LoadGeoLocationAddress();
             LoadGeoLocationNames();
-            LoadGeoRoutes();
-        }
-
-        private static void LoadGeoRoutes()
-        {
-            using (var sr = new StreamReader(routes_Filename))
-            {
-                var lines = sr.ReadToEnd();
-                routes = JsonConvert.DeserializeObject<Dictionary<string, Route>>(lines) ??
-                         new Dictionary<string, Route>();
-            }
         }
 
         private static void LoadGeoLocationNames()
@@ -148,7 +124,6 @@ namespace Utils
 
         public static void WriteGeoData()
         {
-            WriteGeoRoutes();
             WriteGeoLocationNames();
             WriteGeoLocationAddresses();
         }
@@ -173,17 +148,6 @@ namespace Utils
             {
                 var locationNamesJson = JsonConvert.SerializeObject(locationNames);
                 sr.Write(locationNamesJson);
-            }
-        }
-
-        private static void WriteGeoRoutes()
-        {
-            if (routes_Filename == null) return;
-            File.WriteAllText(routes_Filename, String.Empty);
-            using (var sr = new StreamWriter(routes_Filename))
-            {
-                var routesJson = JsonConvert.SerializeObject(routes);
-                sr.Write(routesJson);
             }
         }
 
@@ -283,61 +247,59 @@ namespace Utils
 
         public static Route GetRoute(Location from, Location to)
         {
-            lock (routes)
+            var key = Route.GetKey(from, to);
+            var route = StorageManager.GetRoute(key);
+            if (route != null)
+                return route;
+            const double metersToMiles = 0.000621371192;
+            const int maxDuration = 10;
+            var doc = new XmlDocument();
+            var elapse = new TimeSpan(0, 0, 0);
+            double totalDistance = 0;
+            var url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false&units=imperial";
+            doc.Load(url);
+            var status = doc.SelectSingleNode("//DirectionsResponse/status");
+
+            if (status == null || status.InnerText == "ZERO_RESULTS")
             {
-                var key = Route.GetKey(from, to);
-                if (routes.ContainsKey(key))
-                    return routes[key];
-                const double metersToMiles = 0.000621371192;
-                const int maxDuration = 10;
-                var doc = new XmlDocument();
-                var elapse = new TimeSpan(0, 0, 0);
-                double totalDistance = 0;
-                var url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false&units=imperial";
-                doc.Load(url);
-                var status = doc.SelectSingleNode("//DirectionsResponse/status");
+                Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
+                throw new Exception("Bad route request");
+            }
+            var waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
+            var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
 
-                if (status == null || status.InnerText == "ZERO_RESULTS")
+            foreach (XmlNode leg in legs)
+            {
+                var stepNodes = leg.SelectNodes("step");
+                foreach (XmlNode stepNode in stepNodes)
                 {
-                    Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
-                    throw new Exception("Bad route request");
-                }
-                var waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
-                var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
 
-                foreach (XmlNode leg in legs)
-                {
-                    var stepNodes = leg.SelectNodes("step");
-                    foreach (XmlNode stepNode in stepNodes)
+                    var duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
+                    var distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * metersToMiles;
+                    var duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
+                    var end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                    var totalDistanceTemp = totalDistance;
+                    totalDistance += distance;
+                    var timeSpanTemp = elapse;
+                    elapse += duration2;
+
+                    if (duration > maxDuration)
                     {
-
-                        var duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
-                        var distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * metersToMiles;
-                        var duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
-                        var end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
-                        var totalDistanceTemp = totalDistance;
-                        totalDistance += distance;
-                        var timeSpanTemp = elapse;
-                        elapse += duration2;
-
-                        if (duration > maxDuration)
-                        {
-                            var polyline = stepNode.SelectSingleNode("polyline/points").InnerText;
-                            var locations = DecodePolylinePoints(polyline);
-                            waypoints.AddRange(IncreaseLocationsEnumerable(locations, duration, timeSpanTemp.TotalSeconds, distance, totalDistanceTemp));
-                        }
-                        else
-                        {
-                            waypoints.Add(new Waypoint(end, elapse, totalDistance));
-                        }
+                        var polyline = stepNode.SelectSingleNode("polyline/points").InnerText;
+                        var locations = DecodePolylinePoints(polyline);
+                        waypoints.AddRange(IncreaseLocationsEnumerable(locations, duration, timeSpanTemp.TotalSeconds, distance, totalDistanceTemp));
+                    }
+                    else
+                    {
+                        waypoints.Add(new Waypoint(end, elapse, totalDistance));
                     }
                 }
-
-                waypoints.Add(new Waypoint(to, elapse, totalDistance));
-                var route = new Route(waypoints.ToArray());
-                routes.Add(key, route);
-                return route;
             }
+
+            waypoints.Add(new Waypoint(to, elapse, totalDistance));
+            route = new Route(waypoints.ToArray());
+            StorageManager.SaveRoute(route);
+            return route;
         }
 
         private static IEnumerable<Location> IncreaseGranularityDistance(Location from, Location to, double maxLatLng)
