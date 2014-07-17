@@ -181,7 +181,7 @@
                     }
                 }
             ],
-            "TripsPerHour": 100,
+            "TripsPerHour": 50,
             "VehicleTypes": [
                 "Compact",
                 "Sedan"

@@ -1445,7 +1445,7 @@ namespace ServiceStack.TripThruGateway
         #region RouteTrip
 
         [Api("Use GET /routetrip")]
-        [Route("/routetrip", "GET")]
+        [Route("/routetrip", "GET, OPTIONS")]
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class RouteTrip : IReturn<RouteTripResponse>
         {
@@ -1495,6 +1495,10 @@ namespace ServiceStack.TripThruGateway
                     };
                 }
                 return routeTripResponse;
+            }
+            public RouteTripResponse Options(RouteTrip request)
+            {
+                return new RouteTripResponse();
             }
         }
 
