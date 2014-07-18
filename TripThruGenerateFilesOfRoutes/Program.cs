@@ -9,6 +9,7 @@ using Utils;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
+
 namespace TripThruGenerateFilesOfRoutes
 {
     class Program
@@ -79,6 +80,7 @@ namespace TripThruGenerateFilesOfRoutes
             return wayPoints;
         }
 
+        #region "GenerateRoutes"
         //static void Main()
         //{
 
@@ -137,161 +139,198 @@ namespace TripThruGenerateFilesOfRoutes
         //    Console.WriteLine(tripCount + " trips generated");
         //    Console.ReadKey();
         //}
+#endregion
+
+        #region "MongoDB"
+        //static void Main()
+        //{
+        //    const string host = "mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/";
+        //    const string database = "TripThru";
+        //    const string nameCollection = "trips";
+        //    const string pathTripData = @"C:\Users\OscarErnesto\Downloads\tripData2013\trip_data_1.csv\trip_data_1.csv";
+        //    const string pathTripFare = @"C:\Users\OscarErnesto\Downloads\faredata2013\trip_fare_1.csv\trip_fare_1.csv";
+        //    const string pathRandomsNames =
+        //        @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\Db\FakeName.csv";
+
+        //    MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+        //    {
+        //        cm.AutoMap();
+        //        foreach (var mm in cm.AllMemberMaps)
+        //            mm.SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+        //        cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
+        //        cm.GetMemberMap(c => c.loc);
+        //    });
+
+        //    MongoCollection<Trip> trips;
+        //    var server = MongoServer.Create(host);
+        //    var tripsDatabase = server.GetDatabase(database);
+        //    trips = tripsDatabase.GetCollection<Trip>(nameCollection);
+        //    var tripReader = new StreamReader(File.OpenRead(pathTripData));
+        //    var fareReader = new StreamReader(File.OpenRead(pathTripFare));
+        //    var namesReader = new StreamReader(File.OpenRead(pathRandomsNames));
+
+        //    var r = new Random(DateTime.Now.Millisecond);
+
+        //    var listNames = new Dictionary<string, string>();
+        //    var listPassengerNames = new Dictionary<string, string>();
+
+        //    var countLines = 1;
+
+        //    namesReader.ReadLine();
+        //    tripReader.ReadLine();
+        //    fareReader.ReadLine();
+        //    int re = 0;
+        //    while (re < 1000)
+        //    {
+        //        tripReader.ReadLine();
+        //        fareReader.ReadLine();
+        //        re++;
+        //    }
+
+        //    while (countLines <= 5000)
+        //    {
+        //        var trip = new Trip();
+        //        var tripLine = tripReader.ReadLine();
+        //        var fareLine = fareReader.ReadLine();
+        //        if (tripLine == null) continue;
+        //        var tripValues = tripLine.Split(',');
+        //        if (fareLine == null) continue;
+        //        var fareValues = fareLine.Split(',');
+
+        //        if (!listNames.ContainsKey(tripValues[0]))
+        //        {
+        //            var identity = namesReader.ReadLine();
+        //            if (identity != null)
+        //            {
+        //                var name = identity.Split('\t');
+        //                var completeName = name[3] + " " + name[4] + " " + name[5];
+        //                listNames.Add(tripValues[0], completeName);
+        //            }
+        //        }
+        //        if (!listPassengerNames.ContainsKey(tripValues[1]))
+        //        {
+        //            var identity = namesReader.ReadLine();
+        //            if (identity != null)
+        //            {
+        //                var name = identity.Split('\t');
+        //                var completeName = name[3] + " " + name[4] + " " + name[5];
+        //                listPassengerNames.Add(tripValues[1], completeName);
+        //            }
+        //        }
+
+
+        //        try
+        //        {
+        //            trip.Id = countLines + "d@nytaxi@tripthru.com";
+        //            trip.DriverName = listNames[tripValues[0]];
+        //            var lat = Convert.ToDouble(tripValues[13]);
+        //            var lng = Convert.ToDouble(tripValues[12]);
+        //            if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
+        //                trip.DropoffLocation = new Location(lat, lng);
+        //            else
+        //            {
+        //                Console.WriteLine("Incomplete Trip");
+        //                continue;
+        //            }
+        //            trip.DriverInitiaLocation = new Location(40.769004, -73.981376);
+        //            trip.DropoffTime = Convert.ToDateTime(tripValues[6]).AddYears(1).AddMonths(5);
+        //            trip.DropoffTime = trip.DropoffTime.Value.AddDays(-1 * trip.DropoffTime.Value.Day);
+        //            trip.DropoffTime = trip.DropoffTime.Value.AddDays(r.Next(1, 31)); 
+        //            trip.EnrouteDistance = Convert.ToDouble(tripValues[9]);
+        //            trip.FleetId = "30";
+        //            trip.FleetName = "NY Taxi";
+        //            trip.OriginatingPartnerId = "nytaxi@tripthru.com";
+        //            trip.OriginatingPartnerName = "NY Taxi";
+        //            trip.PassengerName = listPassengerNames[tripValues[1]];
+        //            lat = Convert.ToDouble(tripValues[11]);
+        //            lng = Convert.ToDouble(tripValues[10]);
+        //            if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
+        //                trip.PickupLocation = new Location(lat, lng);
+        //            else
+        //            {
+        //                Console.WriteLine("Incomplete Trip");
+        //                continue;
+        //            }
+        //            trip.PickupTime = Convert.ToDateTime(tripValues[5]).AddYears(1).AddMonths(5);
+        //            trip.PickupTime = trip.PickupTime.Value.AddDays(-1 * trip.PickupTime.Value.Day);
+        //            trip.PickupTime = trip.PickupTime.Value.AddDays(trip.DropoffTime.Value.Day);
+        //            trip.LastUpdate = trip.DropoffTime;
+        //            trip.Price = Convert.ToDouble(fareValues[10]);
+        //            trip.ServicingPartnerId = "nytaxi@tripthru.com";
+        //            trip.ServicingPartnerName = "NY Taxi";
+        //            trip.Status = Status.Complete;
+
+        //            trips.Insert(trip);
+        //            Console.WriteLine(trip.Id);
+        //            countLines++;
+        //        }
+        //        catch (Exception)
+        //        {
+        //            Console.WriteLine("ERROR Incomplete Trip");
+        //        }
+        //    }
+        //    foreach (var variable in listNames)
+        //    {
+        //        Console.WriteLine(variable.Value);
+        //    }
+        //    Console.WriteLine(listNames.Count);
+        //    Console.WriteLine(listPassengerNames.Count);
+        //    Console.ReadLine();
+        //}
+
+#endregion
 
         static void Main()
         {
-            const string host = "mongodb://SG-tripthru-3110.servers.mongodirector.com:27017/";
-            const string database = "TripThru";
-            const string nameCollection = "trips";
-            const string pathTripData = @"C:\Users\OscarErnesto\Downloads\tripData2013\trip_data_1.csv\trip_data_1.csv";
-            const string pathTripFare = @"C:\Users\OscarErnesto\Downloads\faredata2013\trip_fare_1.csv\trip_fare_1.csv";
-            const string pathRandomsNames =
-                @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\Db\FakeName.csv";
-
-            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+            var integersInts = new List<int>();
+            int count = 0;
+            while (count < 5)
             {
-                cm.AutoMap();
-                foreach (var mm in cm.AllMemberMaps)
-                    mm.SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
-                cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.loc);
-            });
-
-            MongoCollection<Trip> trips;
-            var server = MongoServer.Create(host);
-            var tripsDatabase = server.GetDatabase(database);
-            trips = tripsDatabase.GetCollection<Trip>(nameCollection);
-            var tripReader = new StreamReader(File.OpenRead(pathTripData));
-            var fareReader = new StreamReader(File.OpenRead(pathTripFare));
-            var namesReader = new StreamReader(File.OpenRead(pathRandomsNames));
-
-            var r = new Random(DateTime.Now.Millisecond);
-
-            var listNames = new Dictionary<string, string>();
-            var listPassengerNames = new Dictionary<string, string>();
-
-            var countLines = 1;
-
-            namesReader.ReadLine();
-            tripReader.ReadLine();
-            fareReader.ReadLine();
-            int re = 0;
-            while (re < 1000)
-            {
-                tripReader.ReadLine();
-                fareReader.ReadLine();
-                re++;
+                integersInts.Add(5);
+                count++;
             }
+            Console.WriteLine(integersInts.Count);
 
-            while (countLines <= 5000)
-            {
-                var trip = new Trip();
-                var tripLine = tripReader.ReadLine();
-                var fareLine = fareReader.ReadLine();
-                if (tripLine == null) continue;
-                var tripValues = tripLine.Split(',');
-                if (fareLine == null) continue;
-                var fareValues = fareLine.Split(',');
-
-                if (!listNames.ContainsKey(tripValues[0]))
-                {
-                    var identity = namesReader.ReadLine();
-                    if (identity != null)
-                    {
-                        var name = identity.Split('\t');
-                        var completeName = name[3] + " " + name[4] + " " + name[5];
-                        listNames.Add(tripValues[0], completeName);
-                    }
-                }
-                if (!listPassengerNames.ContainsKey(tripValues[1]))
-                {
-                    var identity = namesReader.ReadLine();
-                    if (identity != null)
-                    {
-                        var name = identity.Split('\t');
-                        var completeName = name[3] + " " + name[4] + " " + name[5];
-                        listPassengerNames.Add(tripValues[1], completeName);
-                    }
-                }
-
-
-                try
-                {
-                    trip.Id = countLines + "d@nytaxi@tripthru.com";
-                    trip.DriverName = listNames[tripValues[0]];
-                    var lat = Convert.ToDouble(tripValues[13]);
-                    var lng = Convert.ToDouble(tripValues[12]);
-                    if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
-                        trip.DropoffLocation = new Location(lat, lng);
-                    else
-                    {
-                        Console.WriteLine("Incomplete Trip");
-                        continue;
-                    }
-                    trip.DriverInitiaLocation = new Location(40.769004, -73.981376);
-                    trip.DropoffTime = Convert.ToDateTime(tripValues[6]).AddYears(1).AddMonths(5);
-                    trip.DropoffTime = trip.DropoffTime.Value.AddDays(-1 * trip.DropoffTime.Value.Day);
-                    trip.DropoffTime = trip.DropoffTime.Value.AddDays(r.Next(1, 31)); 
-                    trip.EnrouteDistance = Convert.ToDouble(tripValues[9]);
-                    trip.FleetId = "30";
-                    trip.FleetName = "NY Taxi";
-                    trip.OriginatingPartnerId = "nytaxi@tripthru.com";
-                    trip.OriginatingPartnerName = "NY Taxi";
-                    trip.PassengerName = listPassengerNames[tripValues[1]];
-                    lat = Convert.ToDouble(tripValues[11]);
-                    lng = Convert.ToDouble(tripValues[10]);
-                    if (Math.Abs(lat) > 0 && Math.Abs(lng) > 0 && Math.Abs(lng) < 180 && Math.Abs(lat) < 180)
-                        trip.PickupLocation = new Location(lat, lng);
-                    else
-                    {
-                        Console.WriteLine("Incomplete Trip");
-                        continue;
-                    }
-                    trip.PickupTime = Convert.ToDateTime(tripValues[5]).AddYears(1).AddMonths(5);
-                    trip.PickupTime = trip.PickupTime.Value.AddDays(-1 * trip.PickupTime.Value.Day);
-                    trip.PickupTime = trip.PickupTime.Value.AddDays(trip.DropoffTime.Value.Day);
-                    trip.LastUpdate = trip.DropoffTime;
-                    trip.Price = Convert.ToDouble(fareValues[10]);
-                    trip.ServicingPartnerId = "nytaxi@tripthru.com";
-                    trip.ServicingPartnerName = "NY Taxi";
-                    trip.Status = Status.Complete;
-
-                    trips.Insert(trip);
-                    Console.WriteLine(trip.Id);
-                    countLines++;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("ERROR Incomplete Trip");
-                }
-            }
-            foreach (var variable in listNames)
-            {
-                Console.WriteLine(variable.Value);
-            }
-            Console.WriteLine(listNames.Count);
-            Console.WriteLine(listPassengerNames.Count);
-            Console.ReadLine();
         }
 
+        public static void getLocation(double x0, double y0, int radius) {
+            Random random = new Random();
+
+            // Convert radius from meters to degrees
+            double radiusInDegrees = radius / 111000f;
+
+            double u = random.NextDouble();
+            double v = random.NextDouble();
+            double w = radiusInDegrees * Math.Sqrt(u);
+            double t = 2 * Math.PI * v;
+            double x = w * Math.Cos(t);
+            double y = w * Math.Sin(t);
+
+            // Adjust the x-coordinate for the shrinking of the east-west distances
+            double new_x = x / Math.Cos(y0);
+
+            double foundLongitude = new_x + x0;
+            double foundLatitude = y + y0;
+            Console.WriteLine("Longitude: " + foundLongitude + "  Latitude: " + foundLatitude );
+        }
         private static List<Location> DecodePolylinePoints(string encodedPoints)
         {
             if (encodedPoints == null || encodedPoints == "") return null;

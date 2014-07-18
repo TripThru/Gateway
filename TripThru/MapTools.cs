@@ -151,7 +151,6 @@ namespace Utils
             }
         }
 
-
         // http://code.google.com/apis/maps/documentation/geocoding/#ReverseGeocoding
         public static string GetReverseGeoLoc(Location location)
         {
@@ -245,7 +244,7 @@ namespace Utils
             }
         }
 
-        public static Route GetRoute(Location from, Location to)
+        public static Route GetRoute(Location from, Location to, bool removeFirstAndFinalPosition = false)
         {
             var key = Route.GetKey(from, to);
             var route = StorageManager.GetRoute(key);
@@ -272,8 +271,12 @@ namespace Utils
             {
                 var stepNodes = leg.SelectNodes("step");
                 foreach (XmlNode stepNode in stepNodes)
-                {
-
+                {   
+                    if (removeFirstAndFinalPosition)
+                    {
+                        removeFirstAndFinalPosition = false;
+                        continue;
+                    }
                     var duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
                     var distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * metersToMiles;
                     var duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
