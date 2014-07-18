@@ -260,7 +260,7 @@ namespace Utils
             doc.Load(url);
             var status = doc.SelectSingleNode("//DirectionsResponse/status");
 
-            if (status == null || status.InnerText == "ZERO_RESULTS")
+            if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
             {
                 Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
                 throw new Exception("Bad route request");
