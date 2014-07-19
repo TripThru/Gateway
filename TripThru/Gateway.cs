@@ -219,6 +219,7 @@ namespace TripThruCore
         private DateTime Creation { get; set; }
         public DateTime? LastUpdate { get; set; }
         public DateTime? LastStatusChange;
+        public DateTime RequestDateTime { get; set; }
         public bool ServiceGoalMet { get; set; }
         public TimeSpan Lateness { get; set; }
 

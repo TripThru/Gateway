@@ -244,7 +244,7 @@ namespace Utils
             }
         }
 
-        public static Route GetRoute(Location from, Location to, bool removeFirstAndFinalPosition = false)
+        public static Route GetRoute(Location from, Location to)
         {
             var key = Route.GetKey(from, to);
             var route = StorageManager.GetRoute(key);
@@ -259,24 +259,21 @@ namespace Utils
             doc.Load(url);
             var status = doc.SelectSingleNode("//DirectionsResponse/status");
 
-            if (status == null || status.InnerText == "ZERO_RESULTS")
+            if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
             {
                 Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
                 throw new Exception("Bad route request");
             }
+
+            Console.WriteLine(status.InnerText);
+
             var waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
             var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
-
             foreach (XmlNode leg in legs)
             {
                 var stepNodes = leg.SelectNodes("step");
                 foreach (XmlNode stepNode in stepNodes)
-                {   
-                    if (removeFirstAndFinalPosition)
-                    {
-                        removeFirstAndFinalPosition = false;
-                        continue;
-                    }
+                {
                     var duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
                     var distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * metersToMiles;
                     var duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));

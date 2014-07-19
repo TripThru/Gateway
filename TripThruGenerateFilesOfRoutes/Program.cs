@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Xml;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using TripThruCore;
+using TripThruCore.Storage;
 using Utils;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -40,7 +44,7 @@ namespace TripThruGenerateFilesOfRoutes
 
         private static IEnumerable<Waypoint> IncreaseLocationsEnumerable(IEnumerable<Location> locations, double duration, double totalDuration, double distance, double totalDistance)
         {
-            const double maxStepLntLng = 0.0001;
+            const double maxStepLntLng = 0.0005;
             var wayPoints = new List<Waypoint>();
 
             var countDuration = totalDuration;
@@ -139,7 +143,7 @@ namespace TripThruGenerateFilesOfRoutes
         //    Console.WriteLine(tripCount + " trips generated");
         //    Console.ReadKey();
         //}
-#endregion
+        #endregion
 
         #region "MongoDB"
         //static void Main()
@@ -300,37 +304,161 @@ namespace TripThruGenerateFilesOfRoutes
 
         static void Main()
         {
-            var integersInts = new List<int>();
-            int count = 0;
-            while (count < 5)
-            {
-                integersInts.Add(5);
-                count++;
-            }
-            Console.WriteLine(integersInts.Count);
+            
 
+            var locationList = new List<Tuple<string, Location>>
+            {
+                //new Tuple<string, Location>("Hubai",new Location(25.271139, 55.307485)), //hubai
+                //new Tuple<string, Location>("LosTaxiBlus",new Location(48.837246, 2.347844)), //losTaxiBlus
+                //new Tuple<string, Location>("Mellow",new Location(37.78906, -122.402127)), //mellow
+                //new Tuple<string, Location>("Miami",new Location(25.7871768, -80.1294254)), //miami
+                //new Tuple<string, Location>("Netro",new Location(42.356217, -71.137512)), //netro
+                //new Tuple<string, Location>("NYtaxi",new Location(40.769004, -73.981376)), //nytaxi
+                //new Tuple<string, Location>("TampaCab",new Location(26.1275183, -80.103452)), //tampaCab
+                new Tuple<string, Location>("Tuxor",new Location(37.78906, -122.402127)) //tuxor
+            };
+
+            
+
+            var count = 0;
+
+            foreach (var location in locationList)
+            {
+                var csv = new StringBuilder();
+                StorageManager.OpenStorage(new MongoDbStorage("mongodb://192.168.0.106:27017/", "TripThruRoute" + location.Item1));
+                while (count <= 50)
+                {
+                    Thread.Sleep(1000);
+                    var driverLocation = new Location(location.Item2.Lat, location.Item2.Lng);
+                    var pickUpLocation = GetLocation(location.Item2.Lat, location.Item2.Lng, 2000);
+                    var dropOffLocation = GetLocation(pickUpLocation.Lat, pickUpLocation.Lng, 2000);
+                    Route pickUpRoute;
+                    Route dropOffRoute;
+
+                    try
+                    {
+                        pickUpRoute = GetRoute(driverLocation, pickUpLocation, false,true);
+                        dropOffRoute = GetRoute(pickUpRoute.end, dropOffLocation, false, true);
+                        if (pickUpRoute.waypoints.Length == 2 || dropOffRoute.waypoints.Length == 2)
+                            continue;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    var arrayString = new string[4];
+
+                    arrayString[0] = pickUpRoute.end.Lat.ToString();
+                    arrayString[1] = pickUpRoute.end.Lng.ToString();
+                    arrayString[2] = dropOffRoute.end.Lat.ToString();
+                    arrayString[3] = dropOffRoute.end.Lng.ToString();
+
+                    csv.Append(string.Join(",", arrayString));
+                    csv.Append(Environment.NewLine);
+
+                    
+
+                    //StorageManager.SaveRoute(pickUpRoute);
+                    //StorageManager.SaveRoute(dropOffRoute);
+                    count++;
+                    Console.WriteLine(location.Item1 + " : " + count);
+                }
+                File.AppendAllText(@"C:\Users\OscarErnesto\Documents\routes" + location.Item1 + ".csv", csv.ToString());
+            }
         }
 
-        public static void getLocation(double x0, double y0, int radius) {
-            Random random = new Random();
+        public static Location GetLocation(double x0, double y0, int radius)
+        {
+            var random = new Random();
 
             // Convert radius from meters to degrees
             double radiusInDegrees = radius / 111000f;
 
-            double u = random.NextDouble();
-            double v = random.NextDouble();
-            double w = radiusInDegrees * Math.Sqrt(u);
-            double t = 2 * Math.PI * v;
-            double x = w * Math.Cos(t);
-            double y = w * Math.Sin(t);
+            var u = random.NextDouble();
+            var v = random.NextDouble();
+            var w = radiusInDegrees * Math.Sqrt(u);
+            var t = 2 * Math.PI * v;
+            var x = w * Math.Cos(t);
+            var y = w * Math.Sin(t);
 
             // Adjust the x-coordinate for the shrinking of the east-west distances
-            double new_x = x / Math.Cos(y0);
+            var newX = x / Math.Cos(y0);
 
-            double foundLongitude = new_x + x0;
-            double foundLatitude = y + y0;
-            Console.WriteLine("Longitude: " + foundLongitude + "  Latitude: " + foundLatitude );
+            var foundLongitude = newX + x0;
+            var foundLatitude = y + y0;
+            return new Location(Math.Round(foundLongitude, 6), Math.Round(foundLatitude, 6));
         }
+
+        public static Route GetRoute(Location from, Location to, bool removeFirst = false ,  bool removeFinal = false)
+        {
+            var key = Route.GetKey(from, to);
+            var route = StorageManager.GetRoute(key);
+            if (route != null)
+                return route;
+            const double metersToMiles = 0.000621371192;
+            const int maxDuration = 10;
+            var doc = new XmlDocument();
+            var elapse = new TimeSpan(0, 0, 0);
+            double totalDistance = 0;
+            var url = "http://maps.googleapis.com/maps/api/directions/xml?origin=" + from.Lat + ", " + from.Lng + "&destination=" + to.Lat + ", " + to.Lng + "&sensor=false&units=imperial";
+            doc.Load(url);
+            var status = doc.SelectSingleNode("//DirectionsResponse/status");
+
+            if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
+            {
+                Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
+                throw new Exception("Bad route request");
+            }
+
+            Console.WriteLine(status.InnerText);
+
+            List<Waypoint> waypoints;
+
+            if (removeFirst)
+                waypoints = new List<Waypoint>();
+            else
+                waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
+            var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
+            var flag = true;
+            var count = 0;
+            foreach (XmlNode leg in legs)
+            {
+                var stepNodes = leg.SelectNodes("step");
+                foreach (XmlNode stepNode in stepNodes)
+                {
+                    count++;
+
+                    var duration = int.Parse(stepNode.SelectSingleNode("duration/value").InnerText);
+                    var distance = double.Parse(stepNode.SelectSingleNode("distance/value").InnerText) * metersToMiles;
+                    var duration2 = new TimeSpan(0, 0, int.Parse(stepNode.SelectSingleNode("duration/value").InnerText));
+                    var end = new Location(double.Parse(stepNode.SelectSingleNode("end_location/lat").InnerText), double.Parse(stepNode.SelectSingleNode("end_location/lng").InnerText));
+                    var totalDistanceTemp = totalDistance;
+                    totalDistance += distance;
+                    var timeSpanTemp = elapse;
+                    elapse += duration2;
+
+                    if (duration > maxDuration)
+                    {
+                        var polyline = stepNode.SelectSingleNode("polyline/points").InnerText;
+                        var locations = DecodePolylinePoints(polyline);
+                        waypoints.AddRange(IncreaseLocationsEnumerable(locations, duration, timeSpanTemp.TotalSeconds, distance, totalDistanceTemp));
+                    }
+                    else
+                    {
+                        waypoints.Add(new Waypoint(end, elapse, totalDistance));
+                    }
+                }
+            }
+
+            if(!removeFinal)
+                waypoints.Add(new Waypoint(to, elapse, totalDistance));
+            route = new Route(waypoints.ToArray());
+            StorageManager.SaveRoute(route);
+            return route;
+        }
+
+
         private static List<Location> DecodePolylinePoints(string encodedPoints)
         {
             if (encodedPoints == null || encodedPoints == "") return null;

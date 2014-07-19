@@ -916,9 +916,9 @@ namespace TripThruCore
             if (possibleTrip == null)
             {
                 Passenger passenger = passengers[random.Next(passengers.Length)];
-                Pair<Location, Location> fromTo = GetNewTripPair(); //possibleTrips[random.Next(possibleTrips.Length)];
+                Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
                 DateTime pickupTime = now + new TimeSpan(0, random.Next((int) tripMaxAdvancedNotice.TotalMinutes), 0);
-                QueueTrip(GenerateTrip(passenger, pickupTime, fromTo, true));
+                QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
             }
             else
             {
@@ -927,34 +927,6 @@ namespace TripThruCore
                 DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
                 QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
             }
-        }
-
-
-        private Pair<Location, Location> GetNewTripPair()
-        {
-            return new Pair<Location, Location>(GetRandomLocation(location.Lng, location.Lat, 15000), GetRandomLocation(location.Lng, location.Lat, 15000));
-        }
-
-        private Location GetRandomLocation(double x0, double y0, int radius)
-        {
-            var random1 = new Random();
-
-            // Convert radius from meters to degrees
-            double radiusInDegrees = radius / 111000f;
-
-            var u = random1.NextDouble();
-            var v = random1.NextDouble();
-            var w = radiusInDegrees * Math.Sqrt(u);
-            var t = 2 * Math.PI * v;
-            var x = w * Math.Cos(t);
-            var y = w * Math.Sin(t);
-
-            // Adjust the x-coordinate for the shrinking of the east-west distances
-            var newX = x / Math.Cos(y0);
-
-            var foundLongitude = newX + x0;
-            var foundLatitude = y + y0;
-            return new Location(foundLongitude, foundLatitude);
         }
 
         private string[] GetPossibleTrip()
@@ -1011,9 +983,9 @@ namespace TripThruCore
             return coordinate > -180 && coordinate < 180;
         }
 
-        public PartnerTrip GenerateTrip(Passenger passenger, DateTime pickupTime, Pair<Location, Location> fromTo, bool random = false)
+        public PartnerTrip GenerateTrip(Passenger passenger, DateTime pickupTime, Pair<Location, Location> fromTo)
         {
-            Route route = MapTools.GetRoute(fromTo.First, fromTo.Second, random);
+            Route route = MapTools.GetRoute(fromTo.First, fromTo.Second);
             Logger.Log("Pickup request (" + name + ") " + passenger.name + " requests to be picked up at " + route.start + " on " + pickupTime + " and dropped off at " + route.end);
             Logger.Tab();
             PartnerTrip trip = new PartnerTrip(
@@ -1063,6 +1035,7 @@ namespace TripThruCore
                     Price = t.price,
                     Status = t.status,
                     VehicleType = t.vehicleType,
+                    RequestDateTime = DateTime.UtcNow
                 });
                 t.UpdateTripStatus(notifyPartner: false, status: Status.Queued);
                 return true;
