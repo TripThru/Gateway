@@ -250,6 +250,7 @@ namespace Utils
             var route = StorageManager.GetRoute(key);
             if (route != null)
                 return route;
+            Console.WriteLine("##################NEW ROUTE###################");
             const double metersToMiles = 0.000621371192;
             const int maxDuration = 10;
             var doc = new XmlDocument();

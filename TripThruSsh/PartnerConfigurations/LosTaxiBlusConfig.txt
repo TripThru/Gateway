@@ -9,6 +9,7 @@
 	  "webUrl" : "BookingsLosTaxiBlus/",
 	  "webUrlRelative" : "/BookingsLosTaxiBlus/index.php"
   },
+  "UrlsTrips": "~/../../Db/routesLosTaxiBlus.csv",
   "fleets" : [
     {
         "name" : "Los Taxi Blus",

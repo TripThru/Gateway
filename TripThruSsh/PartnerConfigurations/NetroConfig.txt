@@ -1,5 +1,6 @@
 {
     "enabled": true,
+    "UrlsTrips": "~/../../Db/routesNetro.csv",
     "fleets": [
         {
             "baseCost": 3.0,

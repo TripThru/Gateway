@@ -922,6 +922,7 @@ namespace TripThruCore
             }
             else
             {
+                Console.WriteLine("###LEIDO DE ARCHIVO###");
                 Passenger passenger = GetPassenger(possibleTrip);
                 Pair<Location, Location> fromTo = getLocationPair(possibleTrip);
                 DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
@@ -939,10 +940,10 @@ namespace TripThruCore
                 var tripValues = tripLine.Split(',');
                 try
                 {
-                    var latDrop = Convert.ToDouble(tripValues[13]);
-                    var lngDrop = Convert.ToDouble(tripValues[12]);
-                    var latPick = Convert.ToDouble(tripValues[11]);
-                    var lngPick = Convert.ToDouble(tripValues[10]);
+                    var latDrop = Convert.ToDouble(tripValues[2]);
+                    var lngDrop = Convert.ToDouble(tripValues[3]);
+                    var latPick = Convert.ToDouble(tripValues[0]);
+                    var lngPick = Convert.ToDouble(tripValues[1]);
                     if (CoordinateRange(latDrop) && CoordinateRange(lngDrop) && CoordinateRange(latPick) && CoordinateRange(lngPick))
                     {
                         return tripValues;
@@ -958,10 +959,10 @@ namespace TripThruCore
         }
         private Pair<Location, Location> getLocationPair(string[] valueStrings)
         {
-            var latDrop = Convert.ToDouble(valueStrings[13]);
-            var lngDrop = Convert.ToDouble(valueStrings[12]);
-            var latPick = Convert.ToDouble(valueStrings[11]);
-            var lngPick = Convert.ToDouble(valueStrings[10]);
+            var latDrop = Convert.ToDouble(valueStrings[2]);
+            var lngDrop = Convert.ToDouble(valueStrings[3]);
+            var latPick = Convert.ToDouble(valueStrings[0]);
+            var lngPick = Convert.ToDouble(valueStrings[1]);
             return new Pair<Location, Location>(new Location(latPick,lngPick), new Location(latDrop, lngDrop));
         }
         private Passenger GetPassenger(IList<string> valueStrings)

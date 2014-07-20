@@ -1,5 +1,6 @@
 {
     "Enabled": true,
+    "UrlsTrips": "~/../../Db/routesHubai.csv",
     "Fleets": [
         {
             "BaseCost": 3,

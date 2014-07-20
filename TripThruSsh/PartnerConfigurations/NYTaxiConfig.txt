@@ -1,7 +1,5 @@
 ﻿{
     "Enabled": true,
-	"UrlsTrips": "~/../../Db/trip_data_8.csv",
-	"UrlsNames": "~/../../Db/FakeName.csv",
     "Fleets": [
         {
             "BaseCost": 3,

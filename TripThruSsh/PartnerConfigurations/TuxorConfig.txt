@@ -1,5 +1,6 @@
 ﻿{
     "enabled": true,
+    "UrlsTrips": "~/../../Db/routesTuxor.csv",
     "fleets": [
         {
             "baseCost": 3.0,
