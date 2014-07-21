@@ -164,6 +164,7 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.Lateness).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Creation).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.loc);
             });
             MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Route>(cm =>
