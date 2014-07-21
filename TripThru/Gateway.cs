@@ -221,6 +221,7 @@ namespace TripThruCore
         public DateTime? LastStatusChange;
         public bool ServiceGoalMet { get; set; }
         public TimeSpan Lateness { get; set; }
+        public double LatenessMilliseconds { get; set; }
 
         private List<Location> _historyEnrouteList = new List<Location>();
         private List<Location> _historyPickUpList = new List<Location>();

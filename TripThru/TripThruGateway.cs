@@ -580,8 +580,11 @@ namespace TripThruCore
                     {
                         case Status.PickedUp:
                             {
-                                activeTrips[r.tripID].PickupTime = DateTime.UtcNow;
-                                activeTrips[r.tripID].Lateness = (DateTime)activeTrips[r.tripID].PickupTime - (DateTime)activeTrips[r.tripID].Creation;
+                                DateTime pickupTime = DateTime.UtcNow;
+                                TimeSpan lateness = pickupTime - (DateTime)activeTrips[r.tripID].Creation;
+                                activeTrips[r.tripID].PickupTime = pickupTime;
+                                activeTrips[r.tripID].Lateness = lateness;
+                                activeTrips[r.tripID].LatenessMilliseconds = lateness.TotalMilliseconds;
                                 break;
                             }
                         case Status.Complete:
