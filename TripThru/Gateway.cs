@@ -216,7 +216,7 @@ namespace TripThruCore
         public double? OccupiedDistance { get; set; }
         public double? EnrouteDistance { get; set; }
         public double? DriverRouteDuration { get; set; }
-        private DateTime Creation { get; set; }
+        public DateTime Creation { get; set; }
         public DateTime? LastUpdate { get; set; }
         public DateTime? LastStatusChange;
         public bool ServiceGoalMet { get; set; }
