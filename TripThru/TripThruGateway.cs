@@ -578,6 +578,9 @@ namespace TripThruCore
                     activeTrips[r.tripID].Status = r.status;
                     switch (r.status)
                     {
+                        case Status.PickedUp:
+                            activeTrips[r.tripID].PickupTime = DateTime.UtcNow;
+                            break;
                         case Status.Complete:
                             {
                                 GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);

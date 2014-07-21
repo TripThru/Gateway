@@ -991,8 +991,6 @@ namespace TripThruCore
         public RedisDictionary<string, PartnerAccount> partnerAccounts;
         public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
-            if (accessToken == null) // TODO: this is to get swagger working and is temporary.  We need to add swagger authentication support
-                accessToken = "metro12ondazazxx21";
             if (!clientIdByAccessToken.ContainsKey(accessToken))
                 return null;
             string clientID = clientIdByAccessToken[accessToken];
