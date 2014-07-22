@@ -1065,7 +1065,8 @@ namespace TripThruCore
                 PickupTime = r.pickupTime,
                 DropoffLocation = r.dropoffLocation,
                 PassengerName = r.passengerName,
-                VehicleType = r.vehicleType
+                VehicleType = r.vehicleType,
+                Creation = DateTime.UtcNow
             };
             activeTrips.SaveTrip(trip); // Hack: save trip should be moved somewhere else.
 
