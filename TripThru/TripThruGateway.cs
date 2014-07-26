@@ -513,7 +513,8 @@ namespace TripThruCore
                 ETA = response.ETA,
                 Price = response.price,
 
-                DriverRouteDuration = response.driverRouteDuration
+                DriverRouteDuration = response.driverRouteDuration,
+                SamplingPercentage = 1
 
             };
             if (response.status == Status.PickedUp)

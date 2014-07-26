@@ -1068,7 +1068,8 @@ namespace TripThruCore
                 PassengerName = r.passengerName,
                 VehicleType = r.vehicleType,
                 Creation = DateTime.UtcNow,
-                LatenessMilliseconds = 0
+                LatenessMilliseconds = 0,
+                SamplingPercentage = 1
             };
             activeTrips.SaveTrip(trip); // Hack: save trip should be moved somewhere else.
 
