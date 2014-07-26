@@ -1037,6 +1037,7 @@ namespace TripThruCore
                     Price = t.price,
                     Status = t.status,
                     VehicleType = t.vehicleType,
+                    SamplingPercentage = 1
                 });
                 t.UpdateTripStatus(notifyPartner: false, status: Status.Queued);
                 return true;

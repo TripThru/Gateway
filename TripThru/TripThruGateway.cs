@@ -244,7 +244,8 @@ namespace TripThruCore
                 PickupTime = r.pickupTime,
                 DropoffLocation = r.dropoffLocation,
                 PassengerName = r.passengerName,
-                VehicleType = r.vehicleType
+                VehicleType = r.vehicleType,
+                SamplingPercentage = 1
             };
             trip.SetCreation(DateTime.UtcNow);
             activeTrips.Add(r.tripID, trip);
