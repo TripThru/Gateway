@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.IO;
 using ServiceStack.Common.Utils;
@@ -710,7 +711,7 @@ namespace TripThruCore
         public Dictionary<string, string> listPassengerNames = new Dictionary<string, string>();
 
         public LinkedList<PartnerTrip> queue;
-        public Passenger[] passengers;
+        public List<Passenger> passengers;
         public readonly double tripsPerHour;
         public readonly double costPerMile; // in local currency
         public readonly double baseCost;
@@ -736,7 +737,7 @@ namespace TripThruCore
                 p.PartnerFleet = this;
             random = new Random();
 
-            this.passengers = passengers.ToArray();
+            this.passengers = passengers;
             this.possibleTrips = possibleTrips.ToArray();
 
             if (urlTripsFile != null)
@@ -912,51 +913,154 @@ namespace TripThruCore
 
         private void GenerateRandomTrip(DateTime now)
         {
-            var possibleTrip = GetPossibleTrip();
-            if (possibleTrip == null)
+            var listPossibleTrip = GetPossibleTrip();
+            if (listPossibleTrip == null)
             {
-                Passenger passenger = passengers[random.Next(passengers.Length)];
+                Passenger passenger = passengers[random.Next(passengers.Count)];
                 Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
                 DateTime pickupTime = now + new TimeSpan(0, random.Next((int) tripMaxAdvancedNotice.TotalMinutes), 0);
                 QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
             }
             else
             {
-                Passenger passenger = GetPassenger(possibleTrip);
-                Pair<Location, Location> fromTo = getLocationPair(possibleTrip);
-                DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
-                QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+                foreach (var possibleTrip in listPossibleTrip)
+                {
+                    Passenger passenger = GetPassenger(possibleTrip);
+                    Pair<Location, Location> fromTo = getLocationPair(possibleTrip);
+                    DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
+                    QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
+                }
             }
         }
 
 
 
-        private string[] GetPossibleTrip()
+        private List<string[]> GetPossibleTrip()
         {
             if (TripReader == null) return null;
             while (!TripReader.EndOfStream)
             {
+                var locationsList = new List<string[]>();
+
                 var tripLine = TripReader.ReadLine();
                 if (tripLine == null) continue;
                 var tripValues = tripLine.Split(',');
+
+
+                var substringText = tripValues[5].Substring(0, 19);
+
+                var dateTimeTemp = DateTimeOffset.ParseExact(substringText,
+                "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                if (tripValues[5].Substring(20, 5).Equals("p. m."))
+                {
+                    dateTimeTemp = dateTimeTemp.AddHours(12);
+                }
+
+                var time = dateTimeTemp.TimeOfDay;
+                var timeNow = DateTime.UtcNow.TimeOfDay;
+
+                while (!(time >= timeNow))
+                {
+                    tripLine = TripReader.ReadLine();
+                    if (tripLine == null) break;
+                    tripValues = tripLine.Split(',');
+                    Console.WriteLine("Converte" + tripValues[5]);
+                    substringText = tripValues[5].Substring(0, 19);
+                    dateTimeTemp = DateTimeOffset.ParseExact(substringText,
+                    "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (tripValues[5].Substring(20, 5).Equals("p. m."))
+                    {
+                        dateTimeTemp = dateTimeTemp.AddHours(12);
+                    }
+                    time = dateTimeTemp.TimeOfDay;
+                }
+
                 try
                 {
-                    var latDrop = Convert.ToDouble(tripValues[13]);
-                    var lngDrop = Convert.ToDouble(tripValues[12]);
-                    var latPick = Convert.ToDouble(tripValues[11]);
-                    var lngPick = Convert.ToDouble(tripValues[10]);
-                    if (CoordinateRange(latDrop) && CoordinateRange(lngDrop) && CoordinateRange(latPick) && CoordinateRange(lngPick))
+                    while (time.Minutes == timeNow.Minutes)
                     {
-                        return tripValues;
+                        var latDrop = Convert.ToDouble(tripValues[13]);
+                        var lngDrop = Convert.ToDouble(tripValues[12]);
+                        var latPick = Convert.ToDouble(tripValues[11]);
+                        var lngPick = Convert.ToDouble(tripValues[10]);
+                        if (CoordinateRange(latDrop) && CoordinateRange(lngDrop) && CoordinateRange(latPick) &&
+                            CoordinateRange(lngPick))
+                        {
+                            if (IsInside(this.location, new Location(latPick, lngPick), 50) && IsInside(this.location, new Location(latDrop, lngDrop), 50))
+                                locationsList.Add(tripValues);
+                        }
+                        tripLine = TripReader.ReadLine();
+                        if (tripLine == null) break;
+                        tripValues = tripLine.Split(',');
+                        dateTimeTemp = DateTimeOffset.ParseExact(tripValues[5].Substring(0, 19),
+                        "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        time = dateTimeTemp.TimeOfDay;
                     }
+
+                    var finalListTrips = new List<string[]>();
+
+                    var countList = locationsList.Count;
+                    var counSteps = 0;
+                    var steps1 = (int)countList / 50;
+                    var steps = 0;
+                    if (steps1 != 0)
+                        steps = countList / steps1;
+                    var tripsMinute = 0;
+
+                    if(steps1 != 0)
+                        foreach (var trip in locationsList)
+                        {
+                            tripsMinute++;
+                            if (counSteps < steps)
+                            {
+                                counSteps++;
+                                continue;
+                            }
+                            counSteps = 0;
+                            finalListTrips.Add(trip);
+                        }
+                    else
+                    {
+                        if(locationsList.Count > 0)
+                            finalListTrips.Add(locationsList.First());
+                        else
+                            return null;
+                    }
+
+                    if (finalListTrips.Count > 0)
+                    {
+                        return finalListTrips;
+                    }
+                    else
+                        return null;
 
                 }
                 catch (Exception)
                 {
-                        
                 }
             }
+            if (!TripReader.EndOfStream) return null;
+            TripReader.BaseStream.Position = 0;
+            TripReader.DiscardBufferedData();
             return null;
+        }
+
+        public bool IsInside(Location l, Location Center, double Radius)
+        {
+            double lat1 = DegreesToRadians(Center.Lat);
+            double lng1 = DegreesToRadians(Center.Lng);
+            double lat2 = DegreesToRadians(l.Lat);
+            double lng2 = DegreesToRadians(l.Lng);
+            double dlon = lng2 - lng1;
+            double dlat = lat2 - lat1;
+            double a = Math.Pow(Math.Sin(dlat / 2.0), 2) + Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(dlon / 2.0), 2);
+            double c = 2.0 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            double d = 3961.0 * c; // (where 3961 is the radius of the Earth in miles
+            return d < Radius;
+        }
+        public double DegreesToRadians(double angle)
+        {
+            return Math.PI * angle / 180.0;
         }
         private Pair<Location, Location> getLocationPair(string[] valueStrings)
         {
@@ -968,7 +1072,7 @@ namespace TripThruCore
         }
         private Passenger GetPassenger(IList<string> valueStrings)
         {
-            if (NameReader == null || NameReader.EndOfStream) return passengers[random.Next(passengers.Length)];
+            if (NameReader == null || NameReader.EndOfStream) return passengers[random.Next(passengers.Count)];
             var completeName = "";
             if (listPassengerNames.ContainsKey(valueStrings[0])) return new Passenger(completeName);
             var identity = NameReader.ReadLine();

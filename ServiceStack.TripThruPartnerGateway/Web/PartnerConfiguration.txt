@@ -1,6 +1,6 @@
 ﻿{
     "enabled": true,
-	"UrlsTrips": "~/../../Db/trip_data_8.csv",
+	"UrlsTrips": "~/../../Db/Organizado15.csv",
 	"UrlsNames": "~/../../Db/FakeName.csv",
     "fleets": [
         {
@@ -9,8 +9,8 @@
             "coverage": [
                 {
                     "center": {
-                        "lat": 42.356217,
-                        "lng": -71.137512
+                        "Lat": 40.769004,
+						"Lng": -73.981376
                     },
                     "radius": 50
                 }
@@ -47,8 +47,8 @@
                 "Maryellen Legrand"
             ],
             "location": {
-                "lat": 42.356217,
-                "lng": -71.137512
+                "Lat": 40.769004,
+				"Lng": -73.981376
             },
             "name": "Netro",
             "passengers": [
