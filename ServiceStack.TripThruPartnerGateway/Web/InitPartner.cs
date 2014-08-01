@@ -102,7 +102,7 @@ namespace ServiceStack.TripThruPartnerGateway
                         _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));
 
                 var lastHealthCheck = DateTime.UtcNow;
-                //Thread.Sleep(new TimeSpan(0,3,0)); //This Sleep to give other partners time to initialize
+                Thread.Sleep(new TimeSpan(0,3,0)); //This Sleep to give other partners time to initialize
                 Console.WriteLine("Simulation Start.");
                 while (true)
                 {

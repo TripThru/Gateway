@@ -229,7 +229,7 @@ namespace TripThruSsh
                     {
                         Console.WriteLine("Starting mono");
                         ssh.RunCommand("export MONO_OPTIONS=\"--debug\"");
-                        //ssh.RunCommand("fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log &");
+                        ssh.RunCommand("fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log &");
                         Console.ReadLine();
                     });
             startMono.Start();

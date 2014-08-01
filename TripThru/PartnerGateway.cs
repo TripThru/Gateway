@@ -702,6 +702,7 @@ namespace TripThruCore
         public Dictionary<string, Driver> drivers;
         public LinkedList<Driver> availableDrivers;
         public LinkedList<Driver> returningDrivers;
+        public LinkedList<Driver> saveDrivers;
         public Pair<Location, Location>[] possibleTrips;
 
         public StreamReader TripReader;
@@ -781,6 +782,7 @@ namespace TripThruCore
             this.drivers = new Dictionary<string, Driver>();
             availableDrivers = new LinkedList<Driver>();
             returningDrivers = new LinkedList<Driver>();
+            saveDrivers = new LinkedList<Driver>();
             this.vehicleTypes = new List<VehicleType>(vehicleTypes);
             if (drivers != null)
             {
@@ -789,6 +791,7 @@ namespace TripThruCore
             }
             if (partner != null)
                 partner.AddPartnerFleet(this);
+            
         }
         public override string ToString()
         {
@@ -913,6 +916,7 @@ namespace TripThruCore
 
         private void GenerateRandomTrip(DateTime now)
         {
+            Console.WriteLine("######Generate Trip###########");
             var listPossibleTrip = GetPossibleTrip();
             if (listPossibleTrip == null)
             {
@@ -923,6 +927,7 @@ namespace TripThruCore
             }
             else
             {
+                Console.WriteLine("#######TripsRandoms#####" + listPossibleTrip.Count);
                 foreach (var possibleTrip in listPossibleTrip)
                 {
                     Passenger passenger = GetPassenger(possibleTrip);
@@ -946,16 +951,8 @@ namespace TripThruCore
                 if (tripLine == null) continue;
                 var tripValues = tripLine.Split(',');
 
-
-                var substringText = tripValues[5].Substring(0, 19);
-
-                var dateTimeTemp = DateTimeOffset.ParseExact(substringText,
-                "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                if (tripValues[5].Substring(20, 5).Equals("p. m."))
-                {
-                    dateTimeTemp = dateTimeTemp.AddHours(12);
-                }
-
+                var dateTimeTemp = DateTimeOffset.ParseExact(tripValues[5],
+                "dd/M/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 var time = dateTimeTemp.TimeOfDay;
                 var timeNow = DateTime.UtcNow.TimeOfDay;
 
@@ -964,14 +961,8 @@ namespace TripThruCore
                     tripLine = TripReader.ReadLine();
                     if (tripLine == null) break;
                     tripValues = tripLine.Split(',');
-                    Console.WriteLine("Converte" + tripValues[5]);
-                    substringText = tripValues[5].Substring(0, 19);
-                    dateTimeTemp = DateTimeOffset.ParseExact(substringText,
-                    "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    if (tripValues[5].Substring(20, 5).Equals("p. m."))
-                    {
-                        dateTimeTemp = dateTimeTemp.AddHours(12);
-                    }
+                    dateTimeTemp = DateTimeOffset.ParseExact(tripValues[5],
+                    "dd/M/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     time = dateTimeTemp.TimeOfDay;
                 }
 
@@ -992,8 +983,8 @@ namespace TripThruCore
                         tripLine = TripReader.ReadLine();
                         if (tripLine == null) break;
                         tripValues = tripLine.Split(',');
-                        dateTimeTemp = DateTimeOffset.ParseExact(tripValues[5].Substring(0, 19),
-                        "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        dateTimeTemp = DateTimeOffset.ParseExact(tripValues[5],
+                        "dd/M/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                         time = dateTimeTemp.TimeOfDay;
                     }
 
@@ -1029,6 +1020,24 @@ namespace TripThruCore
 
                     if (finalListTrips.Count > 0)
                     {
+                        if (availableDrivers.Count > finalListTrips.Count + 10)
+                        while (availableDrivers.Count > finalListTrips.Count + 10 && availableDrivers.Count > 0)
+                        {
+                            var avaliable = availableDrivers.First();
+                            saveDrivers.AddLast(avaliable);
+                            availableDrivers.RemoveFirst();
+                        }
+                        else
+                        {
+                            while (availableDrivers.Count < finalListTrips.Count + 10 && saveDrivers.Count > 0)
+                            {
+                                var avaliable = saveDrivers.First();
+                                availableDrivers.AddLast(avaliable);
+                                saveDrivers.RemoveFirst();
+                            }   
+                        }
+                        Console.WriteLine("#######AVALIABLE:" + availableDrivers.Count);
+                        Console.WriteLine("#######SAVE:" + saveDrivers.Count);
                         return finalListTrips;
                     }
                     else
