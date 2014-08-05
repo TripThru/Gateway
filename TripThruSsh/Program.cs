@@ -11,7 +11,7 @@ namespace TripThruSsh
     class Program
     {
 
-        private static Boolean fullDeploy = true; //if true will upload and replace everything, else just update partner configuations
+        private static Boolean fullDeploy = false; //if true will upload and replace everything, else just update partner configuations
         private static Dictionary<string, Environment> environments = new Dictionary<string, Environment>{
             {"sandbox", new Environment{
                      host = "54.201.134.194",
@@ -229,7 +229,7 @@ namespace TripThruSsh
                     {
                         Console.WriteLine("Starting mono");
                         ssh.RunCommand("export MONO_OPTIONS=\"--debug\"");
-                        ssh.RunCommand("fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log &");
+                        ssh.RunCommand("nohup fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log > tripthru.out 2> tripthru.err < /dev/null &");
                     });
             startMono.Start();
 
