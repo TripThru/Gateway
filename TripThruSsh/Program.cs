@@ -58,7 +58,7 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["digital-ocean-mono3"];
+            env = environments["digital-ocean"];
             localPath = @"Z:\WindowsDev\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
