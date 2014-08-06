@@ -128,8 +128,8 @@ namespace ServiceStack.TripThruGateway
                             new GatewayClient(
                                 account.ClientId,
                                 account.PartnerName,
-                                account.TripThruAccessToken,
-                                account.CallbackUrl
+                                account.CallbackUrl,
+                                account.TripThruAccessToken
                                 )
                             );
                 }

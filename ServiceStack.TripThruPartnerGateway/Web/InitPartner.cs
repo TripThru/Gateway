@@ -51,7 +51,7 @@ namespace ServiceStack.TripThruPartnerGateway
             {
                 configuration.Partner.AccessToken = account.AccessToken;
                 configuration.Partner.Name = account.PartnerName;
-                TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.Partner.AccessToken, configuration.TripThruUrl ?? configuration.TripThruUrlMono), configuration.partnerFleets);
+                TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.TripThruUrl ?? configuration.TripThruUrlMono, configuration.Partner.AccessToken), configuration.partnerFleets);
 
                 GatewayService.gateway = partner;
 

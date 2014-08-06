@@ -27,6 +27,13 @@ namespace TripThruSsh
                      sshPort = 22,
                      debug = false
             }},
+            {"digital-ocean-mono3", new Environment{
+                     host = "192.241.200.50",
+                     user = "tripservice",
+                     password = "Tr1PServ1CeSt@Ck",
+                     sshPort = 22,
+                     debug = false
+            }},
             {"vagrant", new Environment{
                      host = "192.168.0.125",
                      user = "tripservice",
@@ -239,7 +246,7 @@ namespace TripThruSsh
             var client = new System.Net.WebClient();
             foreach (PartnerConfiguration config in partnerConfigurations)
             {
-                Console.WriteLine("Sending request to: \n" + @config.Partner.CallbackUrlMono.ToString() + "log");
+                Console.WriteLine("Sending request to: \n" + @config.Partner.CallbackUrlMono.ToString());
                 while (true)
                 {
                     try

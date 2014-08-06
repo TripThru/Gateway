@@ -241,7 +241,7 @@ namespace ServiceStack.TripThruGateway
                         Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
                         acct.PartnerName = request.Name;
                         acct.CallbackUrl = request.CallbackUrl;
-                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, acct.TripThruAccessToken, request.CallbackUrl));
+                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, request.CallbackUrl, acct.TripThruAccessToken));
                         StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
 
                         partnerResponse = new PartnerResponse

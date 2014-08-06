@@ -847,6 +847,28 @@ namespace TripThruCore
         }
     }
 
+    public class GatewayWithCallbackUrl : Gateway
+    {
+        public string RootUrl
+        {
+            get
+            {
+                return this.RootUrl;
+            }
+            set
+            {
+                this.RootUrl = value.EndsWith("/") ? value : value + "/";
+            }
+        }
+
+        public GatewayWithCallbackUrl(string ID, string name, string rootUrl)
+            : base(ID, name)
+        {
+            this.RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
+        }
+
+    }
+
     public class GatewayWithStats : Gateway
     {
         public GatewayWithStats(string ID, string name)

@@ -11,17 +11,16 @@ using ServiceStack.ServiceClient.Web;
 using ServiceStack.ServiceModel;
 namespace ServiceStack.TripThruGateway
 {
-    public class GatewayClient : Gateway
+    public class GatewayClient : GatewayWithCallbackUrl
     {
 
         public string AccessToken { get; set; } //Directly assing access token until authentication is implemented
-        public string RootUrl { get; set; }
         private TimeSpan? timeout;
 
-        public GatewayClient(string ID, string name, string accessToken, string rootUrl) : base(ID, name)
+        public GatewayClient(string ID, string name, string rootUrl, string accessToken)
+            : base(ID, name, rootUrl)
         {
             AccessToken = accessToken;
-            RootUrl = rootUrl.EndsWith("/") ? rootUrl : rootUrl + "/";
             timeout = new TimeSpan(0, 5, 0);
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
