@@ -150,7 +150,7 @@ namespace TripThruCore
             requests++;
             if (!partners.ContainsKey(partner.ID))
                 partners.Add(partner.ID, partner);
-            else if (partners[partner.ID] is GatewayWithCallbackUrl) //update callbackurl
+            else
                 partners[partner.ID] = partner;
             RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
             return response;
