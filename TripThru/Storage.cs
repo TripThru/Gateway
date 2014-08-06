@@ -178,10 +178,10 @@ namespace TripThruCore.Storage
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
-            _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users-test");
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
-            _trips = _tripsDatabase.GetCollection<Trip>("trips");
+            _trips = _tripsDatabase.GetCollection<Trip>("trips-test");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
         }
         public override void CreatePartnerAccount(PartnerAccount account)

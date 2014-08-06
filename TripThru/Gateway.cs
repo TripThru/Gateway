@@ -849,15 +849,16 @@ namespace TripThruCore
 
     public class GatewayWithCallbackUrl : Gateway
     {
+        private string _rootUrl;
         public string RootUrl
         {
             get
             {
-                return this.RootUrl;
+                return this._rootUrl;
             }
             set
             {
-                this.RootUrl = value.EndsWith("/") ? value : value + "/";
+                this._rootUrl = value.EndsWith("/") ? value : value + "/";
             }
         }
 
