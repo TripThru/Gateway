@@ -58,8 +58,8 @@ namespace TripThruSsh
 
         private static void Main(string[] args)
         {
-            env = environments["digital-ocean"];
-            localPath = @"Z:\WindowsDev\Gateway\";
+            env = environments["vagrant"];
+            localPath = @"C:\Users\OscarErnesto\Documents\Visual Studio 2013\Projects\Gateway\";
             remoteFilePath = "/home/tripservice/servicestack/";
             host = env.host;
             user = env.user;
@@ -237,6 +237,7 @@ namespace TripThruSsh
                         Console.WriteLine("Starting mono");
                         ssh.RunCommand("export MONO_OPTIONS=\"--debug\"");
                         ssh.RunCommand("nohup fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log > tripthru.out 2> tripthru.err < /dev/null &");
+                        Console.ReadLine();
                     });
             startMono.Start();
 

@@ -1,6 +1,6 @@
-HomeUrl=http://107.170.240.134:8080/BookingsTuxor/
+HomeUrl=http://192.168.0.125:8080/BookingsTuxor/
 RelativeHomeUrl=/BookingsTuxor/index.php
-TripThruUrl=http://107.170.240.134/TripThru.TripThruGateway/
-PartnerUrl=http://107.170.240.134/TripThru.Tuxor/
+TripThruUrl=http://192.168.0.125/TripThru.TripThruGateway/
+PartnerUrl=http://192.168.0.125/TripThru.Tuxor/
 PartnerName=Tuxor
 PartnerId=tuxor@tripthru.com
