@@ -73,6 +73,7 @@ namespace TripThruCore
 
     public enum PaymentMethod { Cash, Credit, Account };
     public enum QuoteStatus { New, InProgress, Complete, Sent };
+    public enum TripState { New, Quoting, Dispatched };
 
     public class Zone
     {
@@ -224,6 +225,9 @@ namespace TripThruCore
         public TimeSpan Lateness { get; set; }
         public double LatenessMilliseconds { get; set; }
         public double SamplingPercentage { get; set; }
+        public TripState State { get; set; }
+        public bool IsDirty { get; set; }
+        public string MadeDirtyById { get; set; }
 
         private List<Location> _historyEnrouteList = new List<Location>();
         private List<Location> _historyPickUpList = new List<Location>();

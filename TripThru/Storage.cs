@@ -32,6 +32,8 @@ namespace TripThruCore.Storage
         public abstract long GetLastTripId();
         public abstract void InsertTrip(Trip trip);
         public abstract void SaveTrip(Trip trip);
+        public abstract List<Trip> GetTripsByState(TripState state);
+        public abstract List<Trip> GetDirtyTrips();
         public abstract Route GetRoute(string id);
         public abstract void SaveRoute(Route route);
         public abstract void InsertQuote(TripQuotes quote);
@@ -188,6 +190,10 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.LatenessMilliseconds).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.Creation).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.loc);
+                cm.GetMemberMap(c => c.SamplingPercentage);
+                cm.GetMemberMap(c => c.State);
+                cm.GetMemberMap(c => c.IsDirty);
+                cm.GetMemberMap(c => c.MadeDirtyById);
             });
             MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Route>(cm =>
             {
@@ -285,6 +291,14 @@ namespace TripThruCore.Storage
         public override void SaveTrip(Trip trip)
         {
             this._trips.Save(trip);
+        }
+        public override List<Trip> GetTripsByState(TripState state)
+        {
+            return _trips.AsQueryable<Trip>().Where(t => t.State == state).ToList();
+        }
+        public override List<Trip> GetDirtyTrips()
+        {
+            return _trips.AsQueryable<Trip>().Where(t => t.IsDirty == true).ToList();
         }
         public override Route GetRoute(string id)
         {
@@ -393,6 +407,20 @@ namespace TripThruCore.Storage
         {
             if (_storage != null)
                 _storage.SaveTrip(trip);
+        }
+        public static List<Trip> GetTripsByState(TripState state)
+        {
+            if (_storage != null)
+                return _storage.GetTripsByState(state);
+            else
+                return null;
+        }
+        public static List<Trip> GetDirtyTrips()
+        {
+            if (_storage != null)
+                return _storage.GetDirtyTrips();
+            else
+                return null;
         }
         public static Route GetRoute(string id)
         {
