@@ -102,6 +102,7 @@
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO">
@@ -146,6 +147,8 @@
   <ItemGroup>
     <Compile Include="Custom Integrations\TDispatch.cs" />
     <Compile Include="Gateway.cs" />
+    <Compile Include="GatewayClient.cs" />
+    <Compile Include="GatewayService.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MapTools.cs" />
     <Compile Include="PartnerGateway.cs" />
