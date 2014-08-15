@@ -56,8 +56,9 @@ namespace ServiceStack.TripThruGateway
                 PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                 try
                 {
-                    if (!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin)){
-                        if(acct == null)
+                    if (!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin))
+                    {
+                        if (acct == null)
                             acct = user;
                         IEnumerable<Logger.RequestLog> logList = Logger.Queue;
 
@@ -66,7 +67,7 @@ namespace ServiceStack.TripThruGateway
                                                          log.destinationID == acct.ClientId);
                         if (request.tripID != null)
                             logList = logList.Where(log => log.tripID == request.tripID);
-                        
+
                         logList = logList.OrderBy(log => log.Time);
 
                         logResponse = new LogResponse
@@ -102,7 +103,7 @@ namespace ServiceStack.TripThruGateway
         [Restrict(VisibilityTo = EndpointAttributes.None)]
         public class Stats : IReturn<StatsResponse>
         {
-            
+
         }
 
         public class StatsResponse
@@ -153,40 +154,40 @@ namespace ServiceStack.TripThruGateway
                     if (response.result == Gateway.Result.OK)
                     {
                         statsResponse = new StatsResponse
-                    {
-                        Result = "OK",
-                        ResultCode = response.result,
-                        ActiveTrips = response.activeTrips,
-                        CancelsAllTime = response.cancelsAllTime,
-                        CancelsLast24Hrs = response.cancelsLast24Hrs,
-                        CancelsLastHour = response.cancelsLastHour,
-                        DistanceAllTime = response.distanceAllTime,
-                        DistanceLast24Hrs = response.distanceLast24Hrs,
-                        DistanceLastHour = response.distanceLastHour,
-                        ExceptionsAllTime = response.exceptionsAllTime,
-                        ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
-                        ExceptionsLastHour = response.exceptionsLastHour,
-                        FareAllTime = response.fareAllTime,
-                        FareLast24Hrs = response.fareLast24Hrs,
-                        FareLastHour = response.fareLastHour,
-                        RejectsAllTime = response.rejectsAllTime,
-                        RejectsLast24Hrs = response.rejectsLast24Hrs,
-                        RejectsLastHour = response.rejectsLastHour,
-                        RequestsAllTime = response.requestsAllTime,
-                        RequestsLast24Hrs = response.requestsLast24Hrs,
-                        RequestsLastHour = response.requestsLastHour,
-                        TripsAllTime = response.tripsAllTime,
-                        TripsLast24Hrs = response.tripsLast24Hrs,
-                        TripsLastHour = response.tripsLastHour
-                    };
+                        {
+                            Result = "OK",
+                            ResultCode = response.result,
+                            ActiveTrips = response.activeTrips,
+                            CancelsAllTime = response.cancelsAllTime,
+                            CancelsLast24Hrs = response.cancelsLast24Hrs,
+                            CancelsLastHour = response.cancelsLastHour,
+                            DistanceAllTime = response.distanceAllTime,
+                            DistanceLast24Hrs = response.distanceLast24Hrs,
+                            DistanceLastHour = response.distanceLastHour,
+                            ExceptionsAllTime = response.exceptionsAllTime,
+                            ExceptionsLast24Hrs = response.exceptionsLast24Hrs,
+                            ExceptionsLastHour = response.exceptionsLastHour,
+                            FareAllTime = response.fareAllTime,
+                            FareLast24Hrs = response.fareLast24Hrs,
+                            FareLastHour = response.fareLastHour,
+                            RejectsAllTime = response.rejectsAllTime,
+                            RejectsLast24Hrs = response.rejectsLast24Hrs,
+                            RejectsLastHour = response.rejectsLastHour,
+                            RequestsAllTime = response.requestsAllTime,
+                            RequestsLast24Hrs = response.requestsLast24Hrs,
+                            RequestsLastHour = response.requestsLastHour,
+                            TripsAllTime = response.tripsAllTime,
+                            TripsLast24Hrs = response.tripsLast24Hrs,
+                            TripsLastHour = response.tripsLastHour
+                        };
                     }
                     else
                     {
                         statsResponse = new StatsResponse
-                {
-                    Result = "Failed",
-                    ResultCode = response.result
-                };
+                        {
+                            Result = "Failed",
+                            ResultCode = response.result
+                        };
                     }
                 }
                 catch (Exception e)
@@ -253,7 +254,7 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        
+
                         string msg;
                         if (message == null)
                         {
@@ -275,7 +276,7 @@ namespace ServiceStack.TripThruGateway
                             partnerResponse.Message = message;
                         }
                         Logger.Log(msg);
-                        
+
                     }
                 }
                 finally
@@ -377,7 +378,7 @@ namespace ServiceStack.TripThruGateway
                     }
                     else
                     {
-                        
+
                         string msg;
                         if (message == null)
                         {
@@ -398,7 +399,7 @@ namespace ServiceStack.TripThruGateway
                             networksResponse.Message = msg;
                         }
                         Logger.Log(msg);
-                        
+
                     }
                 }
                 catch (Exception e)
@@ -431,195 +432,6 @@ namespace ServiceStack.TripThruGateway
                     return "Access Token is Required";
                 return null;
             }
-        }
-
-        #endregion
-
-        #region Quotes
-
-        [Api(Description = "Use GET to get quotes for a possible trip.")]
-        [Route("/quotes", Verbs = "GET, OPTIONS", Summary = @"get quotes for a possible trip", Notes = "The standard usage is to first get quotes for a planned trip and then dispatch the trip to your selected fleet and/or driver")]
-        [Restrict(VisibilityTo = EndpointAttributes.None)]
-        public class Quotes : IReturn<QuotesResponse>
-        {
-            [ApiMember(Name = "access_token", Description = "Access token acquired through OAuth2.0 authorization procedure.  Example: demo12345", ParameterType = "query", DataType = "string", IsRequired = true)]
-            public string access_token { get; set; }
-            [ApiMember(Name = "PickupTime", Description = "Time that the taxi should arrive. Format (yyyy-MM-ddTHH:mm:ss) GMT.  Example: 2014-02-25T23:30:00", ParameterType = "query", DataType = "DateTime", IsRequired = true)]
-            public DateTime PickupTime { get; set; }
-            [ApiMember(Name = "PickupLat", Description = "GPS coordinate latitude of where the passenger should be picked up. Example: 37.782551", ParameterType = "query", DataType = "double", IsRequired = true)]
-            public double PickupLat { get; set; }
-            [ApiMember(Name = "PickupLng", Description = "GPS coordinate longitude of where the passenger should be picked up. Example: -122.445368", ParameterType = "query", DataType = "double", IsRequired = true)]
-            public double PickupLng { get; set; }
-            [ApiMember(Name = "PassengerName", Description = "Name of passenger", ParameterType = "query", DataType = "string", IsRequired = false)]
-            public string PassengerName { get; set; }
-            [ApiAllowableValues("Luggage", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "Luggage", Description = "Number of pieces of luggage", ParameterType = "query", DataType = "int", IsRequired = false)]
-            public int? Luggage { get; set; }
-            [ApiAllowableValues("Persons", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "Persons", Description = "Number of people that will be in the vehicle", ParameterType = "query", DataType = "int", IsRequired = false)]
-            public int? Persons { get; set; }
-            [ApiMember(Name = "DropoffLat", Description = "GPS coordinate latitude of where the passenger should be dropped off. Example: 37.786956", ParameterType = "query", DataType = "double", IsRequired = true)]
-            public double? DropoffLat { get; set; }
-            [ApiMember(Name = "DropoffLng", Description = "GPS coordinate longitude of where the passenger should be dropped off. Example: -122.440279", ParameterType = "query", DataType = "double", IsRequired = true)]
-            public double? DropoffLng { get; set; }
-            [ApiAllowableValues("PaymentMethod", typeof(PaymentMethod))]
-            [ApiMember(Name = "PaymentMethod", Description = "How does customer plan to pay", ParameterType = "query", DataType = "PaymentMethod", IsRequired = false)]
-            public PaymentMethod? PaymentMethod { get; set; }
-            [ApiAllowableValues("VehicleType", typeof(VehicleType))]
-            [ApiMember(Name = "VehicleType", Description = "What type of vehicle", ParameterType = "query", DataType = "VehicleType", IsRequired = false)]
-            public VehicleType? VehicleType { get; set; }
-            [ApiMember(Name = "MaxPrice", Description = "Maximum price passenger is willing to pay", ParameterType = "query", DataType = "double", IsRequired = false)]
-            public double? MaxPrice { get; set; }
-            [ApiAllowableValues("MinRating", "1", "2", "3", "4", "5", "6", "7")]
-            [ApiMember(Name = "MinRating", Description = "Minimum driver rating", ParameterType = "query", DataType = "int", IsRequired = false)]
-            public int? MinRating { get; set; }
-            [ApiMember(Name = "PartnerId", Description = "Unique identifier of partner you wish to receive quotes from.  Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
-            public string PartnerId { get; set; }
-            [ApiMember(Name = "FleetId", Description = "Unique identifier of fleet you wish to receive quotes from. Use this field only if you have a specific partner in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
-            public string FleetId { get; set; }
-            [ApiMember(Name = "DriverId", Description = "Unique identifier of driver you wish to receive quotes from. Use this field only if you have a specific driver in mind.", ParameterType = "query", DataType = "string", IsRequired = false)]
-            public string DriverId { get; set; }
-            [ApiMember(Name = "PassengerId", Description = "In case there's a specific passenger ID.  Not normally needed", ParameterType = "query", DataType = "string", IsRequired = false)]
-            public string PassengerId { get; set; }
-        }
-
-        public class QuotesResponse
-        {
-            public string Result { get; set; }
-            public Gateway.Result ResultCode { get; set; }
-            public string Message { get; set; }
-            public int? Count { get; set; }
-            public List<TripThruCore.Quote> Quotes { get; set; }
-        }
-
-        public class QuotesService : Service
-        {
-            public QuotesResponse Get(Quotes request)
-            {
-                var accessToken = request.access_token;
-                var message = ValidateQuote(request);
-                request.access_token = null;
-                QuotesResponse quotesResponse = new QuotesResponse
-                {
-                    Result = "Unknown",
-                    ResultCode = Gateway.Result.UnknownError
-                };
-                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
-                var user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
-                var clientId = "none";
-                try
-                {
-                    if ((!accessToken.IsNullOrEmpty() && acct != null || (user != null && user.Role == Storage.UserRole.admin)) && message == null){
-                        if(acct == null)
-                            acct = user;
-                        clientId = acct.ClientId;
-                        Logger.BeginRequest("QuoteTrip received from " + acct.UserName, request);
-                        var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
-                            clientID: acct.ClientId,
-                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
-                            pickupTime: request.PickupTime,
-                            passengerID: request.PassengerId,
-                            passengerName: request.PassengerName,
-                            luggage: request.Luggage,
-                            persons: request.Persons,
-                            dropoffLocation: request.DropoffLat == null ? null : new Location((double)request.DropoffLat, (double)request.DropoffLng),
-                            paymentMethod: request.PaymentMethod,
-                            vehicleType: request.VehicleType,
-                            maxPrice: request.MaxPrice,
-                            minRating: request.MinRating,
-                            partnerID: request.PartnerId,
-                            fleetID: request.FleetId,
-                            driverID: request.DriverId
-                            ));
-                        if (response.result == Gateway.Result.OK)
-                        {
-                            quotesResponse = new QuotesResponse
-                            {
-                                Count = response.quotes.Count,
-                                Quotes = response.quotes,
-                                ResultCode = response.result,
-                                Result = "OK",
-                                Message = "OK"
-                            };
-                        }
-                        else
-                        {
-                            quotesResponse = new QuotesResponse
-                            {
-                                Result = "Failed",
-                                ResultCode = response.result,
-                                Message = "Failed"
-                            };
-                        }
-                    }
-                    else
-                    {
-                        string msg;
-                        if (message == null)
-                        {
-                            Logger.BeginRequest("QuoteTrip received from unknown user", request);
-                            msg = "POST /quotes called with invalid access token, ip: " + Request.RemoteIp +
-                                  ", Response = Authentication failed";
-                            quotesResponse = new QuotesResponse
-                            {
-                                Result = "Failed",
-                                ResultCode = Gateway.Result.AuthenticationError,
-                                Message = "Acces Token Invalid"
-                            };
-                        }
-                        else
-                        {
-                            Logger.BeginRequest("QuoteTrip received with wrong parameters", request);
-                            msg = message;
-                            quotesResponse.Message = message;
-                        }
-                        Logger.Log(msg);
-                        
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("QuoteTrip=" + e.Message, e.ToString());
-                    quotesResponse = new QuotesResponse
-                    {
-                        Result = "Failed",
-                        ResultCode = Gateway.Result.UnknownError,
-                        Message = "Failed"
-                    };
-                }
-                finally
-                {
-                    Logger.AddTag("RequestType", "QuoteTrip");
-                    Logger.AddTag("ClientId", clientId);
-                    Logger.SetOriginatingId(acct.ClientId);
-                    Logger.SetServicingId(gateway.ID); //Should we have a list of servicing partners for this case?
-                    Logger.EndRequest(quotesResponse);
-                }
-                return quotesResponse;
-            }
-
-            public QuotesResponse Options(Quotes request)
-            {
-                return new QuotesResponse();
-            }
-
-            private string ValidateQuote(Quotes quote)
-            {
-                if (quote.access_token.IsNullOrEmpty())
-                    return "Access Token is Required.";
-                if (quote.PickupTime == null)
-                    return "PickupTime is Required.";
-                if (quote.PickupLat == null)
-                    return "PickupLat is Required.";
-                if (quote.PickupLng == null)
-                    return "PickupLng is Required.";
-                if (quote.DropoffLat == null)
-                    return "DropoffLat is Required.";
-                if (quote.DropoffLng == null)
-                    return "DropoffLng is Required.";
-                return null;
-            }
-
         }
 
         #endregion
@@ -700,6 +512,7 @@ namespace ServiceStack.TripThruGateway
             public string Message { get; set; }
             public int? Count { get; set; }
             public List<TripThruCore.Quote> Quotes { get; set; }
+            public TripThruCore.QuoteStatus Status { get; set; }
         }
 
         public class quoteService : Service
@@ -725,6 +538,7 @@ namespace ServiceStack.TripThruGateway
                         Logger.BeginRequest("QuoteTrip received from " + acct.UserName, request);
                         var response = gateway.QuoteTrip(new Gateway.QuoteTripRequest(
                             clientID: acct.ClientId,
+                            id: request.TripId,
                             pickupLocation: new Location(request.PickupLat, request.PickupLng),
                             pickupTime: request.PickupTime,
                             passengerID: request.PassengerId,
@@ -744,8 +558,6 @@ namespace ServiceStack.TripThruGateway
                         {
                             quotesResponse = new QuoteResponse
                             {
-                                Count = response.quotes.Count,
-                                Quotes = response.quotes,
                                 ResultCode = response.result,
                                 Result = "OK",
                                 Message = "OK"
@@ -809,21 +621,193 @@ namespace ServiceStack.TripThruGateway
 
             public QuoteResponse Get(Quote request)
             {
-                QuoteResponse quoteResponse = new QuoteResponse
+                var accessToken = request.access_token;
+                var message = ValidateGetQuote(request);
+                request.access_token = null;
+                QuoteResponse quotesResponse = new QuoteResponse
                 {
-                    Result = "OK",
-                    ResultCode = Gateway.Result.OK
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
                 };
-                return quoteResponse;
+
+                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
+                try
+                {
+                    if (acct != null && message == null)
+                    {
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("GetQuote received from " + acct.UserName, request);
+                        var response = gateway.GetQuote(new Gateway.GetQuoteRequest(clientId, request.TripId));
+                        if (response.result == Gateway.Result.OK)
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                ResultCode = response.result,
+                                Result = "OK",
+                                Message = "OK",
+                                Status = response.status,
+                                Quotes = response.quotes,
+                                Count = response.quotes.Count
+                            };
+                        }
+                        else
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result,
+                                Message = "Failed"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        string msg;
+                        if (message == null)
+                        {
+                            Logger.BeginRequest("GetQuote received from unknown user", request);
+                            msg = "GET /quote called with invalid access token, ip: " + Request.RemoteIp +
+                                  ", Response = Authentication failed";
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = Gateway.Result.AuthenticationError,
+                                Message = "Acces Token Invalid"
+                            };
+                        }
+                        else
+                        {
+                            Logger.BeginRequest("GetQuote received with wrong parameters", request);
+                            msg = message;
+                            quotesResponse.Message = message;
+                        }
+                        Logger.Log(msg);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("GetQuote=" + e.Message, e.ToString());
+                    quotesResponse = new QuoteResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError,
+                        Message = "Failed"
+                    };
+                }
+                finally
+                {
+                    Logger.AddTag("RequestType", "GetQuote");
+                    Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID); //Should we have a list of servicing partners for this case?
+                    Logger.EndRequest(quotesResponse);
+                }
+                return quotesResponse;
             }
             public QuoteResponse Put(Quote request)
             {
-                QuoteResponse quoteResponse = new QuoteResponse
+                var accessToken = request.access_token;
+                var message = ValidateUpdateQuote(request);
+                request.access_token = null;
+                QuoteResponse quotesResponse = new QuoteResponse
                 {
-                    Result = "OK",
-                    ResultCode = Gateway.Result.OK
+                    Result = "Unknown",
+                    ResultCode = Gateway.Result.UnknownError
                 };
-                return quoteResponse;
+
+                var acct = gateway.GetPartnerAccountByAccessToken(accessToken);
+                var clientId = "none";
+                try
+                {
+                    if (acct != null && message == null)
+                    {
+                        clientId = acct.ClientId;
+                        Logger.BeginRequest("UpdateQuote received from " + acct.UserName, request);
+                        var response = gateway.UpdateQuote(new Gateway.UpdateQuoteRequest(
+                            clientID: acct.ClientId,
+                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
+                            pickupTime: request.PickupTime,
+                            passengerID: request.PassengerId,
+                            passengerName: request.PassengerName,
+                            luggage: request.Luggage,
+                            persons: request.Persons,
+                            dropoffLocation: request.DropoffLat == null ? null : new Location((double)request.DropoffLat, (double)request.DropoffLng),
+                            paymentMethod: request.PaymentMethod,
+                            vehicleType: request.VehicleType,
+                            maxPrice: request.MaxPrice,
+                            minRating: request.MinRating,
+                            partnerID: request.PartnerId,
+                            fleetID: request.FleetId,
+                            driverID: request.DriverId,
+                            eta: (DateTime)request.ETA,
+                            fare: (double)request.Price,
+                            tripId: request.TripId
+                            ));
+                        if (response.result == Gateway.Result.OK)
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                ResultCode = response.result,
+                                Result = "OK",
+                                Message = "OK"
+                            };
+                        }
+                        else
+                        {
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = response.result,
+                                Message = "Failed"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        string msg;
+                        if (message == null)
+                        {
+                            Logger.BeginRequest("UpdateQuote received from unknown user", request);
+                            msg = "PUT /quote called with invalid access token, ip: " + Request.RemoteIp +
+                                  ", Response = Authentication failed";
+                            quotesResponse = new QuoteResponse
+                            {
+                                Result = "Failed",
+                                ResultCode = Gateway.Result.AuthenticationError,
+                                Message = "Acces Token Invalid"
+                            };
+                        }
+                        else
+                        {
+                            Logger.BeginRequest("UpdateQuote received with wrong parameters", request);
+                            msg = message;
+                            quotesResponse.Message = message;
+                        }
+                        Logger.Log(msg);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug("UpdateQuote=" + e.Message, e.ToString());
+                    quotesResponse = new QuoteResponse
+                    {
+                        Result = "Failed",
+                        ResultCode = Gateway.Result.UnknownError,
+                        Message = "Failed"
+                    };
+                }
+                finally
+                {
+                    Logger.AddTag("RequestType", "UpdateQuote");
+                    Logger.AddTag("ClientId", clientId);
+                    Logger.SetOriginatingId(acct.ClientId);
+                    Logger.SetServicingId(gateway.ID); //Should we have a list of servicing partners for this case?
+                    Logger.EndRequest(quotesResponse);
+                }
+                return quotesResponse;
             }
 
             public QuoteResponse Options(Quote request)
@@ -844,6 +828,24 @@ namespace ServiceStack.TripThruGateway
                     return "DropoffLat is Required.";
                 if (quote.DropoffLng == null)
                     return "DropoffLng is Required.";
+                return null;
+            }
+            private string ValidateGetQuote(Quote quote)
+            {
+                if (quote.access_token.IsNullOrEmpty())
+                    return "Access Token is Required.";
+                if (quote.TripId == null)
+                    return "Trip id is Required.";
+                return null;
+            }
+            private string ValidateUpdateQuote(Quote quote)
+            {
+                if (quote.access_token.IsNullOrEmpty())
+                    return "Access Token is Required.";
+                if (quote.ETA == null)
+                    return "ETA is Required.";
+                if (quote.Price == null)
+                    return "Price is Required.";
                 return null;
             }
         }
@@ -987,13 +989,13 @@ namespace ServiceStack.TripThruGateway
                             dispatchResponse.Message = message;
                         }
                         Logger.Log(msg);
-                        
+
                     }
                 }
                 catch (Exception e)
                 {
                     Logger.LogDebug("DispatchTrip=" + e.Message, e.ToString(),
-                        new Dictionary<string, string>() { { "TripID", request.TripId }, {"ClientId", clientId},{"Remote Ip", Request.RemoteIp} });
+                        new Dictionary<string, string>() { { "TripID", request.TripId }, { "ClientId", clientId }, { "Remote Ip", Request.RemoteIp } });
                     dispatchResponse = new TripResponse
                     {
                         Result = "Failed",
@@ -1117,7 +1119,8 @@ namespace ServiceStack.TripThruGateway
                 var clientId = "none";
                 try
                 {
-                    if (!accessToken.IsNullOrEmpty() && acct == null) {
+                    if (!accessToken.IsNullOrEmpty() && acct == null)
+                    {
                         PartnerAccount user = StorageManager.GetPartnerAccountByAccessToken(accessToken);
                         if (user != null && user.Role == Storage.UserRole.admin)
                             acct = user;
@@ -1194,7 +1197,7 @@ namespace ServiceStack.TripThruGateway
                             tripStatusResponse.Message = message;
                         }
                         Logger.Log(msg);
-                        
+
                     }
                 }
                 catch (Exception e)
@@ -1294,7 +1297,7 @@ namespace ServiceStack.TripThruGateway
                             tripStatusResponse.Message = msg;
                         }
                         Logger.Log(msg);
-                        
+
                     }
                 }
                 catch (Exception e)
@@ -1485,7 +1488,7 @@ namespace ServiceStack.TripThruGateway
                         return routeTripResponse;
                     routeTripResponse.Result = response.result;
                     routeTripResponse.HistoryEnrouteList = response.HistoryEnrouteList;
-                    routeTripResponse.HistoryPickUpList = response.HistoryPickUpList;
+                    routeTripResponse.HistoryPickUpList = response.HistoryPickupList;
                 }
                 catch (Exception e)
                 {

@@ -237,31 +237,15 @@ namespace TripThruCore
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
         {
             requests++;
-            List<Quote> quotes = new List<Quote>();
-            foreach (PartnerFleet f in PartnerFleets.Values)
-            {
-                if (!f.FleetServesLocation(r.pickupLocation))
-                    continue;
-                foreach (VehicleType vehicleType in f.vehicleTypes)
-                {
-                    if (r.vehicleType == vehicleType || r.vehicleType == null)
-                    {
-                        PartnerTrip trip = GetTrip(r);
-                        trip.vehicleType = vehicleType;
-                        quotes.Add(new Quote(
-                            partnerID: ID,
-                            partnerName: name,
-                            fleetID: f.ID, fleetName: f.name,
-                            vehicleType: vehicleType,
-                            price: trip.dropoffLocation == null ? (double?)null : f.GetPrice(trip),
-                            distance: trip.dropoffLocation == null ? (double?)null : f.GetDistance(trip),
-                            duration: trip.duration,
-                            ETA: f.GetPickupETA(trip)));
-                    }
-                }
-            }
-            QuoteTripResponse response = quotes.Count > 0 ? new QuoteTripResponse(quotes) : new QuoteTripResponse(result: Result.Rejected);
-            return response;
+            throw new Exception("Not implemented");
+        }
+        public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
+        {
+            throw new Exception("Not implemented");
+        }
+        public override Gateway.GetQuoteResponse GetQuote(Gateway.GetQuoteRequest request)
+        {
+            throw new Exception("Not implemented");
         }
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {

@@ -72,6 +72,7 @@ namespace TripThruCore
     public enum VehicleType { Compact, Sedan };
 
     public enum PaymentMethod { Cash, Credit, Account };
+    public enum QuoteStatus { New, InProgress, Complete, Sent };
 
     public class Zone
     {
@@ -239,12 +240,12 @@ namespace TripThruCore
             return true;
         }
 
-        public List<Location> GetEnrouteLocatinList()
+        public List<Location> GetEnrouteLocationList()
         {
             return _historyEnrouteList;
         }
 
-        public List<Location> GetPickUpLocatinList()
+        public List<Location> GetPickupLocationList()
         {
             return _historyPickUpList;
         }
@@ -358,16 +359,29 @@ namespace TripThruCore
             throw new Exception("not supported");
             return null;
         }
-        public class GetGatewayStatsRequest
+        public class Request
+        {
+
+        }
+        public class Response
+        {
+            public Result result { get; set; }
+
+            public Response(Result result)
+            {
+                this.result = result;
+            }
+
+        }
+        public class GetGatewayStatsRequest : Request
         {
             public override string ToString()
             {
                 return "stats";
             }
         }
-        public class GetGatewayStatsResponse
+        public class GetGatewayStatsResponse : Response
         {
-            public Result result;
             public long activeTrips;
             public long rejectsAllTime;
             public long rejectsLast24Hrs;
@@ -399,6 +413,7 @@ namespace TripThruCore
                 double distanceAllTime, double distanceLast24Hours, double distanceLastHour,
                 double fareAllTime, double fareLast24Hrs, double fareLastHour,
                 Result result = Result.OK)
+                : base(result)
             {
                 this.activeTrips = activeTrips;
                 this.requestsAllTime = requestsAllTime;
@@ -422,18 +437,18 @@ namespace TripThruCore
                 this.fareAllTime = fareAllTime;
                 this.fareLast24Hrs = fareLast24Hrs;
                 this.fareLastHour = fareLastHour;
-                this.result = result;
             }
             public GetGatewayStatsResponse(Result result = Result.UnknownError)
+                : base(result)
             {
-                this.result = result;
+
             }
             public override string ToString()
             {
                 return "Result = " + result;
             }
         }
-        public class RegisterPartnerRequest
+        public class RegisterPartnerRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string name { get; set; }
@@ -455,21 +470,20 @@ namespace TripThruCore
                 return s;
             }
         }
-        public class RegisterPartnerResponse
+        public class RegisterPartnerResponse : Response
         {
             public RegisterPartnerResponse(string partnerID = null, Result result = Result.OK)
+                : base(result)
             {
-                this.result = result;
                 this.partnerID = partnerID;
             }
             public override string ToString()
             {
                 return "PartnerID = " + partnerID + ", Result = " + result;
             }
-            public Result result { get; set; }
             public string partnerID { get; set; }
         }
-        public class GetPartnerInfoRequest
+        public class GetPartnerInfoRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public List<Zone> coverage { get; set; }
@@ -494,23 +508,22 @@ namespace TripThruCore
                 return "ClientID = " + clientID;
             }
         }
-        public class GetPartnerInfoResponse
+        public class GetPartnerInfoResponse : Response
         {
-            public Result result { get; set; }
             public List<Fleet> fleets { get; set; }
             public List<VehicleType> vehicleTypes { get; set; }
             public GetPartnerInfoResponse(List<Fleet> fleets = null, List<VehicleType> vehicleTypes = null, Result result = Result.OK)
+                : base(result)
             {
                 this.fleets = fleets;
                 this.vehicleTypes = vehicleTypes;
-                this.result = result;
             }
             public override string ToString()
             {
                 return "Result = " + result;
             }
         }
-        public class DispatchTripRequest
+        public class DispatchTripRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string passengerID { get; set; }
@@ -555,21 +568,22 @@ namespace TripThruCore
                 return "ClientID = " + clientID + ", TripID = " + tripID;
             }
         }
-        public class DispatchTripResponse
+        public class DispatchTripResponse : Response
         {
             public DispatchTripResponse(Result result = Result.OK)
+                : base(result)
             {
-                this.result = result;
+
             }
             public override string ToString()
             {
                 return "Result = " + result;
             }
-            public Result result { get; set; }
         }
-        public class QuoteTripRequest
+        public class QuoteTripRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string tripId { get; set; }
             public string passengerID { get; set; }
             public string passengerName { get; set; }
             public int? luggage { get; set; }
@@ -585,12 +599,13 @@ namespace TripThruCore
             public string partnerID { get; set; }
             public string fleetID { get; set; }
             public string driverID { get; set; }
-            public QuoteTripRequest(string clientID, Location pickupLocation, DateTime pickupTime, string passengerID = null, string passengerName = null,
+            public QuoteTripRequest(string clientID, string id, Location pickupLocation, DateTime pickupTime, string passengerID = null, string passengerName = null,
                 int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
                 PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
                 string fleetID = null, string driverID = null)
             {
                 this.clientID = clientID;
+                this.tripId = id;
                 this.passengerID = passengerID;
                 this.passengerName = passengerName;
                 this.pickupLocation = pickupLocation;
@@ -610,22 +625,109 @@ namespace TripThruCore
                 return "ClientID = " + clientID;
             }
         }
-        public class QuoteTripResponse
+        public class QuoteTripResponse : Response
         {
-
-            public Result result { get; set; }
-            public List<Quote> quotes { get; set; }
-            public QuoteTripResponse(List<Quote> quotes = null, Result result = Result.OK)
+            public QuoteTripResponse(Result result = Result.OK)
+                : base(result)
             {
-                this.quotes = quotes;
-                this.result = result;
+
             }
             public override string ToString()
             {
                 return "Result = " + result;
             }
         }
-        public class GetTripsRequest
+        public class UpdateQuoteRequest : Request
+        {
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string tripId { get; set; }
+            public string passengerID { get; set; }
+            public string passengerName { get; set; }
+            public int? luggage { get; set; }
+            public int? persons { get; set; }
+            public Location pickupLocation { get; set; }
+            public DateTime pickupTime { get; set; }
+            public Location dropoffLocation { get; set; }
+            public List<Location> waypoints { get; set; }
+            public PaymentMethod? paymentMethod { get; set; }
+            public VehicleType? vehicleType { get; set; }
+            public double? maxPrice { get; set; }
+            public int? minRating { get; set; }
+            public string partnerID { get; set; }
+            public string fleetID { get; set; }
+            public string driverID { get; set; }
+            public DateTime eta { get; set; }
+            public double fare { get; set; }
+            public UpdateQuoteRequest(string clientID, string tripId, Location pickupLocation, DateTime pickupTime, DateTime eta, double fare, string passengerID = null, string passengerName = null,
+                int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
+                PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
+                string fleetID = null, string driverID = null)
+            {
+                this.clientID = clientID;
+                this.tripId = tripId;
+                this.passengerID = passengerID;
+                this.passengerName = passengerName;
+                this.pickupLocation = pickupLocation;
+                this.pickupTime = pickupTime;
+                this.dropoffLocation = dropoffLocation;
+                this.waypoints = waypoints;
+                this.paymentMethod = paymentMethod;
+                this.vehicleType = vehicleType;
+                this.maxPrice = maxPrice;
+                this.minRating = minRating;
+                this.partnerID = partnerID;
+                this.fleetID = fleetID;
+                this.driverID = driverID;
+                this.eta = eta;
+                this.fare = fare;
+            }
+            public override string ToString()
+            {
+                return "ClientID = " + clientID;
+            }
+        }
+        public class UpdateQuoteResponse : Response
+        {
+            public UpdateQuoteResponse(Result result = Result.OK)
+                : base(result)
+            {
+
+            }
+            public override string ToString()
+            {
+                return "Result = " + result;
+            }
+        }
+        public class GetQuoteRequest : Request
+        {
+            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
+            public string tripId { get; set; }
+            public GetQuoteRequest(string clientID, string tripId)
+            {
+                this.clientID = clientID;
+                this.tripId = tripId;
+            }
+            public override string ToString()
+            {
+                return "ClientID = " + clientID + ", TripId = " + tripId;
+            }
+        }
+        public class GetQuoteResponse : Response
+        {
+            public List<Quote> quotes { get; set; }
+            public QuoteStatus status { get; set; }
+            public GetQuoteResponse(QuoteStatus status, List<Quote> quotes = null, Result result = Result.OK)
+                : base(result)
+            {
+                this.status = status;
+                this.quotes = quotes;
+            }
+            public override string ToString()
+            {
+                return "Result = " + result;
+            }
+        }
+        public class GetTripsRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public Status? status { get; set; }
@@ -639,14 +741,13 @@ namespace TripThruCore
                 return "ClientID = " + clientID + ", Status = " + status;
             }
         }
-        public class GetTripsResponse
+        public class GetTripsResponse : Response
         {
-            public Result result { get; set; }
             public List<Trip> trips { get; set; }
             public GetTripsResponse(List<Trip> trips, Result result = Result.OK)
+                : base(result)
             {
                 this.trips = trips;
-                this.result = result;
             }
             public override string ToString()
             {
@@ -654,7 +755,7 @@ namespace TripThruCore
                 return s;
             }
         }
-        public class GetRouteTripRequest
+        public class GetRouteTripRequest : Request
         {
             public string tripID { get; set; }
 
@@ -663,15 +764,23 @@ namespace TripThruCore
                 this.tripID = tripID;
             }
         }
-        public class GetRouteTripResponse
+        public class GetRouteTripResponse : Response
         {
-            public Result result { get; set; }
             public string OriginatingPartnerId { get; set; }
             public string ServicingPartnerId { get; set; }
             public List<Location> HistoryEnrouteList { get; set; }
-            public List<Location> HistoryPickUpList { get; set; }
+            public List<Location> HistoryPickupList { get; set; }
+
+            public GetRouteTripResponse(Result result = Result.OK, string originatingPartnerId = null, string servicingPartnerId = null, List<Location> historyEnrouteList = null, List<Location> historyPickupList = null)
+                : base(result)
+            {
+                this.OriginatingPartnerId = originatingPartnerId;
+                this.ServicingPartnerId = servicingPartnerId;
+                this.HistoryEnrouteList = historyEnrouteList;
+                this.HistoryPickupList = historyPickupList;
+            }
         }
-        public class GetTripStatusRequest
+        public class GetTripStatusRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string tripID { get; set; }
@@ -685,9 +794,8 @@ namespace TripThruCore
                 return "ClientID = " + clientID;
             }
         }
-        public class GetTripStatusResponse
+        public class GetTripStatusResponse : Response
         {
-            public Result result { get; set; }
             public string partnerID { get; set; }
             public string partnerName { get; set; }
             public string fleetID { get; set; }
@@ -714,6 +822,7 @@ namespace TripThruCore
                 DateTime? ETA = null, Status? status = null, DateTime? pickupTime = null, Location pickupLocation = null, DateTime? dropoffTime = null, Location dropoffLocation = null,
                 double? price = null, double? distance = null, double? driverRouteDuration = null, Result result = Result.OK
                  )
+                : base(result)
             {
                 this.partnerID = partnerID;
                 this.partnerName = partnerName;
@@ -733,7 +842,6 @@ namespace TripThruCore
                 this.price = price;
                 this.distance = distance;
                 this.driverRouteDuration = driverRouteDuration;
-                this.result = result;
                 this.status = status;
                 this.originatingPartnerName = originatingPartnerName;
                 this.servicingPartnerName = servicingPartnerName;
@@ -760,7 +868,7 @@ namespace TripThruCore
                 return s;
             }
         }
-        public class UpdateTripStatusRequest
+        public class UpdateTripStatusRequest : Request
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string tripID { get; set; }
@@ -780,12 +888,12 @@ namespace TripThruCore
                 return "ClientID = " + clientID;
             }
         }
-        public class UpdateTripStatusResponse
+        public class UpdateTripStatusResponse : Response
         {
-            public Result result { get; set; }
             public UpdateTripStatusResponse(Result result = Result.OK)
+                : base(result)
             {
-                this.result = result;
+
             }
             public override string ToString()
             {
@@ -796,7 +904,6 @@ namespace TripThruCore
         virtual public RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
             throw new Exception("Not supported");
-
         }
         virtual public RegisterPartnerResponse RegisterPartner(Gateway partner)
         {
@@ -806,7 +913,15 @@ namespace TripThruCore
         {
             throw new Exception("Not supported");
         }
+        virtual public void DispatchTripAsync(DispatchTripRequest request, Action<DispatchTripResponse> callback)
+        {
+            throw new Exception("Not supported");
+        }
         virtual public DispatchTripResponse DispatchTrip(DispatchTripRequest request)
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public void QuoteTripAsync(QuoteTripRequest request, Action<QuoteTripResponse> callback)
         {
             throw new Exception("Not supported");
         }
@@ -814,7 +929,23 @@ namespace TripThruCore
         {
             throw new Exception("Not supported");
         }
+        virtual public void UpdateQuoteAsync(UpdateQuoteRequest request, Action<UpdateQuoteResponse> callback)
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public UpdateQuoteResponse UpdateQuote(UpdateQuoteRequest request)
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public GetQuoteResponse GetQuote(GetQuoteRequest request)
+        {
+            throw new Exception("Not supported");
+        }
         virtual public GetTripStatusResponse GetTripStatus(GetTripStatusRequest request)
+        {
+            throw new Exception("Not supported");
+        }
+        virtual public void UpdateTripStatusAsync(UpdateTripStatusRequest request, Action<UpdateTripStatusResponse> callback)
         {
             throw new Exception("Not supported");
         }
