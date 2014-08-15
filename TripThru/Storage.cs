@@ -34,6 +34,10 @@ namespace TripThruCore.Storage
         public abstract void SaveTrip(Trip trip);
         public abstract Route GetRoute(string id);
         public abstract void SaveRoute(Route route);
+        public abstract void InsertQuote(TripQuotes quote);
+        public abstract void SaveQuote(TripQuotes quote);
+        public abstract TripQuotes GetQuote(string tripId);
+        public abstract List<TripQuotes> GetQuotesByStatus(QuoteStatus status);
         protected string RemoveSpecialCharacters(string input)
         {
             return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
@@ -125,6 +129,22 @@ namespace TripThruCore.Storage
         {
             throw new NotImplementedException();
         }
+        public override void InsertQuote(TripQuotes quote)
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveQuote(TripQuotes quote)
+        {
+            throw new NotImplementedException();
+        }
+        public override TripQuotes GetQuote(string tripId)
+        {
+            throw new NotImplementedException();
+        }
+        public override List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class MongoDbStorage : Storage
@@ -132,6 +152,7 @@ namespace TripThruCore.Storage
         private readonly MongoCollection<PartnerAccount> _partners;
         private readonly MongoCollection<Trip> _trips;
         private readonly MongoCollection<Route> _routes;
+        private readonly MongoCollection<TripQuotes> _quotes;
         private MongoDatabase _tripsDatabase;
         private readonly string _tripsDatabaseId;
         private MongoDatabase _networksDatabase;
@@ -175,6 +196,17 @@ namespace TripThruCore.Storage
                     mm.SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.waypoints).SetIgnoreIfNull(true);
             });
+            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<TripQuotes>(cm =>
+            {
+                cm.AutoMap();
+                foreach (var mm in cm.AllMemberMaps)
+                    mm.SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                cm.GetMemberMap(c => c.QuoteRequest).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ReceivedQuotes).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.PartnersThatServe).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.autodispatch).SetIgnoreIfNull(true);
+            });
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
@@ -183,6 +215,7 @@ namespace TripThruCore.Storage
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
             _trips = _tripsDatabase.GetCollection<Trip>("trips");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
+            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
@@ -264,6 +297,23 @@ namespace TripThruCore.Storage
         public override void SaveRoute(Route route)
         {
             this._routes.Save(route);
+        }
+        public override void InsertQuote(TripQuotes quote)
+        {
+            this._quotes.Insert(quote);
+        }
+        public override void SaveQuote(TripQuotes quote)
+        {
+            this._quotes.Save(quote);
+        }
+        public override TripQuotes GetQuote(string tripId)
+        {
+            var query_id = Query.EQ("_id", ObjectId.Parse(tripId));
+            return this._quotes.FindOne(query_id);
+        }
+        public override List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
+        {
+            return _quotes.AsQueryable<TripQuotes>().Where(q => q.Status == status).ToList();
         }
     }
 
@@ -355,6 +405,30 @@ namespace TripThruCore.Storage
         {
             if (_storage != null)
                 _storage.SaveRoute(route);
+        }
+        public static void InsertQuote(TripQuotes quote)
+        {
+            if (_storage != null)
+                _storage.InsertQuote(quote);
+        }
+        public static void SaveQuote(TripQuotes quote)
+        {
+            if (_storage != null)
+                _storage.SaveQuote(quote);
+        }
+        public static TripQuotes GetQuote(string tripId)
+        {
+            if (_storage != null)
+                return _storage.GetQuote(tripId);
+            else
+                return null;
+        }
+        public static List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
+        {
+            if (_storage != null)
+                return _storage.GetQuotesByStatus(status);
+            else
+                return null;
         }
     }
 }

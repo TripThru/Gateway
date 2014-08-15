@@ -275,6 +275,16 @@ namespace TripThruCore
         }
     }
 
+    public class TripQuotes
+    {
+        public string Id { get; set; }
+        public QuoteStatus Status { get; set; }
+        public Gateway.QuoteTripRequest QuoteRequest { get; set; }
+        public List<Quote> ReceivedQuotes { get; set; }
+        public int PartnersThatServe { get; set; }
+        public bool autodispatch { set; get; }
+    }
+
     public class Fleet
     {
         public string PartnerId { get; set; }
