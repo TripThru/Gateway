@@ -715,8 +715,8 @@ namespace TripThruCore
         public class GetQuoteResponse : Response
         {
             public List<Quote> quotes { get; set; }
-            public QuoteStatus status { get; set; }
-            public GetQuoteResponse(QuoteStatus status, List<Quote> quotes = null, Result result = Result.OK)
+            public QuoteStatus? status { get; set; }
+            public GetQuoteResponse(QuoteStatus? status = null, List<Quote> quotes = null, Result result = Result.OK)
                 : base(result)
             {
                 this.status = status;

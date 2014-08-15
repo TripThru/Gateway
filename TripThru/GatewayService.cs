@@ -512,7 +512,7 @@ namespace ServiceStack.TripThruGateway
             public string Message { get; set; }
             public int? Count { get; set; }
             public List<TripThruCore.Quote> Quotes { get; set; }
-            public TripThruCore.QuoteStatus Status { get; set; }
+            public TripThruCore.QuoteStatus? Status { get; set; }
         }
 
         public class quoteService : Service
