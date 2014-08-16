@@ -286,6 +286,7 @@ namespace TripThruCore
         public Gateway.QuoteTripRequest QuoteRequest { get; set; }
         public List<Quote> ReceivedQuotes { get; set; }
         public int PartnersThatServe { get; set; }
+        public int ReceivedUpdatesCount { get; set; }
         public bool autodispatch { set; get; }
     }
 
@@ -655,45 +656,14 @@ namespace TripThruCore
         {
             public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string tripId { get; set; }
-            public string passengerID { get; set; }
-            public string passengerName { get; set; }
-            public int? luggage { get; set; }
-            public int? persons { get; set; }
-            public Location pickupLocation { get; set; }
-            public DateTime pickupTime { get; set; }
-            public Location dropoffLocation { get; set; }
-            public List<Location> waypoints { get; set; }
-            public PaymentMethod? paymentMethod { get; set; }
-            public VehicleType? vehicleType { get; set; }
-            public double? maxPrice { get; set; }
-            public int? minRating { get; set; }
-            public string partnerID { get; set; }
-            public string fleetID { get; set; }
-            public string driverID { get; set; }
-            public DateTime eta { get; set; }
-            public double fare { get; set; }
-            public UpdateQuoteRequest(string clientID, string tripId, Location pickupLocation, DateTime pickupTime, DateTime eta, double fare, string passengerID = null, string passengerName = null,
-                int? luggage = null, int? persons = null, Location dropoffLocation = null, List<Location> waypoints = null,
-                PaymentMethod? paymentMethod = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, string partnerID = null,
-                string fleetID = null, string driverID = null)
+            public int count { get; set; }
+            public List<Quote> quotes { get; set; }
+            public UpdateQuoteRequest(string clientID, string tripId, List<Quote> quotes)
             {
                 this.clientID = clientID;
                 this.tripId = tripId;
-                this.passengerID = passengerID;
-                this.passengerName = passengerName;
-                this.pickupLocation = pickupLocation;
-                this.pickupTime = pickupTime;
-                this.dropoffLocation = dropoffLocation;
-                this.waypoints = waypoints;
-                this.paymentMethod = paymentMethod;
-                this.vehicleType = vehicleType;
-                this.maxPrice = maxPrice;
-                this.minRating = minRating;
-                this.partnerID = partnerID;
-                this.fleetID = fleetID;
-                this.driverID = driverID;
-                this.eta = eta;
-                this.fare = fare;
+                this.count = quotes.Count;
+                this.quotes = quotes;
             }
             public override string ToString()
             {

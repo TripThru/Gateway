@@ -212,6 +212,7 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.ReceivedQuotes).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.PartnersThatServe).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.autodispatch).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.ReceivedUpdatesCount).SetIgnoreIfNull(true);
             });
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 

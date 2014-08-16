@@ -503,6 +503,10 @@ namespace ServiceStack.TripThruGateway
             public string PassengerId { get; set; }
             [ApiMember(Name = "TripId", Description = "Partner scope unique identifier of the trip that you will use to make queries about the trip.  Note: it only has to be unique to you.  TripThru will handle any cross-network uniqueness issues.", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string TripId { get; set; }
+            [ApiMember(Name = "Count", Description = "Quantity of received quotes", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
+            public int? Count { get; set; }
+            [ApiMember(Name = "Quotes", Description = "When a requested quote is completed the server puts the list of received quotes to requesting partner", ParameterType = "query", DataType = "string", IsRequired = false, Verb = "PUT")]
+            public List<TripThruCore.Quote> Quotes { get; set; }
         }
 
         public class QuoteResponse
@@ -727,23 +731,8 @@ namespace ServiceStack.TripThruGateway
                         Logger.BeginRequest("UpdateQuote received from " + acct.UserName, request);
                         var response = gateway.UpdateQuote(new Gateway.UpdateQuoteRequest(
                             clientID: acct.ClientId,
-                            pickupLocation: new Location(request.PickupLat, request.PickupLng),
-                            pickupTime: request.PickupTime,
-                            passengerID: request.PassengerId,
-                            passengerName: request.PassengerName,
-                            luggage: request.Luggage,
-                            persons: request.Persons,
-                            dropoffLocation: request.DropoffLat == null ? null : new Location((double)request.DropoffLat, (double)request.DropoffLng),
-                            paymentMethod: request.PaymentMethod,
-                            vehicleType: request.VehicleType,
-                            maxPrice: request.MaxPrice,
-                            minRating: request.MinRating,
-                            partnerID: request.PartnerId,
-                            fleetID: request.FleetId,
-                            driverID: request.DriverId,
-                            eta: (DateTime)request.ETA,
-                            fare: (double)request.Price,
-                            tripId: request.TripId
+                            tripId: request.TripId,
+                            quotes: request.Quotes
                             ));
                         if (response.result == Gateway.Result.OK)
                         {

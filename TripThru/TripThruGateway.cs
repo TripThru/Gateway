@@ -660,9 +660,9 @@ namespace TripThruCore
         public Gateway.QuoteTripResponse CreateQuote(Gateway.QuoteTripRequest r, bool autodispatch = false)
         {
             TripThru.QuoteTripResponse response;
-            if (QuoteExists(r))
+            if (!QuoteExists(r))
             {
-                SaveQuoteToStorage(r, autodispatch);
+                SaveNewQuoteToStorage(r, autodispatch);
                 response = new Gateway.QuoteTripResponse();
             }
             else
@@ -676,7 +676,7 @@ namespace TripThruCore
         {
             return StorageManager.GetQuote(r.tripId) != null;
         }
-        private void SaveQuoteToStorage(Gateway.QuoteTripRequest r, bool autodispatch = false)
+        private void SaveNewQuoteToStorage(Gateway.QuoteTripRequest r, bool autodispatch = false)
         {
             var tripQuotes = new TripQuotes()
             {
@@ -694,10 +694,11 @@ namespace TripThruCore
             TripThru.UpdateQuoteResponse response;
             if (StorageManager.GetQuote(r.tripId) != null)
             {
-                var quote = new Quote(partnerID: r.partnerID, fleetID: r.fleetID, vehicleType: r.vehicleType,
-                    price: r.fare, ETA: r.eta);
                 var quotes = StorageManager.GetQuote(r.tripId);
-                quotes.ReceivedQuotes.Add(quote);
+                quotes.ReceivedQuotes.AddRange(r.quotes);
+                quotes.ReceivedUpdatesCount++;
+                if (quotes.ReceivedUpdatesCount == quotes.PartnersThatServe)
+                    quotes.Status = QuoteStatus.Complete;
                 StorageManager.SaveQuote(quotes);
                 response = new Gateway.UpdateQuoteResponse();
             }
@@ -869,6 +870,7 @@ namespace TripThruCore
                     {
                         Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler = QuoteTripResponseHandler;
                         ForwardNewQuote(q, partner, MakeQuoteTripRequest(q), responseHandler);
+                        q.PartnersThatServe++;
                     }
                 }
                 catch (Exception e)
