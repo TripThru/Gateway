@@ -750,9 +750,10 @@ namespace TripThruCore
             }
         }
 
-        protected virtual void ForwardNewQuote(TripQuotes t, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
+        protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
         {
-
+            var response = partner.QuoteTrip(request);
+            responseHandler(q, response);
         }
         protected void QuoteTripResponseHandler(TripQuotes q, Gateway.QuoteTripResponse response)
         {
@@ -870,16 +871,14 @@ namespace TripThruCore
         private void NewQuoteHandler(TripQuotes q)
         {
             var request = q.QuoteRequest;
-            foreach (TripThruCore.Gateway partner in TripThru.partners.Values)
+            foreach (TripThruCore.Gateway partner in TripThru.partners.Values.Where(p => p.ID != request.clientID))
             {
-                if (partner.ID == request.clientID)
-                    continue;
                 try
                 {
                     if (PickupLocationIsServedByPartner(request, partner))
                     {
                         Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler = QuoteTripResponseHandler;
-                        ForwardNewQuote(q, responseHandler);
+                        ForwardNewQuote(q, partner, MakeQuoteTripRequest(q), responseHandler);
                     }
                 }
                 catch (Exception e)
@@ -887,6 +886,8 @@ namespace TripThruCore
                     Logger.Log("Exception quoting " + partner.name + ": " + e.ToString());
                 }
             }
+            q.Status = QuoteStatus.InProgress;
+            StorageManager.SaveQuote(q);
         }
         private bool PickupLocationIsServedByPartner(Gateway.QuoteTripRequest r, Gateway p)
         {
@@ -900,6 +901,11 @@ namespace TripThruCore
                 }
             }
             return covered;
+        }
+        private Gateway.QuoteTripRequest MakeQuoteTripRequest(TripQuotes q){
+            var request = q.QuoteRequest;
+            request.clientID = TripThru.ID;
+            return request;
         }
 
         private void CompleteQuoteHandler(TripQuotes q)
