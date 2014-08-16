@@ -761,18 +761,9 @@ namespace TripThruCore
             }
         }
 
-        protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
+        protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
         {
-            if (q.autodispatch)
-            {
-                DispatchAutodispatchTrip(q);
-                q.Status = QuoteStatus.Sent;
-                StorageManager.SaveQuote(q);
-            }
-            else
-            {
-
-            }
+            
         }
         private void DispatchAutodispatchTrip(TripQuotes q)
         {
@@ -821,7 +812,7 @@ namespace TripThruCore
         {
             if (TripIsAutodispatch(t))
             {
-                CreateQuote(MakeQuoteRequest(t), true);
+                CreateQuote(MakeQuoteTripRequest(t), true);
                 t.State = TripState.Quoting;
                 TripThru.activeTrips.SaveTrip(t);
             }
@@ -836,7 +827,7 @@ namespace TripThruCore
         {
             return t.ServicingPartnerId == null;
         }
-        private Gateway.QuoteTripRequest MakeQuoteRequest(Trip t)
+        private Gateway.QuoteTripRequest MakeQuoteTripRequest(Trip t)
         {
             return new Gateway.QuoteTripRequest(
                 clientID: t.OriginatingPartnerId, id: t.Id, pickupLocation: t.PickupLocation, pickupTime: (DateTime)t.PickupTime,
@@ -910,7 +901,20 @@ namespace TripThruCore
         private void CompleteQuoteHandler(TripQuotes q)
         {
             Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
-            ForwardCompleteQuote(q, q.autodispatch ? null : TripThru.partners[q.QuoteRequest.clientID], responseHandler);
+            if (q.autodispatch)
+            {
+                DispatchAutodispatchTrip(q);
+                q.Status = QuoteStatus.Sent;
+                StorageManager.SaveQuote(q);
+            }
+            else
+            {
+                ForwardCompleteQuote(q, TripThru.partners[q.QuoteRequest.clientID], MakeUpdateQuoteRequest(q), responseHandler);
+            }
+        }
+        private Gateway.UpdateQuoteRequest MakeUpdateQuoteRequest(TripQuotes q)
+        {
+            return null;
         }
 
         public class TripDispatcherThread : IDisposable
