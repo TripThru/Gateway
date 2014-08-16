@@ -764,7 +764,8 @@ namespace TripThruCore
 
         protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
         {
-            
+            var response = partner.UpdateQuote(request);
+            responseHandler(q, response);
         }
         private void DispatchAutodispatchTrip(TripQuotes q)
         {
@@ -916,7 +917,11 @@ namespace TripThruCore
         }
         private Gateway.UpdateQuoteRequest MakeUpdateQuoteRequest(TripQuotes q)
         {
-            return null;
+            return new Gateway.UpdateQuoteRequest(
+                clientID: TripThru.ID,
+                tripId: q.Id,
+                quotes: q.ReceivedQuotes
+            );
         }
 
         public class TripDispatcherThread : IDisposable
