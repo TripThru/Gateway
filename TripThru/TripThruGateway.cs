@@ -910,7 +910,7 @@ namespace TripThruCore
         private void CompleteQuoteHandler(TripQuotes q)
         {
             Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
-            ForwardCompleteQuote(q, responseHandler);
+            ForwardCompleteQuote(q, q.autodispatch ? null : TripThru.partners[q.QuoteRequest.clientID], responseHandler);
         }
 
         public class TripDispatcherThread : IDisposable
