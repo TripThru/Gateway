@@ -1087,6 +1087,48 @@ namespace TripThruCore
 
     }
 
+    public class AsyncTripsManager : TripsManager
+    {
+        protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
+        {
+            partner.DispatchTripAsync(request,
+                response =>
+                {
+                    responseHandler(t, response);
+                }
+            );
+        }
+        protected virtual void ForwardTripUpdate(Trip t, Gateway partner, Gateway.UpdateTripStatusRequest request, Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler)
+        {
+            partner.UpdateTripStatusAsync(request,
+                response =>
+                {
+                    responseHandler(t, response);
+                }
+            );
+        }
+
+        protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
+        {
+            partner.QuoteTripAsync(request,
+                response =>
+                {
+                    responseHandler(q, response);
+                }
+            );
+        }
+
+        protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
+        {
+            partner.UpdateQuoteAsync(request,
+                response =>
+                {
+                    responseHandler(q, response);
+                }
+            );
+        }
+    }
+
     public class GatewayLocalClient : Gateway
     {
         Gateway server;
