@@ -709,10 +709,9 @@ namespace TripThruCore
             return response;
         }
 
-        protected virtual void DispatchTrip(Trip t, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
+        protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
-            var servicingPartner = TripThru.partners[request.partnerID];
-            var response = servicingPartner.DispatchTrip(request);
+            var response = partner.DispatchTrip(request);
             responseHandler(t, response);
         }
         protected void DispatchTripResponseHandler(Trip t, Gateway.DispatchTripResponse response)
@@ -734,10 +733,8 @@ namespace TripThruCore
             );
         }
 
-        protected virtual void ForwardTripUpdate(Trip t, Gateway.UpdateTripStatusRequest request, Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler)
+        protected virtual void ForwardTripUpdate(Trip t, Gateway partner, Gateway.UpdateTripStatusRequest request, Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler)
         {
-            var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
-            var partner = TripThru.partners[partnerId];
             var response = partner.UpdateTripStatus(request);
             responseHandler(t, response);
         }
@@ -764,7 +761,7 @@ namespace TripThruCore
             }
         }
 
-        protected virtual void ForwardCompleteQuote(TripQuotes q, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
+        protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
         {
             if (q.autodispatch)
             {
@@ -791,7 +788,7 @@ namespace TripThruCore
             Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
             Trip t = TripThru.activeTrips[q.Id];
             Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
-            DispatchTrip(TripThru.activeTrips[q.Id], request, dispatchResponseHandler);
+            DispatchTrip(TripThru.activeTrips[q.Id], TripThru.partners[request.partnerID], request, dispatchResponseHandler);
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
@@ -831,7 +828,8 @@ namespace TripThruCore
             else
             {
                 Action<Trip, Gateway.DispatchTripResponse> responseHandler = DispatchTripResponseHandler;
-                DispatchTrip(t, MakeDispatchRequest(t), responseHandler);
+                var request = MakeDispatchRequest(t);
+                DispatchTrip(t, TripThru.partners[request.partnerID], request, responseHandler);
             }
         }
         private bool TripIsAutodispatch(Trip t)
@@ -851,7 +849,8 @@ namespace TripThruCore
             if (!TripIsLocal(t))
             {
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
-                ForwardTripUpdate(t, MakeUpdateTripStatusRequest(t), responseHandler);
+                var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
+                ForwardTripUpdate(t, TripThru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
             }
             else
             {
