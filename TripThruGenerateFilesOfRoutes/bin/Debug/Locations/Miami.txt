@@ -1,0 +1,54 @@
+﻿{
+    "locations" : [
+		{
+			"Name": "312 North Ft. Lauderdale Beach Blvd, Ft. Lauderdale, FL 33304",
+			"Lat": 26.1275183,
+			"Lng": -80.103452
+		},
+		{
+			"Name": "2100 N W 42nd Avenue Miami 33126",
+			"Lat": 25.7950665,
+			"Lng": -80.2786931
+		},
+		{
+			"Name": "1 Seminole Way, Ft. Lauderdale 33314",
+			"Lat": 26.0513607,
+			"Lng": -80.2121514
+		},
+		{
+			"Name": "1 East Las Olas Blvd Ft. Lauderdale 33304",
+			"Lat": 26.1196017,
+			"Lng": -80.1429035
+		},
+		{
+			"Name": "1 North Ft. Lauderdale Beach Blvd 33304",
+			"Lat": 26.122976,
+			"Lng": -80.10474
+		},
+		{
+			"Name": "2414 E Sunrise Blvd Ft. Lauderdale 33304",
+			"Lat": 26.137129,
+			"Lng": -80.113431
+		},
+		{
+			"Name": "680 North Federal Highway Ft. Lauderdale 33304",
+			"Lat": 26.1313537,
+			"Lng": -80.1366433
+		},
+		{
+			"Name": "6345 Collins Avenue Miami Beach Fl 33141",
+			"Lat": 25.845224,
+			"Lng": -80.119744
+		},
+		{
+			"Name": "6500 Biscayne Blvd Miami 33138",
+			"Lat": 25.836026,
+			"Lng": -80.184453
+		},
+		{
+			"Name": "1200 Ocean Drive South Beach Miami",
+			"Lat": 25.7871768,
+			"Lng": -80.1294254
+		}
+	]
+}

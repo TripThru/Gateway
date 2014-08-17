@@ -1,0 +1,82 @@
+﻿{
+  "tripThruUrl" : "http://localhost:17187/",
+  "simInterval" : 10,
+  "enabled" : true,
+  "partner" : {
+      "name" : "Dubai Taxi Corporation",
+      "clientId" : "dubai@tripthru.com",
+      "accessToken" : "dubai12ondazazxx21",
+      "callbackUrl" : "http://localhost:17188/"
+      "webUrl" : "BookingsDubaiTaxiCorporation/",
+      "webUrlRelative" : "/BookingsDubaiTaxiCorporation/index.php"
+  },
+  "fleets" : [
+    {
+        "name" : "Dubai Taxi Corporation",
+        "baseCost" : 3.00,
+        "costPerMile" : 3.00,
+        "tripsPerHour" : 100,
+        "location" : {
+            "lat" : 25.271139,
+            "lng" : 55.307485
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 25.270751, "lng" : 55.314030},
+                "end"   : { "lat" : 25.279288, "lng" : 55.304331}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Hussean Widobe",
+            "Omar Sharief",
+            "Sheikh Hamdan",
+            "Mohammed Hamdan",
+            "Rashid Al Maktoum",
+            "Hamdan Widobe",
+            "Ayishah Janan Halabi",
+            "Hayud Munirah Sarkis",
+            "Asra Salwa Nazari",
+            "Hilel Sahl Harb",
+            "Jala Nahid Ba",
+            "Bahiya Baheera Kassis",
+            "Azhar Amro Saliba",
+            "Kawakib Walidah Sarraf",
+            "Khaldoon Harun Safar",
+            "Aliyah Shahirah Nassar",
+            "Muta Abdul Awad",
+            "Fakhir Anbar Guirguis",
+            "Khuzama Maysa Srour",
+            "Sanaa Malakah Ganim",
+            "Jeannine Loyola",
+            "Jacquelyn Folts",
+            "Benton Aguila",
+            "Hisako Peake",
+            "Earlie Tapia",
+            "Gino Kampf",
+            "Temika Snipe",  
+            "Rena Dedrick",
+            "Angele Stoffel",  
+            "Leonor Chesson"
+        ],
+        "passengers" : [
+            "Sheikh Hamdan Bin Mohammed bin Rashid Al Maktoum"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+                    "lat" : 25.271139,
+                    "lng" : 55.307485
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ],
+  "host" : {
+        "virtualPath" : "/"
+  }
+}

@@ -1,0 +1,8 @@
+HomeUrl=http://localhost:81/BookingWebsite/
+RelativeHomeUrl=/BookingWebsite/index.php
+TripThruUrl=http://localhost:17187/
+TripThruAccessToken=jaosid1201231
+PartnerUrl=http://localhost:17188/
+PartnerAccessToken=luxor23noiasdn2123
+PartnerName=Luxor Cab
+PartnerId=luxor@tripthru.com

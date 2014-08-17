@@ -1,0 +1,54 @@
+{
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+  "simInterval" : 10,
+  "partner" : {
+      "name" : "Metro Cab of Boston",
+      "clientId" : "metro@tripthru.com",
+      "accessToken" : "metro12ondazazxx21",
+      "callbackUrl" : "http://54.201.134.194/ServiceStack.MetroCab/"
+  },
+  "fleets" : [
+    {
+        "name" : "Metro Cab of Boston",
+        "baseCost" : 3.00,
+        "costPerMile" : 3.00,
+        "tripsPerHour" : 20,
+		"location" : {
+			"lat" : 42.356217,
+            "lng" : -71.137512
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 37.782551, "lng" : -122.445368},
+                "end"   : { "lat" : 37.786956, "lng" : -122.440279}
+            },
+            {
+                "start" : { "lat" : 42.342634, "lng" : -71.122545},
+                "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Joanna Glennon",
+            "Ofer Matan"
+        ],
+        "passengers" : [
+            "Michael Glennon",
+			"William Glennon",
+			"Bernice Hamilton"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+                    "lat" : 42.356217,
+					"lng" : -71.137512
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ]
+}

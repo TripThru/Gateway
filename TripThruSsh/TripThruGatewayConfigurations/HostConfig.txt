@@ -1,0 +1,4 @@
+﻿{
+	"virtualPath" : "/TripThru.TripThruGateway/",
+	"debug": false
+}

@@ -1,0 +1,61 @@
+{
+  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+  "simInterval" : 10,
+  "partner" : {
+      "name" : "Les Taxi Blues",
+      "clientId" : "les@tripthru.com",
+      "accessToken" : "les12ondazazxx21",
+    "callbackUrl" : "http://54.201.134.194/ServiceStack.LesTaxiBlues/"
+  },
+  "fleets" : [
+    {
+        "name" : "Les Taxi Blues",
+        "baseCost" : 5.00,
+        "costPerMile" : 4.70,
+        "tripsPerHour" : 20,
+		"location" : {
+			"lat" : 48.837246,
+            "lng" : 2.347844
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 37.784345, "lng" : -122.422922},
+                "end"   : { "lat" : 37.785292, "lng" : -122.416257}
+            },
+			{
+                "start" : { "lat" : 48.835975, "lng" : 2.345097},
+                "end"   : { "lat" : 48.837275, "lng" : 2.382433}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Slyvian Reubele",
+            "Wassem Mohammed",
+            "Kelly Tong",
+            "Patrick Crespy",
+            "John Hanckock",
+            "Julie Roberts",
+            "Will Smith",
+            "Bruce Willis"
+        ],
+        "passengers" : [
+            "Daniel Corona",
+            "Billie Elliot",
+            "Pony Boy",
+            "Daniel Craig"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+					"lat" : 48.837246,
+					"lng" : 2.347844
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ]
+}

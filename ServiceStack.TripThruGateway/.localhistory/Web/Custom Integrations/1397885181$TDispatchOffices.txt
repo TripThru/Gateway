@@ -1,0 +1,34 @@
+{
+	"offices":
+	[
+		{	
+			"ID":"52b4053948efcb7ac1137d41",
+			"enabled" : false,
+			"name":"TripThru San Francisco",
+			"api_key":"ec1a72432c504ed470695943e3dfccd8",
+			"fleetAuthorizationCode":"52b4dd8149d943327b19c269",
+			"fleetAccessToken":"5344570849d9434bbdb39aa1",
+			"fleetRefreshToken":"FRNqMMP5oamdqasiYeTokPwv89FNXFo9",
+			"passengerAuthorizationCode":"52fd43ab49d9436573685707",
+			"passengerAccessToken":"53264e9849d9433eb214b5ab",
+			"passengerRefreshToken":"lR7nq3hXJbmkS2DKp9Q0XV1uiWV2igzz",
+			"passengerProxyPK":"52fd3ee248efcb2f518b4586",
+			"coverage":[{"Center":{"lat": 29.114788, "lng": -110.973587},"Radius":8000050}]
+		},
+		{
+			"ID":"529062d06e77c373a280eae1",
+			"enabled" : false,
+			"name":"TripThru",
+			"api_key":"926d24e1c76e2ea3c098a843b6693d9f",
+			"fleetAuthorizationCode":"529b610e49d9431cd4d74ed7",
+			"fleetAccessToken":"52ea8daa49d94350c6b2d53f",
+			"fleetRefreshToken":"Si3zx6XmsBgv9c3cQ31bGIGZImYwI3ps",
+			"passengerAuthorizationCode":"52ef117c49d94303bc62aa2b",
+			"passengerAccessToken":"52ef117849d94303bc62aa2a",
+			"passengerRefreshToken":"UWmrkQLzocDjApaG9pbPf5RpmlcemZtK",
+			"passengerProxyPK":"52ed292649d9433a78e5016c",
+			"coverage":[{"Center":{"Lat":37.78906,"Lng":-122.402127},"Radius":50}]
+		}
+
+	]
+}

@@ -1,0 +1,13 @@
+HomeUrl=http://107.170.240.134:8080/BookingsTuxor/
+RelativeHomeUrl=/BookingsTuxor/index.php
+TripThruUrl=http://107.170.240.134/TripThru.TripThruGateway/
+TripThruAccessToken=jaosid1201231
+<<<<<<< HEAD
+PartnerUrl=http://107.170.240.134/TripThru.Tuxor/
+PartnerAccessToken=luxor23noiasdn2123
+=======
+PartnerUrl=http://192.168.0.125/TripThru.Tuxor/
+PartnerAccessToken=dIOEVOwGYgnyjSCwxuNmLMPqQAPHjeijdynibQPvaLYhscGczR
+>>>>>>> mongoDB
+PartnerName=Tuxor
+PartnerId=tuxor@tripthru.com

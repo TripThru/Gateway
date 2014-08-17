@@ -1,0 +1,105 @@
+﻿{
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
+  "simInterval" : 10,
+  "enabled" : true,
+  "partner" : {
+      "name" : "Luxor Cab",
+      "clientId" : "luxor@tripthru.com",
+      "accessToken" : "luxor23noiasdn2123",
+	  "callbackUrlMono" : "TripThru.LuxorCab/",
+	  "webUrl" : "BookingsLuxorCab/",
+	  "webUrlRelative" : "/BookingsLuxorCab/index.php"
+  },
+  "fleets" : [
+    {
+        "name" : "Luxor Cab - SF",
+        "baseCost" : 3.00,
+        "costPerMile" : 2.70,
+        "tripsPerHour" : 100,
+		"location" : {
+			"lat" : 37.78906,
+            "lng" : -122.402127
+        },
+        "possibleTrips" : [
+            {
+                "start" : { "lat" : 37.800224, "lng" : -122.43352},
+                "end"   : { "lat" : 37.800066, "lng" : -122.436167}
+            },
+            {
+                "start" : { "lat" : 48.835975, "lng" : 2.345097},
+                "end"   : { "lat" : 48.837275, "lng" : 2.382433}
+            },
+            {
+                "start" : { "lat" : 48.843545, "lng" : 2.385352},
+                "end"   : { "lat" : 48.839478, "lng" : 2.317374}
+            },
+            {
+                "start" : { "lat" : 25.270751, "lng" : 55.314030},
+                "end"   : { "lat" : 25.279288, "lng" : 55.304331}
+            },
+            {
+                "start" : { "lat" : -22.910194, "lng" : -43.212211},
+                "end"   : { "lat" : -22.900311, "lng" : -43.240621}
+            },
+            {
+                "start" : { "lat" : 42.342634, "lng" : -71.122545},
+                "end"   : { "lat" : 42.367561, "lng" : -71.129498}
+            }
+        ],
+        "vehicleTypes" : [
+            "compact",
+            "sedan"
+        ],
+        "drivers" : [
+            "Alex Goldman",
+            "Jason Fama",
+            "Simon Shvarts",
+            "Bob Toni",
+            "Velimir Erebos",
+            "Maximillian Constantin",
+			"Kimberly H. Kennedy",
+			"Rodney M. Montgomery",
+			"James B. Racine",
+			"Patrick M. High",
+			"Marcella A. Sova",
+			"Maria K. Morrison",
+			"Lisa M. Nicholson",
+			"Edward P. Morton",
+			"James A. Birt",
+			"Margaret J. Kent",
+			"Gladys L. Serrano",
+			"Eddie J. Johnson",
+			"Lynnette Queener",  
+			"Hulda Mckinnis",
+			"Elicia Kuhlman",  
+			"Doug Vanwingerden",  
+			"Orval Aubert",  
+			"Zoraida Timpson",  
+			"Whitney Ables",  
+			"Tandy Aponte",  
+			"Janeen Aguilera",  
+			"Isidra Bitter"  
+        ],
+        "passengers" : [
+            "Elvis Presley",
+            "John Riggins",
+            "Bart Star",
+            "Michelle Phieffer",
+            "Zong Zi Yi",
+            "Mickey Rourke"
+        ],
+        "coverage" : [
+            {
+                "center" : {
+                    "lat" : 37.78906,
+                    "lng" : -122.402127
+                },
+                "radius" : 50
+            }
+        ]
+    }  
+  ],
+  "host" : {
+		"virtualPath" : "/TripThru.LuxorCab/"
+  }
+}
