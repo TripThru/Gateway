@@ -198,10 +198,10 @@ namespace TripThruCore
             }
             return partnerCoverage[partnerID];
         }
-        public override DispatchTripResponse DispatchTrip(DispatchTripRequest r)
+        public override DispatchTripResponse DispatchTrip(DispatchTripRequest request)
         {
             requests++;
-            throw new Exception("Not implemented");
+            return this.tripsManager.CreateTrip(request);
         }
         public DispatchTripResponse MakeRejectDispatchResponse(DispatchTripRequest r, Gateway client, Gateway partner)
         {
@@ -211,18 +211,26 @@ namespace TripThruCore
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
         {
             requests++;
-            throw new Exception("Not implemented");
+            return this.tripsManager.CreateQuote(request);
         }
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
             requests++;
-            throw new Exception("Not implemented");
+            return this.tripsManager.UpdateQuote(request);
         }
         public override Gateway.GetQuoteResponse GetQuote(Gateway.GetQuoteRequest request)
         {
             requests++;
-            return base.GetQuote(request);
+            var quote = StorageManager.GetQuote(request.tripId);
+            if (quote != null)
+            {
+                return new GetQuoteResponse(status: quote.Status, quotes: quote.ReceivedQuotes);
+            }
+            Logger.Log("Quote id not found");
+            Logger.AddTag("ClientId", request.clientID);
+            return new GetQuoteResponse(result: Result.NotFound);
         }
+
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
             var trips = new List<Trip>();
@@ -341,92 +349,10 @@ namespace TripThruCore
         {
             return response.status == Status.Complete || response.status == Status.Cancelled || response.status == Status.Rejected;
         }
-        public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest r)
+        public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest request)
         {
             requests++;
-            Gateway destPartner = GetDestinationPartner(r.clientID, r.tripID);
-            if (destPartner != null)
-            {
-                UpdateTripStatusResponse response = null;
-                Logger.AddTag("Destination partner", destPartner.name);
-                Logger.SetServicingId(destPartner.ID);
-                if (ShouldForwardTripUpdate(r, destPartner))
-                {
-                    string originClientID = r.clientID;
-                    ChangeClientIDToTripThru(r);
-                    response = destPartner.UpdateTripStatus(r);
-                    r.clientID = originClientID;
-                }
-                else
-                    response = new UpdateTripStatusResponse(result: Result.OK);
-                
-                if (activeTrips.ContainsKey(r.tripID) && r.driverLocation != null){
-                    if (activeTrips[r.tripID].DriverInitiaLocation == null)
-                        activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
-                    switch (r.status)
-                    {
-                        case Status.Enroute:
-                            activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
-                            break;
-                        case Status.PickedUp:
-                            activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
-                            break;
-                    }
-                }
-                if (SuccesAndTripStillActive(r, response))
-                {
-                    activeTrips[r.tripID].Status = r.status;
-                    switch (r.status)
-                    {
-                        case Status.PickedUp:
-                            {
-                                DateTime pickupTime = DateTime.UtcNow;
-                                TimeSpan lateness = pickupTime - (DateTime)activeTrips[r.tripID].Creation;
-                                activeTrips[r.tripID].PickupTime = pickupTime;
-                                activeTrips[r.tripID].Lateness = lateness;
-                                activeTrips[r.tripID].LatenessMilliseconds = lateness.TotalMilliseconds;
-                                break;
-                            }
-                        case Status.Complete:
-                            {
-                                GetTripStatusResponse resp = GetPriceAndDistanceDetailsFromClient(r);
-                                DeactivateTripAndUpdateStats(r.tripID, Status.Complete, resp.price, resp.distance);
-                            }
-                            break;
-                        case Status.Rejected:
-                        case Status.Cancelled:
-                            DeactivateTripAndUpdateStats(r.tripID, r.status);
-                            break;
-                    }
-                }
-                else
-                    Logger.Log("Request to destination partner failed, Result=" + response.result);
-                return response;
-            }
-            Logger.Log("Destination partner trip not found");
-            Logger.AddTag("ClientId", r.clientID);
-            return new UpdateTripStatusResponse(result: Result.NotFound);
-        }
-
-        private bool ShouldForwardTripUpdate(UpdateTripStatusRequest r, Gateway destinationPartner)
-        {
-            return r.clientID != destinationPartner.ID;
-        }
-
-        private bool SuccesAndTripStillActive(UpdateTripStatusRequest r, UpdateTripStatusResponse response)
-        {
-            return response.result == Result.OK && activeTrips.ContainsKey(r.tripID);
-        }
-
-        private GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(UpdateTripStatusRequest r)
-        {
-            GetTripStatusResponse resp = partners[r.clientID].GetTripStatus(new GetTripStatusRequest(r.clientID, r.tripID));
-            return resp;
-        }
-
-        private void ChangeClientIDToTripThru(UpdateTripStatusRequest r)
-        {
-            r.clientID = ID;
+            return this.tripsManager.UpdateTrip(request);
         }
 
         public void HealthCheck()
@@ -621,7 +547,19 @@ namespace TripThruCore
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
             Gateway destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
-            if (destPartner != null || !tripthru.activeTrips.ContainsKey(r.tripID))
+            if (destPartner == null)
+            { 
+                Logger.AddTag("ClientId", r.clientID);
+                Logger.Log("Destination partner trip not found");
+                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
+            } 
+            else if (tripthru.activeTrips.ContainsKey(r.tripID))
+            {
+                Logger.AddTag("ClientId", r.clientID);
+                Logger.Log("Trip id already exists");
+                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.Rejected);
+            }
+            else
             {
                 Gateway.UpdateTripStatusResponse response = null;
                 Logger.AddTag("Destination partner", destPartner.name);
@@ -642,9 +580,6 @@ namespace TripThruCore
                 tripthru.activeTrips.SaveTrip(tripthru.activeTrips[r.tripID]);
                 return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.OK);
             }
-            Logger.Log("Destination partner trip not found");
-            Logger.AddTag("ClientId", r.clientID);
-            return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
         }
         private bool ShouldForwardTripUpdate(Gateway.UpdateTripStatusRequest r, Gateway destinationPartner)
         {
@@ -744,6 +679,12 @@ namespace TripThruCore
                 t.IsDirty = false;
                 tripthru.activeTrips.SaveTrip(t);
             }
+        }
+
+        private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
+        {
+            var resp = tripthru.partners[r.clientID].GetTripStatus(new Gateway.GetTripStatusRequest(r.clientID, r.tripID));
+            return resp;
         }
 
         protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
