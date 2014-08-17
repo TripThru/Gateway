@@ -118,7 +118,7 @@ namespace ServiceStack.TripThruGateway
 
                 var accounts = StorageManager.GetPartnerAccounts();
                 Logger.OpenLog("TripThruGateway");
-                GatewayService.gateway = new TripThru();
+                GatewayService.gateway = new TripThru(async: true);
                 foreach (var account in accounts)
                 {
                     if (Storage.UserRole.partner == account.Role && account.CallbackUrl != null &&

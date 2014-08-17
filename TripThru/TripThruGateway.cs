@@ -30,6 +30,7 @@ namespace TripThruCore
         public RedisDictionary<string, string> servicingPartnerByTrip;
         private RedisDictionary<string, List<Zone>> partnerCoverage;
         public readonly TimeSpan missedBookingPeriod = new TimeSpan(0, 30, 0);
+        private TripsManager tripsManager;
 
         List<Zone> GetPartnerCoverage(string partnerID)
         {
@@ -45,7 +46,7 @@ namespace TripThruCore
             }
             return partnerCoverage[partnerID];
         }
-        public TripThru(bool enableTDispatch = true)
+        public TripThru(bool enableTDispatch = true, bool async = false)
             : base("TripThru", "TripThru")
         {
             InitializePersistantDataObjects();
@@ -53,6 +54,7 @@ namespace TripThruCore
             LoadUserAccounts();
             if (enableTDispatch)
                 LoadTDispatchIntegrations();
+            this.tripsManager = async == true ? new TripsManagerAsync(this) : new TripsManager(this);
 
             new PartnersUpdateThread(partners);
             new HealthCheckThread(this);
@@ -542,25 +544,21 @@ namespace TripThruCore
     public class TripsManager
     {
 
-        private TimeSpan monitorsInteval = new TimeSpan(0, 0, 5);
-        public TripThru TripThru
+        private TimeSpan monitorsInteval;
+        private TripThru tripthru;
+        public TripsManager(TripThru tripthru)
         {
-            get
-            {
-                return TripThru;
-            }
-            set
-            {
-                this.TripThru = value;
-                new TripDispatcherThread(this, monitorsInteval);
-                new TripUpdaterThread(this, monitorsInteval);
-                new NewQuotesHandlerThread(this, monitorsInteval);
-                new CompleteQuotesHandlerThread(this, monitorsInteval);
-            }
+            this.monitorsInteval = new TimeSpan(0, 0, 5);
+            this.tripthru = tripthru;
+            new TripDispatcherThread(this, monitorsInteval);
+            new TripUpdaterThread(this, monitorsInteval);
+            new NewQuotesHandlerThread(this, monitorsInteval);
+            new CompleteQuotesHandlerThread(this, monitorsInteval);
         }
+
         public Gateway.DispatchTripResponse CreateTrip(Gateway.DispatchTripRequest r)
         {
-            TripThru.DispatchTripResponse response;
+            Gateway.DispatchTripResponse response;
             if (TripIsNotAlreadyActive(r))
             {
                 Gateway partner = null;
@@ -571,14 +569,14 @@ namespace TripThruCore
             }
             else
             {
-                response = TripThru.MakeRejectDispatchResponse(r, TripThru.partners[r.clientID], null);
+                response = tripthru.MakeRejectDispatchResponse(r, tripthru.partners[r.clientID], null);
                 Logger.Log("DispatchTrip failed: Trip already active");
             }
             return response;
         }
         private Gateway SelectedPartner(Gateway.DispatchTripRequest r)
         {
-            return TripThru.partners[r.partnerID];
+            return tripthru.partners[r.partnerID];
         }
         private bool PartnerHasBeenSpecified(Gateway.DispatchTripRequest r)
         {
@@ -586,7 +584,7 @@ namespace TripThruCore
         }
         private bool TripIsNotAlreadyActive(Gateway.DispatchTripRequest r)
         {
-            return !TripThru.activeTrips.ContainsKey(r.tripID);
+            return !tripthru.activeTrips.ContainsKey(r.tripID);
         }
         private static bool PartnerHasNotBeenSpecified(Gateway.DispatchTripRequest r)
         {
@@ -594,7 +592,7 @@ namespace TripThruCore
         }
         private void MakeTripAndAddItToActive(Gateway.DispatchTripRequest r, Gateway partner)
         {
-            Gateway client = TripThru.partners[r.clientID];
+            Gateway client = tripthru.partners[r.clientID];
             var trip = new Trip
             {
                 Id = r.tripID,
@@ -613,7 +611,7 @@ namespace TripThruCore
                 SamplingPercentage = 1
             };
             trip.SetCreation(DateTime.UtcNow);
-            TripThru.activeTrips.Add(r.tripID, trip);
+            tripthru.activeTrips.Add(r.tripID, trip);
             Logger.AddTag("Passenger", r.passengerName);
             Logger.AddTag("Pickup_time", r.pickupTime.ToString());
             Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
@@ -622,26 +620,26 @@ namespace TripThruCore
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
-            Gateway destPartner = TripThru.GetDestinationPartner(r.clientID, r.tripID);
-            if (destPartner != null || !TripThru.activeTrips.ContainsKey(r.tripID))
+            Gateway destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
+            if (destPartner != null || !tripthru.activeTrips.ContainsKey(r.tripID))
             {
-                TripThru.UpdateTripStatusResponse response = null;
+                Gateway.UpdateTripStatusResponse response = null;
                 Logger.AddTag("Destination partner", destPartner.name);
                 Logger.SetServicingId(destPartner.ID);
-                TripThru.activeTrips[r.tripID].Status = r.status;
-                TripThru.activeTrips[r.tripID].IsDirty = true;
-                if (TripThru.activeTrips[r.tripID].DriverInitiaLocation == null)
-                    TripThru.activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
+                tripthru.activeTrips[r.tripID].Status = r.status;
+                tripthru.activeTrips[r.tripID].IsDirty = true;
+                if (tripthru.activeTrips[r.tripID].DriverInitiaLocation == null)
+                    tripthru.activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
                 switch (r.status)
                 {
                     case Status.Enroute:
-                        TripThru.activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
+                        tripthru.activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
                         break;
                     case Status.PickedUp:
-                        TripThru.activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
+                        tripthru.activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
                         break;
                 }
-                TripThru.activeTrips.SaveTrip(TripThru.activeTrips[r.tripID]);
+                tripthru.activeTrips.SaveTrip(tripthru.activeTrips[r.tripID]);
                 return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.OK);
             }
             Logger.Log("Destination partner trip not found");
@@ -654,12 +652,12 @@ namespace TripThruCore
         }
         private void ChangeClientIDToTripThru(Gateway.UpdateTripStatusRequest r)
         {
-            r.clientID = TripThru.ID;
+            r.clientID = tripthru.ID;
         }
 
         public Gateway.QuoteTripResponse CreateQuote(Gateway.QuoteTripRequest r, bool autodispatch = false)
         {
-            TripThru.QuoteTripResponse response;
+            Gateway.QuoteTripResponse response;
             if (!QuoteExists(r))
             {
                 SaveNewQuoteToStorage(r, autodispatch);
@@ -691,7 +689,7 @@ namespace TripThruCore
 
         public Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest r)
         {
-            TripThru.UpdateQuoteResponse response;
+            Gateway.UpdateQuoteResponse response;
             if (StorageManager.GetQuote(r.tripId) != null)
             {
                 var quotes = StorageManager.GetQuote(r.tripId);
@@ -721,14 +719,14 @@ namespace TripThruCore
             {
                 t.State = TripState.Dispatched;
                 t.IsDirty = true;
-                t.MadeDirtyById = TripThru.ID;
+                t.MadeDirtyById = tripthru.ID;
             }
-            TripThru.activeTrips.SaveTrip(t);
+            tripthru.activeTrips.SaveTrip(t);
         }
         protected Gateway.DispatchTripRequest MakeDispatchRequest(Trip t)
         {
             return new Gateway.DispatchTripRequest(
-                clientID: TripThru.ID, tripID: t.Id, pickupLocation: t.PickupLocation, pickupTime: (DateTime)t.PickupTime,
+                clientID: tripthru.ID, tripID: t.Id, pickupLocation: t.PickupLocation, pickupTime: (DateTime)t.PickupTime,
                 passengerName: t.PassengerName, dropoffLocation: t.DropoffLocation, vehicleType: t.VehicleType,
                 partnerID: t.ServicingPartnerId, fleetID: t.FleetId, driverID: t.DriverId
             );
@@ -744,7 +742,7 @@ namespace TripThruCore
             if (response.result == Gateway.Result.OK)
             {
                 t.IsDirty = false;
-                TripThru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.SaveTrip(t);
             }
         }
 
@@ -771,17 +769,17 @@ namespace TripThruCore
         {
             var bestQuote = SelectBestQuote(q.QuoteRequest, q.ReceivedQuotes);
             var quoteRequest = q.QuoteRequest;
-            TripThru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
-            TripThru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
-            TripThru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
-            TripThru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
-            TripThru.activeTrips[q.Id].State = TripState.New;
-            TripThru.activeTrips.SaveTrip(TripThru.activeTrips[q.Id]);
+            tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
+            tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
+            tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
+            tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
+            tripthru.activeTrips[q.Id].State = TripState.New;
+            tripthru.activeTrips.SaveTrip(tripthru.activeTrips[q.Id]);
 
             Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
-            Trip t = TripThru.activeTrips[q.Id];
+            Trip t = tripthru.activeTrips[q.Id];
             Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
-            DispatchTrip(TripThru.activeTrips[q.Id], TripThru.partners[request.partnerID], request, dispatchResponseHandler);
+            DispatchTrip(tripthru.activeTrips[q.Id], tripthru.partners[request.partnerID], request, dispatchResponseHandler);
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
@@ -794,13 +792,13 @@ namespace TripThruCore
         private Quote SelectBestQuote(Gateway.QuoteTripRequest r, List<Quote> quotes)
         {
             Quote bestQuote = null;
-            DateTime bestETA = r.pickupTime + TripThru.missedBookingPeriod;
+            DateTime bestETA = r.pickupTime + tripthru.missedBookingPeriod;
             // not more than 30 minues late
             foreach (Quote q in quotes)
             {
                 DateTime eta = (DateTime)q.ETA;
                 if (eta == null) // if no ETA is returned then we assum a certain lateness.
-                    eta = r.pickupTime + TripThru.missedBookingPeriod - new TimeSpan(0, 1, 0);
+                    eta = r.pickupTime + tripthru.missedBookingPeriod - new TimeSpan(0, 1, 0);
                 if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
                 {
                     bestETA = (DateTime)q.ETA;
@@ -816,13 +814,13 @@ namespace TripThruCore
             {
                 CreateQuote(MakeQuoteTripRequest(t), true);
                 t.State = TripState.Quoting;
-                TripThru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.SaveTrip(t);
             }
             else
             {
                 Action<Trip, Gateway.DispatchTripResponse> responseHandler = DispatchTripResponseHandler;
                 var request = MakeDispatchRequest(t);
-                DispatchTrip(t, TripThru.partners[request.partnerID], request, responseHandler);
+                DispatchTrip(t, tripthru.partners[request.partnerID], request, responseHandler);
             }
         }
         private bool TripIsAutodispatch(Trip t)
@@ -843,7 +841,7 @@ namespace TripThruCore
             {
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
                 var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
-                ForwardTripUpdate(t, TripThru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
+                ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
             }
             else
             {
@@ -857,13 +855,13 @@ namespace TripThruCore
         protected Gateway.UpdateTripStatusRequest MakeUpdateTripStatusRequest(Trip t)
         {
             return new Gateway.UpdateTripStatusRequest(
-                    clientID: TripThru.ID, tripID: t.Id, status: (Status)t.Status, driverLocation: t.DriverLocation, eta: t.ETA);
+                    clientID: tripthru.ID, tripID: t.Id, status: (Status)t.Status, driverLocation: t.DriverLocation, eta: t.ETA);
         }
 
         private void NewQuoteHandler(TripQuotes q)
         {
             var request = q.QuoteRequest;
-            foreach (TripThruCore.Gateway partner in TripThru.partners.Values.Where(p => p.ID != request.clientID))
+            foreach (TripThruCore.Gateway partner in tripthru.partners.Values.Where(p => p.ID != request.clientID))
             {
                 try
                 {
@@ -885,7 +883,7 @@ namespace TripThruCore
         private bool PickupLocationIsServedByPartner(Gateway.QuoteTripRequest r, Gateway p)
         {
             bool covered = false;
-            foreach (Zone z in TripThru.GetPartnerCoverage(p.ID))
+            foreach (Zone z in tripthru.GetPartnerCoverage(p.ID))
             {
                 if (z.IsInside(r.pickupLocation))
                 {
@@ -897,7 +895,7 @@ namespace TripThruCore
         }
         private Gateway.QuoteTripRequest MakeQuoteTripRequest(TripQuotes q){
             var request = q.QuoteRequest;
-            request.clientID = TripThru.ID;
+            request.clientID = tripthru.ID;
             return request;
         }
 
@@ -912,13 +910,13 @@ namespace TripThruCore
             }
             else
             {
-                ForwardCompleteQuote(q, TripThru.partners[q.QuoteRequest.clientID], MakeUpdateQuoteRequest(q), responseHandler);
+                ForwardCompleteQuote(q, tripthru.partners[q.QuoteRequest.clientID], MakeUpdateQuoteRequest(q), responseHandler);
             }
         }
         private Gateway.UpdateQuoteRequest MakeUpdateQuoteRequest(TripQuotes q)
         {
             return new Gateway.UpdateQuoteRequest(
-                clientID: TripThru.ID,
+                clientID: tripthru.ID,
                 tripId: q.Id,
                 quotes: q.ReceivedQuotes
             );
@@ -1087,8 +1085,13 @@ namespace TripThruCore
 
     }
 
-    public class AsyncTripsManager : TripsManager
+    public class TripsManagerAsync : TripsManager
     {
+        public TripsManagerAsync(TripThru tripthru)
+            : base(tripthru)
+        {
+
+        }
         protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
             partner.DispatchTripAsync(request,
