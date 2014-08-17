@@ -117,11 +117,19 @@ namespace TripThruCore.Storage
         }
         public override void InsertTrip(Trip trip)
         {
-            
+            throw new NotImplementedException();
         }
         public override void SaveTrip(Trip trip)
         {
-            
+            throw new NotImplementedException();
+        }
+        public override List<Trip> GetTripsByState(TripState state)
+        {
+            throw new NotImplementedException();
+        }
+        public override List<Trip> GetDirtyTrips()
+        {
+            throw new NotImplementedException();
         }
         public override Route GetRoute(string id)
         {

@@ -1,1 +1,0 @@
-Gateway and partner project
