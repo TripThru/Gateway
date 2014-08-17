@@ -241,12 +241,9 @@ namespace TripThruCore
             new Thread(() => CreateQuoteAndForwardToPartner(r)).Start();
             return new Gateway.QuoteTripResponse();
         }
-        private bool QuoteExists(Gateway.QuoteTripRequest r)
-        {
-            return StorageManager.GetQuote(r.tripId) != null;
-        }
         private void CreateQuoteAndForwardToPartner(QuoteTripRequest r)
         {
+            Thread.Sleep(1000);
             List<Quote> quotes = new List<Quote>();
             foreach (PartnerFleet f in PartnerFleets.Values)
             {
@@ -271,7 +268,9 @@ namespace TripThruCore
                 }
             }
             var request = new UpdateQuoteRequest(clientID: this.ID, tripId: r.tripId, quotes: quotes);
-            this.tripthru.UpdateQuote(request);
+            Logger.BeginRequest("Sending quote update to TripThru. TripId: " + r.tripId, request);
+            var response = this.tripthru.UpdateQuote(request);
+            Logger.EndRequest(response);
         }
 
         public override GetTripsResponse GetTrips(GetTripsRequest r)

@@ -703,10 +703,19 @@ namespace CustomIntegrations
                 }
                 catch (Exception e) { }
                 quotes.Add(new Quote(partnerID: ID, partnerName: name, fleetID: ID, fleetName: name, price: price, ETA: DateTime.UtcNow + new TimeSpan(1, 0, createResponse.fare.time_to_wait)));
-                response = new Gateway.QuoteTripResponse(quotes, Result.OK);
+                response = new Gateway.QuoteTripResponse(Result.OK);
+                new Thread(() => ForwardQuoteUpdateToTripThru(request.tripId, quotes)).Start();
             }
             Logger.EndRequest(response);
             return response;
+        }
+        private void ForwardQuoteUpdateToTripThru(string tripId, List<Quote> quotes)
+        {
+            Thread.Sleep(1000);
+            var request = new Gateway.UpdateQuoteRequest(this.ID, tripId, quotes);
+            Logger.BeginRequest("Sending quote update to TripThru. TripId: " + tripId, request);
+            var response = tripthru.UpdateQuote(request);
+            Logger.EndRequest(response);
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
