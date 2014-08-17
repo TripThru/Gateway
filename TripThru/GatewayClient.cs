@@ -186,22 +186,9 @@ namespace ServiceStack.TripThruGateway
             GatewayService.Quote quotes = new GatewayService.Quote
             {
                 access_token = AccessToken,
-                PassengerId = request.passengerID,
-                PassengerName = request.passengerName,
-                Luggage = request.luggage,
-                Persons = request.persons,
-                PickupLat = request.pickupLocation.Lat,
-                PickupLng = request.pickupLocation.Lng,
-                PickupTime = request.pickupTime,
-                DropoffLat = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lat,
-                DropoffLng = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lng,
-                PaymentMethod = request.paymentMethod,
-                VehicleType = request.vehicleType,
-                MaxPrice = request.maxPrice,
-                MinRating = request.minRating,
-                FleetId = request.fleetID,
-                DriverId = request.driverID,
-                TripId = request.tripId
+                TripId = request.tripId,
+                Count = request.quotes.Count,
+                Quotes = request.quotes
             };
             var client = GetClient();
 
