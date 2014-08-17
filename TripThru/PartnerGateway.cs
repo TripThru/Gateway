@@ -7,6 +7,7 @@ using ServiceStack.Common.Utils;
 using ServiceStack.Text;
 using Utils;
 using TripThruCore.Storage;
+using System.Threading;
 
 namespace TripThruCore
 {
@@ -237,16 +238,42 @@ namespace TripThruCore
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
         {
             requests++;
-            throw new Exception("Not implemented");
+            new Thread(() => CreateQuoteAndForwardToPartner(r)).Start();
+            return new Gateway.QuoteTripResponse();
         }
-        public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
+        private bool QuoteExists(Gateway.QuoteTripRequest r)
         {
-            throw new Exception("Not implemented");
+            return StorageManager.GetQuote(r.tripId) != null;
         }
-        public override Gateway.GetQuoteResponse GetQuote(Gateway.GetQuoteRequest request)
+        private void CreateQuoteAndForwardToPartner(QuoteTripRequest r)
         {
-            throw new Exception("Not implemented");
+            List<Quote> quotes = new List<Quote>();
+            foreach (PartnerFleet f in PartnerFleets.Values)
+            {
+                if (!f.FleetServesLocation(r.pickupLocation))
+                    continue;
+                foreach (VehicleType vehicleType in f.vehicleTypes)
+                {
+                    if (r.vehicleType == vehicleType || r.vehicleType == null)
+                    {
+                        PartnerTrip trip = GetTrip(r);
+                        trip.vehicleType = vehicleType;
+                        quotes.Add(new Quote(
+                            partnerID: ID,
+                            partnerName: name,
+                            fleetID: f.ID, fleetName: f.name,
+                            vehicleType: vehicleType,
+                            price: trip.dropoffLocation == null ? (double?)null : f.GetPrice(trip),
+                            distance: trip.dropoffLocation == null ? (double?)null : f.GetDistance(trip),
+                            duration: trip.duration,
+                            ETA: f.GetPickupETA(trip)));
+                    }
+                }
+            }
+            var request = new UpdateQuoteRequest(clientID: this.ID, tripId: r.tripId, quotes: quotes);
+            this.tripthru.UpdateQuote(request);
         }
+
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
             var trips = new List<Trip>();
@@ -276,44 +303,44 @@ namespace TripThruCore
                     PartnerTrip t = tripsByID[r.tripID];
                     //lock (t)
                     //{
-                        DateTime? pickupTime = null;
-                        if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
-                            pickupTime = t.pickupTime; // Only if trip has been pickedup.
+                    DateTime? pickupTime = null;
+                    if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
+                        pickupTime = t.pickupTime; // Only if trip has been pickedup.
 
-                        if (t.price == null && t.PartnerFleet != null)
-                            t.price = t.PartnerFleet.GetPrice(t);
+                    if (t.price == null && t.PartnerFleet != null)
+                        t.price = t.PartnerFleet.GetPrice(t);
 
-                        double? distance = null;
-                        if (t.PartnerFleet != null)
-                            distance = t.PartnerFleet.GetDistance(t);
+                    double? distance = null;
+                    if (t.PartnerFleet != null)
+                        distance = t.PartnerFleet.GetDistance(t);
 
-                        double? driverRouteDuration = null;
-                        if (t.driver != null && t.driver.route != null)
-                            driverRouteDuration = t.driver.route.duration.TotalSeconds;
+                    double? driverRouteDuration = null;
+                    if (t.driver != null && t.driver.route != null)
+                        driverRouteDuration = t.driver.route.duration.TotalSeconds;
 
-                        t.lastStatusNotifiedToPartner = t.status;
+                    t.lastStatusNotifiedToPartner = t.status;
 
-                        response = new GetTripStatusResponse(
-                            partnerID: ID,
-                            partnerName: name,
-                            fleetID: t.PartnerFleet != null ? t.PartnerFleet.ID : null,
-                            fleetName: t.PartnerFleet != null ? t.PartnerFleet.name : null,
-                            pickupTime: pickupTime,
-                            pickupLocation: t.pickupLocation,
-                            driverID: t.driver != null ? t.driver.ID : null,
-                            driverName: t.driver != null ? t.driver.name : null,
-                            driverLocation: t.driver != null ? t.driver.location : null,
-                            driverInitialLocation: t.driverInitiaLocation ?? null,
-                            dropoffTime: t.dropoffTime,
-                            dropoffLocation: t.dropoffLocation,
-                            vehicleType: t.vehicleType,
-                            ETA: t.ETA,
-                            distance: distance,
-                            driverRouteDuration: driverRouteDuration,
-                            price: t.price,
-                            status: t.status,
-                            passengerName: t.passengerName
-                        );
+                    response = new GetTripStatusResponse(
+                        partnerID: ID,
+                        partnerName: name,
+                        fleetID: t.PartnerFleet != null ? t.PartnerFleet.ID : null,
+                        fleetName: t.PartnerFleet != null ? t.PartnerFleet.name : null,
+                        pickupTime: pickupTime,
+                        pickupLocation: t.pickupLocation,
+                        driverID: t.driver != null ? t.driver.ID : null,
+                        driverName: t.driver != null ? t.driver.name : null,
+                        driverLocation: t.driver != null ? t.driver.location : null,
+                        driverInitialLocation: t.driverInitiaLocation ?? null,
+                        dropoffTime: t.dropoffTime,
+                        dropoffLocation: t.dropoffLocation,
+                        vehicleType: t.vehicleType,
+                        ETA: t.ETA,
+                        distance: distance,
+                        driverRouteDuration: driverRouteDuration,
+                        price: t.price,
+                        status: t.status,
+                        passengerName: t.passengerName
+                    );
                     //}
                 }
             }
@@ -334,8 +361,8 @@ namespace TripThruCore
                     PartnerTrip t = tripsByID[r.tripID];
                     //lock (t)
                     //{
-                        response = new UpdateTripStatusResponse();
-                        t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
+                    response = new UpdateTripStatusResponse();
+                    t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
                     //}
                     Logger.SetServicingId(this.ID);
                 }
@@ -692,7 +719,7 @@ namespace TripThruCore
         public StreamReader TripReader;
         public StreamReader NameReader;
 
-        public Dictionary<string, string>listDriverNames = new Dictionary<string, string>();
+        public Dictionary<string, string> listDriverNames = new Dictionary<string, string>();
         public Dictionary<string, string> listPassengerNames = new Dictionary<string, string>();
 
         public LinkedList<PartnerTrip> queue;
@@ -747,7 +774,7 @@ namespace TripThruCore
                 {
                     TripReader = null;
                 }
-                
+
             }
 
             List<Pair<Location, Location>> coveredTrips = new List<Pair<Location, Location>>();
@@ -775,7 +802,7 @@ namespace TripThruCore
             }
             if (partner != null)
                 partner.AddPartnerFleet(this);
-            
+
         }
         public override string ToString()
         {
@@ -906,7 +933,7 @@ namespace TripThruCore
             {
                 Passenger passenger = passengers[random.Next(passengers.Count)];
                 Pair<Location, Location> fromTo = possibleTrips[random.Next(possibleTrips.Length)];
-                DateTime pickupTime = now + new TimeSpan(0, random.Next((int) tripMaxAdvancedNotice.TotalMinutes), 0);
+                DateTime pickupTime = now + new TimeSpan(0, random.Next((int)tripMaxAdvancedNotice.TotalMinutes), 0);
                 QueueTrip(GenerateTrip(passenger, pickupTime, fromTo));
             }
             else
@@ -982,7 +1009,7 @@ namespace TripThruCore
                         steps = countList / steps1;
                     var tripsMinute = 0;
 
-                    if(steps1 != 0)
+                    if (steps1 != 0)
                         foreach (var trip in locationsList)
                         {
                             tripsMinute++;
@@ -996,7 +1023,7 @@ namespace TripThruCore
                         }
                     else
                     {
-                        if(locationsList.Count > 0)
+                        if (locationsList.Count > 0)
                             finalListTrips.Add(locationsList.First());
                         else
                             return null;
@@ -1005,12 +1032,12 @@ namespace TripThruCore
                     if (finalListTrips.Count > 0)
                     {
                         if (availableDrivers.Count > finalListTrips.Count + 10)
-                        while (availableDrivers.Count > finalListTrips.Count + 10 && availableDrivers.Count > 0)
-                        {
-                            var avaliable = availableDrivers.First();
-                            saveDrivers.AddLast(avaliable);
-                            availableDrivers.RemoveFirst();
-                        }
+                            while (availableDrivers.Count > finalListTrips.Count + 10 && availableDrivers.Count > 0)
+                            {
+                                var avaliable = availableDrivers.First();
+                                saveDrivers.AddLast(avaliable);
+                                availableDrivers.RemoveFirst();
+                            }
                         else
                         {
                             while (availableDrivers.Count < finalListTrips.Count + 10 && saveDrivers.Count > 0)
@@ -1018,7 +1045,7 @@ namespace TripThruCore
                                 var avaliable = saveDrivers.First();
                                 availableDrivers.AddLast(avaliable);
                                 saveDrivers.RemoveFirst();
-                            }   
+                            }
                         }
                         Console.WriteLine("#######AVALIABLE:" + availableDrivers.Count);
                         Console.WriteLine("#######SAVE:" + saveDrivers.Count);
@@ -1061,7 +1088,7 @@ namespace TripThruCore
             var lngDrop = Convert.ToDouble(valueStrings[12]);
             var latPick = Convert.ToDouble(valueStrings[11]);
             var lngPick = Convert.ToDouble(valueStrings[10]);
-            return new Pair<Location, Location>(new Location(latPick,lngPick), new Location(latDrop, lngDrop));
+            return new Pair<Location, Location>(new Location(latPick, lngPick), new Location(latDrop, lngDrop));
         }
         private Passenger GetPassenger(IList<string> valueStrings)
         {

@@ -678,23 +678,7 @@ namespace TripThruCore
             {
                 t.IsDirty = false;
                 tripthru.activeTrips.SaveTrip(t);
-                if (t.Status == Status.Complete)
-                    DeactivateTripAndUpdateStats(t);
             }
-        }
-        private void DeactivateTripAndUpdateStats(Trip t)
-        {
-            var tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
-            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, tripStatus.price, tripStatus.distance);
-        }
-        private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
-        {
-            var resp = tripthru.partners[r.clientID].GetTripStatus(new Gateway.GetTripStatusRequest(r.clientID, r.tripID));
-            return resp;
-        }
-        private Gateway.GetTripStatusRequest MakeGetTripStatusRequest(Trip t)
-        {
-            return new Gateway.GetTripStatusRequest(clientID: tripthru.ID, tripID: t.Id);
         }
 
         protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
@@ -793,6 +777,8 @@ namespace TripThruCore
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
                 var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
+                if (t.Status == Status.Complete)
+                    DeactivateTripAndUpdateStats(t);
             }
             else
             {
@@ -807,6 +793,20 @@ namespace TripThruCore
         {
             return new Gateway.UpdateTripStatusRequest(
                     clientID: tripthru.ID, tripID: t.Id, status: (Status)t.Status, driverLocation: t.DriverLocation, eta: t.ETA);
+        }
+        private void DeactivateTripAndUpdateStats(Trip t)
+        {
+            var tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
+            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, tripStatus.price, tripStatus.distance);
+        }
+        private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
+        {
+            var resp = tripthru.partners[r.clientID].GetTripStatus(new Gateway.GetTripStatusRequest(r.clientID, r.tripID));
+            return resp;
+        }
+        private Gateway.GetTripStatusRequest MakeGetTripStatusRequest(Trip t)
+        {
+            return new Gateway.GetTripStatusRequest(clientID: tripthru.ID, tripID: t.Id);
         }
 
         private void NewQuoteHandler(TripQuotes q)
