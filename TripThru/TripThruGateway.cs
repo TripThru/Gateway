@@ -666,9 +666,11 @@ namespace TripThruCore
         public Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest r)
         {
             Gateway.UpdateQuoteResponse response;
-            if (StorageManager.GetQuote(r.tripId) != null)
+            var quotes = StorageManager.GetQuote(r.tripId);
+            if (quotes != null)
             {
-                var quotes = StorageManager.GetQuote(r.tripId);
+                if (quotes.ReceivedQuotes == null)
+                    quotes.ReceivedQuotes = new List<Quote>();
                 quotes.ReceivedQuotes.AddRange(r.quotes);
                 quotes.ReceivedUpdatesCount++;
                 if (quotes.ReceivedUpdatesCount == quotes.PartnersThatServe)
