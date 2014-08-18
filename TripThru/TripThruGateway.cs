@@ -842,16 +842,16 @@ namespace TripThruCore
                 var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
                 Logger.Log("Notifying update to partner " + partnerId + ". Trip: " + t.Id);
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
-                if (t.Status == Status.Complete)
-                {
-                    Logger.Log("Deactivating Complete trip");
-                    DeactivateTripAndUpdateStats(t);
-                }
             }
             else
             {
                 Logger.Log("Trip " + t.Id + " is local so no need to notify partner");
                 UpdateTripStatusResponseHandler(t, new Gateway.UpdateTripStatusResponse());
+            }
+            if (t.Status == Status.Complete)
+            {
+                Logger.Log("Deactivating Complete trip");
+                DeactivateTripAndUpdateStats(t);
             }
         }
         private bool TripIsLocal(Trip t)
