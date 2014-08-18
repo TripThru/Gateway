@@ -519,12 +519,13 @@ namespace TripThruCore
             if (TripIsNotAlreadyActive(r))
             {
                 Gateway partner = null;
+                bool isLocal = false;
                 if (PartnerHasBeenSpecified(r))
                 {
                     partner = SelectedPartner(r);
                     RecordTripServicingPartner(r, partner);
+                    isLocal = partner.ID == r.clientID;
                 }
-                bool isLocal = partner.ID == r.clientID;
                 MakeTripAndAddItToActive(r, partner, isLocal);
                 RecordTripOriginatingPartner(r);
                 response = new Gateway.DispatchTripResponse();
