@@ -122,6 +122,45 @@ namespace ServiceStack.TripThruGateway
             Logger.EndRequest(null);
         }
 
+        public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                throw new Exception("Invalid callback url: " + RootUrl);
+
+            Logger.BeginRequest("DispatchTrip sent to " + name, request);
+            GatewayService.Trip dispatch = new GatewayService.Trip
+            {
+                access_token = AccessToken,
+                PassengerId = request.passengerID,
+                PassengerName = request.passengerName,
+                Luggage = request.luggage,
+                Persons = request.persons,
+                PickupLat = request.pickupLocation.Lat,
+                PickupLng = request.pickupLocation.Lng,
+                PickupTime = request.pickupTime,
+                DropoffLat = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lat,
+                DropoffLng = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lng,
+                PaymentMethod = request.paymentMethod,
+                VehicleType = request.vehicleType,
+                MaxPrice = request.maxPrice,
+                MinRating = request.minRating,
+                PartnerId = request.partnerID,
+                FleetId = request.fleetID,
+                DriverId = request.driverID,
+                TripId = request.tripID
+            };
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
+            GatewayService.TripResponse resp = client.Post<GatewayService.TripResponse>(dispatch);
+            Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
+            {
+                result = resp.ResultCode,
+            };
+            Logger.EndRequest(response);
+            return response;
+        }
+
         public override void QuoteTripAsync(Gateway.QuoteTripRequest request, Action<Gateway.QuoteTripResponse> callback)
         {
             Uri uri;
@@ -172,8 +211,48 @@ namespace ServiceStack.TripThruGateway
                     callback(result);
                 }
             );
-            Logger.Log("Invoking callback");
             Logger.EndRequest(null);
+        }
+
+        public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                return new Gateway.QuoteTripResponse
+                {
+                    result = Result.InvalidParameters
+                };
+            Logger.BeginRequest("QuoteTrip sent to " + name, request);
+            //Logger.Log("RootURL: " + RootUrl);
+            GatewayService.Quote quotes = new GatewayService.Quote
+            {
+                access_token = AccessToken,
+                PassengerId = request.passengerID,
+                PassengerName = request.passengerName,
+                Luggage = request.luggage,
+                Persons = request.persons,
+                PickupLat = request.pickupLocation.Lat,
+                PickupLng = request.pickupLocation.Lng,
+                PickupTime = request.pickupTime,
+                DropoffLat = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lat,
+                DropoffLng = request.dropoffLocation == null ? (double?)null : request.dropoffLocation.Lng,
+                PaymentMethod = request.paymentMethod,
+                VehicleType = request.vehicleType,
+                MaxPrice = request.maxPrice,
+                MinRating = request.minRating,
+                FleetId = request.fleetID,
+                DriverId = request.driverID,
+            };
+            JsonServiceClient client = new JsonServiceClient(RootUrl);
+            client.Timeout = timeout;
+            GatewayService.QuoteResponse resp = client.Get<GatewayService.QuoteResponse>(quotes);
+            Gateway.QuoteTripResponse response = new Gateway.QuoteTripResponse
+            {
+                result = resp.ResultCode
+            };
+            Logger.EndRequest(response);
+            return response;
+
         }
 
         public override void UpdateQuoteAsync(Gateway.UpdateQuoteRequest request, Action<Gateway.UpdateQuoteResponse> callback)
@@ -213,8 +292,30 @@ namespace ServiceStack.TripThruGateway
                     callback(result);
                 }
             );
-            Logger.Log("Invoking callback");
             Logger.EndRequest(null);
+        }
+
+        public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                throw new Exception("Invalid callback url: " + RootUrl);
+
+            var tripId = request.tripId;
+            GatewayService.Quote quotes = new GatewayService.Quote
+            {
+                access_token = AccessToken,
+                TripId = request.tripId,
+                Count = request.quotes.Count,
+                Quotes = request.quotes
+            };
+            var client = GetClient();
+
+            Logger.BeginRequest("UpdateQuote sent to " + name + ". Trip: " + tripId, request);
+            var response = client.Put<GatewayService.QuoteResponse>(quotes);
+            var result = new Gateway.UpdateQuoteResponse(response.ResultCode);
+            Logger.EndRequest(result);
+            return result;
         }
 
         public override Gateway.GetQuoteResponse GetQuote(Gateway.GetQuoteRequest request)
