@@ -72,11 +72,9 @@ namespace TripThruTests
                 rejects++;
             Gateway.QuoteTripResponse response = new Gateway.QuoteTripResponse
             {
-                result = resp.result, 
-                quotes = resp.quotes
+                result = resp.result
             };
             return response;
-            
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
@@ -123,8 +121,6 @@ namespace TripThruTests
         {
             requests++;
             UpdateTripStatusResponse resp = server.UpdateTripStatus(request);
-            if (resp.result == Gateway.Result.Rejected)
-                rejects++;
             switch (request.status)
             {
                 case Status.Cancelled:
@@ -140,6 +136,23 @@ namespace TripThruTests
                 result = resp.result
             };
             return response;
+        }
+
+        public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
+        {
+            requests++;
+            var resp = server.UpdateQuote(request);
+            return new Gateway.UpdateQuoteResponse(resp.result);
+        }
+
+        public override GetQuoteResponse GetQuote(GetQuoteRequest request)
+        {
+            requests++;
+            var resp = server.GetQuote(request);
+            if (resp.result == Result.OK)
+                return new Gateway.GetQuoteResponse(resp.status, resp.quotes);
+            else
+                return new Gateway.GetQuoteResponse(result: resp.result);
         }
     }
 }
