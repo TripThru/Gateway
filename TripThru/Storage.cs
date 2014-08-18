@@ -199,7 +199,7 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.Creation).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.loc);
                 cm.GetMemberMap(c => c.SamplingPercentage);
-                cm.GetMemberMap(c => c.State);
+                cm.GetMemberMap(c => c.State).SetRepresentation(BsonType.String);
                 cm.GetMemberMap(c => c.IsDirty);
                 cm.GetMemberMap(c => c.MadeDirtyById);
             });
@@ -225,12 +225,12 @@ namespace TripThruCore.Storage
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
-            _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users-test");
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
-            _trips = _tripsDatabase.GetCollection<Trip>("trips");
+            _trips = _tripsDatabase.GetCollection<Trip>("trips-test");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
-            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes");
+            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes-test");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
