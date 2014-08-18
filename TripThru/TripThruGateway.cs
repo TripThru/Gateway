@@ -159,9 +159,14 @@ namespace TripThruCore
         }
         public override GetPartnerInfoResponse GetPartnerInfo(GetPartnerInfoRequest r)
         {
+            requests++;
+            if (!partners.ContainsKey(r.clientID))
+            {
+                Logger.Log("Partner " + r.clientID + " not found.");
+                return new GetPartnerInfoResponse(result: Result.NotFound);
+            }
             if (r.fleets != null || r.vehicleTypes != null || r.coverage != null)
                 throw new Exception("Filters currently not supported");
-            requests++;
             List<VehicleType> vehicleTypes = new List<VehicleType>();
             List<Fleet> fleets = new List<Fleet>();
             r.clientID = ID;
@@ -187,6 +192,11 @@ namespace TripThruCore
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest request)
         {
             requests++;
+            if (!partners.ContainsKey(request.clientID))
+            {
+                Logger.Log("Partner " + request.clientID + " not found.");
+                return new DispatchTripResponse(result: Result.NotFound);
+            }
             var response = this.tripsManager.CreateTrip(request);
             if (response.result == Result.Rejected)
                 rejects++;
@@ -200,6 +210,11 @@ namespace TripThruCore
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
         {
             requests++;
+            if (!partners.ContainsKey(request.clientID))
+            {
+                Logger.Log("Partner " + request.clientID + " not found.");
+                return new QuoteTripResponse(result: Result.NotFound);
+            }
             var response = this.tripsManager.CreateQuote(request);
             if (response.result == Result.Rejected)
                 rejects++;
@@ -208,11 +223,21 @@ namespace TripThruCore
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
             requests++;
+            if (!partners.ContainsKey(request.clientID))
+            {
+                Logger.Log("Partner " + request.clientID + " not found.");
+                return new UpdateQuoteResponse(result: Result.NotFound);
+            }
             return this.tripsManager.UpdateQuote(request);
         }
         public override Gateway.GetQuoteResponse GetQuote(Gateway.GetQuoteRequest request)
         {
             requests++;
+            if (!partners.ContainsKey(request.clientID))
+            {
+                Logger.Log("Partner " + request.clientID + " not found.");
+                return new GetQuoteResponse(result: Result.NotFound);
+            }
             var quote = StorageManager.GetQuote(request.tripId);
             if (quote != null)
             {
@@ -225,6 +250,11 @@ namespace TripThruCore
 
         public override GetTripsResponse GetTrips(GetTripsRequest r)
         {
+            if (!partners.ContainsKey(r.clientID))
+            {
+                Logger.Log("Partner " + r.clientID + " not found.");
+                return new GetTripsResponse(null, Result.NotFound);
+            }
             var trips = new List<Trip>();
             if (activeTrips.Count > 0)
             {
@@ -238,6 +268,11 @@ namespace TripThruCore
         public override GetTripStatusResponse GetTripStatus(GetTripStatusRequest r)
         {
             requests++;
+            if (!partners.ContainsKey(r.clientID))
+            {
+                Logger.Log("Partner " + r.clientID + " not found.");
+                return new GetTripStatusResponse(result: Result.NotFound);
+            }
             Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
             if (partner != null)
             {
@@ -278,7 +313,6 @@ namespace TripThruCore
 
         public override GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
         {
-            requests++;
             GetRouteTripResponse getRouteTripResponse = new GetRouteTripResponse
             {
                 result = Result.NotFound
@@ -344,6 +378,11 @@ namespace TripThruCore
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest request)
         {
             requests++;
+            if (!partners.ContainsKey(request.clientID))
+            {
+                Logger.Log("Partner " + request.clientID + " not found.");
+                return new UpdateTripStatusResponse(result: Result.NotFound);
+            }
             return this.tripsManager.UpdateTrip(request);
         }
 
