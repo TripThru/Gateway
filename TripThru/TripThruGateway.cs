@@ -522,6 +522,7 @@ namespace TripThruCore
                 if (PartnerHasBeenSpecified(r))
                     partner = SelectedPartner(r);
                 MakeTripAndAddItToActive(r, partner);
+                RecordTripOriginatingPartner(r);
                 response = new Gateway.DispatchTripResponse();
             }
             else
@@ -573,6 +574,18 @@ namespace TripThruCore
             Logger.AddTag("Pickup_time", r.pickupTime.ToString());
             Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
             Logger.AddTag("Dropoff_location", r.dropoffLocation.ToString());
+        }
+        private void RecordTripOriginatingPartner(Gateway.DispatchTripRequest r)
+        {
+            Logger.Log("RecordTripOriginatingPartner: Request=" + r + ", partner=" + r.clientID);
+            tripthru.originatingPartnerByTrip.Add(r.tripID, r.clientID);
+            Logger.AddTag("Originating partner", r.clientID);
+        }
+        private void RecordTripServicingPartner(Gateway.DispatchTripRequest r, Gateway partner)
+        {
+            Logger.Log("RecordTripServicingPartner: Request=" + r + ", partner=" + partner.name);
+            tripthru.servicingPartnerByTrip.Add(r.tripID, partner.ID);
+            Logger.AddTag("Servicing partner", partner.ID);
         }
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
@@ -677,6 +690,7 @@ namespace TripThruCore
         protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
             var response = partner.DispatchTrip(request);
+            RecordTripServicingPartner(request, partner);
             responseHandler(t, response);
         }
         protected void DispatchTripResponseHandler(Trip t, Gateway.DispatchTripResponse response)
