@@ -219,7 +219,7 @@ namespace TripThruCore.Storage
                 cm.GetMemberMap(c => c.QuoteRequest).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.ReceivedQuotes).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.PartnersThatServe).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.autodispatch).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.Autodispatch).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.ReceivedUpdatesCount).SetIgnoreIfNull(true);
             });
             var server = MongoServer.Create(tripsDatabaseConnectionString);
@@ -331,8 +331,11 @@ namespace TripThruCore.Storage
         }
         public override TripQuotes GetQuote(string tripId)
         {
-            var query_id = Query.EQ("_id", ObjectId.Parse(tripId));
-            return this._quotes.FindOne(query_id);
+            var quotes = this._quotes.AsQueryable<TripQuotes>().Where(q => q.Id == tripId).ToList();
+            if (quotes.Count > 0)
+                return quotes[0];
+            else
+                return null;
         }
         public override List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
         {

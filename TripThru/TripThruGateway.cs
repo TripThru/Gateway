@@ -399,15 +399,6 @@ namespace TripThruCore
             if (Logger.splunkEnabled)
                 tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
 
-
-            foreach (Trip trip in activeTrips.Values)
-            {
-                if (!originatingPartnerByTrip.ContainsKey(trip.Id))
-                    Logger.LogDebug("Active trip " + trip + " has no originating partner");
-                if (!servicingPartnerByTrip.ContainsKey(trip.Id))
-                    Logger.LogDebug("Active trip " + trip + " has no servicing partner");
-            }
-
             Logger.LogDebug("Health check (tripthru latest 2)", null, tags);
         }
 
@@ -666,7 +657,7 @@ namespace TripThruCore
                 Status = QuoteStatus.New,
                 PartnersThatServe = 0,
                 QuoteRequest = r,
-                autodispatch = autodispatch
+                Autodispatch = autodispatch
             };
             StorageManager.InsertQuote(tripQuotes);
         }
@@ -904,7 +895,7 @@ namespace TripThruCore
         private void CompleteQuoteHandler(TripQuotes q)
         {
             Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
-            if (q.autodispatch)
+            if (q.Autodispatch)
             {
                 DispatchAutodispatchTrip(q);
                 q.Status = QuoteStatus.Sent;

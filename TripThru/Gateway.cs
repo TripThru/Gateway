@@ -73,7 +73,7 @@ namespace TripThruCore
 
     public enum PaymentMethod { Cash, Credit, Account };
     public enum QuoteStatus { New, InProgress, Complete, Sent };
-    public enum TripState { New, Quoting, Dispatched };
+    public enum TripState { New, Quoting, Dispatched, Local };
 
     public class Zone
     {
@@ -287,7 +287,7 @@ namespace TripThruCore
         public List<Quote> ReceivedQuotes { get; set; }
         public int PartnersThatServe { get; set; }
         public int ReceivedUpdatesCount { get; set; }
-        public bool autodispatch { set; get; }
+        public bool Autodispatch { set; get; }
     }
 
     public class Fleet

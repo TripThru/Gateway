@@ -51,12 +51,12 @@ namespace TripThruTests
             Gateway.DispatchTripResponse resp = server.DispatchTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
-            if (resp.result == Result.OK)
+            /*if (resp.result == Result.OK)
             {
                 var resp1 = GetTripStatus(new GetTripStatusRequest(request.clientID, request.tripID));
                 if (resp1.distance != null) distance = distance + resp1.distance.Value;
                 if (resp1.price != null) fare = fare + resp1.price.Value;
-            }
+            }*/
             Gateway.DispatchTripResponse response = new Gateway.DispatchTripResponse
             {
                 result = resp.result,

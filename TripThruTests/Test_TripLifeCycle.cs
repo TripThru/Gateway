@@ -21,7 +21,7 @@ namespace Tests
         {
             Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
-            StorageManager.OpenStorage(new SqliteStorage("App_Data/db.sqlite"));
+            StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-TP-3217.servers.mongodirector.com:27017/", "TripThru"));
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;
@@ -352,9 +352,6 @@ namespace Tests
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
             TestTripLifecycle_FromNewToComplete(fleet, trip);
             ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
-
-        
-
         }
 
         public void TestTripLifecycle_FromNewToComplete(PartnerFleet fleet, PartnerTrip trip)
