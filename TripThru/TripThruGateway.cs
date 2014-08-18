@@ -778,7 +778,7 @@ namespace TripThruCore
                 t.Status = Status.Rejected;
                 t.IsDirty = true;
                 t.MadeDirtyById = tripthru.ID;
-                StorageManager.SaveTrip(t);
+                tripthru.activeTrips.SaveTrip(t);
                 Logger.Log("Deactivating rejected trip " + t.Id);
                 DeactivateTripAndUpdateStats(t);
             }
@@ -799,7 +799,7 @@ namespace TripThruCore
             foreach (Quote q in quotes)
             {
                 DateTime eta = (DateTime)q.ETA;
-                if (eta == null) // if no ETA is returned then we assum a certain lateness.
+                if (eta == null) // if no ETA is returned then we assume a certain lateness.
                     eta = r.pickupTime + tripthru.missedBookingPeriod - new TimeSpan(0, 1, 0);
                 if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
                 {
@@ -978,16 +978,13 @@ namespace TripThruCore
                     while (true)
                     {
                         var trips = StorageManager.GetTripsByState(TripState.New);
-                        if (trips != null && trips.Count() > 0)
-                        {
-                            Logger.BeginRequest("################## " + trips.Count + " trips ##################", null);
-                            Logger.EndRequest(null);
-                        }
                         foreach (var trip in trips)
                         {
+                            var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread( () => {
-                                Logger.BeginRequest("Processing new trip " + trip.Id, null, trip.Id);
-                                this._tripManager.NewTripHandler(trip);
+                                
+                                Logger.BeginRequest("Processing new trip " + t.Id, null, t.Id);
+                                this._tripManager.NewTripHandler(t);
                                 Logger.EndRequest(null);
                             }).Start();
                         }
@@ -1029,10 +1026,11 @@ namespace TripThruCore
                         var trips = StorageManager.GetDirtyTrips();
                         foreach (var trip in trips)
                         {
+                            var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread(() =>
                             {
-                                Logger.BeginRequest("Processing dirty trip " + trip.Id, null, trip.Id);
-                                this._tripManager.DirtyTripHandler(trip);
+                                Logger.BeginRequest("Processing dirty trip " + t.Id, null, t.Id);
+                                this._tripManager.DirtyTripHandler(t);
                                 Logger.EndRequest(null);
                             }).Start();
                         }
