@@ -697,11 +697,19 @@ namespace TripThruCore
         }
         protected void DispatchTripResponseHandler(Trip t, Gateway.DispatchTripResponse response)
         {
-            if (response.result == Gateway.Result.OK)
+            if (response.result == Gateway.Result.OK || response.result == Gateway.Result.Rejected)
             {
                 t.State = TripState.Dispatched;
                 t.IsDirty = true;
                 t.MadeDirtyById = tripthru.ID;
+                if (response.result == Gateway.Result.Rejected)
+                    t.Status = Status.Rejected;
+                else
+                    t.Status = Status.Dispatched;
+            }
+            else
+            {
+                t.State = TripState.New;
             }
             tripthru.activeTrips.SaveTrip(t);
         }
@@ -747,7 +755,7 @@ namespace TripThruCore
             var response = partner.UpdateQuote(request);
             responseHandler(q, response);
         }
-        private void DispatchAutodispatchTrip(TripQuotes q)
+        private void SelectBestQuoteAndSetServicingPartnerToTrip(TripQuotes q)
         {
             Logger.Log("Selecting best quote for autodispatch. Quote: " + q.Id);
             var bestQuote = SelectBestQuote(q.QuoteRequest, q.ReceivedQuotes);
@@ -762,11 +770,6 @@ namespace TripThruCore
                 tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
                 tripthru.activeTrips[q.Id].State = TripState.New;
                 tripthru.activeTrips.SaveTrip(tripthru.activeTrips[q.Id]);
-
-                Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
-                Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
-                Logger.Log("Dispatching trip " + request.partnerID + " to " + request.partnerID);
-                DispatchTrip(t, tripthru.partners[request.partnerID], request, dispatchResponseHandler);
             }
             else
             {
@@ -821,6 +824,8 @@ namespace TripThruCore
                 Logger.Log("Dispatch trip");
                 Action<Trip, Gateway.DispatchTripResponse> responseHandler = DispatchTripResponseHandler;
                 var request = MakeDispatchRequest(t);
+                t.State = TripState.Dispatching;
+                tripthru.activeTrips.SaveTrip(t);
                 DispatchTrip(t, tripthru.partners[request.partnerID], request, responseHandler);
             }
         }
@@ -930,7 +935,7 @@ namespace TripThruCore
             if (q.Autodispatch)
             {
                 Logger.Log("Quote is autodispach so dispatching and changing status to Sent");
-                DispatchAutodispatchTrip(q);
+                SelectBestQuoteAndSetServicingPartnerToTrip(q);
                 q.Status = QuoteStatus.Sent;
                 Logger.Log("Changing quote state to sent and saving");
                 StorageManager.SaveQuote(q);
@@ -973,6 +978,11 @@ namespace TripThruCore
                     while (true)
                     {
                         var trips = StorageManager.GetTripsByState(TripState.New);
+                        if (trips != null && trips.Count() > 0)
+                        {
+                            Logger.BeginRequest("################## " + trips.Count + " trips ##################", null);
+                            Logger.EndRequest(null);
+                        }
                         foreach (var trip in trips)
                         {
                             new Thread( () => {

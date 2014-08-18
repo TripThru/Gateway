@@ -1132,7 +1132,7 @@ namespace TripThruCore
             lock (locker)
             {
                 if (availableDrivers.Count == 0 && t.origination == PartnerTrip.Origination.Foreign)
-                    return false; // don't except from parters if no available drivers
+                    return false; // don't accept from partners if no available drivers
                 Logger.Log("Queueing " + t);
                 queue.AddLast(t);
                 if (partner.activeTrips.ContainsKey(t.ID))

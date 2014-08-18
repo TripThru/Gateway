@@ -73,7 +73,7 @@ namespace TripThruCore
 
     public enum PaymentMethod { Cash, Credit, Account };
     public enum QuoteStatus { New, InProgress, Complete, Sent };
-    public enum TripState { New, Quoting, Dispatched, Local };
+    public enum TripState { New, Quoting, Dispatching, Dispatched, Local };
 
     public class Zone
     {
