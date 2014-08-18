@@ -839,7 +839,7 @@ namespace TripThruCore
             if (!TripIsLocal(t))
             {
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
-                var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
+                var partnerId = t.MadeDirtyById == t.OriginatingPartnerId ? t.ServicingPartnerId : t.OriginatingPartnerId;
                 Logger.Log("Notifying update to partner " + partnerId + ". Trip: " + t.Id);
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
             }
