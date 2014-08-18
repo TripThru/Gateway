@@ -632,6 +632,7 @@ namespace TripThruCore
 
         public Gateway.QuoteTripResponse CreateQuote(Gateway.QuoteTripRequest r, bool autodispatch = false)
         {
+            Logger.Log("Creating new quote for " + r.tripId);
             Gateway.QuoteTripResponse response;
             if (!QuoteExists(r))
             {
@@ -685,7 +686,9 @@ namespace TripThruCore
 
         protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
+            Logger.Log("Dispatching trip " + t.Id + " to partner " + partner.ID);
             var response = partner.DispatchTrip(request);
+            Logger.Log("Response received, Result: " + response.result);
             if(!tripthru.servicingPartnerByTrip.ContainsKey(t.Id))
                 RecordTripServicingPartner(request, partner);
             responseHandler(t, response);
@@ -744,8 +747,10 @@ namespace TripThruCore
         }
         private void DispatchAutodispatchTrip(TripQuotes q)
         {
+            Logger.Log("Selecting best quote for autodispatch. Quote: " + q.Id);
             var bestQuote = SelectBestQuote(q.QuoteRequest, q.ReceivedQuotes);
             var quoteRequest = q.QuoteRequest;
+            Logger.Log("Best quote found from partner " + bestQuote.PartnerId + " with ETA " + bestQuote.ETA);
             tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
             tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
             tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
@@ -756,7 +761,8 @@ namespace TripThruCore
             Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
             Trip t = tripthru.activeTrips[q.Id];
             Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
-            DispatchTrip(tripthru.activeTrips[q.Id], tripthru.partners[request.partnerID], request, dispatchResponseHandler);
+            Logger.Log("Dispatching trip " + request.partnerID + " to " + request.partnerID);
+            DispatchTrip(t, tripthru.partners[request.partnerID], request, dispatchResponseHandler);
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
@@ -789,12 +795,14 @@ namespace TripThruCore
         {
             if (TripIsAutodispatch(t))
             {
+                Logger.Log("Trip is autodispatch, create quote and change state to Quoting");
                 CreateQuote(MakeQuoteTripRequest(t), true);
                 t.State = TripState.Quoting;
                 tripthru.activeTrips.SaveTrip(t);
             }
             else
             {
+                Logger.Log("Dispatch trip");
                 Action<Trip, Gateway.DispatchTripResponse> responseHandler = DispatchTripResponseHandler;
                 var request = MakeDispatchRequest(t);
                 DispatchTrip(t, tripthru.partners[request.partnerID], request, responseHandler);
@@ -818,12 +826,17 @@ namespace TripThruCore
             {
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
                 var partnerId = t.MadeDirtyById == t.ServicingPartnerId ? t.OriginatingPartnerId : t.ServicingPartnerId;
+                Logger.Log("Notifying update to partner " + partnerId + ". Trip: " + t.Id);
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
                 if (t.Status == Status.Complete)
+                {
+                    Logger.Log("Deactivating Complete trip");
                     DeactivateTripAndUpdateStats(t);
+                }
             }
             else
             {
+                Logger.Log("Trip " + t.Id + " is local so no need to notify partner");
                 UpdateTripStatusResponseHandler(t, new Gateway.UpdateTripStatusResponse());
             }
         }
@@ -860,6 +873,7 @@ namespace TripThruCore
                 {
                     if (PickupLocationIsServedByPartner(request, partner))
                     {
+                        Logger.Log("Sending quote request to partner " + partner.ID);
                         Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler = QuoteTripResponseHandler;
                         ForwardNewQuote(q, partner, MakeQuoteTripRequest(q), responseHandler);
                         q.PartnersThatServe++;
@@ -897,13 +911,17 @@ namespace TripThruCore
             Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
             if (q.Autodispatch)
             {
+                Logger.Log("Quote is autodispach so dispatching and changing status to Sent");
                 DispatchAutodispatchTrip(q);
                 q.Status = QuoteStatus.Sent;
+                Logger.Log("Changing quote state to sent and saving");
                 StorageManager.SaveQuote(q);
             }
             else
             {
-                ForwardCompleteQuote(q, tripthru.partners[q.QuoteRequest.clientID], MakeUpdateQuoteRequest(q), responseHandler);
+                var partner = tripthru.partners[q.QuoteRequest.clientID];
+                Logger.Log("Sending Complete UpdateQuote request to partner " + partner.ID);
+                ForwardCompleteQuote(q, partner, MakeUpdateQuoteRequest(q), responseHandler);
             }
         }
         private Gateway.UpdateQuoteRequest MakeUpdateQuoteRequest(TripQuotes q)
@@ -939,7 +957,11 @@ namespace TripThruCore
                         var trips = StorageManager.GetTripsByState(TripState.New);
                         foreach (var trip in trips)
                         {
-                            new Thread( () => this._tripManager.NewTripHandler(trip) ).Start();
+                            new Thread( () => {
+                                Logger.BeginRequest("Processing new trip " + trip.Id, null, trip.Id);
+                                this._tripManager.NewTripHandler(trip);
+                                Logger.EndRequest(null);
+                            }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
@@ -979,7 +1001,12 @@ namespace TripThruCore
                         var trips = StorageManager.GetDirtyTrips();
                         foreach (var trip in trips)
                         {
-                            new Thread( () => this._tripManager.DirtyTripHandler(trip) ).Start();
+                            new Thread(() =>
+                            {
+                                Logger.BeginRequest("Processing dirty trip " + trip.Id, null, trip.Id);
+                                this._tripManager.DirtyTripHandler(trip);
+                                Logger.EndRequest(null);
+                            }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
@@ -1019,7 +1046,11 @@ namespace TripThruCore
                         var quotes = StorageManager.GetQuotesByStatus(QuoteStatus.New);
                         foreach (var quote in quotes)
                         {
-                            new Thread( () => this._tripManager.NewQuoteHandler(quote) ).Start();
+                            new Thread( () => {
+                                Logger.BeginRequest("Processing new quote " + quote.Id, null , quote.Id);
+                                this._tripManager.NewQuoteHandler(quote);
+                                Logger.EndRequest(null);
+                            }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
@@ -1059,7 +1090,11 @@ namespace TripThruCore
                         var quotes = StorageManager.GetQuotesByStatus(QuoteStatus.Complete);
                         foreach (var quote in quotes)
                         {
-                            new Thread( () => this._tripManager.CompleteQuoteHandler(quote) ).Start();
+                            new Thread( () => {
+                                Logger.BeginRequest("Processing completed quote " + quote.Id, null, quote.Id);
+                                this._tripManager.CompleteQuoteHandler(quote);
+                                Logger.EndRequest(null);
+                            }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
