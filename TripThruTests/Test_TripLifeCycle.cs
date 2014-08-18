@@ -393,16 +393,17 @@ namespace Tests
 
         public void ValidateTripThruStatus(PartnerTrip trip)
         {
-            if (trip.origination != PartnerTrip.Origination.Foreign && trip.service != PartnerTrip.Origination.Foreign)
-                return;
-            Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, trip.ID));
-            Assert.AreEqual(trip.status, response.status, "The trip local status is different in compare how gateway says. Trip ID: " + trip.ID);
+            //if (trip.origination != PartnerTrip.Origination.Foreign && trip.service != PartnerTrip.Origination.Foreign)
+            //    return;
+            var tripId =  PartnerTrip.GetPublicID(partner.ID, trip.ID);
+            Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
+            Assert.AreEqual(trip.status, response.status, "The trip local status is different in compare how gateway says. Trip ID: " + tripId);
             if (trip.status == Status.Enroute)
-                Assert.IsNotNull(response.driverLocation, "The trip is route but the driverLocation is null. Trip ID: " + trip.ID);
+                Assert.IsNotNull(response.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + tripId);
             if (trip.status == Status.PickedUp)
-                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance),"The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + tripId);
             if (trip.status == Status.Complete)
-                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + tripId);
         }
 
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
@@ -416,7 +417,7 @@ namespace Tests
             switch (trip.status)
             {
                 case Status.Enroute:
-                    Assert.IsNotNull(trip.driverLocation, "The trip is route but the driverLocation is null. Trip ID: " + trip.ID);
+                    Assert.IsNotNull(trip.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + trip.ID);
                     break;
                 case Status.PickedUp:
                     Assert.IsNotNull(trip.driverLocation, "The trip is PickedUp but the driverLocation is null. Trip ID: " + trip.ID);
