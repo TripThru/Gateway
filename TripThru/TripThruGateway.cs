@@ -520,8 +520,12 @@ namespace TripThruCore
             {
                 Gateway partner = null;
                 if (PartnerHasBeenSpecified(r))
+                {
                     partner = SelectedPartner(r);
-                MakeTripAndAddItToActive(r, partner);
+                    RecordTripServicingPartner(r, partner);
+                }
+                bool isLocal = partner.ID == r.clientID;
+                MakeTripAndAddItToActive(r, partner, isLocal);
                 RecordTripOriginatingPartner(r);
                 response = new Gateway.DispatchTripResponse();
             }
@@ -548,7 +552,7 @@ namespace TripThruCore
         {
             return r.partnerID == null;
         }
-        private void MakeTripAndAddItToActive(Gateway.DispatchTripRequest r, Gateway partner)
+        private void MakeTripAndAddItToActive(Gateway.DispatchTripRequest r, Gateway partner, bool isLocal = false)
         {
             Gateway client = tripthru.partners[r.clientID];
             var trip = new Trip
@@ -565,7 +569,7 @@ namespace TripThruCore
                 PassengerName = r.passengerName,
                 VehicleType = r.vehicleType,
                 IsDirty = false,
-                State = TripState.New,
+                State = isLocal ? TripState.Dispatched : TripState.New,
                 SamplingPercentage = 1
             };
             trip.SetCreation(DateTime.UtcNow);
@@ -690,7 +694,8 @@ namespace TripThruCore
         protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
             var response = partner.DispatchTrip(request);
-            RecordTripServicingPartner(request, partner);
+            if(!tripthru.servicingPartnerByTrip.ContainsKey(t.Id))
+                RecordTripServicingPartner(request, partner);
             responseHandler(t, response);
         }
         protected void DispatchTripResponseHandler(Trip t, Gateway.DispatchTripResponse response)
