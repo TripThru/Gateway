@@ -26,7 +26,6 @@ namespace TripThruCore
 
 
         static long nextID = 0;
-        public string GenerateUniqueID() { nextID++; return nextID.ToString() + "@" + ID; }
         public override string GetName(string clientID)
         {
             return tripthru.name;
@@ -125,6 +124,7 @@ namespace TripThruCore
             DispatchTripResponse response;
             {
                 requests++;
+                r.tripID = PartnerFleet.GetPrivateID(r.tripID, this.ID);
                 if (r.partnerID != null && r.partnerID != ID)
                 {
                     Logger.Log("Dispatching trip to partner " + r.partnerID);
@@ -196,7 +196,7 @@ namespace TripThruCore
             Logger.Tab();
             Gateway.DispatchTripRequest request = new Gateway.DispatchTripRequest(
                 clientID: ID,
-                tripID: trip.ID,
+                tripID: PartnerTrip.GetPublicID(trip.ID, this.ID),
                 pickupLocation: trip.pickupLocation,
                 pickupTime: trip.pickupTime,
                 passengerID: trip.passengerID,
@@ -282,6 +282,8 @@ namespace TripThruCore
                     trips.AddRange(activeTrips.Values.Where(trip => trip.Status == r.status).ToList());
                 else
                     trips.AddRange(activeTrips.Values);
+                foreach (var trip in trips)
+                    trip.Id = PartnerFleet.GetPublicID(trip.Id, this.ID);
             }
             return new GetTripsResponse(trips);
         }
@@ -290,6 +292,7 @@ namespace TripThruCore
             GetTripStatusResponse response;
             {
                 requests++;
+                r.tripID = PartnerFleet.GetPrivateID(r.tripID, this.ID);
                 if (!tripsByID.ContainsKey(r.tripID))
                 {
                     Logger.Log("Trip " + r.tripID + " not found");
@@ -351,6 +354,7 @@ namespace TripThruCore
             UpdateTripStatusResponse response;
             {
                 requests++;
+                r.tripID = PartnerFleet.GetPrivateID(r.tripID, this.ID);
                 if (!tripsByID.ContainsKey(r.tripID))
                 {
                     response = new UpdateTripStatusResponse(result: Result.NotFound);
@@ -423,7 +427,7 @@ namespace TripThruCore
             {
                 Logger.Log("Getting (Foreign) status of " + trip);
                 Logger.Tab();
-                Gateway.GetTripStatusRequest request = new Gateway.GetTripStatusRequest(clientID: ID, tripID: trip.ID);
+                Gateway.GetTripStatusRequest request = new Gateway.GetTripStatusRequest(clientID: ID, tripID: PartnerTrip.GetPublicID(trip.ID, this.ID));
                 Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(request);
                 if (response.status != null)
                     trip.UpdateTripStatus(notifyPartner: false, status: (Status)response.status, driverLocation: response.driverLocation, eta: response.ETA); // todo: not good -- fix this.
@@ -548,11 +552,6 @@ namespace TripThruCore
             if (driverInitiaLocation == null)
                 this.driverInitiaLocation = location;
         }
-        private Gateway.GetTripStatusResponse GetStatsFromForeignServiceProvider()
-        {
-            Gateway.GetTripStatusResponse resp = partner.tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, ID));
-            return resp;
-        }
 
         private bool IsOneOfTheActiveTrips()
         {
@@ -565,7 +564,7 @@ namespace TripThruCore
             Logger.Tab();
             Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
                 clientID: partner.ID,
-                tripID: ID,
+                tripID: PartnerTrip.GetPublicID(ID, this.partner.ID),
                 status: status,
                 driverLocation: driverLocation,
                 eta: eta

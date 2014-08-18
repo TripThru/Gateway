@@ -434,8 +434,10 @@ namespace Utils
         }
 
         static public long nextID = 0;
-        static public string GenerateUniqueID() { nextID++; return nextID.ToString(); }
-        static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
+        static public string GenerateUniqueID() { nextID++; return"local" + nextID.ToString(); }
+        static public string GenerateUniqueID(string clientID) { nextID++; return "local" + clientID + "-" + nextID.ToString() + "@" + clientID; }
+        static public string GetPublicID(string id, string clientID) { return id.Replace("local" + clientID + "-", ""); }
+        static public string GetPrivateID(string id, string clientID) { return "local" + clientID + "-" + id; }
 
     }
 
