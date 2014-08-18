@@ -187,7 +187,10 @@ namespace TripThruCore
         public override DispatchTripResponse DispatchTrip(DispatchTripRequest request)
         {
             requests++;
-            return this.tripsManager.CreateTrip(request);
+            var response = this.tripsManager.CreateTrip(request);
+            if (response.result == Result.Rejected)
+                rejects++;
+            return response;
         }
         public DispatchTripResponse MakeRejectDispatchResponse(DispatchTripRequest r, Gateway client, Gateway partner)
         {
@@ -197,7 +200,10 @@ namespace TripThruCore
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest request)
         {
             requests++;
-            return this.tripsManager.CreateQuote(request);
+            var response = this.tripsManager.CreateQuote(request);
+            if (response.result == Result.Rejected)
+                rejects++;
+            return response;
         }
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
@@ -539,11 +545,11 @@ namespace TripThruCore
                 Logger.Log("Destination partner trip not found");
                 return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
             } 
-            else if (tripthru.activeTrips.ContainsKey(r.tripID))
+            else if (!tripthru.activeTrips.ContainsKey(r.tripID))
             {
                 Logger.AddTag("ClientId", r.clientID);
-                Logger.Log("Trip id already exists");
-                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.Rejected);
+                Logger.Log("Trip id not found");
+                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
             }
             else
             {
@@ -623,7 +629,7 @@ namespace TripThruCore
             }
             else
             {
-                response = new Gateway.UpdateQuoteResponse(TripThruCore.Gateway.Result.Rejected);
+                response = new Gateway.UpdateQuoteResponse(TripThruCore.Gateway.Result.NotFound);
                 Logger.Log("UpdateQuote failed: Unknown quote id");
             }
             return response;
