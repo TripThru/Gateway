@@ -749,20 +749,34 @@ namespace TripThruCore
         {
             Logger.Log("Selecting best quote for autodispatch. Quote: " + q.Id);
             var bestQuote = SelectBestQuote(q.QuoteRequest, q.ReceivedQuotes);
-            var quoteRequest = q.QuoteRequest;
-            Logger.Log("Best quote found from partner " + bestQuote.PartnerId + " with ETA " + bestQuote.ETA);
-            tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
-            tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
-            tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
-            tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
-            tripthru.activeTrips[q.Id].State = TripState.New;
-            tripthru.activeTrips.SaveTrip(tripthru.activeTrips[q.Id]);
-
-            Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
             Trip t = tripthru.activeTrips[q.Id];
-            Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
-            Logger.Log("Dispatching trip " + request.partnerID + " to " + request.partnerID);
-            DispatchTrip(t, tripthru.partners[request.partnerID], request, dispatchResponseHandler);
+            if (bestQuote != null)
+            {
+                var quoteRequest = q.QuoteRequest;
+                Logger.Log("Best quote found from partner " + bestQuote.PartnerId + " with ETA " + bestQuote.ETA);
+                tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
+                tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
+                tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
+                tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
+                tripthru.activeTrips[q.Id].State = TripState.New;
+                tripthru.activeTrips.SaveTrip(tripthru.activeTrips[q.Id]);
+
+                Action<Trip, Gateway.DispatchTripResponse> dispatchResponseHandler = DispatchTripResponseHandler;
+                Gateway.DispatchTripRequest request = MakeDispatchRequest(t);
+                Logger.Log("Dispatching trip " + request.partnerID + " to " + request.partnerID);
+                DispatchTrip(t, tripthru.partners[request.partnerID], request, dispatchResponseHandler);
+            }
+            else
+            {
+                Logger.Log("No quote within acceptable ETA was found. Changing trip status to rejected trip " + q.Id);
+                t.State = TripState.Dispatched;
+                t.Status = Status.Rejected;
+                t.IsDirty = true;
+                t.MadeDirtyById = tripthru.ID;
+                StorageManager.SaveTrip(t);
+                Logger.Log("Deactivating rejected trip " + t.Id);
+                DeactivateTripAndUpdateStats(t);
+            }
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
@@ -851,8 +865,10 @@ namespace TripThruCore
         }
         private void DeactivateTripAndUpdateStats(Trip t)
         {
-            var tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
-            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, tripStatus.price, tripStatus.distance);
+            Gateway.GetTripStatusResponse tripStatus = null;
+            if (t.Status == Status.Complete)
+                tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
+            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, tripStatus.price != null ? tripStatus.price : 0, tripStatus.distance != null ? tripStatus.distance : 0);
         }
         private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
         {
