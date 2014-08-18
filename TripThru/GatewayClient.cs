@@ -400,9 +400,50 @@ namespace ServiceStack.TripThruGateway
             return response;
         }
 
+        public override void UpdateTripStatusAsync(Gateway.UpdateTripStatusRequest request, Action<Gateway.UpdateTripStatusResponse> callback)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
+                throw new Exception("Invalid callback url: " + RootUrl);
+
+            var tripId = request.tripID;
+            var tripStatus = new GatewayService.TripStatus
+            {
+                access_token = AccessToken,
+                Status = request.status,
+                TripId = request.tripID,
+                DriverLocationLat = request.driverLocation != null ? (double?)request.driverLocation.Lat : null,
+                DriverLocationLng = request.driverLocation != null ? (double?)request.driverLocation.Lng : null,
+                ETA = request.eta
+            };
+            var client = GetClient();
+
+            Logger.BeginRequest("Async UpdateTripStatus sent to " + name + ". Trip: " + tripId, request);
+            client.PutAsync<GatewayService.TripStatusResponse>(tripStatus,
+                r =>
+                {
+                    Logger.BeginRequest("Successful async UpdateTripStatus response received for trip: " + tripId, r);
+                    var result = new Gateway.UpdateTripStatusResponse(r.ResultCode);
+                    Logger.Log("Invoking callback");
+                    callback(result);
+                },
+                (r, ex) =>
+                {
+                    Logger.BeginRequest("Exception ocurred async UpdateTripStatus. Trip: " + tripId + ", Result: " + (r != null ? r.ResultCode.ToString() : "null"), ex);
+                    Gateway.UpdateTripStatusResponse result = null;
+                    if (r != null)
+                        result = new Gateway.UpdateTripStatusResponse(r.ResultCode);
+                    else
+                        result = new Gateway.UpdateTripStatusResponse(Result.UnknownError);
+                    Logger.Log("Invoking callback");
+                    callback(result);
+                }
+            );
+            Logger.EndRequest(null);
+        }
+
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
-
             Uri uri;
             if (!Uri.TryCreate(RootUrl, UriKind.Absolute, out uri))
                 throw new Exception("Invalid callback url: " + RootUrl);
