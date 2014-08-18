@@ -601,23 +601,26 @@ namespace TripThruCore
             }
             else
             {
+                var trip = tripthru.activeTrips[r.tripID];
                 Gateway.UpdateTripStatusResponse response = null;
                 Logger.AddTag("Destination partner", destPartner.name);
                 Logger.SetServicingId(destPartner.ID);
-                tripthru.activeTrips[r.tripID].Status = r.status;
-                tripthru.activeTrips[r.tripID].IsDirty = true;
-                if (tripthru.activeTrips[r.tripID].DriverInitiaLocation == null)
-                    tripthru.activeTrips[r.tripID].DriverInitiaLocation = r.driverLocation;
+                trip.Status = r.status;
+                trip.DriverLocation = r.driverLocation;
+                trip.ETA = r.eta;
+                trip.IsDirty = true;
+                if (trip.DriverInitiaLocation == null)
+                    trip.DriverInitiaLocation = r.driverLocation;
                 switch (r.status)
                 {
                     case Status.Enroute:
-                        tripthru.activeTrips[r.tripID].AddEnrouteLocationList(r.driverLocation);
+                        trip.AddEnrouteLocationList(r.driverLocation);
                         break;
                     case Status.PickedUp:
-                        tripthru.activeTrips[r.tripID].AddPickUpLocationList(r.driverLocation);
+                        trip.AddPickUpLocationList(r.driverLocation);
                         break;
                 }
-                tripthru.activeTrips.SaveTrip(tripthru.activeTrips[r.tripID]);
+                tripthru.activeTrips.SaveTrip(trip);
                 return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.OK);
             }
         }

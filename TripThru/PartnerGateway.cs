@@ -526,6 +526,7 @@ namespace TripThruCore
                 if (IsOneOfTheActiveTrips())
                 {
                     partner.activeTrips[ID].Status = status;
+                    this.status = status;
                     if (lastStatusNotifiedToPartner != status && notifyPartner)
                         NotifyForeignPartner(status, driverLocation, eta);
                 }
@@ -549,6 +550,7 @@ namespace TripThruCore
         private void UpdateDriverLocation(Location location)
         {
             this.driverLocation = location;
+            partner.activeTrips[ID].DriverLocation = location;
             if (driverInitiaLocation == null)
                 this.driverInitiaLocation = location;
         }
@@ -1420,7 +1422,7 @@ namespace TripThruCore
             return DateTime.UtcNow - (DateTime)t.pickupTime;
         }
 
-        private static void UpdateTripDriverLocation(PartnerTrip t)
+        private void UpdateTripDriverLocation(PartnerTrip t)
         {
             if (t.driver == null)
                 throw new Exception("Driver is null for trip " + t);
