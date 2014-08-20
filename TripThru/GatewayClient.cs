@@ -247,7 +247,7 @@ namespace ServiceStack.TripThruGateway
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             client.Timeout = timeout;
-            GatewayService.QuoteResponse resp = client.Get<GatewayService.QuoteResponse>(quotes);
+            GatewayService.QuoteResponse resp = client.Post<GatewayService.QuoteResponse>(quotes);
             Gateway.QuoteTripResponse response = new Gateway.QuoteTripResponse
             {
                 result = resp.ResultCode
