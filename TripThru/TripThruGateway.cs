@@ -856,10 +856,14 @@ namespace TripThruCore
             {
                 Logger.Log("Trip " + t.Id + " is local so no need to notify partner");
                 UpdateTripStatusResponseHandler(t, new Gateway.UpdateTripStatusResponse());
+                t.IsDirty = false;
+                tripthru.activeTrips.SaveTrip(t);
             }
             if (t.Status == Status.Complete)
             {
                 Logger.Log("Deactivating Complete trip");
+                t.IsDirty = false;
+                tripthru.activeTrips.SaveTrip(t);
                 DeactivateTripAndUpdateStats(t);
             }
         }
