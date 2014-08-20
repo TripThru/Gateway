@@ -1092,6 +1092,7 @@ namespace TripThruCore
             public void SaveTrip(Trip trip)
             {
                 trip.LastUpdate = DateTime.UtcNow;
+                dict[trip.Id] = trip;
                 StorageManager.SaveTrip(trip);
             }
 

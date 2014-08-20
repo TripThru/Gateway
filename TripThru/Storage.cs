@@ -279,6 +279,8 @@ namespace TripThruCore.Storage
 
         public override long GetLastTripId()
         {
+            if (_tripsDatabaseId == "TripThru") //Only partners need to retrieve latest id to generate trips
+                return 0;
             var lastTrip = _trips.FindAll()
                 .SetSortOrder(SortBy.Descending("IdNumber"))
                 .Where(t => t.Id.Contains(this._tripsDatabaseId))
