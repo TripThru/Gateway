@@ -810,35 +810,61 @@ namespace ServiceStack.TripThruGateway
             private string ValidateQuote(Quote quote)
             {
                 if (quote.access_token.IsNullOrEmpty())
-                    return "Access Token is Required.";
+                    return "Access Token is required.";
                 if (quote.PickupTime == null)
-                    return "PickupTime is Required.";
+                    return "PickupTime is required.";
                 if (quote.PickupLat == null)
-                    return "PickupLat is Required.";
+                    return "PickupLat is required.";
                 if (quote.PickupLng == null)
-                    return "PickupLng is Required.";
+                    return "PickupLng is required.";
                 if (quote.DropoffLat == null)
-                    return "DropoffLat is Required.";
+                    return "DropoffLat is required.";
                 if (quote.DropoffLng == null)
-                    return "DropoffLng is Required.";
+                    return "DropoffLng is required.";
                 return null;
             }
             private string ValidateGetQuote(Quote quote)
             {
                 if (quote.access_token.IsNullOrEmpty())
-                    return "Access Token is Required.";
+                    return "Access Token is required.";
                 if (quote.TripId == null)
-                    return "Trip id is Required.";
+                    return "Trip id is required.";
                 return null;
             }
             private string ValidateUpdateQuote(Quote quote)
             {
                 if (quote.access_token.IsNullOrEmpty())
-                    return "Access Token is Required.";
-                if (quote.ETA == null)
-                    return "ETA is Required.";
-                if (quote.Price == null)
-                    return "Price is Required.";
+                    return "Access Token is required.";
+                if (quote.TripId == null)
+                    return "Trip id is required.";
+                if (quote.Quotes == null || quote.Quotes.Count() == 0)
+                    return "Quote list is required.";
+                else
+                {
+                    foreach (var q in quote.Quotes)
+                    {
+                        if (q.PartnerId.IsNullOrEmpty())
+                            return "Partner id is required";
+                        if (q.PartnerName.IsNullOrEmpty())
+                            return "Partner name is required";
+                        if (q.FleetId.IsNullOrEmpty())
+                            return "Fleet id is required";
+                        if (q.FleetName.IsNullOrEmpty())
+                            return "Fleet name is required";
+                        if (q.VehicleType == null)
+                            return "Vehicle type is required";
+                        if (q.Price == null)
+                            return "Price is required";
+                        if (q.Distance == null)
+                            return "Distance is required";
+                        if (q.Duration == null)
+                            return "Duration is required";
+                        if (q.ETA == null)
+                            return "ETA is required";
+                    }
+                }
+                if (quote.Count == null || quote.Count == 0)
+                    return "Quote count is required";
                 return null;
             }
         }
