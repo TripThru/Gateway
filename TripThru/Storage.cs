@@ -175,6 +175,7 @@ namespace TripThruCore.Storage
                 cm.AutoMap();
                 foreach (var mm in cm.AllMemberMaps)
                     mm.SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.IdNumber).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
                 cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
@@ -278,20 +279,11 @@ namespace TripThruCore.Storage
 
         public override long GetLastTripId()
         {
-            var lastTrips = _trips.AsQueryable<Trip>()
-                .Where(c => c.Id.Contains(this._tripsDatabaseId)).OrderByDescending(c => c.LastUpdate).ThenByDescending(c => c.Id);
-            //To do: Find a proper way to query the last Id
-            long maxId = 0;
-            var limit = 30;
-            foreach (var trip in lastTrips)
-            {
-                var tripId = long.Parse(trip.Id.SplitOnFirst('@')[0]);
-                if (tripId > maxId)
-                    maxId = tripId;
-                if (--limit == 0)
-                    break;
-            }
-            return maxId;
+            var lastTrip = _trips.FindAll()
+                .SetSortOrder(SortBy.Descending("IdNumber"))
+                .Where(t => t.Id.Contains(this._tripsDatabaseId))
+                .FirstOrDefault();
+            return lastTrip != null && lastTrip.IdNumber != null ? (long)lastTrip.IdNumber : 0;
         }
         public override void InsertTrip(Trip trip)
         {

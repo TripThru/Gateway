@@ -147,7 +147,12 @@ namespace TripThruCore
                 partners.Add(partner.ID, partner);
             else
                 partners[partner.ID] = partner;
-            this.partnerCoverage[partner.ID] = coverage;
+            if (partnerCoverage.ContainsKey(partner.ID))
+                this.partnerCoverage[partner.ID].Clear();
+            else
+                this.partnerCoverage[partner.ID] = new List<Zone>();
+            this.partnerCoverage[partner.ID].AddRange(coverage);
+            
             RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
             return response;
         }

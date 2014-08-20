@@ -477,6 +477,7 @@ namespace TripThruCore
     public class PartnerTrip : IDName
     {
         private Status _status;
+        public long? IdNumber;
         public Location driverLocation;
         public Location driverInitiaLocation;
         public string passengerID;
@@ -638,9 +639,10 @@ namespace TripThruCore
         }
         public PartnerTrip(Partner partner, string ID, Origination origination, Location pickupLocation, DateTime pickupTime, PaymentMethod? paymentMethod = null, string passengerID = null, string passengerName = null, Location dropoffLocation = null,
            DateTime? dropoffTime = null, List<Location> waypoints = null, VehicleType? vehicleType = null, double? maxPrice = null, int? minRating = null, PartnerFleet fleet = null, Driver driver = null, TimeSpan? duration = null, TimeSpan? driverRouteDuration = null, double? price = null,
-            bool autoDispatch = true)
+            bool autoDispatch = true, long? IdNumber = null)
         {
             this.ID = ID;
+            this.IdNumber = IdNumber;
             this.origination = origination;
             this.service = Origination.Local;
             this.partner = partner;
@@ -1116,6 +1118,7 @@ namespace TripThruCore
             Logger.Tab();
             PartnerTrip trip = new PartnerTrip(
                 partner: this.partner,
+                IdNumber: PartnerTrip.nextID,
                 ID: PartnerTrip.GenerateUniqueID(this.partner.ID),
                 origination: PartnerTrip.Origination.Local,
                 pickupLocation: route.start,
@@ -1153,6 +1156,7 @@ namespace TripThruCore
                     DriverInitiaLocation = t.driverInitiaLocation ?? null,
                     DropoffTime = t.dropoffTime,
                     Id = t.ID,
+                    IdNumber = t.IdNumber,
                     OriginatingPartnerId = this.ID,
                     OriginatingPartnerName = this.name,
                     PassengerName = t.passengerName,

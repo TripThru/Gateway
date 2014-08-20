@@ -180,6 +180,7 @@ namespace TripThruCore
     public class Trip
     {
         public string Id { get; set; }
+        public long? IdNumber { get; set; }
         public string OriginatingPartnerName { get; set; }
         public string OriginatingPartnerId { get; set; }
         public string ServicingPartnerName { get; set; }
