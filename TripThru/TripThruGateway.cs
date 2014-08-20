@@ -892,6 +892,8 @@ namespace TripThruCore
         private void NewQuoteHandler(TripQuotes q)
         {
             var request = q.QuoteRequest;
+            q.Status = QuoteStatus.InProgress;
+            StorageManager.SaveQuote(q);
             foreach (TripThruCore.Gateway partner in tripthru.partners.Values.Where(p => p.ID != request.clientID))
             {
                 try
@@ -909,7 +911,6 @@ namespace TripThruCore
                     Logger.Log("Exception quoting " + partner.name + ": " + e.ToString());
                 }
             }
-            q.Status = QuoteStatus.InProgress;
             StorageManager.SaveQuote(q);
         }
         private bool PickupLocationIsServedByPartner(Gateway.QuoteTripRequest r, Gateway p)
