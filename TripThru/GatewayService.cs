@@ -213,6 +213,8 @@ namespace ServiceStack.TripThruGateway
             public string Name { get; set; }
             [ApiMember(Name = "CallbackUrl", Description = "This is the callback url where your support of our Gateway API is", ParameterType = "query", DataType = "string", IsRequired = true)]
             public string CallbackUrl { get; set; }
+            [ApiMember(Name = "Coverage", Description = "List of your coverage zones so our Gateway knows if you can serve a request", ParameterType = "query", DataType = "string", IsRequired = true)]
+            public List<Zone> Coverage { get; set; }
         }
 
         public class PartnerResponse
@@ -242,7 +244,7 @@ namespace ServiceStack.TripThruGateway
                         Logger.BeginRequest("RegisterPartner received from " + acct.UserName, request);
                         acct.PartnerName = request.Name;
                         acct.CallbackUrl = request.CallbackUrl;
-                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, request.CallbackUrl, acct.TripThruAccessToken));
+                        gateway.RegisterPartner(new GatewayClient(acct.ClientId, request.Name, request.CallbackUrl, acct.TripThruAccessToken), request.Coverage);
                         StorageManager.RegisterPartner(acct, request.Name, request.CallbackUrl);
 
                         partnerResponse = new PartnerResponse
@@ -302,6 +304,8 @@ namespace ServiceStack.TripThruGateway
                     return "Name is Required";
                 if (request.CallbackUrl.IsNullOrEmpty())
                     return "CallbackUrl is Required";
+                if (request.Coverage == null || request.Coverage.Count() == 0)
+                    return "At least one coverage zone is required";
                 return null;
             }
         }

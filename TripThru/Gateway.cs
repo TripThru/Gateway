@@ -465,23 +465,23 @@ namespace TripThruCore
         }
         public class RegisterPartnerRequest : Request
         {
-            public string clientID { get; set; }  // TODO: TripThru needs to know who's making the call
             public string name { get; set; }
-            public string callback_url { get; set; } // TODO: This should actually be a string, since we're not yet integrated I'm just using an object pointer
-            public string accessToken { get; set; } //Todo: Lets assume for now that in Gateway service we retrieve an access token after registering partner in DB
+            public string callback_url { get; set; } 
+            public string accessToken { get; set; } 
+            public List<Zone> coverage { get; set; }
 
-            public RegisterPartnerRequest(string clientID, string name, string callback_url, string accessToken)
+            public RegisterPartnerRequest(string name, string callback_url, string accessToken, List<Zone> coverage)
             {
-                this.clientID = clientID;
                 this.name = name;
                 this.callback_url = callback_url;
                 this.accessToken = accessToken;
+                this.coverage = coverage;
             }
             public override string ToString()
             {
                 string s = "Partner = " + name;
-                if (clientID != null)
-                    s += ", ClientID = " + clientID;
+                s += ", Callback = " + callback_url;
+                s += ", Access token = " + accessToken;
                 return s;
             }
         }
@@ -889,7 +889,7 @@ namespace TripThruCore
         {
             throw new Exception("Not supported");
         }
-        virtual public RegisterPartnerResponse RegisterPartner(Gateway partner)
+        virtual public RegisterPartnerResponse RegisterPartner(Gateway partner, List<Zone> coverage)
         {
             throw new Exception("Not supported");
         }
@@ -1170,7 +1170,7 @@ namespace TripThruCore
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
-        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner)
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner, List<Zone> coverage)
         {
             return MakeRejectRegisterPartnerResponse();
         }

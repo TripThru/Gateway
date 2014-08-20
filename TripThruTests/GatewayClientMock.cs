@@ -18,10 +18,10 @@ namespace TripThruTests
             this.server = server;
         }
 
-        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway gateway)
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway gateway, List<Zone> coverage)
         {
             requests++;
-            Gateway.RegisterPartnerResponse resp = server.RegisterPartner(gateway);
+            Gateway.RegisterPartnerResponse resp = server.RegisterPartner(gateway, coverage);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
             return new Gateway.RegisterPartnerResponse

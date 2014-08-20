@@ -34,17 +34,10 @@ namespace TripThruCore
 
         public List<Zone> GetPartnerCoverage(string partnerID)
         {
-            if (!partnerCoverage.ContainsKey(partnerID))
-            {
-                Gateway partner = partners[partnerID];
-                Gateway.GetPartnerInfoResponse resp = partner.GetPartnerInfo(new Gateway.GetPartnerInfoRequest(ID));
-                List<Zone> coverage = new List<Zone>();
-                if (resp.result == Result.OK)
-                    foreach (Fleet f in resp.fleets)
-                        coverage.AddRange(f.Coverage);
-                partnerCoverage.Add(partner.ID, coverage);
-            }
-            return partnerCoverage[partnerID];
+            if (partnerCoverage.ContainsKey(partnerID))
+                return partnerCoverage[partnerID];
+            else
+                return null;
         }
         public TripThru(bool enableTDispatch = true, bool async = false)
             : base("TripThru", "TripThru")
@@ -147,13 +140,14 @@ namespace TripThruCore
             return partners[servicingPartnerByTrip[tripID]].ID != clientID;
         }
 
-        public override RegisterPartnerResponse RegisterPartner(Gateway partner)
+        public override RegisterPartnerResponse RegisterPartner(Gateway partner, List<Zone> coverage)
         {
             requests++;
             if (!partners.ContainsKey(partner.ID))
                 partners.Add(partner.ID, partner);
             else
                 partners[partner.ID] = partner;
+            this.partnerCoverage[partner.ID] = coverage;
             RegisterPartnerResponse response = new RegisterPartnerResponse(partner.ID);
             return response;
         }
@@ -478,7 +472,7 @@ namespace TripThruCore
             o.passengerRefreshToken = partner.api.PASSENGER_REFRESH_TOKEN;
             o.ID = partner.ID;
             o.name = partner.name;
-            RegisterPartner(new GatewayLocalClient(partner)); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
+            RegisterPartner(new GatewayLocalClient(partner), coverage); // the local client is not necessary, it just encloses the call inside a Begin/End request (for logging)
         }
 
         public override void Update()
@@ -916,7 +910,14 @@ namespace TripThruCore
         private bool PickupLocationIsServedByPartner(Gateway.QuoteTripRequest r, Gateway p)
         {
             bool covered = false;
-            foreach (Zone z in tripthru.GetPartnerCoverage(p.ID))
+            
+            var coverage = tripthru.GetPartnerCoverage(p.ID);
+            if (coverage == null)
+            {
+                Logger.Log("Partner " + p.ID + " doesn't have any coverage zones");
+                return false;
+            }
+            foreach (Zone z in coverage)
             {
                 if (z.IsInside(r.pickupLocation))
                 {

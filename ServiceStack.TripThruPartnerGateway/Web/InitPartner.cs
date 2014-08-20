@@ -97,9 +97,14 @@ namespace ServiceStack.TripThruPartnerGateway
                 Logger.Log("Simulation started at " + DateTime.UtcNow);
                 Logger.EndRequest(null);
                 var interval = new TimeSpan(0, 0, _configuration.SimInterval);
+
+                var coverage = new List<Zone>();
+                foreach (var fleet in _partner.PartnerFleets.Values)
+                    coverage.AddRange(fleet.coverage);
                 _partner.tripthru.RegisterPartner(
-                    new Gateway.RegisterPartnerRequest(_configuration.Partner.ClientId, _configuration.Partner.Name,
-                        _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, _configuration.Partner.AccessToken));
+                    new Gateway.RegisterPartnerRequest(_configuration.Partner.Name,
+                        _configuration.Partner.CallbackUrl ?? _configuration.Partner.CallbackUrlMono, 
+                        _configuration.Partner.AccessToken, coverage));
 
                 var lastHealthCheck = DateTime.UtcNow;
                 Thread.Sleep(new TimeSpan(0,3,0)); //This Sleep to give other partners time to initialize

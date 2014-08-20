@@ -278,7 +278,10 @@ namespace Tests
                 this.locationVerificationTolerance = (double)locationVerificationTolerance;
             PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
             partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClientMock(tripthru), configuration.partnerFleets);
-            partner.tripthru.RegisterPartner(partner);
+            var coverage = new List<Zone>();
+            foreach (var fleet in partner.PartnerFleets.Values)
+                coverage.AddRange(fleet.coverage);
+            partner.tripthru.RegisterPartner(partner, coverage);
         }
 
         public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets(List<Partner> partners )

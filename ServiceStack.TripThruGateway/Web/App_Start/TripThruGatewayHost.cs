@@ -130,7 +130,8 @@ namespace ServiceStack.TripThruGateway
                                 account.PartnerName,
                                 account.CallbackUrl,
                                 account.TripThruAccessToken
-                                )
+                                ),
+                                account.Coverage != null ? account.Coverage : new List<Zone>()
                             );
                 }
                 MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());

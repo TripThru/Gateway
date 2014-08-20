@@ -37,7 +37,8 @@ namespace ServiceStack.TripThruGateway
             {
                 access_token = AccessToken,
                 Name = request.name,
-                CallbackUrl = request.callback_url
+                CallbackUrl = request.callback_url,
+                Coverage = request.coverage
             });
             return new Gateway.RegisterPartnerResponse
             {

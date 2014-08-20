@@ -358,6 +358,7 @@ namespace TripThruCore.Storage
         public string CallbackUrl { get; set; }
         public string TripThruAccessToken { get; set; } //For us to authenticate with them
         public Storage.UserRole Role { get; set; }
+        public List<Zone> Coverage { set; get; }
     }
 
     public class StorageManager

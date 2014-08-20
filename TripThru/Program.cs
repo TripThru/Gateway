@@ -72,7 +72,10 @@ namespace Program
                     Partner partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, tripthru,
                         configuration.partnerFleets);
                     partners.Add(new GatewayLocalClient(partner));
-                    tripthru.RegisterPartner(partner);
+                    List<Zone> coverage = new List<Zone>();
+                    foreach(PartnerFleet fleet in partner.PartnerFleets.Values)
+                        coverage.AddRange(fleet.coverage);
+                    tripthru.RegisterPartner(partner, coverage);
                 }
             }
             MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
