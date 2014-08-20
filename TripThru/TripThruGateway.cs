@@ -729,10 +729,12 @@ namespace TripThruCore
         }
         protected void UpdateTripStatusResponseHandler(Trip t, Gateway.UpdateTripStatusResponse response)
         {
-            if (response.result == Gateway.Result.OK)
+            if (response.result != Gateway.Result.OK)
             {
-                t.IsDirty = false;
+                Logger.BeginRequest("Unsuccesful trip update. Activating isDirty flag again. Trip: " + t.Id, null, t.Id);
+                t.IsDirty = true;
                 tripthru.activeTrips.SaveTrip(t);
+                Logger.EndRequest(null);
             }
         }
 
@@ -850,6 +852,9 @@ namespace TripThruCore
                 Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler = UpdateTripStatusResponseHandler;
                 var partnerId = t.MadeDirtyById == t.OriginatingPartnerId ? t.ServicingPartnerId : t.OriginatingPartnerId;
                 Logger.Log("Notifying update to partner " + partnerId + ". Trip: " + t.Id);
+                t.IsDirty = false;
+                tripthru.activeTrips.SaveTrip(t);
+                Logger.Log("Deactivating isDirty flag");
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
             }
             else
