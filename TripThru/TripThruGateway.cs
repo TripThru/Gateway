@@ -913,9 +913,15 @@ namespace TripThruCore
         private void DeactivateTripAndUpdateStats(Trip t)
         {
             Gateway.GetTripStatusResponse tripStatus = null;
+            double? price = 0;
+            double? distance = 0;
             if (t.Status == Status.Complete)
+            {
                 tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
-            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, tripStatus.price != null ? tripStatus.price : 0, tripStatus.distance != null ? tripStatus.distance : 0);
+                price = tripStatus.price != null ? tripStatus.price : 0;
+                distance =  tripStatus.distance != null ? tripStatus.distance : 0;
+            }
+            tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, price, distance);
         }
         private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
         {
