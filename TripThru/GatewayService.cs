@@ -857,10 +857,6 @@ namespace ServiceStack.TripThruGateway
                             return "Vehicle type is required";
                         if (q.Price == null)
                             return "Price is required";
-                        if (q.Distance == null)
-                            return "Distance is required";
-                        if (q.Duration == null)
-                            return "Duration is required";
                         if (q.ETA == null)
                             return "ETA is required";
                     }

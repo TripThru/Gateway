@@ -226,12 +226,12 @@ namespace TripThruCore.Storage
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
-            _partners = _networksDatabase.GetCollection<PartnerAccount>("users-test");
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
-            _trips = _tripsDatabase.GetCollection<Trip>("trips-test");
+            _trips = _tripsDatabase.GetCollection<Trip>("trips");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
-            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes-test");
+            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
