@@ -158,6 +158,7 @@ namespace ServiceStack.TripThruGateway
             {
                 result = resp.ResultCode,
             };
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(response);
             return response;
         }
@@ -252,6 +253,7 @@ namespace ServiceStack.TripThruGateway
             {
                 result = resp.ResultCode
             };
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(response);
             return response;
 
@@ -316,6 +318,7 @@ namespace ServiceStack.TripThruGateway
             Logger.BeginRequest("UpdateQuote sent to " + name + ". Trip: " + tripId, request);
             var response = client.Put<GatewayService.QuoteResponse>(quotes);
             var result = new Gateway.UpdateQuoteResponse(response.ResultCode);
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(result);
             return result;
         }
@@ -347,6 +350,7 @@ namespace ServiceStack.TripThruGateway
             {
                 response = new Gateway.GetQuoteResponse(result: Result.UnknownError);
             }
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(response);
             return response;
         }
@@ -398,6 +402,7 @@ namespace ServiceStack.TripThruGateway
                         result = resp.ResultCode
                 };
             }
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(response);
             return response;
         }
@@ -465,6 +470,7 @@ namespace ServiceStack.TripThruGateway
             {
                 result = resp.ResultCode
             };
+            Logger.Log("Response: " + resp.Result);
             Logger.EndRequest(response);
             return response;
         }

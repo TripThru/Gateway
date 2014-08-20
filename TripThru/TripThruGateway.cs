@@ -690,9 +690,7 @@ namespace TripThruCore
 
         protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
-            Logger.Log("Dispatching trip " + t.Id + " to partner " + partner.ID);
             var response = partner.DispatchTrip(request);
-            Logger.Log("Response received, Result: " + response.result);
             if(!tripthru.servicingPartnerByTrip.ContainsKey(t.Id))
                 RecordTripServicingPartner(request, partner);
             responseHandler(t, response);
