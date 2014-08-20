@@ -318,7 +318,7 @@ namespace ServiceStack.TripThruGateway
             Logger.BeginRequest("UpdateQuote sent to " + name + ". Trip: " + tripId, request);
             var response = client.Put<GatewayService.QuoteResponse>(quotes);
             var result = new Gateway.UpdateQuoteResponse(response.ResultCode);
-            Logger.Log("Response: " + resp.Result);
+            Logger.Log("Response: " + response.Result);
             Logger.EndRequest(result);
             return result;
         }
