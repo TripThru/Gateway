@@ -697,20 +697,26 @@ namespace TripThruCore
         }
         protected void DispatchTripResponseHandler(Trip t, Gateway.DispatchTripResponse response)
         {
+            Logger.BeginRequest("DispatchTrip response received. Trip: " + t.Id, null, t.Id);
             if (response.result == Gateway.Result.OK || response.result == Gateway.Result.Rejected)
             {
+                Logger.Log("Changing trip state to Dispatched");
                 t.State = TripState.Dispatched;
                 t.IsDirty = true;
                 t.MadeDirtyById = tripthru.ID;
+                Logger.Log("Activating isDirtyFlag and setting MadeDirtyBy TripThru");
                 if (response.result == Gateway.Result.Rejected)
                     t.Status = Status.Rejected;
                 else
                     t.Status = Status.Dispatched;
+                Logger.Log("Changin trip state to " + t.Status);
             }
             else
             {
+                Logger.Log("DispatchTrip request failed so setting trip to New state to retry dispatch. Response: " + response.result);
                 t.State = TripState.New; //Try to dispatch again
             }
+            Logger.EndRequest(response);
             tripthru.activeTrips.SaveTrip(t);
         }
         protected Gateway.DispatchTripRequest MakeDispatchRequest(Trip t)
@@ -729,13 +735,14 @@ namespace TripThruCore
         }
         protected void UpdateTripStatusResponseHandler(Trip t, Gateway.UpdateTripStatusResponse response)
         {
+            Logger.BeginRequest("UpdateTripStatus response received. Trip: " + t.Id, null, t.Id);
             if (response.result != Gateway.Result.OK)
             {
-                Logger.BeginRequest("Unsuccesful trip update. Activating isDirty flag again. Trip: " + t.Id, null, t.Id);
+                Logger.Log("Unsuccesful trip update, rectivating isDirty flag");
                 t.IsDirty = true;
                 tripthru.activeTrips.SaveTrip(t);
-                Logger.EndRequest(null);
             }
+            Logger.EndRequest(response);
         }
 
         protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
@@ -745,11 +752,17 @@ namespace TripThruCore
         }
         protected void QuoteTripResponseHandler(TripQuotes q, Gateway.QuoteTripResponse response)
         {
+            Logger.BeginRequest("QuoteTrip response received. Trip: " + q.Id, null, q.Id);
             if (response.result == Gateway.Result.OK)
             {
-                q.Status = QuoteStatus.InProgress;
-                StorageManager.SaveQuote(q);
+                if (q.Status != QuoteStatus.InProgress)
+                {
+                    Logger.Log("Changing quote status to InProgress");
+                    q.Status = QuoteStatus.InProgress;
+                    StorageManager.SaveQuote(q);
+                }
             }
+            Logger.EndRequest(response);
         }
 
         protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
@@ -788,12 +801,19 @@ namespace TripThruCore
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
+            Logger.BeginRequest("UpdateQuote response received. Trip: " + q.Id, null, q.Id);
             if (response.result == Gateway.Result.OK)
+            {
+                Logger.Log("Changing quote status to Sent");
                 q.Status = QuoteStatus.Sent;
+            }
             else
+            {
+                Logger.Log("Unsuccessful response, changing quote status to Complete to retry request");
                 q.Status = QuoteStatus.Complete;
+            }
             StorageManager.SaveQuote(q);
-
+            Logger.EndRequest(response);
         }
         private Quote SelectBestQuote(Gateway.QuoteTripRequest r, List<Quote> quotes)
         {
