@@ -709,7 +709,7 @@ namespace TripThruCore
             }
             else
             {
-                t.State = TripState.New;
+                t.State = TripState.New; //Try to dispatch again
             }
             tripthru.activeTrips.SaveTrip(t);
         }
@@ -766,6 +766,7 @@ namespace TripThruCore
                 Logger.Log("Best quote found from partner " + bestQuote.PartnerId + " with ETA " + bestQuote.ETA);
                 tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
                 tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
+                RecordTripServicingPartner(MakeDispatchRequest(t), tripthru.partners[bestQuote.PartnerId]);
                 tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
                 tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
                 tripthru.activeTrips[q.Id].State = TripState.New;
