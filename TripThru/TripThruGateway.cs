@@ -1158,9 +1158,9 @@ namespace TripThruCore
         public TripsManagerAsync(TripThru tripthru)
             : base(tripthru)
         {
-
+            Logger.LogDebug("Starting async trip manager");
         }
-        protected virtual void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
+        protected override void DispatchTrip(Trip t, Gateway partner, Gateway.DispatchTripRequest request, Action<Trip, Gateway.DispatchTripResponse> responseHandler)
         {
             partner.DispatchTripAsync(request,
                 response =>
@@ -1169,7 +1169,7 @@ namespace TripThruCore
                 }
             );
         }
-        protected virtual void ForwardTripUpdate(Trip t, Gateway partner, Gateway.UpdateTripStatusRequest request, Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler)
+        protected override void ForwardTripUpdate(Trip t, Gateway partner, Gateway.UpdateTripStatusRequest request, Action<Trip, Gateway.UpdateTripStatusResponse> responseHandler)
         {
             partner.UpdateTripStatusAsync(request,
                 response =>
@@ -1179,7 +1179,7 @@ namespace TripThruCore
             );
         }
 
-        protected virtual void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
+        protected override void ForwardNewQuote(TripQuotes q, Gateway partner, Gateway.QuoteTripRequest request, Action<TripQuotes, Gateway.QuoteTripResponse> responseHandler)
         {
             partner.QuoteTripAsync(request,
                 response =>
@@ -1189,7 +1189,7 @@ namespace TripThruCore
             );
         }
 
-        protected virtual void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
+        protected override void ForwardCompleteQuote(TripQuotes q, Gateway partner, Gateway.UpdateQuoteRequest request, Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler)
         {
             partner.UpdateQuoteAsync(request,
                 response =>
