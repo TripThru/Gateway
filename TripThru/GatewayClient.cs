@@ -228,6 +228,7 @@ namespace ServiceStack.TripThruGateway
             GatewayService.Quote quotes = new GatewayService.Quote
             {
                 access_token = AccessToken,
+                TripId = request.tripId,
                 PassengerId = request.passengerID,
                 PassengerName = request.passengerName,
                 Luggage = request.luggage,
@@ -242,7 +243,7 @@ namespace ServiceStack.TripThruGateway
                 MaxPrice = request.maxPrice,
                 MinRating = request.minRating,
                 FleetId = request.fleetID,
-                DriverId = request.driverID,
+                DriverId = request.driverID
             };
             JsonServiceClient client = new JsonServiceClient(RootUrl);
             client.Timeout = timeout;
