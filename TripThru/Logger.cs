@@ -350,17 +350,19 @@ namespace Utils
         {
             lock (locker)
             {
-                Console.WriteLine(message + (detailed != null ? " | " + detailed : "") + "\n\n");
+                Console.WriteLine(message + (detailed != null ? " | " + detailed : ""));
                 RequestLog error = new RequestLog("");
                 error.Messages.Add(new Message(0, message));
                 if (detailed != null)
                     error.Messages.Add(new Message(40, detailed));
                 error.Tags.Add(new Tag("Type", "DEBUG"));
-                error.Tags.Add(
-                    new Tag("Memory", (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb"));
                 if (tags != null)
                     foreach (var key in tags.Keys)
+                    {
                         error.Tags.Add(new Tag(key, tags[key]));
+                        Console.WriteLine('\t' + key + ": " + tags[key]);
+                    }
+                Console.WriteLine("");
                 error.Messages.Add(new Message(0, "End"));
                 error.Response = "";
                 if (splunkEnabled && splunkClient != null)

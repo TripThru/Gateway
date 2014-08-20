@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 using ServiceStack.Common.Utils;
 using Utils;
 using CustomIntegrations;
@@ -395,10 +396,12 @@ namespace TripThruCore
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
             tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
             tags["LoggerQueue"] = Logger.Queue.Count.ToString();
+            tags["Memory"] = (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb";
+            tags["RunningThreads"] = Process.GetCurrentProcess().Threads.Count.ToString();
             if (Logger.splunkEnabled)
                 tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
 
-            Logger.LogDebug("Health check (tripthru latest 2)", null, tags);
+            Logger.LogDebug("Health check TripThru", null, tags);
         }
 
         public class Office

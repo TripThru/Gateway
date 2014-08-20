@@ -469,7 +469,7 @@ namespace TripThruCore
             tags["LoggerQueue"] = Logger.Queue.Count.ToString();
             if (Logger.splunkEnabled)
                 tags["SplunkQueue"] = Logger.splunkClient.queue.Count.ToString();
-            Logger.LogDebug("Health check (latest 2)", null, tags);
+            Logger.LogDebug("Health check " + this.ID, null, tags);
         }
     }
 
