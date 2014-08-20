@@ -72,7 +72,7 @@ namespace TripThruCore
     public enum VehicleType { Compact, Sedan };
 
     public enum PaymentMethod { Cash, Credit, Account };
-    public enum QuoteStatus { New, InProgress, Complete, Sent };
+    public enum QuoteStatus { New, InProgress, Complete, Sending, Sent };
     public enum TripState { New, Quoting, Dispatching, Dispatched, Local };
 
     public class Zone

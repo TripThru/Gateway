@@ -787,10 +787,11 @@ namespace TripThruCore
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
         {
             if (response.result == Gateway.Result.OK)
-            {
                 q.Status = QuoteStatus.Sent;
-                StorageManager.SaveQuote(q);
-            }
+            else
+                q.Status = QuoteStatus.Complete;
+            StorageManager.SaveQuote(q);
+
         }
         private Quote SelectBestQuote(Gateway.QuoteTripRequest r, List<Quote> quotes)
         {
@@ -944,19 +945,20 @@ namespace TripThruCore
 
         private void CompleteQuoteHandler(TripQuotes q)
         {
-            Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
             if (q.Autodispatch)
             {
-                Logger.Log("Quote is autodispach so dispatching and changing status to Sent");
-                SelectBestQuoteAndSetServicingPartnerToTrip(q);
+                Logger.Log("Selecting best quote and changing quote state to sent");
                 q.Status = QuoteStatus.Sent;
-                Logger.Log("Changing quote state to sent and saving");
                 StorageManager.SaveQuote(q);
+                SelectBestQuoteAndSetServicingPartnerToTrip(q);
             }
             else
             {
                 var partner = tripthru.partners[q.QuoteRequest.clientID];
                 Logger.Log("Sending Complete UpdateQuote request to partner " + partner.ID);
+                Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
+                q.Status = QuoteStatus.Sending;
+                StorageManager.SaveQuote(q);
                 ForwardCompleteQuote(q, partner, MakeUpdateQuoteRequest(q), responseHandler);
             }
         }
