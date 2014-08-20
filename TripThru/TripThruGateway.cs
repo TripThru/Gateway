@@ -997,8 +997,7 @@ namespace TripThruCore
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread( () => {
-                                
-                                Logger.BeginRequest("Processing new trip " + t.Id, null, t.Id);
+                                Logger.BeginRequest("Processing trip " + t.Id + (t.ServicingPartnerId == null ? " for autodispatch quoting" : " for dispatch"), null, t.Id);
                                 this._tripManager.NewTripHandler(t);
                                 Logger.EndRequest(null);
                             }).Start();
