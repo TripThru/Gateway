@@ -837,6 +837,8 @@ namespace ServiceStack.TripThruGateway
                     return "Access Token is required.";
                 if (quote.TripId == null)
                     return "Trip id is required.";
+                if (quote.Count == null || quote.Count == 0)
+                    return "Quote count is required";
                 if (quote.Quotes == null || quote.Quotes.Count() == 0)
                     return "Quote list is required.";
                 else
@@ -863,8 +865,6 @@ namespace ServiceStack.TripThruGateway
                             return "ETA is required";
                     }
                 }
-                if (quote.Count == null || quote.Count == 0)
-                    return "Quote count is required";
                 return null;
             }
         }
