@@ -1090,7 +1090,7 @@ namespace TripThruCore
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread(() =>
                             {
-                                Logger.BeginRequest("Processing dirty trip " + t.Id, null, t.Id);
+                                Logger.BeginRequest("Processing dirty trip " + "(" + t.Status + ") " + t.Id, null, t.Id);
                                 this._tripManager.DirtyTripHandler(t);
                                 Logger.EndRequest(null);
                             }).Start();
