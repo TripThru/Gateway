@@ -22,6 +22,7 @@ namespace TripThruCore
         static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
         void CleanUpTrip(string tripID)
         {
+            Logger.LogDebug("Cleaning up trip " + tripID);
             originatingPartnerByTrip.Remove(tripID);
             servicingPartnerByTrip.Remove(tripID);
         }
@@ -920,9 +921,12 @@ namespace TripThruCore
             double? distance = 0;
             if (t.Status == Status.Complete)
             {
-                tripStatus = tripthru.partners[t.ServicingPartnerId].GetTripStatus(MakeGetTripStatusRequest(t));
+                var partner = tripthru.partners[t.ServicingPartnerId];
+                Logger.Log("Getting trip stats from servicing partner " + partner.ID);
+                tripStatus = partner.GetTripStatus(MakeGetTripStatusRequest(t));
                 price = tripStatus.price != null ? tripStatus.price : 0;
                 distance =  tripStatus.distance != null ? tripStatus.distance : 0;
+                Logger.Log("Stats received. Price: " + price + ", Distance: " + distance);
             }
             tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, price, distance);
         }
