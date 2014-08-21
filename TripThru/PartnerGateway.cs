@@ -1145,7 +1145,7 @@ namespace TripThruCore
                 if (partner.tripsByID.ContainsKey(t.ID))
                     throw new Exception("Trip " + t + ": already exist in tripsByID dictionary");
                 partner.tripsByID.Add(t.ID, t);
-                partner.activeTrips.Add(t.ID, new Trip
+                partner.activeTrips.Insert(t.ID, new Trip
                 {
                     FleetId = t.PartnerFleet != null ? t.PartnerFleet.ID : null,
                     FleetName = t.PartnerFleet != null ? t.PartnerFleet.name : null,

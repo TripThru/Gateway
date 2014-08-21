@@ -1051,57 +1051,54 @@ namespace TripThruCore
 
     public class GatewayServer : GatewayWithStats
     {
-        public class ActiveTrips
+
+        public abstract class ActiveValuesManager<T>
         {
-            private ConcurrentDictionary<string, Trip> dict;
+            protected ConcurrentDictionary<string, T> dict;
             public bool IsEmpty { get { return dict.IsEmpty; } }
             public int Count { get { return dict.Count; } }
-            public IEnumerable<Trip> Values { get { return dict.Values; } }
-            public long lastID { get; set; }
-            public ActiveTrips(string id)
+            public IEnumerable<T> Values { get { return dict.Values; } }
+            public ActiveValuesManager()
             {
-                dict = new ConcurrentDictionary<string, Trip>();
+                dict = new ConcurrentDictionary<string, T>();
                 dict.Clear();
-                var lastDbTripId = StorageManager.GetLastTripId();
-                this.lastID = lastDbTripId;
             }
             public bool ContainsKey(string id)
             {
                 return dict.Keys.Contains(id);
             }
-            public void Add(string id, Trip trip)
-            {
-                InsertTrip(trip);
-                dict.TryAdd(id, trip);
-            }
-
-            private void InsertTrip(Trip trip)
-            {
-                trip.LastUpdate = DateTime.UtcNow;
-                StorageManager.InsertTrip(trip);
-            }
-            public void Remove(string id)
-            {
-                Logger.Log("Removing active trip " + id);
-
-                Trip trip;
-                dict.TryRemove(id, out trip);
-                SaveTrip(trip);
-            }
-
-            public void SaveTrip(Trip trip)
-            {
-                trip.LastUpdate = DateTime.UtcNow;
-                dict[trip.Id] = trip;
-                StorageManager.SaveTrip(trip);
-            }
-
-
-            public Trip this[string id]
+            public T this[string id]
             {
                 get { return dict[id]; }
             }
-            public void UpdateTrip(Trip trip)
+            public abstract void Insert(string id, T value);
+            public abstract void Remove(string id);
+            public abstract void Update(T value);
+        }
+        public class ActiveTrips : ActiveValuesManager<Trip>
+        {
+            public long lastID { get; set; }
+            public ActiveTrips() 
+                : base()
+            {
+                var lastDbTripId = StorageManager.GetLastTripId();
+                this.lastID = lastDbTripId;
+            }
+
+            public override void Insert(string id, Trip value)
+            {
+                dict.TryAdd(id, value);
+                value.LastUpdate = DateTime.UtcNow;
+                StorageManager.InsertTrip(value);
+            }
+            public override void Remove(string id)
+            {
+                Logger.Log("Removing active trip " + id);
+                Trip trip;
+                dict.TryRemove(id, out trip);
+                StorageManager.UpdateTrip(trip);
+            }
+            public override void Update(Trip trip)
             {
                 if (!ContainsKey(trip.Id)) return;
                 this[trip.Id].FleetId = trip.FleetId;
@@ -1122,11 +1119,61 @@ namespace TripThruCore
                     this[trip.Id].Status = trip.Status;
                     this[trip.Id].LastStatusChange = DateTime.UtcNow;
                 }
-                SaveTrip(this[trip.Id]);
+                trip.LastUpdate = DateTime.UtcNow;
+                dict[trip.Id] = trip;
+                StorageManager.UpdateTrip(trip);
+            }
+            public List<Trip> GetTripsByState(TripState state)
+            {
+                return dict.Values.Where(t => t.State == state).ToList();
+            }
+            public List<Trip> GetDirtyTrips()
+            {
+                return dict.Values.Where(t => t.IsDirty).ToList();
+            }
+        }
+        public class ActiveQuotes : ActiveValuesManager<TripQuotes>
+        {
+            public long lastID { get; set; }
+            public ActiveQuotes()
+                : base()
+            {
+
+            }
+
+            public override void Insert(string id, TripQuotes value)
+            {
+                dict.TryAdd(id, value);
+                StorageManager.InsertQuote(value);
+            }
+            public override void Remove(string id)
+            {
+                Logger.Log("Removing active quote " + id);
+                TripQuotes quote;
+                dict.TryRemove(id, out quote);
+                StorageManager.UpdateQuote(quote);
+            }
+            public override void Update(TripQuotes quote)
+            {
+                if (!ContainsKey(quote.Id)) return;
+                this[quote.Id].Autodispatch = quote.Autodispatch;
+                this[quote.Id].Id = quote.Id;
+                this[quote.Id].PartnersThatServe = quote.PartnersThatServe;
+                this[quote.Id].QuoteRequest = quote.QuoteRequest;
+                this[quote.Id].ReceivedQuotes = quote.ReceivedQuotes;
+                this[quote.Id].ReceivedUpdatesCount = quote.ReceivedUpdatesCount;
+                this[quote.Id].Status = quote.Status;
+                dict[quote.Id] = quote;
+                StorageManager.UpdateQuote(quote);
+            }
+            public List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
+            {
+                return dict.Values.Where(q => q.Status == status).ToList();
             }
         }
 
         public ActiveTrips activeTrips;
+        public ActiveQuotes activeQuotes;
 
         public GarbageCleanup<string> garbageCleanup;
         public RedisDictionary<string, string> clientIdByAccessToken;
@@ -1168,7 +1215,8 @@ namespace TripThruCore
         {
             JsConfig.AssumeUtc = true;
 
-            activeTrips = new ActiveTrips(ID);
+            activeTrips = new ActiveTrips();
+            activeQuotes = new ActiveQuotes();
             partnerAccounts = new RedisDictionary<string, PartnerAccount>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => partnerAccounts));
             clientIdByAccessToken = new RedisDictionary<string, string>(redisClient, ID + ":" + MemberInfoGetting.GetMemberName(() => clientIdByAccessToken));
         }
@@ -1211,7 +1259,7 @@ namespace TripThruCore
                 LatenessMilliseconds = 0,
                 SamplingPercentage = 1
             };
-            activeTrips.SaveTrip(trip); // Hack: save trip should be moved somewhere else.
+            activeTrips.Update(trip); // Hack: save trip should be moved somewhere else.
 
             return response;
         }

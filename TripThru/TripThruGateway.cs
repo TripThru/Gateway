@@ -352,7 +352,7 @@ namespace TripThruCore
             };
             if (response.status == Status.PickedUp)
                 trip.EnrouteDistance = response.distance;
-            activeTrips.UpdateTrip(trip);
+            activeTrips.Update(trip);
         }
 
         private void MakeGetTripStatusResponse(GetTripStatusRequest r, Gateway partner, GetTripStatusResponse response)
@@ -568,7 +568,7 @@ namespace TripThruCore
                 SamplingPercentage = 1
             };
             trip.SetCreation(DateTime.UtcNow);
-            tripthru.activeTrips.Add(r.tripID, trip);
+            tripthru.activeTrips.Insert(r.tripID, trip);
             Logger.AddTag("Passenger", r.passengerName);
             Logger.AddTag("Pickup_time", r.pickupTime.ToString());
             Logger.AddTag("Pickup_location,", r.pickupLocation.ToString());
@@ -623,7 +623,7 @@ namespace TripThruCore
                         trip.AddPickUpLocationList(r.driverLocation);
                         break;
                 }
-                tripthru.activeTrips.SaveTrip(trip);
+                tripthru.activeTrips.Update(trip);
                 return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.OK);
             }
         }
@@ -666,7 +666,7 @@ namespace TripThruCore
                 QuoteRequest = r,
                 Autodispatch = autodispatch
             };
-            StorageManager.InsertQuote(tripQuotes);
+            tripthru.activeQuotes.Insert(tripQuotes.Id, tripQuotes);
         }
 
         public Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest r)
@@ -681,7 +681,7 @@ namespace TripThruCore
                 quotes.ReceivedUpdatesCount++;
                 if (quotes.ReceivedUpdatesCount == quotes.PartnersThatServe)
                     quotes.Status = QuoteStatus.Complete;
-                StorageManager.SaveQuote(quotes);
+                tripthru.activeQuotes.Update(quotes);
                 response = new Gateway.UpdateQuoteResponse();
             }
             else
@@ -721,7 +721,7 @@ namespace TripThruCore
                 t.State = TripState.New; //Try to dispatch again
             }
             Logger.EndRequest(response);
-            tripthru.activeTrips.SaveTrip(t);
+            tripthru.activeTrips.Update(t);
         }
         protected Gateway.DispatchTripRequest MakeDispatchRequest(Trip t)
         {
@@ -748,7 +748,7 @@ namespace TripThruCore
             {
                 Logger.Log("Unsuccesful request, rectivating isDirty flag. Result: " + response.result);
                 t.IsDirty = true;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
             }
             Logger.EndRequest(response);
         }
@@ -765,7 +765,7 @@ namespace TripThruCore
             {
                 Logger.Log("Changing quote status to InProgress");
                 q.Status = QuoteStatus.InProgress;
-                StorageManager.SaveQuote(q);
+                tripthru.activeQuotes.Update(q);
             }
             if (response.result == Gateway.Result.OK)
             {
@@ -798,7 +798,7 @@ namespace TripThruCore
                 tripthru.activeTrips[q.Id].FleetId = bestQuote.FleetId;
                 tripthru.activeTrips[q.Id].FleetName = bestQuote.FleetName;
                 tripthru.activeTrips[q.Id].State = TripState.New;
-                tripthru.activeTrips.SaveTrip(tripthru.activeTrips[q.Id]);
+                tripthru.activeTrips.Update(tripthru.activeTrips[q.Id]);
             }
             else
             {
@@ -807,7 +807,7 @@ namespace TripThruCore
                 t.Status = Status.Rejected;
                 t.IsDirty = true;
                 t.MadeDirtyById = tripthru.ID;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
                 Logger.Log("Deactivating rejected trip " + t.Id);
                 DeactivateTripAndUpdateStats(t);
             }
@@ -825,7 +825,7 @@ namespace TripThruCore
                 Logger.Log("Unsuccessful request, changing quote status to Complete to retry. Result: " + response.result);
                 q.Status = QuoteStatus.Complete;
             }
-            StorageManager.SaveQuote(q);
+            tripthru.activeQuotes.Update(q);
             Logger.EndRequest(response);
         }
         private Quote SelectBestQuote(Gateway.QuoteTripRequest r, List<Quote> quotes)
@@ -854,7 +854,7 @@ namespace TripThruCore
                 Logger.Log("Trip is autodispatch, create quote and change state to Quoting");
                 CreateQuote(MakeQuoteTripRequest(t), true);
                 t.State = TripState.Quoting;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
             }
             else
             {
@@ -862,7 +862,7 @@ namespace TripThruCore
                 Action<Trip, Gateway.DispatchTripResponse> responseHandler = DispatchTripResponseHandler;
                 var request = MakeDispatchRequest(t);
                 t.State = TripState.Dispatching;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
                 DispatchTrip(t, tripthru.partners[request.partnerID], request, responseHandler);
             }
         }
@@ -886,7 +886,7 @@ namespace TripThruCore
                 var partnerId = t.MadeDirtyById == t.OriginatingPartnerId ? t.ServicingPartnerId : t.OriginatingPartnerId;
                 Logger.Log("Notifying update to partner " + partnerId + ". Trip: " + t.Id);
                 t.IsDirty = false;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
                 Logger.Log("Deactivating isDirty flag");
                 ForwardTripUpdate(t, tripthru.partners[partnerId], MakeUpdateTripStatusRequest(t), responseHandler);
             }
@@ -895,13 +895,13 @@ namespace TripThruCore
                 Logger.Log("Trip " + t.Id + " is local so no need to notify partner");
                 UpdateTripStatusResponseHandler(t, new Gateway.UpdateTripStatusResponse());
                 t.IsDirty = false;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
             }
             if (t.Status == Status.Complete)
             {
                 Logger.Log("Deactivating Complete trip");
                 t.IsDirty = false;
-                tripthru.activeTrips.SaveTrip(t);
+                tripthru.activeTrips.Update(t);
                 DeactivateTripAndUpdateStats(t);
             }
         }
@@ -944,7 +944,7 @@ namespace TripThruCore
         {
             var request = q.QuoteRequest;
             q.Status = QuoteStatus.InProgress;
-            StorageManager.SaveQuote(q);
+            tripthru.activeQuotes.Update(q);
             foreach (TripThruCore.Gateway partner in tripthru.partners.Values.Where(p => p.ID != request.clientID))
             {
                 try
@@ -962,7 +962,7 @@ namespace TripThruCore
                     Logger.Log("Exception quoting " + partner.name + ": " + e.ToString());
                 }
             }
-            StorageManager.SaveQuote(q);
+            tripthru.activeQuotes.Update(q);
         }
         private bool PickupLocationIsServedByPartner(Gateway.QuoteTripRequest r, Gateway p)
         {
@@ -996,7 +996,7 @@ namespace TripThruCore
             {
                 Logger.Log("Selecting best quote and changing quote state to sent");
                 q.Status = QuoteStatus.Sent;
-                StorageManager.SaveQuote(q);
+                tripthru.activeQuotes.Update(q);
                 SelectBestQuoteAndSetServicingPartnerToTrip(q);
             }
             else
@@ -1005,7 +1005,7 @@ namespace TripThruCore
                 Logger.Log("Sending Complete UpdateQuote request to partner " + partner.ID);
                 Action<TripQuotes, Gateway.UpdateQuoteResponse> responseHandler = UpdateQuoteResponseHandler;
                 q.Status = QuoteStatus.Sending;
-                StorageManager.SaveQuote(q);
+                tripthru.activeQuotes.Update(q);
                 ForwardCompleteQuote(q, partner, MakeUpdateQuoteRequest(q), responseHandler);
             }
         }
@@ -1039,7 +1039,7 @@ namespace TripThruCore
                 {
                     while (true)
                     {
-                        var trips = StorageManager.GetTripsByState(TripState.New);
+                        var trips = _tripManager.tripthru.activeTrips.GetTripsByState(TripState.New);
                         foreach (var trip in trips)
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
@@ -1084,7 +1084,7 @@ namespace TripThruCore
                 {
                     while (true)
                     {
-                        var trips = StorageManager.GetDirtyTrips();
+                        var trips = _tripManager.tripthru.activeTrips.GetDirtyTrips();
                         foreach (var trip in trips)
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
@@ -1130,7 +1130,7 @@ namespace TripThruCore
                 {
                     while (true)
                     {
-                        var quotes = StorageManager.GetQuotesByStatus(QuoteStatus.New);
+                        var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.New);
                         foreach (var quote in quotes)
                         {
                             new Thread( () => {
@@ -1174,7 +1174,7 @@ namespace TripThruCore
                 {
                     while (true)
                     {
-                        var quotes = StorageManager.GetQuotesByStatus(QuoteStatus.Complete);
+                        var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.Complete);
                         foreach (var quote in quotes)
                         {
                             new Thread( () => {

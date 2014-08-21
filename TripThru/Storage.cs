@@ -31,13 +31,13 @@ namespace TripThruCore.Storage
         public abstract PartnerAccount GetPartnerAccountByAccessToken(string accessToken);
         public abstract long GetLastTripId();
         public abstract void InsertTrip(Trip trip);
-        public abstract void SaveTrip(Trip trip);
+        public abstract void UpdateTrip(Trip trip);
         public abstract List<Trip> GetTripsByState(TripState state);
         public abstract List<Trip> GetDirtyTrips();
         public abstract Route GetRoute(string id);
-        public abstract void SaveRoute(Route route);
+        public abstract void UpdateRoute(Route route);
         public abstract void InsertQuote(TripQuotes quote);
-        public abstract void SaveQuote(TripQuotes quote);
+        public abstract void UpdateQuote(TripQuotes quote);
         public abstract TripQuotes GetQuote(string tripId);
         public abstract List<TripQuotes> GetQuotesByStatus(QuoteStatus status);
         protected string RemoveSpecialCharacters(string input)
@@ -119,7 +119,7 @@ namespace TripThruCore.Storage
         {
             throw new NotImplementedException();
         }
-        public override void SaveTrip(Trip trip)
+        public override void UpdateTrip(Trip trip)
         {
             throw new NotImplementedException();
         }
@@ -135,7 +135,7 @@ namespace TripThruCore.Storage
         {
             throw new NotImplementedException();
         }
-        public override void SaveRoute(Route route)
+        public override void UpdateRoute(Route route)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +143,7 @@ namespace TripThruCore.Storage
         {
             throw new NotImplementedException();
         }
-        public override void SaveQuote(TripQuotes quote)
+        public override void UpdateQuote(TripQuotes quote)
         {
             throw new NotImplementedException();
         }
@@ -291,7 +291,7 @@ namespace TripThruCore.Storage
         {
             this._trips.Insert(trip);
         }
-        public override void SaveTrip(Trip trip)
+        public override void UpdateTrip(Trip trip)
         {
             this._trips.Save(trip);
         }
@@ -311,7 +311,7 @@ namespace TripThruCore.Storage
             else
                 return null;
         }
-        public override void SaveRoute(Route route)
+        public override void UpdateRoute(Route route)
         {
             this._routes.Save(route);
         }
@@ -319,7 +319,7 @@ namespace TripThruCore.Storage
         {
             this._quotes.Insert(quote);
         }
-        public override void SaveQuote(TripQuotes quote)
+        public override void UpdateQuote(TripQuotes quote)
         {
             this._quotes.Save(quote);
         }
@@ -410,10 +410,10 @@ namespace TripThruCore.Storage
             if (_storage != null)
                 _storage.InsertTrip(trip);
         }
-        public static void SaveTrip(Trip trip)
+        public static void UpdateTrip(Trip trip)
         {
             if (_storage != null)
-                _storage.SaveTrip(trip);
+                _storage.UpdateTrip(trip);
         }
         public static List<Trip> GetTripsByState(TripState state)
         {
@@ -436,20 +436,20 @@ namespace TripThruCore.Storage
             else
                 return null;
         }
-        public static void SaveRoute(Route route)
+        public static void UpdateRoute(Route route)
         {
             if (_storage != null)
-                _storage.SaveRoute(route);
+                _storage.UpdateRoute(route);
         }
         public static void InsertQuote(TripQuotes quote)
         {
             if (_storage != null)
                 _storage.InsertQuote(quote);
         }
-        public static void SaveQuote(TripQuotes quote)
+        public static void UpdateQuote(TripQuotes quote)
         {
             if (_storage != null)
-                _storage.SaveQuote(quote);
+                _storage.UpdateQuote(quote);
         }
         public static TripQuotes GetQuote(string tripId)
         {
