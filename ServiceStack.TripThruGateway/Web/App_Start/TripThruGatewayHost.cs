@@ -113,7 +113,7 @@ namespace ServiceStack.TripThruGateway
                 }
                 else
                 {
-                    StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-TP-3217.servers.mongodirector.com:27017/", "TripThru"));
+                    StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-TripThru-3328.servers.mongodirector.com:27017/", "TripThru"));
                 }
 
                 var accounts = StorageManager.GetPartnerAccounts();
