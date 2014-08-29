@@ -1269,7 +1269,8 @@ namespace TripThruCore
                 return;
             Logger.Log("Deactivating trip " + tripID + " from " + name);
 
-
+            var trip = activeTrips[tripID];
+            trip.Status = status;
             switch (status)
             {
                 case Status.Complete:
@@ -1277,14 +1278,15 @@ namespace TripThruCore
                         completes++;
                         fare += (double)price;
                         this.distance += (double)distance;
-                        if (activeTrips[tripID].LastStatusChange != null)
-                            activeTrips[tripID].OccupiedTime = DateTime.UtcNow - (DateTime)activeTrips[tripID].LastStatusChange;
-                        activeTrips[tripID].OccupiedDistance = distance;
+                        if (trip.LastStatusChange != null)
+                            trip.OccupiedTime = DateTime.UtcNow - (DateTime)trip.LastStatusChange;
+                        trip.OccupiedDistance = distance;
                         break;
                     }
                 case Status.Cancelled: cancels++; break;
                 case Status.Rejected: rejects++; break;
             }
+            activeTrips.Update(trip);
             activeTrips.Remove(tripID);
             if (garbageCleanup != null)
                 garbageCleanup.Add(tripID);
