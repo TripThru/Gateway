@@ -104,7 +104,7 @@ namespace TripThruCore
                     if (ServiceHasBeenEstablished(tripID))
                         return ServicingPartner(tripID);
                     else
-                        throw new Exception("Fatal Error: Service has not been establish for tripID = " + tripID + ", TripOriginatedWithClient = " + TripOriginatedWithClient(clientID, tripID));
+                        return null;
                 }
                 return OriginatingPartner(tripID);
             }
@@ -589,12 +589,22 @@ namespace TripThruCore
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
+            if (r.status == Status.Cancelled)
+                Console.WriteLine("qwds");
             Gateway destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
             if (destPartner == null)
-            { 
-                Logger.AddTag("ClientId", r.clientID);
-                Logger.Log("Destination partner trip not found");
-                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
+            {
+                if (r.status == Status.Cancelled && tripthru.originatingPartnerByTrip.ContainsKey(r.tripID) && r.clientID == tripthru.originatingPartnerByTrip[r.tripID])
+                {
+                    tripthru.DeactivateTripAndUpdateStats(r.tripID, r.status, 0, 0);
+                    return new Gateway.UpdateTripStatusResponse();
+                }
+                else
+                { 
+                    Logger.AddTag("ClientId", r.clientID);
+                    Logger.Log("Destination partner trip not found");
+                    return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
+                }
             } 
             else if (!tripthru.activeTrips.ContainsKey(r.tripID))
             {
@@ -1044,9 +1054,16 @@ namespace TripThruCore
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread( () => {
-                                Logger.BeginRequest("Processing trip " + t.Id + (t.ServicingPartnerId == null ? " for autodispatch quoting" : " for dispatch"), null, t.Id);
-                                this._tripManager.NewTripHandler(t);
-                                Logger.EndRequest(null);
+                                try
+                                {
+                                    Logger.BeginRequest("Processing trip " + t.Id + (t.ServicingPartnerId == null ? " for autodispatch quoting" : " for dispatch"), null, t.Id);
+                                    this._tripManager.NewTripHandler(t);
+                                    Logger.EndRequest(null);
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.LogDebug("New trip processing exception (" + t.Id + ")", e.ToString());
+                                }
                             }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
@@ -1054,7 +1071,7 @@ namespace TripThruCore
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("Dispatch error :" + e.Message, e.StackTrace);
+                    Logger.LogDebug("TripDispatcherThread exception");
                 }
             }
 
@@ -1090,9 +1107,16 @@ namespace TripThruCore
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread(() =>
                             {
-                                Logger.BeginRequest("Processing dirty trip " + "(" + t.Status + ", MadeDirtyBy: " + t.MadeDirtyById + ") " + t.Id, null, t.Id);
-                                this._tripManager.DirtyTripHandler(t);
-                                Logger.EndRequest(null);
+                                try
+                                {
+                                    Logger.BeginRequest("Processing dirty trip " + "(" + t.Status + ", MadeDirtyBy: " + t.MadeDirtyById + ") " + t.Id, null, t.Id);
+                                    this._tripManager.DirtyTripHandler(t);
+                                    Logger.EndRequest(null);
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.LogDebug("Dirty trip processing exception (" + t.Id + ")", e.ToString());
+                                }
                             }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
@@ -1100,7 +1124,7 @@ namespace TripThruCore
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug("Update trip error :" + e.Message, e.StackTrace);
+                    Logger.LogDebug("TripUpdaterThread exception");
                 }
             }
 
@@ -1126,25 +1150,32 @@ namespace TripThruCore
 
             private void StartThread()
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    try
                     {
                         var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.New);
                         foreach (var quote in quotes)
                         {
+                            var q = _tripManager.tripthru.activeQuotes[quote.Id];
                             new Thread( () => {
-                                Logger.BeginRequest("Processing new quote " + quote.Id, null , quote.Id);
-                                this._tripManager.NewQuoteHandler(quote);
-                                Logger.EndRequest(null);
+                                try { 
+                                    Logger.BeginRequest("Processing new quote " + q.Id, null , q.Id);
+                                    this._tripManager.NewQuoteHandler(q);
+                                    Logger.EndRequest(null);
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.LogDebug("New quote processing exception (" + q.Id + ")", e.ToString());
+                                }
                             }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("New quote error :" + e.Message, e.StackTrace);
+                    catch (Exception e)
+                    {
+                        Logger.LogDebug("NewQuotesHandlerThread exception");
+                    }
                 }
             }
 
@@ -1170,25 +1201,34 @@ namespace TripThruCore
 
             private void StartThread()
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    try
                     {
                         var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.Complete);
                         foreach (var quote in quotes)
                         {
+                            var q = _tripManager.tripthru.activeQuotes[quote.Id];
                             new Thread( () => {
-                                Logger.BeginRequest("Processing completed quote " + quote.Id, null, quote.Id);
-                                this._tripManager.CompleteQuoteHandler(quote);
-                                Logger.EndRequest(null);
+                                try
+                                {
+                                    Logger.BeginRequest("Processing completed quote " + q.Id, null, q.Id);
+                                    this._tripManager.CompleteQuoteHandler(q);
+                                    Logger.EndRequest(null);
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.LogDebug("Complete quote processing exception (" + q.Id + ")", e.ToString());
+                                }
+
                             }).Start();
                         }
                         System.Threading.Thread.Sleep(_heartbeat);
                     }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebug("Complete quote error :" + e.Message, e.StackTrace);
+                    catch (Exception e)
+                    {
+                        Logger.LogDebug("CompleteQuotesHandlerThread exception");
+                    }
                 }
             }
 
