@@ -21,7 +21,7 @@ namespace Tests
         {
             Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
-            StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-TP-3217.servers.mongodirector.com:27017/", "TripThru"));
+            StorageManager.OpenStorage(new MongoDbStorage("mongodb://SG-TripThru-3328.servers.mongodirector.com/", "TripThru"));
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;
