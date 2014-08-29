@@ -135,16 +135,16 @@
             ]
         }
     ],
-    "host": {
-        "virtualPath": "/TripThru.Netro/",
-		"debug": true
-    },
+  "host" : {
+		"virtualPath" : "/TripThru.NYTaxi/"
+  },
     "partner": {
         "callbackUrlMono": "http://localhost:17188/",
-        "webUrl": "BookingsNetro/",
-        "webUrlRelative": "/BookingsNetro/index.php",
-		"clientId": "netro@tripthru.com"
+        "ClientId": "nytaxi@tripthru.com",
+		"Name": "NY Taxi",
+        "WebUrl": "/BookingsNYTaxi/",
+        "WebUrlRelative": "/BookingsNYTaxi/index.php"
     },
-    "simInterval": 10,
+    "SimInterval": 10,
     "tripThruUrlMono" : "http://localhost:17187/"
 }

@@ -298,7 +298,7 @@ namespace Utils
 
             waypoints.Add(new Waypoint(to, elapse, totalDistance));
             route = new Route(waypoints.ToArray());
-            StorageManager.SaveRoute(route);
+            StorageManager.UpdateRoute(route);
             return route;
         }
 

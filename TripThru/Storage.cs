@@ -226,12 +226,12 @@ namespace TripThruCore.Storage
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
-            _partners = _networksDatabase.GetCollection<PartnerAccount>("users-test");
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users_test");
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
-            _trips = _tripsDatabase.GetCollection<Trip>("trips-test");
+            _trips = _tripsDatabase.GetCollection<Trip>("trips_test");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
-            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes-test");
+            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes_test");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
@@ -364,106 +364,226 @@ namespace TripThruCore.Storage
         }
         public static void CreatePartnerAccount(PartnerAccount account)
         {
-            if (_storage == null)
-                return;
-            _storage.CreatePartnerAccount(account);
+            try {
+                if (_storage == null)
+                    return;
+                _storage.CreatePartnerAccount(account);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("CreatePartnerAccount exception", e.ToString());
+                throw e;
+            }
         }
         public static void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
-            if (_storage == null)
-                return;
-            _storage.RegisterPartner(account, partnerName, callbackUrl);
+            try{
+                if (_storage == null)
+                    return;
+                _storage.RegisterPartner(account, partnerName, callbackUrl);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("RegisterPartner exception", e.ToString());
+                throw e;
+            }
         }
         public static IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
-            if (_storage == null)
-                return null;
-            return _storage.GetPartnerAccounts();
+            try { 
+                if (_storage == null)
+                    return null;
+                return _storage.GetPartnerAccounts();
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetPartnerAccounts exception", e.ToString());
+                throw e;
+            }
         }
 
         public static PartnerAccount GetPartnerAccountByUsername(string userName)
         {
-            if (_storage == null)
-                return null;
-            return _storage.GetPartnerAccountByUsername(userName);
+            try {
+                if (_storage == null)
+                    return null;
+                return _storage.GetPartnerAccountByUsername(userName);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetPartnerAccountByUsername exception", e.ToString());
+                throw e;
+            }
         }
         public static PartnerAccount GetPartnerAccountByClientId(string clientId)
         {
-            if (_storage == null)
-                return null;
-            return _storage.GetPartnerAccountByClientId(clientId);
+            try {
+                if (_storage == null)
+                    return null;
+                return _storage.GetPartnerAccountByClientId(clientId);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetPartnerAccountByClientId exception", e.ToString());
+                throw e;
+            }
         }
         public static PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
-            if (_storage == null)
-                return null;
-            return _storage.GetPartnerAccountByAccessToken(accessToken);
+            try {
+                if (_storage == null)
+                    return null;
+                return _storage.GetPartnerAccountByAccessToken(accessToken);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetPartnerAccountByAccessToken exception", e.ToString());
+                throw e;
+            }
         }
         public static long GetLastTripId()
         {
-            if (_storage == null)
-                return 0;
-            return _storage.GetLastTripId();
+            try {
+                if (_storage == null)
+                    return 0;
+                return _storage.GetLastTripId();
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetLastTripId exception", e.ToString());
+                throw e;
+            }
         }
         public static void InsertTrip(Trip trip)
         {
-            if (_storage != null)
-                _storage.InsertTrip(trip);
+            try {
+                if (_storage != null)
+                    _storage.InsertTrip(trip);
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("InsertTrip exception", e.ToString());
+                throw e;
+            }
         }
         public static void UpdateTrip(Trip trip)
         {
-            if (_storage != null)
+            try { 
+                if (_storage != null)
                 _storage.UpdateTrip(trip);
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("UpdateTrip exception", e.ToString());
+                throw e;
+            }
         }
         public static List<Trip> GetTripsByState(TripState state)
         {
-            if (_storage != null)
-                return _storage.GetTripsByState(state);
-            else
-                return null;
+            try{
+                if (_storage != null)
+                    return _storage.GetTripsByState(state);
+                else
+                    return null;
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetTripsByState exception", e.ToString());
+                throw e;
+            }
         }
         public static List<Trip> GetDirtyTrips()
         {
-            if (_storage != null)
-                return _storage.GetDirtyTrips();
-            else
-                return null;
+            try {
+                if (_storage != null)
+                    return _storage.GetDirtyTrips();
+                else
+                    return null;
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetDirtyTrips exception", e.ToString());
+                throw e;
+            }
         }
         public static Route GetRoute(string id)
         {
-            if (_storage != null)
-                return _storage.GetRoute(id);
-            else
-                return null;
+            try {
+                if (_storage != null)
+                    return _storage.GetRoute(id);
+                else
+                    return null;
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetRoute exception", e.ToString());
+                throw e;
+            }
         }
         public static void UpdateRoute(Route route)
         {
-            if (_storage != null)
-                _storage.UpdateRoute(route);
+            try {
+                if (_storage != null)
+                    _storage.UpdateRoute(route);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("UpdateRoute exception", e.ToString());
+                throw e;
+            }
         }
         public static void InsertQuote(TripQuotes quote)
         {
-            if (_storage != null)
-                _storage.InsertQuote(quote);
+            try {
+                if (_storage != null)
+                    _storage.InsertQuote(quote);
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("InsertQuote exception", e.ToString());
+                throw e;
+            }
         }
         public static void UpdateQuote(TripQuotes quote)
         {
-            if (_storage != null)
-                _storage.UpdateQuote(quote);
+            try{
+                if (_storage != null)
+                    _storage.UpdateQuote(quote);
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("UpdateQuote exception", e.ToString());
+                throw e;
+            }
         }
         public static TripQuotes GetQuote(string tripId)
         {
-            if (_storage != null)
-                return _storage.GetQuote(tripId);
-            else
-                return null;
+            try{
+                if (_storage != null)
+                    return _storage.GetQuote(tripId);
+                else
+                    return null;
+                }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetQuote exception", e.ToString());
+                throw e;
+            }
         }
         public static List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
         {
-            if (_storage != null)
-                return _storage.GetQuotesByStatus(status);
-            else
-                return null;
+            try
+            {
+                if (_storage != null)
+                    return _storage.GetQuotesByStatus(status);
+                else
+                    return null;
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetQuotesByStatus exception", e.ToString());
+                throw e;
+            }
         }
     }
 }
