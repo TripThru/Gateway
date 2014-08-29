@@ -589,8 +589,6 @@ namespace TripThruCore
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
-            if (r.status == Status.Cancelled)
-                Console.WriteLine("qwds");
             Gateway destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
             if (destPartner == null)
             {
