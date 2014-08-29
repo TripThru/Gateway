@@ -1180,7 +1180,7 @@ namespace TripThruCore
         public RedisDictionary<string, PartnerAccount> partnerAccounts;
         public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
         {
-            if (!clientIdByAccessToken.ContainsKey(accessToken))
+            if (accessToken == null || !clientIdByAccessToken.ContainsKey(accessToken))
                 return null;
             string clientID = clientIdByAccessToken[accessToken];
             return partnerAccounts[clientID];
