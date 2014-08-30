@@ -40,6 +40,7 @@ namespace TripThruCore.Storage
         public abstract void UpdateQuote(TripQuotes quote);
         public abstract TripQuotes GetQuote(string tripId);
         public abstract List<TripQuotes> GetQuotesByStatus(QuoteStatus status);
+        public abstract void Reset();
         protected string RemoveSpecialCharacters(string input)
         {
             return new string(input.Where(c => Char.IsLetterOrDigit(c)).ToArray());
@@ -155,6 +156,10 @@ namespace TripThruCore.Storage
         {
             throw new NotImplementedException();
         }
+        public override void Reset()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class MongoDbStorage : Storage
@@ -226,12 +231,12 @@ namespace TripThruCore.Storage
             var server = MongoServer.Create(tripsDatabaseConnectionString);
 
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
-            _partners = _networksDatabase.GetCollection<PartnerAccount>("users_test");
+            _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
 
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
-            _trips = _tripsDatabase.GetCollection<Trip>("trips_test");
+            _trips = _tripsDatabase.GetCollection<Trip>("trips");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
-            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes_test");
+            _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes");
         }
         public override void CreatePartnerAccount(PartnerAccount account)
         {
@@ -334,6 +339,12 @@ namespace TripThruCore.Storage
         public override List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
         {
             return _quotes.AsQueryable<TripQuotes>().Where(q => q.Status == status).ToList();
+        }
+        public override void Reset()
+        {
+            this._trips.Drop();
+            this._routes.Drop();
+            this._quotes.Drop();
         }
     }
 
@@ -582,6 +593,18 @@ namespace TripThruCore.Storage
             catch (Exception e)
             {
                 Logger.LogDebug("GetQuotesByStatus exception", e.ToString());
+                throw e;
+            }
+        }
+        public static void Reset()
+        {
+            try{
+                if (_storage != null)
+                    _storage.Reset();
+            }
+            catch(Exception e)
+            {
+                Logger.LogDebug("Storage Reset exception", e.ToString());
                 throw e;
             }
         }
