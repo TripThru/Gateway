@@ -122,6 +122,40 @@ namespace Utils
             }
         }
 
+        private static DateTime googleQueryLimitEnd;
+        private static int googleRequestCount = 0;
+        private static int currentRequestsDay = DateTime.Now.Day; 
+        private static bool ReachedOverQueryLimit()
+        {
+            if (currentRequestsDay != DateTime.Now.Day)
+            {
+                currentRequestsDay = DateTime.Now.Day;
+                googleRequestCount = 0;
+            }
+            return googleQueryLimitEnd != null && DateTime.Now < googleQueryLimitEnd;
+        }
+        private static void SetMinuteOverQueryLimit()
+        {
+            googleQueryLimitEnd = DateTime.Now + new TimeSpan(0, 0, 3);
+        }
+        private static void SetDailyOverQueryLimit()
+        {
+            googleQueryLimitEnd = DateTime.Now + new TimeSpan(24, 10, 0);
+        }
+        private static void LogNewRequest(bool successful = true)
+        {
+            if (successful)
+            {
+                googleRequestCount++;
+                if (googleRequestCount >= 2499)
+                    SetDailyOverQueryLimit();
+            }
+            else
+            {
+                SetMinuteOverQueryLimit();
+            }
+        }
+
         public static void WriteGeoData()
         {
             WriteGeoLocationNames();
@@ -166,29 +200,25 @@ namespace Utils
 
         private static string GetReverseGeoLocationNameFromMapService(Location location)
         {
-            //return "Google -- Over query limit";
-
+            if (ReachedOverQueryLimit())
+                throw new Exception("Reached google OVER_QUERY_LIMIT");
             XmlDocument doc = new XmlDocument();
             {
                 doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
-                /*if (element.InnerText == "OVER_QUERY_LIMIT")
+                XmlNode status = doc.SelectSingleNode("//GeocodeResponse/status");
+                if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
                 {
-
-                    System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                    doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                    element = doc.SelectSingleNode("//GeocodeResponse/status");
-
-                }*/
-                if (element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT")
-                    return "Google -- Over query limit";
+                    LogNewRequest(successful: false);
+                    Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
+                    throw new Exception("Reached google OVER_QUERY_LIMIT");
+                }
                 else
                 {
-
-                    element = doc.SelectSingleNode("//GeocodeResponse/result/formatted_address");
-                    locationNames.Add(location.getID(), element.InnerText);
+                    LogNewRequest(successful: true);
+                    status = doc.SelectSingleNode("//GeocodeResponse/result/formatted_address");
+                    locationNames.Add(location.getID(), status.InnerText);
                     WriteGeoLocationNames();
-                    return element.InnerText;
+                    return status.InnerText;
                 }
             }
         }
@@ -206,19 +236,15 @@ namespace Utils
 
         private static Pair<string, string> GetReverseGeoAddressFromMapService(Location location)
         {
+            if (ReachedOverQueryLimit())
+                throw new Exception("Reached google OVER_QUERY_LIMIT");
             Pair<string, string> address = new Pair<string, string>();
             XmlDocument doc = new XmlDocument();
             doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-            XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
-            /*if (element.InnerText == "OVER_QUERY_LIMIT")
+            XmlNode status = doc.SelectSingleNode("//GeocodeResponse/status");
+            if (!(status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT"))
             {
-                System.Threading.Thread.Sleep(new TimeSpan(0, 1, 10));
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                element = doc.SelectSingleNode("//GeocodeResponse/status");
-
-            }*/
-            if (!(element.InnerText == "ZERO_RESULTS" || element.InnerText == "OVER_QUERY_LIMIT"))
-            {
+                LogNewRequest(successful: true);
                 var streetNumberNode =
                     doc.SelectSingleNode(
                         "//GeocodeResponse/result/address_component[type=\"street_number\"]/short_name");
@@ -241,7 +267,9 @@ namespace Utils
             }
             else
             {
-                return new Pair<string, string>("reached query limit", "reached query limit");
+                LogNewRequest(successful: false);
+                Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
+                throw new Exception("Reached google OVER_QUERY_LIMIT");
             }
         }
 
@@ -251,6 +279,8 @@ namespace Utils
             var route = StorageManager.GetRoute(key);
             if (route != null)
                 return route;
+            if (ReachedOverQueryLimit())
+                throw new Exception("Reached google OVER_QUERY_LIMIT");
             const double metersToMiles = 0.000621371192;
             const int maxDuration = 10;
             var doc = new XmlDocument();
@@ -262,8 +292,13 @@ namespace Utils
 
             if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
             {
+                LogNewRequest(successful: false);
                 Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
-                throw new Exception("Bad route request");
+                throw new Exception("Reached google OVER_QUERY_LIMIT");
+            }
+            else
+            {
+                LogNewRequest(successful: true);
             }
             var waypoints = new List<Waypoint> {new Waypoint(@from, new TimeSpan(0), 0)};
             var legs = doc.SelectNodes("//DirectionsResponse/route/leg");
