@@ -136,10 +136,12 @@ namespace Utils
         }
         private static void SetMinuteOverQueryLimit()
         {
+            Logger.LogDebug("Reached google OVER_QUERY_LIMIT, setting 3 second delay before resuming requests");
             googleQueryLimitEnd = DateTime.Now + new TimeSpan(0, 0, 3);
         }
         private static void SetDailyOverQueryLimit()
         {
+            Logger.LogDebug("Reached 2500 google requests, setting 24 hours delay before resuming requests");
             googleQueryLimitEnd = DateTime.Now + new TimeSpan(24, 10, 0);
         }
         private static void LogNewRequest(bool successful = true)
