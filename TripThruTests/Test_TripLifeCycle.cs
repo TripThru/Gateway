@@ -22,7 +22,6 @@ namespace Tests
             Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
             StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
-            StorageManager.Reset();
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;
@@ -37,6 +36,7 @@ namespace Tests
         public void TearDown()
         {
             Logger.Log("Tearing down");
+            StorageManager.Reset();
             MapTools.ClearCache();
         }
 
