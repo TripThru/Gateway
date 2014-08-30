@@ -343,7 +343,6 @@ namespace TripThruCore.Storage
         public override void Reset()
         {
             this._trips.Drop();
-            this._routes.Drop();
             this._quotes.Drop();
         }
     }
