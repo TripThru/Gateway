@@ -175,69 +175,81 @@ namespace TripThruCore.Storage
         public MongoDbStorage(string tripsDatabaseConnectionString, string tripsDatabaseName)
         {
             _tripsDatabaseId = tripsDatabaseName;
-            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
-            {
-                cm.AutoMap();
-                foreach (var mm in cm.AllMemberMaps)
-                    mm.SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.IdNumber).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
-                cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Lateness).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.LatenessMilliseconds).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Creation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.loc);
-                cm.GetMemberMap(c => c.SamplingPercentage);
-                cm.GetMemberMap(c => c.State).SetRepresentation(BsonType.String);
-                cm.GetMemberMap(c => c.IsDirty);
-                cm.GetMemberMap(c => c.MadeDirtyById);
-            });
-            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Route>(cm =>
-            {
-                cm.AutoMap();
-                foreach (var mm in cm.AllMemberMaps)
-                    mm.SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.waypoints).SetIgnoreIfNull(true);
-            });
-            MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<TripQuotes>(cm =>
-            {
-                cm.AutoMap();
-                foreach (var mm in cm.AllMemberMaps)
-                    mm.SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
-                cm.GetMemberMap(c => c.QuoteRequest).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ReceivedQuotes).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.PartnersThatServe).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.Autodispatch).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.ReceivedUpdatesCount).SetIgnoreIfNull(true);
-            });
+            RegisterClassMaps();
             var server = MongoServer.Create(tripsDatabaseConnectionString);
-
             _networksDatabase = server.GetDatabase(_networksDatabaseId);
             _partners = _networksDatabase.GetCollection<PartnerAccount>("users");
-
             _tripsDatabase = server.GetDatabase(RemoveSpecialCharacters(tripsDatabaseName));
             _trips = _tripsDatabase.GetCollection<Trip>("trips");
             _routes = _tripsDatabase.GetCollection<Route>("routes");
             _quotes = _tripsDatabase.GetCollection<TripQuotes>("quotes");
         }
+        private void RegisterClassMaps()
+        {
+            if (!MongoDB.Bson.Serialization.BsonClassMap.IsClassMapRegistered(typeof(Trip)))
+            {
+                MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Trip>(cm =>
+                {
+                    cm.AutoMap();
+                    foreach (var mm in cm.AllMemberMaps)
+                        mm.SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.IdNumber).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                    cm.GetMemberMap(c => c.PickupTime).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.PickupLocation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.FleetId).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.FleetName).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.ETA).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DropoffLocation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DropoffTime).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverRouteDuration).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverId).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.OccupiedDistance).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverName).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Price).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.ServicingPartnerName).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Lateness).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.LatenessMilliseconds).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Creation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.loc);
+                    cm.GetMemberMap(c => c.SamplingPercentage);
+                    cm.GetMemberMap(c => c.State).SetRepresentation(BsonType.String);
+                    cm.GetMemberMap(c => c.IsDirty);
+                    cm.GetMemberMap(c => c.MadeDirtyById);
+                });
+            }
+            if (!MongoDB.Bson.Serialization.BsonClassMap.IsClassMapRegistered(typeof(Route)))
+            {
+                MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<Route>(cm =>
+                {
+                    cm.AutoMap();
+                    foreach (var mm in cm.AllMemberMaps)
+                        mm.SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.waypoints).SetIgnoreIfNull(true);
+                });
+            }
+            if (!MongoDB.Bson.Serialization.BsonClassMap.IsClassMapRegistered(typeof(TripQuotes)))
+            {
+                MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<TripQuotes>(cm =>
+                {
+                    cm.AutoMap();
+                    foreach (var mm in cm.AllMemberMaps)
+                        mm.SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Status).SetRepresentation(BsonType.String);
+                    cm.GetMemberMap(c => c.QuoteRequest).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.ReceivedQuotes).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.PartnersThatServe).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.Autodispatch).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.ReceivedUpdatesCount).SetIgnoreIfNull(true);
+                });
+            }
+        }
+
         public override void CreatePartnerAccount(PartnerAccount account)
         {
             _partners.Insert(account);
