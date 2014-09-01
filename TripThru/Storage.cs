@@ -498,13 +498,13 @@ namespace TripThruCore.Storage
         public static void UpdateTrip(Trip trip)
         {
             try 
-            { 
+            {
                 if (_storage != null)
                     _storage.UpdateTrip(trip);
             }
             catch (Exception e)
             {
-                Logger.LogDebug("UpdateTrip exception", e.ToString());
+                Logger.LogDebug("UpdateTrip exception. Trip is " + (trip != null ? "not null" : "null"), e.ToString());
                 throw e;
             }
         }

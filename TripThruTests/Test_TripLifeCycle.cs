@@ -49,8 +49,6 @@ namespace Tests
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 5, 0));
             lib.Test_SingleTripLifecycle_ForAllPartnerFleets();
-            Assert.AreEqual(lib.partner.distance.lastHour.Value, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(lib.partner.fare.lastHour.Value, tripthru.fare.lastHour.Value, "Fares are different");
         }
 
         [Test]
@@ -61,9 +59,7 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 5, 0));
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>() { lib.partner });
-            Assert.AreEqual(lib.partner.distance.lastHour.Value, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(lib.partner.fare.lastHour.Value, tripthru.fare.lastHour.Value, "Fares are different");
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
@@ -80,10 +76,7 @@ namespace Tests
                 filename: "Test_Configurations/LocalTripsNotEnoughDrivers.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 1, 0));
-
             lib.Test_SingleTripLifecycle_ForAllPartnerFleets();
-            Assert.AreEqual(lib.partner.distance.lastHour.Value, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(lib.partner.fare.lastHour.Value, tripthru.fare.lastHour.Value, "Fares are different");
         }
 
         [Test]
@@ -101,10 +94,7 @@ namespace Tests
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 1, 0));
-
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>() { lib.partner });
-            Assert.AreEqual(lib.partner.distance.lastHour.Value, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(lib.partner.fare.lastHour.Value, tripthru.fare.lastHour.Value, "Fares are different");
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
@@ -120,10 +110,7 @@ namespace Tests
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 10, 0));
-
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets(new List<Partner>(){lib.partner});
-            Assert.AreEqual(lib.partner.distance.lastHour.Value, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(lib.partner.fare.lastHour.Value, tripthru.fare.lastHour.Value, "Fares are different");
+            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
         [Test]
@@ -149,31 +136,9 @@ namespace Tests
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
             Test_TripLifeCycle_Base.ValidateSubTests(subTests, 
                 timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
-                simInterval : new TimeSpan(0, 0, 1), 
-                partners: new List<Partner>(){libA.partner, libB.partner});
-
+                simInterval : new TimeSpan(0, 0, 1)
+                );
             Thread.Sleep(new TimeSpan(0,0,1));
-
-            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.lastHour.Count, "Request are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
-            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.lastHour.Count, "Cancels are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.lastHour.Count, "Completes are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.lastHour.Value, "Distances are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.lastHour.Value, "Fares are different");
-
-            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.last24Hrs.Count, "Request are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.lastHour.Count, "Rejects are different.");
-            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.last24Hrs.Count, "Cancels are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.last24Hrs.Count, "Completes are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.last24Hrs.Value, "Distances are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.last24Hrs.Value, "Fares are different");
-
-            Assert.AreEqual(Test_TripLifeCycle_Base.requests, tripthru.requests.allTime.value, "Request are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.rejects, tripthru.rejects.allTime.value, "Rejects are different.");
-            Assert.AreEqual(Test_TripLifeCycle_Base.cancels, tripthru.cancels.allTime.value, "Cancels are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.completes, tripthru.completes.allTime.value, "Completes are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.distance, tripthru.distance.allTime.value, "Distances are different");
-            Assert.AreEqual(Test_TripLifeCycle_Base.fare, tripthru.fare.allTime.value, "Fares are different");
         }
 
         [Test]
@@ -186,7 +151,6 @@ namespace Tests
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
-            List<Partner> partners = new List<Partner>();
             foreach (string filename in filePaths)
             {
                 Logger.Log("filename = " + filename);
@@ -196,11 +160,8 @@ namespace Tests
                     maxLateness: maxLateness,
                     locationVerificationTolerance: locationVerificationTolerance);
                 subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
-                partners.Add(lib.partner);
-            }
-
-
-            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1), partners:partners);
+            } 
+            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1));
         }
 
     }
@@ -210,6 +171,7 @@ namespace Tests
         public string filename;
         public Gateway tripthru;
         public Partner partner;
+        private GatewayMock partnerServiceMock;
         PartnerTrip.Origination? origination = null;
         PartnerTrip.Origination? service = null;
         public TimeSpan simInterval = new TimeSpan(0, 0, 1);
@@ -217,8 +179,6 @@ namespace Tests
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
-        static public int rejects, requests, cancels, completes;
-        static public double distance, fare;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
@@ -278,17 +238,18 @@ namespace Tests
             if (locationVerificationTolerance != null)
                 this.locationVerificationTolerance = (double)locationVerificationTolerance;
             PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
-            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClientMock(tripthru), configuration.partnerFleets);
+            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayMock(tripthru), configuration.partnerFleets);
             var coverage = new List<Zone>();
             foreach (var fleet in partner.PartnerFleets.Values)
                 coverage.AddRange(fleet.coverage);
-            partner.tripthru.RegisterPartner(partner, coverage);
+            this.partnerServiceMock = new GatewayMock(partner);
+            partner.tripthru.RegisterPartner(partnerServiceMock, coverage);
         }
 
-        public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets(List<Partner> partners )
+        public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets()
         {
             List<SubTest> subtests = MakeSimultaneousTripLifecycle_SubTests();
-            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1), partners: partners );
+            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
         }
 
         public List<SubTest> MakeSimultaneousTripLifecycle_SubTests()
@@ -302,7 +263,7 @@ namespace Tests
             return singleTrips_Subtests;
         }
 
-        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval, List<Partner> partners )
+        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
         {
             foreach (SubTest u in singleTrips_Subtests)
                 new Thread(u.Run).Start();
@@ -323,22 +284,10 @@ namespace Tests
                 }
                 Thread.Sleep(simInterval);
             }
-            foreach (var partner1 in partners)
-            {
-                var tripthru = (GatewayClientMock)partner1.tripthru;
-                requests += tripthru.requests.lastHour.Count;
-                rejects += tripthru.rejects.lastHour.Count;
-                cancels += tripthru.cancels.lastHour.Count;
-                completes += tripthru.completes.lastHour.Count;
-                distance += tripthru.distance.lastHour.Value;
-                fare += tripthru.fare.lastHour.Value;
-            }
-
         }
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()
         {
-            PartnerTrip trip = null;
             foreach (PartnerFleet fleet in partner.PartnerFleets.Values)
             {
                 var i = 1;
@@ -355,6 +304,7 @@ namespace Tests
         {
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
             TestTripLifecycle_FromNewToComplete(fleet, trip);
+            ValidateRequestsForTripIfServiceForeign(partnerServiceMock, (GatewayMock) partner.tripthru, trip);
             ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
         }
 
@@ -397,8 +347,6 @@ namespace Tests
 
         public void ValidateTripThruStatus(PartnerTrip trip)
         {
-            //if (trip.origination != PartnerTrip.Origination.Foreign && trip.service != PartnerTrip.Origination.Foreign)
-            //    return;
             var tripId =  PartnerTrip.GetPublicID(partner.ID, trip.ID);
             Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
             Assert.AreEqual(trip.status, response.status, "The trip local status is different in compare how gateway says. Trip ID: " + tripId);
@@ -497,6 +445,28 @@ namespace Tests
                 //Assert.IsFalse(DateTime.UtcNow > timeoutAt, "The timeoutAt is less than UtcNow. Trip ID: " + trip.ID);
                 System.Threading.Thread.Sleep(simInterval);
             }
+        }
+
+        public void ValidateRequestsForTripIfServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
+        {
+            if (trip.service == PartnerTrip.Origination.Local)
+                return;
+            var id = trip.ID;
+            ValidateSentRequestsForTripServiceForeign(originatingGateway, servicingGateway, id);
+            ValidateReceivedRequestsForTripServiceForeign(originatingGateway, servicingGateway, id);
+        }
+        public void ValidateSentRequestsForTripServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, string tripId)
+        {
+            var requests = servicingGateway.RequestsByTripId[tripId];
+            Assert.Greater(requests.Dispatch, 0, "Never made a dispatch request");
+        }
+        public void ValidateReceivedRequestsForTripServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, string tripId)
+        {
+            var requests = originatingGateway.RequestsByTripId[tripId];
+            Assert.AreEqual(requests.UpdateDispatched, 1, "Should receive this update only once");
+            Assert.AreEqual(requests.UpdateEnroute, 1, "Should receive this update only once");
+            Assert.AreEqual(requests.UpdatePickedUp, 1, "Should receive this update only once");
+            Assert.AreEqual(requests.UpdateComplete, 1, "Should receive this update only once");
         }
     }
 

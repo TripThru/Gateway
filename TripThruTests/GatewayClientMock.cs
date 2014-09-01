@@ -2,20 +2,42 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ServiceStack.TripThruGateway;
 using TripThruCore;
 using Utils;
 
 namespace TripThruTests
 {
-    class GatewayClientMock : GatewayWithStats
+    public class GatewayMock : GatewayWithStats
     {
         Gateway server;
+        public Dictionary<string, TripRequests> RequestsByTripId;
+        public class TripRequests
+        {
+            public int Quote = 0;
+            public int UpdateQuote = 0;
+            public int GetQuote = 0;
+            public int Reject = 0;
+            public int Cancel = 0;
+            public int Dispatch = 0;
+            public int UpdateQueued = 0;
+            public int UpdateDispatched = 0;
+            public int UpdateEnroute = 0;
+            public int UpdatePickedUp = 0;
+            public int UpdateComplete = 0;
+            public int GetStatus = 0;
+        };
 
-        public GatewayClientMock(Gateway server)
+        public GatewayMock(Gateway server)
             : base(server.ID, server.name)
         {
             this.server = server;
+            this.RequestsByTripId = new Dictionary<string, TripRequests>();
+        }
+
+        private void InitializeTripRequestsList(string tripId)
+        {
+            if (!RequestsByTripId.ContainsKey(tripId))
+                RequestsByTripId[tripId] = new TripRequests();
         }
 
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway gateway, List<Zone> coverage)
@@ -36,22 +58,19 @@ namespace TripThruTests
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
             requests++;
-            requests++; //Assuming Tripthru will quote itself in AutoDispatch
+            InitializeTripRequestsList(request.tripID);
+            RequestsByTripId[request.tripID].Dispatch++;
             Gateway.DispatchTripResponse resp = server.DispatchTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
-            /*if (resp.result == Result.OK)
-            {
-                var resp1 = GetTripStatus(new GetTripStatusRequest(request.clientID, request.tripID));
-                if (resp1.distance != null) distance = distance + resp1.distance.Value;
-                if (resp1.price != null) fare = fare + resp1.price.Value;
-            }*/
             return resp;
         }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
             requests++;
+            InitializeTripRequestsList(request.tripId);
+            RequestsByTripId[request.tripId].Quote++;
             Gateway.QuoteTripResponse resp = server.QuoteTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
@@ -61,19 +80,40 @@ namespace TripThruTests
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
             requests++;
+            InitializeTripRequestsList(request.tripID);
+            RequestsByTripId[request.tripID].GetStatus++;
             return server.GetTripStatus(request);
         }
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
             requests++;
+            InitializeTripRequestsList(request.tripID);
+            var tripRequests = RequestsByTripId[request.tripID];
             switch (request.status)
             {
-                case Status.Cancelled:
-                    cancels++;
+                case Status.Queued:
+                    tripRequests.UpdateQueued++;
+                    break;
+                case Status.Dispatched:
+                    tripRequests.UpdateDispatched++;
+                    break;
+                case Status.Enroute:
+                    tripRequests.UpdateEnroute++;
+                    break;
+                case Status.PickedUp:
+                    tripRequests.UpdatePickedUp++;
                     break;
                 case Status.Complete:
+                    tripRequests.UpdateComplete++;
                     completes++;
+                    break;
+                case Status.Rejected:
+                    tripRequests.Reject++;
+                    break;
+                case Status.Cancelled:
+                    tripRequests.Cancel++;
+                    cancels++;
                     break;
             }
             return server.UpdateTripStatus(request);
@@ -82,12 +122,16 @@ namespace TripThruTests
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
             requests++;
+            InitializeTripRequestsList(request.tripId);
+            RequestsByTripId[request.tripId].UpdateQuote++;
             return server.UpdateQuote(request);
         }
 
         public override GetQuoteResponse GetQuote(GetQuoteRequest request)
         {
             requests++;
+            InitializeTripRequestsList(request.tripId);
+            RequestsByTripId[request.tripId].GetQuote++;
             return server.GetQuote(request);
         }
     }
