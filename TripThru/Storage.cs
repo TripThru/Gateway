@@ -386,7 +386,8 @@ namespace TripThruCore.Storage
         }
         public static void CreatePartnerAccount(PartnerAccount account)
         {
-            try {
+            try 
+            {
                 if (_storage == null)
                     return;
                 _storage.CreatePartnerAccount(account);
@@ -399,7 +400,8 @@ namespace TripThruCore.Storage
         }
         public static void RegisterPartner(PartnerAccount account, string partnerName, string callbackUrl)
         {
-            try{
+            try
+            {
                 if (_storage == null)
                     return;
                 _storage.RegisterPartner(account, partnerName, callbackUrl);
@@ -412,11 +414,12 @@ namespace TripThruCore.Storage
         }
         public static IEnumerable<PartnerAccount> GetPartnerAccounts()
         {
-            try { 
+            try 
+            { 
                 if (_storage == null)
                     return null;
                 return _storage.GetPartnerAccounts();
-                }
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("GetPartnerAccounts exception", e.ToString());
@@ -426,7 +429,8 @@ namespace TripThruCore.Storage
 
         public static PartnerAccount GetPartnerAccountByUsername(string userName)
         {
-            try {
+            try 
+            {
                 if (_storage == null)
                     return null;
                 return _storage.GetPartnerAccountByUsername(userName);
@@ -439,7 +443,8 @@ namespace TripThruCore.Storage
         }
         public static PartnerAccount GetPartnerAccountByClientId(string clientId)
         {
-            try {
+            try 
+            {
                 if (_storage == null)
                     return null;
                 return _storage.GetPartnerAccountByClientId(clientId);
@@ -465,7 +470,8 @@ namespace TripThruCore.Storage
         }
         public static long GetLastTripId()
         {
-            try {
+            try 
+            {
                 if (_storage == null)
                     return 0;
                 return _storage.GetLastTripId();
@@ -478,10 +484,11 @@ namespace TripThruCore.Storage
         }
         public static void InsertTrip(Trip trip)
         {
-            try {
+            try 
+            {
                 if (_storage != null)
                     _storage.InsertTrip(trip);
-                }
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("InsertTrip exception", e.ToString());
@@ -490,10 +497,11 @@ namespace TripThruCore.Storage
         }
         public static void UpdateTrip(Trip trip)
         {
-            try { 
+            try 
+            { 
                 if (_storage != null)
-                _storage.UpdateTrip(trip);
-                }
+                    _storage.UpdateTrip(trip);
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("UpdateTrip exception", e.ToString());
@@ -502,12 +510,13 @@ namespace TripThruCore.Storage
         }
         public static List<Trip> GetTripsByState(TripState state)
         {
-            try{
+            try
+            {
                 if (_storage != null)
                     return _storage.GetTripsByState(state);
                 else
                     return null;
-                }
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("GetTripsByState exception", e.ToString());
@@ -516,7 +525,8 @@ namespace TripThruCore.Storage
         }
         public static List<Trip> GetDirtyTrips()
         {
-            try {
+            try 
+            {
                 if (_storage != null)
                     return _storage.GetDirtyTrips();
                 else
@@ -530,7 +540,8 @@ namespace TripThruCore.Storage
         }
         public static Route GetRoute(string id)
         {
-            try {
+            try 
+            {
                 if (_storage != null)
                     return _storage.GetRoute(id);
                 else
@@ -544,7 +555,8 @@ namespace TripThruCore.Storage
         }
         public static void UpdateRoute(Route route)
         {
-            try {
+            try 
+            {
                 if (_storage != null)
                     _storage.UpdateRoute(route);
             }
@@ -556,7 +568,8 @@ namespace TripThruCore.Storage
         }
         public static void InsertQuote(TripQuotes quote)
         {
-            try {
+            try 
+            {
                 if (_storage != null)
                     _storage.InsertQuote(quote);
             }
@@ -568,10 +581,11 @@ namespace TripThruCore.Storage
         }
         public static void UpdateQuote(TripQuotes quote)
         {
-            try{
+            try
+            {
                 if (_storage != null)
                     _storage.UpdateQuote(quote);
-                }
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("UpdateQuote exception", e.ToString());
@@ -580,12 +594,13 @@ namespace TripThruCore.Storage
         }
         public static TripQuotes GetQuote(string tripId)
         {
-            try{
+            try
+            {
                 if (_storage != null)
                     return _storage.GetQuote(tripId);
                 else
                     return null;
-                }
+            }
             catch (Exception e)
             {
                 Logger.LogDebug("GetQuote exception", e.ToString());
@@ -609,7 +624,8 @@ namespace TripThruCore.Storage
         }
         public static void Reset()
         {
-            try{
+            try
+            {
                 if (_storage != null)
                     _storage.Reset();
             }
