@@ -1093,10 +1093,25 @@ namespace TripThruCore
             }
             public override void Remove(string id)
             {
-                Logger.Log("Removing active trip " + id);
-                Trip trip;
-                dict.TryRemove(id, out trip);
-                StorageManager.UpdateTrip(trip);
+                if (dict.ContainsKey(id)) 
+                { 
+                    Logger.Log("Removing active trip " + id);
+                    Trip trip;
+                    dict.TryRemove(id, out trip);
+                    if (trip != null)
+                    {
+                        StorageManager.UpdateTrip(trip);
+                    }
+                    else
+                    {
+                        Logger.Log("Remove trip exception. " + id + " must have been tried to remove multiple times");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Trip " + id + " doesn't exist");
+                    Logger.Log("Remove trip exception. " + id + " doesn't exist");
+                }
             }
             public override void Update(Trip trip)
             {
