@@ -398,6 +398,7 @@ namespace TripThruCore
         {
             var tags = new Dictionary<string, string>();
             tags["ActiveTrips"] = this.activeTrips.Count.ToString();
+            tags["ActiveQuotes"] = this.activeQuotes.Count.ToString();
             tags["OriginatingPartnerByTrip"] = this.originatingPartnerByTrip.Count.ToString();
             tags["ServicingPartnerByTrip"] = this.servicingPartnerByTrip.Count.ToString();
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
@@ -671,7 +672,7 @@ namespace TripThruCore
         }
         private bool QuoteExists(Gateway.QuoteTripRequest r)
         {
-            return StorageManager.GetQuote(r.tripId) != null;
+            return tripthru.activeQuotes.ContainsKey(r.tripId);
         }
         private void SaveNewQuoteToStorage(Gateway.QuoteTripRequest r, bool autodispatch = false)
         {
@@ -682,7 +683,8 @@ namespace TripThruCore
                 PartnersThatServe = 0,
                 QuoteRequest = r,
                 Autodispatch = autodispatch,
-                ReceivedQuotes = new List<Quote>()
+                ReceivedQuotes = new List<Quote>(),
+                ReceivedUpdatesCount = 0
             };
             tripthru.activeQuotes.Insert(tripQuotes.Id, tripQuotes);
         }
@@ -690,7 +692,7 @@ namespace TripThruCore
         public Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest r)
         {
             Gateway.UpdateQuoteResponse response;
-            var quotes = StorageManager.GetQuote(r.tripId);
+            var quotes = tripthru.activeQuotes.ContainsKey(r.tripId) ? tripthru.activeQuotes[r.tripId] : null;
             if (quotes != null)
             {
                 if (quotes.ReceivedQuotes == null)
@@ -835,13 +837,15 @@ namespace TripThruCore
             {
                 Logger.Log("Successful request, changing quote status to Sent. Result: " + response.result);
                 q.Status = QuoteStatus.Sent;
+                tripthru.activeQuotes.Update(q);
+                tripthru.activeQuotes.Remove(q.Id);
             }
             else
             {
                 Logger.Log("Unsuccessful request, changing quote status to Complete to retry. Result: " + response.result);
                 q.Status = QuoteStatus.Complete;
+                tripthru.activeQuotes.Update(q);
             }
-            tripthru.activeQuotes.Update(q);
             Logger.EndRequest(response);
         }
         private Quote SelectBestQuote(Gateway.QuoteTripRequest r, List<Quote> quotes)
