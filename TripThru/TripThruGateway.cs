@@ -1089,6 +1089,7 @@ namespace TripThruCore
             public TripUpdaterThread(TripsManager tripManager, TimeSpan heartbeat)
             {
                 this._tripManager = tripManager;
+                this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
                 _worker.Start();
             }
@@ -1142,6 +1143,7 @@ namespace TripThruCore
             public NewQuotesHandlerThread(TripsManager tripManager, TimeSpan heartbeat)
             {
                 this._tripManager = tripManager;
+                this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
                 _worker.Start();
             }
@@ -1193,6 +1195,7 @@ namespace TripThruCore
             public CompleteQuotesHandlerThread(TripsManager tripManager, TimeSpan heartbeat)
             {
                 this._tripManager = tripManager;
+                this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
                 _worker.Start();
             }
