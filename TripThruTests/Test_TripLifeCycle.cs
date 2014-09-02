@@ -304,7 +304,7 @@ namespace Tests
         {
             PartnerTrip trip = fleet.GenerateTrip(fleet.passengers[0], DateTime.UtcNow, tripSpec);
             TestTripLifecycle_FromNewToComplete(fleet, trip);
-            ValidateRequestsForTripIfServiceForeign(partnerServiceMock, (GatewayMock) partner.tripthru, trip);
+            ValidateTripRequests(partnerServiceMock, (GatewayMock) partner.tripthru, trip);
             ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
         }
 
@@ -447,26 +447,45 @@ namespace Tests
             }
         }
 
-        public void ValidateRequestsForTripIfServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
+        public void ValidateTripRequests(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
         {
-            if (trip.service == PartnerTrip.Origination.Local)
-                return;
-            var id = trip.ID;
-            ValidateSentRequestsForTripServiceForeign(originatingGateway, servicingGateway, id);
-            ValidateReceivedRequestsForTripServiceForeign(originatingGateway, servicingGateway, id);
+            var id = trip.publicID;
+            var originatingRequests = originatingGateway.RequestsByTripId[id];
+            var servicingRequests = servicingGateway.RequestsByTripId[id];
+            if (trip.service == PartnerTrip.Origination.Foreign)
+            {
+                ValidateSentRequestsForTripServiceForeign(originatingRequests, servicingRequests);
+                ValidateReceivedRequestsForTripServiceForeign(originatingRequests, servicingRequests);
+            }
+            else
+            {
+                ValidateSentRequestsForTripServiceLocal(originatingRequests, servicingRequests);
+                ValidateReceivedRequestsForTripServiceLocal(originatingRequests, servicingRequests);
+            }
         }
-        public void ValidateSentRequestsForTripServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, string tripId)
+        public void ValidateSentRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests)
         {
-            var requests = servicingGateway.RequestsByTripId[tripId];
-            Assert.Greater(requests.Dispatch, 0, "Never made a dispatch request");
+            Assert.Greater(sentRequests.Dispatch, 0, "Never made a dispatch request");
         }
-        public void ValidateReceivedRequestsForTripServiceForeign(GatewayMock originatingGateway, GatewayMock servicingGateway, string tripId)
+        public void ValidateReceivedRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests)
         {
-            var requests = originatingGateway.RequestsByTripId[tripId];
-            Assert.AreEqual(requests.UpdateDispatched, 1, "Should receive this update only once");
-            Assert.AreEqual(requests.UpdateEnroute, 1, "Should receive this update only once");
-            Assert.AreEqual(requests.UpdatePickedUp, 1, "Should receive this update only once");
-            Assert.AreEqual(requests.UpdateComplete, 1, "Should receive this update only once");
+            Assert.AreEqual(1, receivedRequests.Dispatch, "Should receive dispatch request only once");
+            Assert.AreEqual(1, receivedRequests.UpdateDispatched, "Should receive this update only once");
+            Assert.AreEqual(1, receivedRequests.UpdateEnroute, "Should receive this update only once");
+            Assert.AreEqual(1, receivedRequests.UpdatePickedUp, "Should receive this update only once");
+            Assert.AreEqual(1, receivedRequests.UpdateComplete, "Should receive this update only once");
+        }
+        public void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests)
+        {
+            Assert.GreaterOrEqual(sentRequests.Dispatch, 1, "Should try to dispatch at least once");
+            Assert.AreEqual(1, sentRequests.UpdateDispatched, "Should send status update only once");
+            Assert.AreEqual(1, sentRequests.UpdateEnroute, "Should send status update only once");
+            Assert.AreEqual(1, sentRequests.UpdatePickedUp, "Should send status update only once");
+            Assert.AreEqual(1, sentRequests.UpdateComplete, "Should send status update only once");
+        }
+        public void ValidateReceivedRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests)
+        {
+            Assert.AreEqual(1, receivedRequests.GetStatus, "Should receive GetTripStatus request to update gateway stats once");
         }
     }
 

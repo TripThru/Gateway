@@ -196,7 +196,7 @@ namespace TripThruCore
             Logger.Tab();
             Gateway.DispatchTripRequest request = new Gateway.DispatchTripRequest(
                 clientID: ID,
-                tripID: PartnerTrip.GetPublicID(trip.ID, this.ID),
+                tripID: trip.publicID,
                 pickupLocation: trip.pickupLocation,
                 pickupTime: trip.pickupTime,
                 passengerID: trip.passengerID,
@@ -427,7 +427,7 @@ namespace TripThruCore
             {
                 Logger.Log("Getting (Foreign) status of " + trip);
                 Logger.Tab();
-                Gateway.GetTripStatusRequest request = new Gateway.GetTripStatusRequest(clientID: ID, tripID: PartnerTrip.GetPublicID(trip.ID, this.ID));
+                Gateway.GetTripStatusRequest request = new Gateway.GetTripStatusRequest(clientID: ID, tripID: trip.publicID);
                 Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(request);
                 if (response.status != null)
                     trip.UpdateTripStatus(notifyPartner: false, status: (Status)response.status, driverLocation: response.driverLocation, eta: response.ETA); // todo: not good -- fix this.
@@ -477,6 +477,7 @@ namespace TripThruCore
     public class PartnerTrip : IDName
     {
         private Status _status;
+        public string publicID; //Id used to identify trip in external requests
         public long? IdNumber;
         public Location driverLocation;
         public Location driverInitiaLocation;
@@ -567,7 +568,7 @@ namespace TripThruCore
             Logger.Tab();
             Gateway.UpdateTripStatusRequest request = new Gateway.UpdateTripStatusRequest(
                 clientID: partner.ID,
-                tripID: PartnerTrip.GetPublicID(ID, this.partner.ID),
+                tripID: publicID,
                 status: status,
                 driverLocation: driverLocation,
                 eta: eta
@@ -642,6 +643,7 @@ namespace TripThruCore
             bool autoDispatch = true, long? IdNumber = null)
         {
             this.ID = ID;
+            this.publicID = PartnerTrip.GetPublicID(ID, partner.ID);
             this.IdNumber = IdNumber;
             this.origination = origination;
             this.service = Origination.Local;
