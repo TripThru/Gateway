@@ -1163,10 +1163,25 @@ namespace TripThruCore
             }
             public override void Remove(string id)
             {
-                Logger.Log("Removing active quote " + id);
-                TripQuotes quote;
-                dict.TryRemove(id, out quote);
-                StorageManager.UpdateQuote(quote);
+                if (dict.ContainsKey(id))
+                {
+                    Logger.Log("Removing active quote " + id);
+                    TripQuotes quote;
+                    dict.TryRemove(id, out quote);
+                    if (quote != null)
+                    {
+                        StorageManager.UpdateQuote(quote);
+                    }
+                    else
+                    {
+                        Logger.Log("Remove quote exception. " + id + " must have been tried to remove multiple times");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Quote " + id + " doesn't exist");
+                    Logger.Log("Remove quote exception. " + id + " doesn't exist");
+                }
             }
             public override void Update(TripQuotes quote)
             {
