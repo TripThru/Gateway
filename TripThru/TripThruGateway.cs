@@ -637,7 +637,7 @@ namespace TripThruCore
         public Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest r)
         {
             Gateway.UpdateQuoteResponse response;
-            var quotes = tripthru.activeQuotes.ContainsKey(r.tripId) ? tripthru.activeQuotes[r.tripId] : null;
+            var quotes = tripthru.activeQuotes.ContainsKey(r.tripId) ? tripthru.activeQuotes[r.tripId].Clone() : null;
             if (quotes != null)
             {
                 if (quotes.ReceivedQuotes == null)
