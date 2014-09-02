@@ -450,17 +450,19 @@ namespace Tests
         public void ValidateTripRequests(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
         {
             var id = trip.publicID;
-            var originatingRequests = originatingGateway.RequestsByTripId[id];
-            var servicingRequests = servicingGateway.RequestsByTripId[id];
+            Assert.IsTrue(originatingGateway.RequestsByTripId.ContainsKey(id), "Should have received at least one request");
+            Assert.IsTrue(servicingGateway.RequestsByTripId.ContainsKey(id), "Should have sent at least one request");
+            var receivedRequests = originatingGateway.RequestsByTripId[id];
+            var sentRequests = servicingGateway.RequestsByTripId[id];
             if (trip.service == PartnerTrip.Origination.Foreign)
             {
-                ValidateSentRequestsForTripServiceForeign(originatingRequests, servicingRequests);
-                ValidateReceivedRequestsForTripServiceForeign(originatingRequests, servicingRequests);
+                ValidateSentRequestsForTripServiceForeign(receivedRequests, sentRequests);
+                ValidateReceivedRequestsForTripServiceForeign(receivedRequests, sentRequests);
             }
             else
             {
-                ValidateSentRequestsForTripServiceLocal(originatingRequests, servicingRequests);
-                ValidateReceivedRequestsForTripServiceLocal(originatingRequests, servicingRequests);
+                ValidateSentRequestsForTripServiceLocal(receivedRequests, sentRequests);
+                ValidateReceivedRequestsForTripServiceLocal(receivedRequests, sentRequests);
             }
         }
         public void ValidateSentRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests)
