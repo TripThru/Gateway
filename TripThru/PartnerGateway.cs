@@ -303,8 +303,6 @@ namespace TripThruCore
 
                     Logger.SetServicingId(this.ID);
                     PartnerTrip t = tripsByID[r.tripID];
-                    //lock (t)
-                    //{
                     DateTime? pickupTime = null;
                     if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
                         pickupTime = t.pickupTime; // Only if trip has been pickedup.
@@ -343,7 +341,6 @@ namespace TripThruCore
                         status: t.status,
                         passengerName: t.passengerName
                     );
-                    //}
                 }
             }
             return response;
@@ -362,11 +359,8 @@ namespace TripThruCore
                 else
                 {
                     PartnerTrip t = tripsByID[r.tripID];
-                    //lock (t)
-                    //{
                     response = new UpdateTripStatusResponse();
                     t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
-                    //}
                     Logger.SetServicingId(this.ID);
                 }
             }
@@ -520,15 +514,12 @@ namespace TripThruCore
             if (TripStatusHasChanged(status, driverLocation, eta))
             {
                 Logger.Log("Trip status changed from " + _status + " to " + status + (driverLocation != null ? (" and driver's location has changed to " + driverLocation) : "") + (eta != null ? (" and eta has changed to " + eta) : ""));
-                _status = status;
                 if (driverLocation != null)
                     UpdateDriverLocation(driverLocation);
                 if (eta != null)
                     this.ETA = eta;
                 if (IsOneOfTheActiveTrips())
                 {
-                    partner.activeTrips[ID].Status = status;
-                    this.status = status;
                     if (lastStatusNotifiedToPartner != status && notifyPartner)
                         NotifyForeignPartner(status, driverLocation, eta);
                 }
@@ -537,6 +528,7 @@ namespace TripThruCore
             }
             if (status == Status.Complete)
             {
+                Logger.Log("Trip " + ID + " completed. Deactivating.");
                 if (service == Origination.Foreign)
                 {
                     partner.DeactivateTripAndUpdateStats(ID, Status.Complete, 0, 0);
@@ -545,8 +537,23 @@ namespace TripThruCore
                     partner.DeactivateTripAndUpdateStats(ID, Status.Complete, PartnerFleet.GetPrice(this), PartnerFleet.GetDistance(this));
             }
             else if (status == Status.Cancelled || status == Status.Rejected)
-                partner.DeactivateTripAndUpdateStats(ID, status);
-
+            {
+                Logger.Log("Trip " + ID + " was " + status);
+                if (origination == Origination.Foreign || PartnerFleet.MissedPeriodReached(this))
+                {
+                    Logger.Log("Missed period reached or trip is foreign so deactivating");
+                    partner.DeactivateTripAndUpdateStats(ID, status, 0, 0);
+                }
+                else
+                {
+                    Logger.Log("Missed period not reached yet so putting trip back to queue");
+                    status = Status.Queued;
+                    service = Origination.Local;
+                }
+            }
+            if (IsOneOfTheActiveTrips())
+                partner.activeTrips[ID].Status = status;
+            this.status = status;
             lastStatusNotifiedToPartner = status;
         }
         private void UpdateDriverLocation(Location location)
@@ -1271,7 +1278,7 @@ namespace TripThruCore
             Logger.Untab();
         }
 
-        private bool MissedPeriodReached(PartnerTrip t)
+        public bool MissedPeriodReached(PartnerTrip t)
         {
             return DateTime.UtcNow > t.pickupTime + missedPeriod;
         }
@@ -1322,7 +1329,6 @@ namespace TripThruCore
 
         public void ProcessTrip(PartnerTrip t)
         {
-            //Logger.LogDebug("Processing " + t);
             lock (locker)
             {
                 switch (t.status)
@@ -1482,7 +1488,7 @@ namespace TripThruCore
 
         private static void LogTheNewDriverLocation(PartnerTrip t)
         {
-            Logger.Log("Getting status of: " + t);
+            Logger.Log("Status of: " + t);
             t.lastUpdate = DateTime.UtcNow;
         }
 
