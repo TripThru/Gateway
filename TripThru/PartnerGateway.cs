@@ -232,8 +232,10 @@ namespace TripThruCore
 
         public PartnerTrip GetTrip(QuoteTripRequest r)
         {
-            return new PartnerTrip(this, null, PartnerTrip.Origination.Foreign, r.pickupLocation, r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation,
-                null, r.waypoints, r.vehicleType, r.maxPrice, r.minRating, r.fleetID == null ? null : this.PartnerFleets[r.fleetID], r.driverID == null ? null : this.PartnerFleets[r.fleetID].drivers[r.driverID]);
+            return new PartnerTrip(this, r.tripId != null ? r.tripId : "quote", PartnerTrip.Origination.Foreign, r.pickupLocation, 
+                r.pickupTime, r.paymentMethod, r.passengerID, r.passengerName, r.dropoffLocation, null, r.waypoints, r.vehicleType, 
+                r.maxPrice, r.minRating, r.fleetID == null ? null : this.PartnerFleets[r.fleetID], 
+                r.driverID == null ? null : this.PartnerFleets[r.fleetID].drivers[r.driverID]);
         }
         public override QuoteTripResponse QuoteTrip(QuoteTripRequest r)
         {
