@@ -755,7 +755,6 @@ namespace TripThruCore
             Trip t = tripthru.activeTrips[q.Id];
             if (bestQuote != null)
             {
-                var quoteRequest = q.QuoteRequest;
                 Logger.Log("Best quote found from partner " + bestQuote.PartnerId + " with ETA " + bestQuote.ETA);
                 tripthru.activeTrips[q.Id].ServicingPartnerId = bestQuote.PartnerId;
                 tripthru.activeTrips[q.Id].ServicingPartnerName = bestQuote.PartnerName;
@@ -962,8 +961,11 @@ namespace TripThruCore
             return covered;
         }
         private Gateway.QuoteTripRequest MakeQuoteTripRequest(TripQuotes q){
-            var request = q.QuoteRequest;
-            request.clientID = tripthru.ID;
+            var r = q.QuoteRequest;
+            var request = new Gateway.QuoteTripRequest(
+                    clientID: tripthru.ID, id: r.tripId, pickupLocation: r.pickupLocation, pickupTime: r.pickupTime,
+                    passengerName: r.passengerName, dropoffLocation: r.dropoffLocation, vehicleType: r.vehicleType
+                );
             return request;
         }
 

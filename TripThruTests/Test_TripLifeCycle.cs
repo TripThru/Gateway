@@ -411,6 +411,7 @@ namespace Tests
                 if (response.result == Gateway.Result.OK)
                     status = response.status;
             }
+            Thread.Sleep(simInterval);
         }
 
         private DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)

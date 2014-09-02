@@ -1189,8 +1189,8 @@ namespace TripThruCore
                 this[quote.Id].Autodispatch = quote.Autodispatch;
                 this[quote.Id].Id = quote.Id;
                 this[quote.Id].PartnersThatServe = quote.PartnersThatServe;
-                this[quote.Id].QuoteRequest = quote.QuoteRequest;
-                this[quote.Id].ReceivedQuotes = quote.ReceivedQuotes;
+                this[quote.Id].QuoteRequest = CopyQuoteTripRequest(quote.QuoteRequest);
+                this[quote.Id].ReceivedQuotes = quote.ReceivedQuotes.ToList();
                 this[quote.Id].ReceivedUpdatesCount = quote.ReceivedUpdatesCount;
                 this[quote.Id].Status = quote.Status;
                 StorageManager.UpdateQuote(quote);
@@ -1198,6 +1198,13 @@ namespace TripThruCore
             public List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
             {
                 return dict.Values.Where(q => q.Status == status).ToList();
+            }
+            private QuoteTripRequest CopyQuoteTripRequest(QuoteTripRequest r)
+            {
+                return new Gateway.QuoteTripRequest(
+                    clientID: r.clientID, id: r.tripId, pickupLocation: r.pickupLocation, pickupTime: r.pickupTime,
+                    passengerName: r.passengerName, dropoffLocation: r.dropoffLocation, vehicleType: r.vehicleType
+                );
             }
         }
 
