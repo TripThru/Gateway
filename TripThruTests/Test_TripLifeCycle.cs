@@ -489,7 +489,8 @@ namespace Tests
         }
         public void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
-            Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once");
+            if (trip.origination == PartnerTrip.Origination.Foreign)
+                Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once");
             Assert.LessOrEqual(sentRequests.UpdateDispatched, 1, "Should send status update at most once");
             Assert.LessOrEqual(sentRequests.UpdateEnroute, 1, "Should send status update at most once");
             Assert.LessOrEqual(sentRequests.UpdatePickedUp, 1, "Should send status update at most once");
