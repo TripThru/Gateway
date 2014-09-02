@@ -1029,6 +1029,7 @@ namespace TripThruCore
                 Logger.Log("Selecting best quote and changing quote state to sent");
                 q.Status = QuoteStatus.Sent;
                 tripthru.activeQuotes.Update(q);
+                tripthru.activeQuotes.Remove(q.Id);
                 SelectBestQuoteAndSetServicingPartnerToTrip(q);
             }
             else
