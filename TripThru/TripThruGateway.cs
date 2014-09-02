@@ -672,7 +672,8 @@ namespace TripThruCore
                 Status = QuoteStatus.New,
                 PartnersThatServe = 0,
                 QuoteRequest = r,
-                Autodispatch = autodispatch
+                Autodispatch = autodispatch,
+                ReceivedQuotes = new List<Quote>()
             };
             tripthru.activeQuotes.Insert(tripQuotes.Id, tripQuotes);
         }
@@ -841,15 +842,18 @@ namespace TripThruCore
             Quote bestQuote = null;
             DateTime bestETA = r.pickupTime + tripthru.missedBookingPeriod;
             // not more than 30 minues late
-            foreach (Quote q in quotes)
+            if (quotes != null)
             {
-                DateTime eta = (DateTime)q.ETA;
-                if (eta == null) // if no ETA is returned then we assume a certain lateness.
-                    eta = r.pickupTime + tripthru.missedBookingPeriod - new TimeSpan(0, 1, 0);
-                if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
+                foreach (Quote q in quotes)
                 {
-                    bestETA = (DateTime)q.ETA;
-                    bestQuote = q;
+                    DateTime eta = (DateTime)q.ETA;
+                    if (eta == null) // if no ETA is returned then we assume a certain lateness.
+                        eta = r.pickupTime + tripthru.missedBookingPeriod - new TimeSpan(0, 1, 0);
+                    if (eta.ToUniversalTime() < bestETA.ToUniversalTime())
+                    {
+                        bestETA = (DateTime)q.ETA;
+                        bestQuote = q;
+                    }
                 }
             }
             return bestQuote;
@@ -969,6 +973,11 @@ namespace TripThruCore
                 {
                     Logger.Log("Exception quoting " + partner.name + ": " + e.ToString());
                 }
+            }
+            if (q.PartnersThatServe == 0)
+            {
+                Logger.Log("No partners available. Changing quote to complete.");
+                q.Status = QuoteStatus.Complete;
             }
             tripthru.activeQuotes.Update(q);
         }
