@@ -216,7 +216,7 @@ namespace TripThruCore.Storage
                     cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
                     cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
                     cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
-                    cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                    cm.GetMemberMap(c => c.DriverInitialLocation).SetIgnoreIfNull(true);
                     cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
                     cm.GetMemberMap(c => c.Lateness).SetIgnoreIfNull(true);
                     cm.GetMemberMap(c => c.LatenessMilliseconds).SetIgnoreIfNull(true);

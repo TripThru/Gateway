@@ -1162,7 +1162,7 @@ namespace TripThruCore
                     DriverLocation = t.driver != null ? t.driver.location : null,
                     DriverName = t.driver != null ? t.driver.name : null,
                     DropoffLocation = t.dropoffLocation,
-                    DriverInitiaLocation = t.driverInitiaLocation ?? null,
+                    DriverInitialLocation = t.driverInitiaLocation ?? null,
                     DropoffTime = t.dropoffTime,
                     Id = t.ID,
                     IdNumber = t.IdNumber,
@@ -1457,8 +1457,8 @@ namespace TripThruCore
             Logger.Log("The destination has been reached for: " + t);
             Logger.Tab();
             t.dropoffTime = DateTime.UtcNow;
+            t.UpdateTripStatus(notifyPartner: true, driverLocation: t.driverLocation, status: Status.Complete);
             CompleteTrip(t);
-            t.UpdateTripStatus(notifyPartner: true, status: Status.Complete);
             Logger.Untab();
         }
 

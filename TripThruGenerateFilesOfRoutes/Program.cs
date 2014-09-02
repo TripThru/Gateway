@@ -170,7 +170,7 @@ namespace TripThruGenerateFilesOfRoutes
                 cm.GetMemberMap(c => c.ServicingPartnerId).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.VehicleType).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.DriverLocation).SetIgnoreIfNull(true);
-                cm.GetMemberMap(c => c.DriverInitiaLocation).SetIgnoreIfNull(true);
+                cm.GetMemberMap(c => c.DriverInitialLocation).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.LastUpdate).SetIgnoreIfNull(true);
                 cm.GetMemberMap(c => c.loc);
             });
@@ -246,7 +246,7 @@ namespace TripThruGenerateFilesOfRoutes
                         Console.WriteLine("Incomplete Trip");
                         continue;
                     }
-                    trip.DriverInitiaLocation = new Location(40.769004, -73.981376);
+                    trip.DriverInitialLocation = new Location(40.769004, -73.981376);
                     trip.DropoffTime = Convert.ToDateTime(tripValues[6]).AddYears(1).AddMonths(5);
                     trip.DropoffTime = trip.DropoffTime.Value.AddDays(-1 * trip.DropoffTime.Value.Day);
                     trip.DropoffTime = trip.DropoffTime.Value.AddDays(r.Next(1, 31)); 

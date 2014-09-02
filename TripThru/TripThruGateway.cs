@@ -295,7 +295,7 @@ namespace TripThruCore
                 driverID: trip.DriverId,
                 driverName: trip.DriverName,
                 driverLocation: trip.DriverLocation,
-                driverInitialLocation: trip.DriverInitiaLocation,
+                driverInitialLocation: trip.DriverInitialLocation,
                 dropoffTime: trip.DropoffTime,
                 dropoffLocation: trip.DropoffLocation,
                 vehicleType: trip.VehicleType,
@@ -575,8 +575,8 @@ namespace TripThruCore
                 trip.DriverLocation = r.driverLocation;
                 trip.ETA = r.eta;
                 trip.IsDirty = true;
-                if (trip.DriverInitiaLocation == null)
-                    trip.DriverInitiaLocation = r.driverLocation;
+                if (trip.DriverInitialLocation == null)
+                    trip.DriverInitialLocation = r.driverLocation;
                 switch (r.status)
                 {
                     case Status.Enroute:

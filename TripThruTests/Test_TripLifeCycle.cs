@@ -63,7 +63,7 @@ namespace Tests
         }
 
         [Test]
-        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Rejected", MatchType = MessageMatch.Contains)]
+        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
         public void NotEnoughDrivers_SingleTrips()
         {
             Logger.Log("Test_TripLifeCycle_NotEnoughDrivers_SingleTrips");
@@ -80,7 +80,7 @@ namespace Tests
         }
 
         [Test]
-        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Rejected", MatchType = MessageMatch.Contains)]
+        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
         public void NotEnoughDrivers_SimultaneousTrips_VerifyRejected()
         {
             Logger.Log("NotEnoughDrivers_SimultaneousTrips_VerifyRejected");
@@ -108,7 +108,7 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
-                maxLateness: new TimeSpan(0, 10, 0));
+                maxLateness: new TimeSpan(0, 20, 0));
             lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
         }
 
@@ -145,7 +145,7 @@ namespace Tests
         {
             Logger.Log("AllPartners_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);
-            TimeSpan maxLateness = new TimeSpan(0, 25, 0);
+            TimeSpan maxLateness = new TimeSpan(0, 20, 0);
             double locationVerificationTolerance = 4;
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
@@ -401,7 +401,6 @@ namespace Tests
             Status? status = null;
             while (status != Status.Dispatched && DateTime.UtcNow < timeoutAt)
             {
-                Console.WriteLine("Waiting for " + trip.ID + " to be dispatched");
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
                 fleet.ProcessTrip(trip);

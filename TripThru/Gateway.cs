@@ -206,7 +206,7 @@ namespace TripThruCore
             } 
         }
         public Location DropoffLocation { get; set; }
-        public Location DriverInitiaLocation { get; set; }
+        public Location DriverInitialLocation { get; set; }
         public DateTime? PickupTime { get; set; }
         public DateTime? DropoffTime { get; set; }
         public VehicleType? VehicleType { get; set; }
@@ -1120,6 +1120,7 @@ namespace TripThruCore
                 this[trip.Id].FleetName = trip.FleetName;
                 this[trip.Id].DriverId = trip.DriverId;
                 this[trip.Id].DriverName = trip.DriverName;
+                this[trip.Id].DriverLocation = trip.DriverLocation;
                 this[trip.Id].ETA = trip.ETA;
                 this[trip.Id].Price = trip.Price;
                 this[trip.Id].OccupiedDistance = trip.OccupiedDistance;
