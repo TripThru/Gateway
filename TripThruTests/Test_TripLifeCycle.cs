@@ -88,7 +88,6 @@ namespace Tests
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
              * */
-            //GatewayServer gatewayServer = new GatewayServer("EmptyGateway", "EmptyGateway");
             var tripthru = new TripThru(enableTDispatch: false);
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
@@ -348,9 +347,9 @@ namespace Tests
 
         public void ValidateTripThruStatus(PartnerTrip trip)
         {
-            var tripId =  PartnerTrip.GetPublicID(partner.ID, trip.ID);
+            var tripId = trip.publicID;
             Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
-            Assert.AreEqual(trip.status, response.status, "The trip local status is different in compare how gateway says. Trip ID: " + tripId);
+            Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
             if (trip.status == Status.Enroute)
                 Assert.IsNotNull(response.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + tripId);
             if (trip.status == Status.PickedUp)
@@ -361,12 +360,14 @@ namespace Tests
 
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
         {
-            ValidateOriginationAndService(trip);
+            if (nextStatus == Status.Dispatched)
+                WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
+            else
+                WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, GetTimeWhenStatusShouldBeReached(trip));
             if (trip.status == nextStatus)
                 ValidateTripThruStatus(trip);
-            WaitUntilStatusReachedOrTimeout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
 
-            Assert.AreEqual(nextStatus, trip.status, "The 'trip' not advance to the next status. Trip ID: " + trip.ID);
+            Assert.AreEqual(nextStatus, trip.status, "The trip did not advance to the next status. Trip ID: " + trip.ID);
             switch (trip.status)
             {
                 case Status.Enroute:
@@ -383,31 +384,32 @@ namespace Tests
             }
         }
 
-        private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
+        private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, Status nextStatus, DateTime timeoutAt)
         {
-            Status startingStatus = trip.status;
-            do
+            while (trip.status != nextStatus && DateTime.UtcNow < timeoutAt)
             {
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
-            } while (trip.status == startingStatus && DateTime.UtcNow < timeoutAt);
-        }
-
-        private void ValidateOriginationAndService(PartnerTrip trip)
-        {
-            if (trip.status == Status.Queued) //if still completely local
-            {
-                Assert.AreEqual(PartnerTrip.Origination.Local, trip.origination, "The origination 'trip' is different to local. Trip ID: " + trip.ID);
-                Assert.AreEqual(PartnerTrip.Origination.Local, trip.service, "The service 'trip' is different to local. Trip ID: " + trip.ID);
             }
-            else
+        }
+        private void WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
+        {
+            // The trip will advance to dispatched status on the partner's side but tripthru could reject it so we wait to confirm if
+            // tripthru successfully dispatched the trip.
+            Status? status = null;
+            while (status != Status.Dispatched && DateTime.UtcNow < timeoutAt)
             {
-                if (origination != null)
-                    Assert.AreEqual(origination, trip.origination, "The origination is different. Trip ID: " + trip.ID);
-                if (service != null)
-                    Assert.AreEqual(service, trip.service, "The service is different. Trip ID: " + trip.ID);
+                Console.WriteLine("Waiting for " + trip.ID + " to be dispatched");
+                // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
+                // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
+                fleet.ProcessTrip(trip);
+                Thread.Sleep(simInterval);
+
+                var response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, trip.publicID));
+                if (response.result == Gateway.Result.OK)
+                    status = response.status;
             }
         }
 

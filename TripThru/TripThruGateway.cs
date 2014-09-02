@@ -244,7 +244,7 @@ namespace TripThruCore
             {
                 return new GetQuoteResponse(status: quote.Status, quotes: quote.ReceivedQuotes);
             }
-            Logger.Log("Quote id not found");
+            Logger.Log("Quote " + request.tripId + " not found");
             Logger.AddTag("ClientId", request.clientID);
             return new GetQuoteResponse(result: Result.NotFound);
         }
@@ -274,49 +274,38 @@ namespace TripThruCore
                 Logger.Log("Partner " + r.clientID + " not found.");
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
-            Gateway partner = GetDestinationPartner(r.clientID, r.tripID);
-            if (partner != null)
+            var trip = StorageManager.GetTrip(r.tripID);
+            if (trip != null)
             {
-                Logger.AddTag("Destination_partner", partner.name);
-                Logger.SetServicingId(partner.ID);
-                r.clientID = ID;
-                GetTripStatusResponse response = partner.GetTripStatus(r);
-                if (response.result == Result.OK)
-                {
-                    if (TripHasNonActiveStatus(response))
-                    {
-                        var trip = activeTrips[r.tripID];
-                        trip.Status = trip.Status;
-                        trip.DriverLocation = response.driverLocation;
-                        trip.DropoffTime = response.dropoffTime;
-                        trip.IsDirty = true;
-                        activeTrips.Update(trip);
-                    }
-                    else
-                    {
-                        if (TripHasDriverInitialLocation(r.tripID))
-                            AddDriverInitialLocation(response, r.tripID);
-                        UpdateActiveTripWithNewTripStatus(r, response);
-                    }
-                    MakeGetTripStatusResponse(r, partner, response);
-                }
-                else
-                {
-                    Logger.Log("Request to destination partner failed, Result=" + response.result);
-                }
-                return response;
+                return MakeGetTripStatusResponse(trip);
             }
-            Logger.Log("Destination partner trip not found");
+            Logger.Log("Trip " + r.tripID + " not found");
             Logger.AddTag("ClientId", r.clientID);
             return new GetTripStatusResponse(result: Result.NotFound);
         }
-        private bool TripHasDriverInitialLocation(string tripId)
+        private GetTripStatusResponse MakeGetTripStatusResponse(Trip trip)
         {
-            return activeTrips[tripId].DriverInitiaLocation != null;
-        }
-        private void AddDriverInitialLocation(GetTripStatusResponse response, string tripId)
-        {
-            response.driverInitialLocation = activeTrips[tripId].DriverInitiaLocation;
+            return new GetTripStatusResponse(
+                partnerID: trip.OriginatingPartnerId,
+                partnerName: trip.OriginatingPartnerName,
+                fleetID: trip.FleetId,
+                fleetName: trip.FleetName,
+                pickupTime: trip.PickupTime,
+                pickupLocation: trip.PickupLocation,
+                driverID: trip.DriverId,
+                driverName: trip.DriverName,
+                driverLocation: trip.DriverLocation,
+                driverInitialLocation: trip.DriverInitiaLocation,
+                dropoffTime: trip.DropoffTime,
+                dropoffLocation: trip.DropoffLocation,
+                vehicleType: trip.VehicleType,
+                ETA: trip.ETA,
+                distance: trip.EnrouteDistance,
+                driverRouteDuration: trip.DriverRouteDuration,
+                price: trip.Price,
+                status: trip.Status,
+                passengerName: trip.PassengerName
+            );
         }
 
         public override GetRouteTripResponse GetRouteTrip(GetRouteTripRequest request)
@@ -339,50 +328,6 @@ namespace TripThruCore
             return getRouteTripResponse;
         }
 
-        private void UpdateActiveTripWithNewTripStatus(GetTripStatusRequest r, GetTripStatusResponse response)
-        {
-
-            Trip trip = new Trip
-            {
-                Id = r.tripID,
-                FleetId = response.fleetID,
-                FleetName = response.fleetName,
-                DriverId = response.driverID,
-                DriverName = response.driverName,
-                Status = response.status,
-                ETA = response.ETA,
-                Price = response.price,
-
-                DriverRouteDuration = response.driverRouteDuration,
-                SamplingPercentage = 1
-
-            };
-            if (response.status == Status.PickedUp)
-                trip.EnrouteDistance = response.distance;
-            activeTrips.Update(trip);
-        }
-
-        private void MakeGetTripStatusResponse(GetTripStatusRequest r, Gateway partner, GetTripStatusResponse response)
-        {
-            Logger.AddTag("Passenger", response.passengerName);
-            Logger.AddTag("Pickup time", response.pickupTime.ToString());
-            Logger.AddTag("Pickup location", response.pickupLocation.ToString());
-            Logger.AddTag("Dropoff location", response.dropoffLocation.ToString());
-            Logger.AddTag("Status", response.status.ToString());
-            Logger.AddTag("ETA", response.ETA.ToString());
-
-            response.partnerID = partner.ID;
-            response.partnerName = partner.name;
-            response.originatingPartnerName = partners[originatingPartnerByTrip[r.tripID]].name;
-            response.servicingPartnerName = partners[servicingPartnerByTrip[r.tripID]].name;
-            Logger.AddTag("Originating partner", response.originatingPartnerName);
-            Logger.AddTag("Servicing partner", response.servicingPartnerName);
-        }
-
-        private static bool TripHasNonActiveStatus(GetTripStatusResponse response)
-        {
-            return response.status == Status.Complete || response.status == Status.Cancelled || response.status == Status.Rejected;
-        }
         public override UpdateTripStatusResponse UpdateTripStatus(UpdateTripStatusRequest request)
         {
             requests++;

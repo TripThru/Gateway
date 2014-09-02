@@ -32,6 +32,7 @@ namespace TripThruCore.Storage
         public abstract long GetLastTripId();
         public abstract void InsertTrip(Trip trip);
         public abstract void UpdateTrip(Trip trip);
+        public abstract Trip GetTrip(string id);
         public abstract List<Trip> GetTripsByState(TripState state);
         public abstract List<Trip> GetDirtyTrips();
         public abstract Route GetRoute(string id);
@@ -121,6 +122,10 @@ namespace TripThruCore.Storage
             throw new NotImplementedException();
         }
         public override void UpdateTrip(Trip trip)
+        {
+            throw new NotImplementedException();
+        }
+        public override Trip GetTrip(string id)
         {
             throw new NotImplementedException();
         }
@@ -311,6 +316,14 @@ namespace TripThruCore.Storage
         public override void UpdateTrip(Trip trip)
         {
             this._trips.Save(trip);
+        }
+        public override Trip GetTrip(string id)
+        {
+            var trips = this._trips.AsQueryable<Trip>().Where(t => t.Id == id).ToList();
+            if (trips.Count > 0)
+                return trips[0];
+            else
+                return null;
         }
         public override List<Trip> GetTripsByState(TripState state)
         {
@@ -505,6 +518,21 @@ namespace TripThruCore.Storage
             catch (Exception e)
             {
                 Logger.LogDebug("UpdateTrip exception. Trip is " + (trip != null ? "not null" : "null"), e.ToString());
+                throw e;
+            }
+        }
+        public static Trip GetTrip(string id)
+        {
+            try
+            {
+                if (_storage != null)
+                    return _storage.GetTrip(id);
+                else
+                    return null;
+            }
+            catch (Exception e)
+            {
+                Logger.LogDebug("GetTrip exception", e.ToString());
                 throw e;
             }
         }
