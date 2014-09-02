@@ -411,7 +411,7 @@ namespace Tests
                 if (response.result == Gateway.Result.OK)
                     status = response.status;
             }
-            Thread.Sleep(simInterval);
+            Thread.Sleep(new TimeSpan(0, 0, 5)); // Give tripthru enough time to notify update to originating partner
         }
 
         private DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)
