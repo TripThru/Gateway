@@ -284,7 +284,14 @@ namespace TripThruCore
                 if (response.result == Result.OK)
                 {
                     if (TripHasNonActiveStatus(response))
-                        DeactivateTripAndUpdateStats(r.tripID, (Status)response.status, response.price, response.distance);
+                    {
+                        var trip = activeTrips[r.tripID];
+                        trip.Status = trip.Status;
+                        trip.DriverLocation = response.driverLocation;
+                        trip.DropoffTime = response.dropoffTime;
+                        trip.IsDirty = true;
+                        activeTrips.Update(trip);
+                    }
                     else
                     {
                         if (TripHasDriverInitialLocation(r.tripID))
@@ -594,7 +601,9 @@ namespace TripThruCore
             {
                 if (r.status == Status.Cancelled && tripthru.originatingPartnerByTrip.ContainsKey(r.tripID) && r.clientID == tripthru.originatingPartnerByTrip[r.tripID])
                 {
-                    tripthru.DeactivateTripAndUpdateStats(r.tripID, r.status, 0, 0);
+                    var trip = tripthru.activeTrips[r.tripID];
+                    trip.Status = r.status;
+                    tripthru.activeTrips.Update(trip);
                     return new Gateway.UpdateTripStatusResponse();
                 }
                 else
@@ -817,8 +826,6 @@ namespace TripThruCore
                 t.IsDirty = true;
                 t.MadeDirtyById = tripthru.ID;
                 tripthru.activeTrips.Update(t);
-                Logger.Log("Deactivating rejected trip " + t.Id);
-                DeactivateTripAndUpdateStats(t);
             }
         }
         protected void UpdateQuoteResponseHandler(TripQuotes q, Gateway.UpdateQuoteResponse response)
@@ -909,9 +916,9 @@ namespace TripThruCore
                 t.IsDirty = false;
                 tripthru.activeTrips.Update(t);
             }
-            if (t.Status == Status.Complete)
+            if (TripHasNonActiveStatus(t))
             {
-                Logger.Log("Deactivating Complete trip");
+                Logger.Log("Deactivating " + t.Status +" trip");
                 t.IsDirty = false;
                 tripthru.activeTrips.Update(t);
                 DeactivateTripAndUpdateStats(t);
@@ -921,12 +928,16 @@ namespace TripThruCore
         {
             return t.OriginatingPartnerId == t.ServicingPartnerId;
         }
+        private bool TripHasNonActiveStatus(Trip t)
+        {
+            return t.Status == Status.Complete || t.Status == Status.Cancelled || t.Status == Status.Rejected;
+        }
         protected Gateway.UpdateTripStatusRequest MakeUpdateTripStatusRequest(Trip t)
         {
             return new Gateway.UpdateTripStatusRequest(
                     clientID: tripthru.ID, tripID: t.Id, status: (Status)t.Status, driverLocation: t.DriverLocation, eta: t.ETA);
         }
-        private void DeactivateTripAndUpdateStats(Trip t)
+        public void DeactivateTripAndUpdateStats(Trip t)
         {
             Gateway.GetTripStatusResponse tripStatus = null;
             double? price = 0;
