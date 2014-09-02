@@ -22,6 +22,7 @@ namespace Tests
             Logger.OpenLog("Nunit", splunkEnabled: false);
             MapTools.ClearCache();
             StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
+            StorageManager.Reset(); // Sometimes mongo can't delete on teardown between tests
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;

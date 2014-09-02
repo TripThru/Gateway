@@ -1018,7 +1018,7 @@ namespace TripThruCore
                     while (true)
                     {
                         var trips = _tripManager.tripthru.activeTrips.GetTripsByState(TripState.New);
-                        foreach (var trip in trips)
+                        foreach (var trip in trips.ToList())
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread( () => {
@@ -1071,7 +1071,7 @@ namespace TripThruCore
                     while (true)
                     {
                         var trips = _tripManager.tripthru.activeTrips.GetDirtyTrips();
-                        foreach (var trip in trips)
+                        foreach (var trip in trips.ToList())
                         {
                             var t = _tripManager.tripthru.activeTrips[trip.Id];
                             new Thread(() =>
@@ -1125,7 +1125,7 @@ namespace TripThruCore
                     try
                     {
                         var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.New);
-                        foreach (var quote in quotes)
+                        foreach (var quote in quotes.ToList())
                         {
                             var q = _tripManager.tripthru.activeQuotes[quote.Id];
                             new Thread( () => {
@@ -1177,7 +1177,7 @@ namespace TripThruCore
                     try
                     {
                         var quotes = _tripManager.tripthru.activeQuotes.GetQuotesByStatus(QuoteStatus.Complete);
-                        foreach (var quote in quotes)
+                        foreach (var quote in quotes.ToList())
                         {
                             var q = _tripManager.tripthru.activeQuotes[quote.Id];
                             new Thread( () => {

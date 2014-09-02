@@ -1135,8 +1135,7 @@ namespace TripThruCore
                     this[trip.Id].Status = trip.Status;
                     this[trip.Id].LastStatusChange = DateTime.UtcNow;
                 }
-                trip.LastUpdate = DateTime.UtcNow;
-                dict[trip.Id] = trip;
+                this[trip.Id].LastUpdate = DateTime.UtcNow;
                 StorageManager.UpdateTrip(trip);
             }
             public List<Trip> GetTripsByState(TripState state)
@@ -1194,7 +1193,6 @@ namespace TripThruCore
                 this[quote.Id].ReceivedQuotes = quote.ReceivedQuotes;
                 this[quote.Id].ReceivedUpdatesCount = quote.ReceivedUpdatesCount;
                 this[quote.Id].Status = quote.Status;
-                dict[quote.Id] = quote;
                 StorageManager.UpdateQuote(quote);
             }
             public List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
