@@ -1010,6 +1010,7 @@ namespace TripThruCore
                 this._tripManager = tripManager;
                 this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
 
@@ -1063,6 +1064,7 @@ namespace TripThruCore
                 this._tripManager = tripManager;
                 this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
 
@@ -1117,6 +1119,7 @@ namespace TripThruCore
                 this._tripManager = tripManager;
                 this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
 
@@ -1169,6 +1172,7 @@ namespace TripThruCore
                 this._tripManager = tripManager;
                 this._heartbeat = heartbeat;
                 _worker = new Thread(StartThread);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
 
@@ -1403,6 +1407,7 @@ namespace TripThruCore
         {
             this._tripthruGateway = tripthruGateway;
             _worker = new Thread(StartThread);
+            _worker.IsBackground = true;
             _worker.Start();
         }
 
@@ -1439,6 +1444,7 @@ namespace TripThruCore
         {
             _partners = partners;
             _worker = new Thread(StartThread);
+            _worker.IsBackground = true;
             _worker.Start();
         }
 

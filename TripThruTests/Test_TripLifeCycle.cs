@@ -266,8 +266,11 @@ namespace Tests
         public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
         {
             foreach (SubTest u in singleTrips_Subtests)
-                new Thread(u.Run).Start();
-
+            {
+                var thread = new Thread(u.Run);
+                thread.IsBackground = true;
+                thread.Start();
+            }
             bool? passed = null;
             while (passed == null && DateTime.UtcNow < timeoutAt)
             {
