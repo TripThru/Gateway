@@ -20,12 +20,6 @@ namespace TripThruCore
     {
         static long nextID = 0;
         static public string GenerateUniqueID(string clientID) { nextID++; return nextID.ToString() + "@" + clientID; }
-        void CleanUpTrip(string tripID)
-        {
-            Logger.LogDebug("Cleaning up trip " + tripID);
-            originatingPartnerByTrip.Remove(tripID);
-            servicingPartnerByTrip.Remove(tripID);
-        }
         public Dictionary<string, Gateway> partners;
 
         public RedisDictionary<string, string> originatingPartnerByTrip;
@@ -45,7 +39,7 @@ namespace TripThruCore
             : base("TripThru", "TripThru")
         {
             InitializePersistantDataObjects();
-            garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
+            //garbageCleanup = new GarbageCleanup<string>(new TimeSpan(0, 1, 0), CleanUpTrip);
             LoadUserAccounts();
             if (enableTDispatch)
                 LoadTDispatchIntegrations();
@@ -348,7 +342,7 @@ namespace TripThruCore
             tags["ServicingPartnerByTrip"] = this.servicingPartnerByTrip.Count.ToString();
             tags["LocationAddresses"] = MapTools.locationAddresses.Count.ToString();
             tags["LocationNames"] = MapTools.locationNames.Count.ToString();
-            tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
+            //tags["Garbage"] = this.garbageCleanup.garbage.Count.ToString();
             tags["LoggerQueue"] = Logger.Queue.Count.ToString();
             tags["Memory"] = (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb";
             tags["RunningThreads"] = Process.GetCurrentProcess().Threads.Count.ToString();
@@ -900,7 +894,14 @@ namespace TripThruCore
                 distance =  tripStatus.distance != null ? tripStatus.distance : 0;
                 Logger.Log("Stats received. Price: " + price + ", Distance: " + distance);
             }
+            CleanUpTrip(t.Id);
             tripthru.DeactivateTripAndUpdateStats(t.Id, (Status)t.Status, price, distance);
+        }
+        void CleanUpTrip(string tripID)
+        {
+            Logger.LogDebug("Cleaning up trip " + tripID);
+            tripthru.originatingPartnerByTrip.Remove(tripID);
+            tripthru.servicingPartnerByTrip.Remove(tripID);
         }
         private Gateway.GetTripStatusResponse GetPriceAndDistanceDetailsFromClient(Gateway.UpdateTripStatusRequest r)
         {
