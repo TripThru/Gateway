@@ -162,7 +162,7 @@ namespace Tests
             Logger.Log("AllPartners_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);
             TimeSpan maxLateness = new TimeSpan(0, 20, 0);
-            double locationVerificationTolerance = 8;
+            double locationVerificationTolerance = 10;
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
@@ -341,6 +341,7 @@ namespace Tests
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()
         {
+            Test_TripLifeCycle_Base.testsRunning = true;
             foreach (PartnerFleet fleet in partner.PartnerFleets.Values)
             {
                 var i = 1;
@@ -351,6 +352,7 @@ namespace Tests
                 }
                 
             }
+            Test_TripLifeCycle_Base.testsRunning = false;
         }
 
         public void TestTripLifecycleAndReturningDriver(PartnerFleet fleet, Pair<Location, Location> tripSpec)
@@ -417,8 +419,12 @@ namespace Tests
             if (nextStatus == Status.Dispatched)
             {
                 WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
-                // At this point trip is already dispatched and about to change to Enroute so we move on to check the next status.
-                return;
+                if (trip.service == PartnerTrip.Origination.Foreign)
+                {
+                    // If service is foreign at this point trip is already dispatched and about to change to Enroute so we move on to check the next status.
+                    // if it's local we need to call ProcessTrip again before checking next status
+                    return;
+                }
             }
             else
                 WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, GetTimeWhenStatusShouldBeReached(trip));
