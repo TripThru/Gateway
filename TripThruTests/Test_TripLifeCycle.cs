@@ -60,7 +60,12 @@ namespace Tests
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 5, 0));
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            List<SubTest> subTests = lib.MakeSimultaneousTripLifecycle_SubTests();
+            List<Partner> partners = new List<Partner>() { lib.partner };
+            Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
+                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0),
+                simInterval: new TimeSpan(0, 0, 1)
+            );
         }
 
         [Test]
@@ -94,7 +99,12 @@ namespace Tests
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 1, 0));
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            List<SubTest> subTests = lib.MakeSimultaneousTripLifecycle_SubTests();
+            List<Partner> partners = new List<Partner>() { lib.partner };
+            Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
+                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0),
+                simInterval: new TimeSpan(0, 0, 1)
+            );
         }
 
         [Test]
@@ -110,7 +120,12 @@ namespace Tests
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 20, 0));
-            lib.Test_SimultaneousTripLifecycle_ForAllPartnerFleets();
+            List<SubTest> subTests = lib.MakeSimultaneousTripLifecycle_SubTests();
+            List<Partner> partners = new List<Partner>() { lib.partner };
+            Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
+                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
+                simInterval : new TimeSpan(0, 0, 1)
+            );
         }
 
         [Test]
@@ -134,10 +149,11 @@ namespace Tests
                 locationVerificationTolerance: 4);
             List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
-            Test_TripLifeCycle_Base.ValidateSubTests(subTests, 
+            List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
+            Test_TripLifeCycle_Base.RunSubTests(partners, subTests, 
                 timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
                 simInterval : new TimeSpan(0, 0, 1)
-                );
+            );
             Thread.Sleep(new TimeSpan(0,0,1));
         }
 
@@ -151,6 +167,7 @@ namespace Tests
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
+            List<Partner> partners = new List<Partner>();
             foreach (string filename in filePaths)
             {
                 Logger.Log("filename = " + filename);
@@ -159,9 +176,13 @@ namespace Tests
                     tripthru: tripthru,
                     maxLateness: maxLateness,
                     locationVerificationTolerance: locationVerificationTolerance);
+                partners.Add(lib.partner);
                 subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
-            } 
-            Test_TripLifeCycle_Base.ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), simInterval: new TimeSpan(0, 0, 1));
+            }
+            Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
+                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), 
+                simInterval: new TimeSpan(0, 0, 1)
+            );
         }
 
     }
@@ -179,6 +200,7 @@ namespace Tests
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
+        private static bool testsRunning = false;
 
         public class UnitTest_SingleTripLifecycleAndReturningDriver : SubTest
         {
@@ -246,12 +268,6 @@ namespace Tests
             partner.tripthru.RegisterPartner(partnerServiceMock, coverage);
         }
 
-        public void Test_SimultaneousTripLifecycle_ForAllPartnerFleets()
-        {
-            List<SubTest> subtests = MakeSimultaneousTripLifecycle_SubTests();
-            ValidateSubTests(subtests, timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), simInterval: new TimeSpan(0, 0, 1));
-        }
-
         public List<SubTest> MakeSimultaneousTripLifecycle_SubTests()
         {
             List<SubTest> singleTrips_Subtests = new List<SubTest>();
@@ -263,14 +279,18 @@ namespace Tests
             return singleTrips_Subtests;
         }
 
-        public static void ValidateSubTests(List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
+        public static void RunSubTests(List<Partner> partners, List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
         {
-            foreach (SubTest u in singleTrips_Subtests)
-            {
-                var thread = new Thread(u.Run);
-                thread.IsBackground = true;
+            Test_TripLifeCycle_Base.testsRunning = true;
+            var fleets = new List<PartnerFleet>();
+            foreach (var partner in partners)
+                fleets.AddRange(partner.PartnerFleets.Values);
+            var runningThreads = new List<Thread>();
+            runningThreads.AddRange(MakeFleetForeignQueueThreads(fleets, simInterval));
+            runningThreads.AddRange(MakeSubTestsThreads(singleTrips_Subtests));
+            foreach (var thread in runningThreads)
                 thread.Start();
-            }
+            
             bool? passed = null;
             while (passed == null && DateTime.UtcNow < timeoutAt)
             {
@@ -280,6 +300,7 @@ namespace Tests
                     if (test.Exception != null)
                     {
                         Console.WriteLine(test.Exception.Message + " : " + test.Exception);
+                        Test_TripLifeCycle_Base.testsRunning = false;
                         throw test.Exception;
                     }
                     if (test.Passed == null)
@@ -287,6 +308,36 @@ namespace Tests
                 }
                 Thread.Sleep(simInterval);
             }
+            Test_TripLifeCycle_Base.testsRunning = false;
+        }
+        private static List<Thread> MakeSubTestsThreads(List<SubTest> subtests)
+        {
+            var threads = new List<Thread>();
+            foreach (SubTest s in subtests)
+            {
+                var thread = new Thread(s.Run);
+                thread.IsBackground = true;
+                threads.Add(thread);
+            }
+            return threads;
+        }
+        //Todo: We need to process foreign trips separately since we are calling ProcessTrip not ProcessQueue for local trips
+        private static List<Thread> MakeFleetForeignQueueThreads(List<PartnerFleet> fleets, TimeSpan simInterval)
+        {
+            var fleetForeignQueueThreads = new List<Thread>();
+            foreach (var fleet in fleets)
+            {
+                var thread = new Thread(() => {
+                    while (Test_TripLifeCycle_Base.testsRunning)
+                    {
+                        fleet.ProcessForeignTrips();
+                        Thread.Sleep(simInterval);
+                    }
+                });
+                thread.IsBackground = true;
+                fleetForeignQueueThreads.Add(thread);
+            }
+            return fleetForeignQueueThreads;
         }
 
         public void Test_SingleTripLifecycle_ForAllPartnerFleets()

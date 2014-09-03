@@ -1309,6 +1309,14 @@ namespace TripThruCore
 
         }
 
+        // Todo: This is a helper method to run tests, should be a cleaner way of doing this from the tests side
+        public void ProcessForeignTrips()
+        {
+            var trips = queue.Where(t => t.origination == PartnerTrip.Origination.Foreign);
+            foreach (var trip in trips)
+                ProcessTrip(trip);
+        }
+
         private void RemoveOldNonActiveTrips(LinkedListNode<PartnerTrip> node, PartnerTrip t)
         {
             switch (t.status)
