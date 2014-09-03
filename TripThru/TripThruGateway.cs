@@ -542,6 +542,13 @@ namespace TripThruCore
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
+            if (!tripthru.activeTrips.ContainsKey(r.tripID))
+            {
+                Logger.AddTag("ClientId", r.clientID);
+                Logger.Log("Trip id not found");
+                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
+            }
+
             Gateway destPartner = tripthru.GetDestinationPartner(r.clientID, r.tripID);
             if (destPartner == null)
             {
@@ -558,12 +565,6 @@ namespace TripThruCore
                     Logger.Log("Destination partner trip not found");
                     return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
                 }
-            } 
-            else if (!tripthru.activeTrips.ContainsKey(r.tripID))
-            {
-                Logger.AddTag("ClientId", r.clientID);
-                Logger.Log("Trip id not found");
-                return new Gateway.UpdateTripStatusResponse(result: TripThruCore.Gateway.Result.NotFound);
             }
             else
             {

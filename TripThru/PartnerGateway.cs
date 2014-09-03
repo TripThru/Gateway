@@ -1276,7 +1276,7 @@ namespace TripThruCore
         {
             Logger.Log("Missed period reached: -- so cancel " + t);
             Logger.Tab();
-            t.UpdateTripStatus(notifyPartner: true, status: Status.Cancelled);
+            t.UpdateTripStatus(notifyPartner: TripServicedByForeignProvider(t), status: Status.Cancelled);
             Logger.Untab();
         }
 
