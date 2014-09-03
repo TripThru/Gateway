@@ -671,13 +671,11 @@ namespace TripThruCore
                 Logger.Log("Activating isDirtyFlag and setting MadeDirtyBy TripThru");
                 if (response.result == Gateway.Result.Rejected)
                     t.Status = Status.Rejected;
-                else
-                    t.Status = Status.Dispatched;
-                Logger.Log("Changing trip state to " + t.Status);
+                    Logger.Log("Changing trip state to " + t.Status);
             }
             else
             {
-                Logger.Log("Unsuccessful requesst, so setting trip to New state to retry dispatch. Result: " + response.result);
+                Logger.Log("Unsuccessful request, so setting trip to New state to retry dispatch. Result: " + response.result);
                 t.State = TripState.New; //Try to dispatch again
             }
             Logger.EndRequest(response);
