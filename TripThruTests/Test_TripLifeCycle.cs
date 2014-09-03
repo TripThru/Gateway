@@ -162,7 +162,7 @@ namespace Tests
             Logger.Log("AllPartners_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);
             TimeSpan maxLateness = new TimeSpan(0, 20, 0);
-            double locationVerificationTolerance = 4;
+            double locationVerificationTolerance = 8;
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
@@ -444,7 +444,7 @@ namespace Tests
 
         private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, Status nextStatus, DateTime timeoutAt)
         {
-            while (trip.status != nextStatus && DateTime.UtcNow < timeoutAt)
+            while (trip.status != nextStatus && DateTime.UtcNow < timeoutAt && Test_TripLifeCycle_Base.testsRunning)
             {
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
@@ -457,7 +457,7 @@ namespace Tests
             // The trip will advance to dispatched status on the partner's side but tripthru could reject it so we wait to confirm if
             // tripthru successfully dispatched the trip.
             Status? status = null;
-            while (status != Status.Dispatched && DateTime.UtcNow < timeoutAt)
+            while (status != Status.Dispatched && DateTime.UtcNow < timeoutAt && Test_TripLifeCycle_Base.testsRunning)
             {
                 // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
                 // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
@@ -500,7 +500,7 @@ namespace Tests
             Status currentStatus = trip.status;
             Assert.AreNotEqual(trip.ETA, null, "The trip ETA is null. Trip ID");
             DateTime timeoutAt = (DateTime) trip.ETA + maxLateness;
-            while (!trip.driver.location.Equals(fleet.location, tolerance: locationVerificationTolerance))
+            while (!trip.driver.location.Equals(fleet.location, tolerance: locationVerificationTolerance) && Test_TripLifeCycle_Base.testsRunning)
             {
                 fleet.UpdateReturningDriverLocations();
                 //Assert.IsFalse(DateTime.UtcNow > timeoutAt, "The timeoutAt is less than UtcNow. Trip ID: " + trip.ID);
