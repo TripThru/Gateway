@@ -63,7 +63,7 @@ namespace Tests
             List<SubTest> subTests = lib.MakeSimultaneousTripLifecycle_SubTests();
             List<Partner> partners = new List<Partner>() { lib.partner };
             Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
-                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0),
+                timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
                 simInterval: new TimeSpan(0, 0, 1)
             );
         }
@@ -123,7 +123,7 @@ namespace Tests
             List<SubTest> subTests = lib.MakeSimultaneousTripLifecycle_SubTests();
             List<Partner> partners = new List<Partner>() { lib.partner };
             Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
-                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
+                timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0), 
                 simInterval : new TimeSpan(0, 0, 1)
             );
         }
@@ -151,10 +151,9 @@ namespace Tests
             subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
             List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
             Test_TripLifeCycle_Base.RunSubTests(partners, subTests, 
-                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 10, 0), 
+                timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0), 
                 simInterval : new TimeSpan(0, 0, 1)
             );
-            Thread.Sleep(new TimeSpan(0,0,1));
         }
 
         [Test]
@@ -180,7 +179,7 @@ namespace Tests
                 subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
             }
             Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
-                timeoutAt: DateTime.UtcNow + new TimeSpan(0, 30, 0), 
+                timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0), 
                 simInterval: new TimeSpan(0, 0, 1)
             );
         }
