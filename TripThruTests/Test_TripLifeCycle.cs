@@ -142,7 +142,7 @@ namespace Tests
         }
 
         [Test]
-        public void AllPartners_Gateway()
+        public void EnoughDrivers_AllPartners_Gateway()
         {
             Logger.Log("AllPartners_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);

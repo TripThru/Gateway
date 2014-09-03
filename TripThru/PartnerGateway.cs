@@ -745,7 +745,7 @@ namespace TripThruCore
         public readonly TimeSpan simInterval = new TimeSpan(0, 0, 10);
         public readonly TimeSpan updateInterval = new TimeSpan(0, 0, 30); // for simluation
         public readonly TimeSpan missedPeriod = new TimeSpan(0, 15, 0);
-        public readonly TimeSpan retryInterval = new TimeSpan(0, 5, 0);
+        public readonly TimeSpan retryInterval = new TimeSpan(0, 3, 0);
         public readonly TimeSpan criticalPeriod = new TimeSpan(0, 15, 0);
         public readonly TimeSpan removalAge = new TimeSpan(0, 5, 0);
         public int maxActiveTrips = 5;
@@ -1129,8 +1129,8 @@ namespace TripThruCore
             Logger.Tab();
             PartnerTrip trip = new PartnerTrip(
                 partner: this.partner,
-                IdNumber: PartnerTrip.nextID,
                 ID: PartnerTrip.GenerateUniqueID(this.partner.ID),
+                IdNumber: PartnerTrip.nextID,
                 origination: PartnerTrip.Origination.Local,
                 pickupLocation: route.start,
                 pickupTime: pickupTime,

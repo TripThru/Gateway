@@ -113,7 +113,6 @@
     <Content Include="Test_Configurations\ForeignTripsEnoughDriversB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Test_Configurations\Partners\LesTaxiBluesConfig.txt" />
     <Content Include="Test_Configurations\LocalTripsEnoughDrivers.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -123,9 +122,27 @@
     <Content Include="Test_Configurations\LocalTripsNotEnoughDriversSimultaneous.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Test_Configurations\Partners\LuxorCabConfiguration.txt" />
-    <Content Include="Test_Configurations\Partners\MetroCabConfig.txt" />
-    <Content Include="Test_Configurations\Partners\YellowCabConfig.txt" />
+    <Content Include="Test_Configurations\Partners\HubaiConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\LosTaxiBlusConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\MellowConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\MiamiTaxiConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\NetroConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\NYTaxiConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test_Configurations\Partners\TampaCabConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test_GeoData\Geo-Location-Addresses.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
