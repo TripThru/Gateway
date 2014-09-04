@@ -44,7 +44,7 @@ namespace Tests
         [Test]
         public void EnoughDrivers_SingleTrips()
         {
-            Logger.Log("Test_TripLifeCycle_EnoughDrivers_SingleTrips");
+            Logger.Log("EnoughDrivers_SingleTrips");
             var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
@@ -55,7 +55,7 @@ namespace Tests
         [Test]
         public void EnoughDrivers_SimultaneousTrips()
         {
-            Logger.Log("Test_TripLifeCycle_EnoughDrivers_SimultaneousTrips");
+            Logger.Log("EnoughDrivers_SimultaneousTrips");
             var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
@@ -71,7 +71,7 @@ namespace Tests
         [Test]
         public void NotEnoughDrivers_SingleTrips()
         {
-            Logger.Log("Test_TripLifeCycle_NotEnoughDrivers_SingleTrips");
+            Logger.Log("NotEnoughDrivers_SingleTrips");
             /* In this test since there are not enough drivers it tries to dispatch to tripthru --
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
@@ -85,9 +85,9 @@ namespace Tests
         }
 
         [Test]
-        public void NotEnoughDrivers_SimultaneousTrips_VerifyRejected()
+        public void NotEnoughDrivers_SimultaneousTrips()
         {
-            Logger.Log("NotEnoughDrivers_SimultaneousTrips_VerifyRejected");
+            Logger.Log("NotEnoughDrivers_SimultaneousTrips");
             /* In this test since there are not enough drivers it tries to dispatch to tripthru --
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
@@ -129,7 +129,7 @@ namespace Tests
         [Test]
         public void EnoughDrivers_TwoPartnersShareJobs_Gateway()
         {
-            Logger.Log("Test_TripLifeCycle_EnoughDrivers_TwoPartnersShareJobs_Gateway");
+            Logger.Log("EnoughDrivers_TwoPartnersShareJobs_Gateway");
             var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             var libA = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversA.txt",
@@ -157,7 +157,7 @@ namespace Tests
         [Test]
         public void EnoughDrivers_AllPartners_Gateway()
         {
-            Logger.Log("AllPartners_Gateway");
+            Logger.Log("EnoughDrivers_AllPartners_Gateway");
             var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             TimeSpan maxLateness = new TimeSpan(0, 20, 0);
             double locationVerificationTolerance = 4;
@@ -359,7 +359,8 @@ namespace Tests
             TestTripLifecycle_FromNewToComplete(fleet, trip);
             Thread.Sleep(5000); // Give tripthru a margin to finish processing the completed trip
             ValidateTripRequests(partnerServiceMock, (GatewayMock) partner.tripthru, trip);
-            ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
+            if (DriverHasToReturn(trip))
+                ValidateReturningDriverRouteIfServiceLocal(fleet, trip);
         }
 
         public void TestTripLifecycle_FromNewToComplete(PartnerFleet fleet, PartnerTrip trip)
@@ -407,17 +408,16 @@ namespace Tests
                 WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, GetTimeWhenStatusShouldBeReached(trip));
 
             /* 
-             * When trip is foreign and it doesn't advance to the expected status:
              * - If trip is still in Queued status we need to verify that it actually got a Rejected update from tripthru.
-             * - It's also possible that the servicing partner sends more that one update before tripthru 
+             * - When trip is foreign it's also possible that the servicing partner sends more that one update before tripthru 
              *   notifies the first one received, giving the impression that we skipped a status, so we verify 
              *   this to make sure it was actually sent.
              */
-            if (trip.status != nextStatus && TripIsForeign(trip))
+            if (trip.status != nextStatus )
             {
                 if (trip.status == Status.Queued)
                     ValidateTripWasRejected(trip);
-                else
+                else if (TripIsForeign(trip))
                     ValidateTripThruReceivedStatusUpdateButSkippedIt(trip, nextStatus);
                 return;
             }
@@ -474,7 +474,7 @@ namespace Tests
 
         private void ValidateTripWasRejected(PartnerTrip trip)
         {
-            var requests = partnerServiceMock.RequestsByTripId[trip.ID];
+            var requests = partnerServiceMock.RequestsByTripId[trip.publicID];
             Assert.GreaterOrEqual(requests.RejectedUpdates, 1,
                 "Trip didn't advance from Queued status but wasn't rejected either");
         }
@@ -560,7 +560,12 @@ namespace Tests
             return timeoutAt;
         }
 
-        public void ValidateReturningDriverRouteIfServiceLocal(PartnerFleet fleet, PartnerTrip trip)
+        private bool DriverHasToReturn(PartnerTrip trip)
+        {
+            return trip.status == Status.Complete || trip.status == Status.PickedUp || trip.status == Status.Enroute;
+        }
+
+        private void ValidateReturningDriverRouteIfServiceLocal(PartnerFleet fleet, PartnerTrip trip)
         {
             if (trip.service == PartnerTrip.Origination.Foreign)
                 return;
@@ -575,7 +580,7 @@ namespace Tests
             }
         }
 
-        public void ValidateTripRequests(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
+        private void ValidateTripRequests(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
         {
             var id = trip.publicID;
             Assert.IsTrue(originatingGateway.RequestsByTripId.ContainsKey(id), "Should have received at least one request");
@@ -594,11 +599,11 @@ namespace Tests
                 ValidateReceivedRequestsForTripServiceLocal(receivedRequests, sentRequests, trip);
             }
         }
-        public void ValidateSentRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
+        private void ValidateSentRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             Assert.Greater(sentRequests.Dispatch, 0, "Never made a dispatch request");
         }
-        public void ValidateReceivedRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
+        private void ValidateReceivedRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             Assert.GreaterOrEqual(sentRequests.Dispatch, 1, "Should send dispatch request at least once");
             Assert.LessOrEqual(receivedRequests.DispatchedUpdates, 1, "Should receive dispatch status update at most once");
@@ -614,7 +619,7 @@ namespace Tests
                 Assert.AreEqual(1, receivedRequests.CompleteUpdates, "Should receive complete status update only once");
             }
         }
-        public void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
+        private void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             if (trip.origination == PartnerTrip.Origination.Foreign)
                 Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once");
@@ -631,9 +636,10 @@ namespace Tests
                 Assert.AreEqual(1, sentRequests.CompleteUpdates, "Should send complete status update only once");
             }
         }
-        public void ValidateReceivedRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
+        private void ValidateReceivedRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
-            Assert.AreEqual(1, receivedRequests.GetStatus, "Should receive GetTripStatus request to update gateway stats once");
+            if (trip.status == Status.Complete)
+                Assert.AreEqual(1, receivedRequests.GetStatus, "Should receive GetTripStatus request to update gateway stats once");
         }
     }
 
