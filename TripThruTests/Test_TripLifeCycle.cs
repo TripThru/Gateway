@@ -409,9 +409,13 @@ namespace Tests
             if (trip.status == Status.Enroute)
                 Assert.IsNotNull(response.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + tripId);
             if (trip.status == Status.PickedUp)
-                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + tripId);
+                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance),
+                    "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
+                    + "Expected " + trip.pickupLocation.getID() + " but got " + trip.driverLocation.getID());
             if (trip.status == Status.Complete)
-                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + tripId);
+                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance),
+                    "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
+                    + "Expected " + trip.dropoffLocation.getID() + " but got " + trip.driverLocation.getID());
         }
 
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
