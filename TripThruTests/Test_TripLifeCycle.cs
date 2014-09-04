@@ -162,7 +162,7 @@ namespace Tests
             Logger.Log("AllPartners_Gateway");
             var tripthru = new TripThru(enableTDispatch: false);
             TimeSpan maxLateness = new TimeSpan(0, 20, 0);
-            double locationVerificationTolerance = 10;
+            double locationVerificationTolerance = 4;
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
             Logger.Log("filePaths = " + filePaths);
             List<SubTest> subtests = new List<SubTest>();
@@ -439,11 +439,15 @@ namespace Tests
                     break;
                 case Status.PickedUp:
                     Assert.IsNotNull(trip.driverLocation, "The trip is PickedUp but the driverLocation is null. Trip ID: " + trip.ID);
-                    Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                    Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), 
+                        "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
+                        + "Expected " + trip.pickupLocation.getID() + " but got " + trip.driverLocation.getID());
                     break;
                 case Status.Complete:
                     Assert.IsNotNull(trip.driverLocation, "The trip is Complete but the driverLocation is null. Trip ID: " + trip.ID);
-                    Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance), "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID);
+                    Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance),
+                        "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
+                        + "Expected " + trip.dropoffLocation.getID() + " but got " + trip.driverLocation.getID());
                     break;
             }
         }
