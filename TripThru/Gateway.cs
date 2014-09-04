@@ -1157,6 +1157,8 @@ namespace TripThruCore
                     this[trip.Id].LastStatusChange = DateTime.UtcNow;
                 }
                 this[trip.Id].LastUpdate = DateTime.UtcNow;
+                this[trip.Id].IsDirty = trip.IsDirty;
+                this[trip.Id].MadeDirtyById = trip.MadeDirtyById;
                 StorageManager.UpdateTrip(trip);
             }
             public List<Trip> GetTripsByState(TripState state)

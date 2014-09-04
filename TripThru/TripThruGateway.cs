@@ -570,6 +570,7 @@ namespace TripThruCore
                 trip.DriverLocation = r.driverLocation;
                 trip.ETA = r.eta;
                 trip.IsDirty = true;
+                trip.MadeDirtyById = r.clientID;
                 if (trip.DriverInitialLocation == null)
                     trip.DriverInitialLocation = r.driverLocation;
                 switch (r.status)
