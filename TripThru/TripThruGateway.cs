@@ -667,12 +667,9 @@ namespace TripThruCore
             {
                 Logger.Log("Successful request, changing trip state to Dispatched. Result: " + response.result);
                 t.State = TripState.Dispatched;
-                t.IsDirty = true;
-                t.MadeDirtyById = tripthru.ID;
-                Logger.Log("Activating isDirtyFlag and setting MadeDirtyBy TripThru");
                 if (response.result == Gateway.Result.Rejected)
                     t.Status = Status.Rejected;
-                    Logger.Log("Changing trip state to " + t.Status);
+                Logger.Log("Trip status: " + t.Status);
             }
             else
             {
