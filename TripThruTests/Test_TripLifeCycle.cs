@@ -497,10 +497,12 @@ namespace Tests
                 case Status.Dispatched:
                     Assert.AreEqual(1, requests.DispatchedUpdates, 
                         "TripThru didn't receive Dispatched trip status update. TripID: " + tripId);
+                    location = requests.DispatchedRequest.driverLocation;
                     break;
                 case Status.Enroute:
                     Assert.AreEqual(1, requests.EnrouteUpdates,
                         "TripThru didn't receive Enroute trip status update. TripID: " + tripId);
+                    location = requests.EnrouteRequest.driverLocation;
                     break;
                 case Status.PickedUp:
                     Assert.AreEqual(1, requests.PickedUpUpdates,

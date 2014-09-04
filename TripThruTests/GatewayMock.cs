@@ -101,7 +101,6 @@ namespace TripThruTests
                     tripRequests.QueuedRequest = request;
                     break;
                 case Status.Dispatched:
-                    Logger.Log("Incrementing dispatched updates. Trip: " + request.tripID);
                     tripRequests.DispatchedUpdates++;
                     tripRequests.DispatchedRequest = request;
                     break;
