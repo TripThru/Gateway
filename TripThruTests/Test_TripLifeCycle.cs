@@ -45,7 +45,7 @@ namespace Tests
         public void EnoughDrivers_SingleTrips()
         {
             Logger.Log("Test_TripLifeCycle_EnoughDrivers_SingleTrips");
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 5, 0));
@@ -56,7 +56,7 @@ namespace Tests
         public void EnoughDrivers_SimultaneousTrips()
         {
             Logger.Log("Test_TripLifeCycle_EnoughDrivers_SimultaneousTrips");
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base("Test_Configurations/LocalTripsEnoughDrivers.txt",
                 tripthru: tripthru,
                 maxLateness: new TimeSpan(0, 5, 0));
@@ -77,7 +77,7 @@ namespace Tests
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
              * */
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDrivers.txt",
                 tripthru: tripthru,
@@ -94,7 +94,7 @@ namespace Tests
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
              * */
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
@@ -115,7 +115,7 @@ namespace Tests
              * which has an empty implementation that always rejects.
              * We expect an assertion error because we expect the trip status to change from Queued to Dispatched
              * */
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             Test_TripLifeCycle_Base lib = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/LocalTripsNotEnoughDriversSimultaneous.txt",
                 tripthru: tripthru,
@@ -132,7 +132,7 @@ namespace Tests
         public void EnoughDrivers_TwoPartnersShareJobs_Gateway()
         {
             Logger.Log("Test_TripLifeCycle_EnoughDrivers_TwoPartnersShareJobs_Gateway");
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             var libA = new Test_TripLifeCycle_Base(
                 filename: "Test_Configurations/ForeignTripsEnoughDriversA.txt",
                 tripthru: tripthru,
@@ -160,7 +160,7 @@ namespace Tests
         public void EnoughDrivers_AllPartners_Gateway()
         {
             Logger.Log("AllPartners_Gateway");
-            var tripthru = new TripThru(enableTDispatch: false);
+            var tripthru = new GatewayMock(new TripThru(enableTDispatch: false));
             TimeSpan maxLateness = new TimeSpan(0, 20, 0);
             double locationVerificationTolerance = 4;
             string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
@@ -189,7 +189,7 @@ namespace Tests
     public class Test_TripLifeCycle_Base
     {
         public string filename;
-        public Gateway tripthru;
+        public GatewayMock tripthru;
         public Partner partner;
         private GatewayMock partnerServiceMock;
         PartnerTrip.Origination? origination = null;
@@ -242,7 +242,7 @@ namespace Tests
 
         public Test_TripLifeCycle_Base(
             string filename, 
-            Gateway tripthru, 
+            GatewayMock tripthru, 
             TimeSpan? maxLateness = null, 
             PartnerTrip.Origination? origination = null, 
             PartnerTrip.Origination? service = null, 
@@ -259,7 +259,7 @@ namespace Tests
             if (locationVerificationTolerance != null)
                 this.locationVerificationTolerance = (double)locationVerificationTolerance;
             PartnerConfiguration configuration = Partner.LoadPartnerConfigurationFromJsonFile(filename);
-            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayMock(tripthru), configuration.partnerFleets);
+            partner = new Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayMock(this.tripthru), configuration.partnerFleets);
             var coverage = new List<Zone>();
             foreach (var fleet in partner.PartnerFleets.Values)
                 coverage.AddRange(fleet.coverage);
@@ -401,80 +401,69 @@ namespace Tests
             }
         }
 
-        public void ValidateTripThruStatus(PartnerTrip trip)
-        {
-            var tripId = trip.publicID;
-            Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
-            Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
-            if (trip.status == Status.Enroute)
-                Assert.IsNotNull(response.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + tripId);
-            if (trip.status == Status.PickedUp)
-                Assert.IsTrue(response.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance),
-                    "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
-                    + "Expected " + trip.pickupLocation.getID() + " but got " + trip.driverLocation.getID());
-            if (trip.status == Status.Complete)
-                Assert.IsTrue(response.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance),
-                    "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
-                    + "Expected " + trip.dropoffLocation.getID() + " but got " + trip.driverLocation.getID());
-        }
-
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
         {
             if (nextStatus == Status.Dispatched)
-            {
                 WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
-                if (trip.service == PartnerTrip.Origination.Foreign)
-                {
-                    // If service is foreign at this point trip is already dispatched and about to change to Enroute so we move on to check the next status.
-                    // if it's local we need to call ProcessTrip again before checking next status
-                    return;
-                }
-            }
             else
                 WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, GetTimeWhenStatusShouldBeReached(trip));
-            if (trip.status == nextStatus)
-                ValidateTripThruStatus(trip);
 
-            Assert.AreEqual(nextStatus, trip.status, "The trip did not advance to the next status. Trip ID: " + trip.ID);
-            switch (trip.status)
+            /* 
+             * When trip is foreign and it doesn't advance to the expected status:
+             * - If trip is still in Queued status we need to verify that it actually got a Rejected update from tripthru.
+             * - It's also possible that the servicing partner sends more that one update before tripthru 
+             *   notifies the first one received, giving the impression that we skipped a status, so we verify 
+             *   this to make sure it was actually sent.
+             */
+            if (trip.status != nextStatus && TripIsForeign(trip))
             {
-                case Status.Enroute:
-                    Assert.IsNotNull(trip.driverLocation, "The trip is Enroute but the driverLocation is null. Trip ID: " + trip.ID);
-                    break;
-                case Status.PickedUp:
-                    Assert.IsNotNull(trip.driverLocation, "The trip is PickedUp but the driverLocation is null. Trip ID: " + trip.ID);
-                    Assert.IsTrue(trip.driverLocation.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance), 
-                        "The trip is PickedUp but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
-                        + "Expected " + trip.pickupLocation.getID() + " but got " + trip.driverLocation.getID());
-                    break;
-                case Status.Complete:
-                    Assert.IsNotNull(trip.driverLocation, "The trip is Complete but the driverLocation is null. Trip ID: " + trip.ID);
-                    Assert.IsTrue(trip.driverLocation.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance),
-                        "The trip is Complete but the driverLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
-                        + "Expected " + trip.dropoffLocation.getID() + " but got " + trip.driverLocation.getID());
-                    break;
+                if (trip.status == Status.Queued)
+                    ValidateTripWasRejected(trip);
+                else
+                    ValidateTripThruReceivedStatusUpdateButSkippedIt(trip, nextStatus);
+                return;
             }
+
+            Assert.AreEqual(nextStatus, trip.status, "The trip did not advance to the expected status. Trip ID: " + trip.ID);
+            ValidateTripThruStatus(trip);
+            ValidateTripStatusLocation(trip, trip.status, trip.driverLocation);
+        }
+
+        private bool TripIsForeign(PartnerTrip trip)
+        {
+            /* 
+             * Check against fleet coverage zone instead of trip.service since trip could still be queued.
+             */
+            return !trip.PartnerFleet.FleetServesLocation(trip.pickupLocation);
         }
 
         private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, Status nextStatus, DateTime timeoutAt)
         {
             while (trip.status != nextStatus && DateTime.UtcNow < timeoutAt && Test_TripLifeCycle_Base.testsRunning)
             {
-                // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
-                // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
+                /*
+                 * There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips 
+                 * in a queue, a call to ProcessQueue may end up processing more than one queue.  
+                 * Then it may seem like trips jump a state (status).
+                */
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
             }
         }
         private void WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
         {
-            // The trip will advance to dispatched status on the partner's side but tripthru could reject it so we wait to confirm if
-            // tripthru successfully dispatched the trip.
+            /* 
+             * The trip will advance to dispatched status on the partner's side but tripthru could reject it so we wait 
+             * to confirm if tripthru successfully dispatched the trip.
+             */
             Status? status = null;
             while (status != Status.Dispatched && DateTime.UtcNow < timeoutAt && Test_TripLifeCycle_Base.testsRunning)
             {
-                // There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips in a queue, a call to ProcessQueue
-                // may end up processing more than one queue.  Then it may seem like trips jump a state (status).
+                /*
+                 * There's a reason we're calling ProcessTrip instead of ProcessQueue, as when there are multiple trips 
+                 * in a queue, a call to ProcessQueue may end up processing more than one queue.  
+                 * Then it may seem like trips jump a state (status).
+                 */
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
 
@@ -483,6 +472,72 @@ namespace Tests
                     status = response.status;
             }
             Thread.Sleep(new TimeSpan(0, 0, 5)); // Give tripthru enough time to notify update to originating partner
+        }
+
+        private void ValidateTripWasRejected(PartnerTrip trip)
+        {
+            var requests = partnerServiceMock.RequestsByTripId[trip.ID];
+            Assert.GreaterOrEqual(requests.RejectedUpdates, 1,
+                "Trip didn't advance from Queued status but wasn't never rejected");
+        }
+
+        private void ValidateTripThruStatus(PartnerTrip trip)
+        {
+            var tripId = trip.publicID;
+            Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
+            Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
+            ValidateTripStatusLocation(trip, trip.status, response.driverLocation);
+        }
+
+        private void ValidateTripThruReceivedStatusUpdateButSkippedIt(PartnerTrip trip, Status status)
+        {
+            var tripId = trip.publicID;
+            var requests = tripthru.RequestsByTripId[tripId];
+            Location location = null;
+            switch (status)
+            {
+                case Status.Dispatched:
+                    Assert.AreEqual(1, requests.DispatchedUpdates, 
+                        "TripThru didn't receive Dispatched trip status update. TripID: " + tripId);
+                    break;
+                case Status.Enroute:
+                    Assert.AreEqual(1, requests.EnrouteUpdates,
+                        "TripThru didn't receive Enroute trip status update. TripID: " + tripId);
+                    break;
+                case Status.PickedUp:
+                    Assert.AreEqual(1, requests.PickedUpUpdates,
+                        "TripThru didn't receive PickedUp trip status update. TripID: " + tripId);
+                    location = requests.PickedUpRequest.driverLocation;
+                    break;
+                case Status.Complete:
+                    Assert.AreEqual(1, requests.CompleteUpdates,
+                        "TripThru didn't receive Complete trip status update. TripID: " + tripId);
+                    location = requests.PickedUpRequest.driverLocation;
+                    break;
+            }
+            ValidateTripStatusLocation(trip, status, location);
+        }
+
+        private void ValidateTripStatusLocation(PartnerTrip trip, Status status, Location location)
+        {
+            switch (status)
+            {
+                case Status.Enroute:
+                    Assert.IsNotNull(location, "The trip is Enroute but the location is null. Trip ID: " + trip.ID);
+                    break;
+                case Status.PickedUp:
+                    Assert.IsNotNull(location, "The trip is PickedUp but the location is null. Trip ID: " + trip.ID);
+                    Assert.IsTrue(location.Equals(trip.pickupLocation, tolerance: locationVerificationTolerance),
+                        "The trip is PickedUp but the location is out to the tolerance area. Trip ID: " + trip.ID + "."
+                        + "Expected " + trip.pickupLocation.getID() + " but got " + location.getID());
+                    break;
+                case Status.Complete:
+                    Assert.IsNotNull(location, "The trip is Complete but the location is null. Trip ID: " + trip.ID);
+                    Assert.IsTrue(location.Equals(trip.dropoffLocation, tolerance: locationVerificationTolerance),
+                        "The trip is Complete but the lLocation is out to the tolerance area. Trip ID: " + trip.ID + "."
+                        + "Expected " + trip.dropoffLocation.getID() + " but got " + location.getID());
+                    break;
+            }
         }
 
         private DateTime GetTimeWhenStatusShouldBeReached(PartnerTrip trip)
@@ -548,34 +603,34 @@ namespace Tests
         public void ValidateReceivedRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             Assert.GreaterOrEqual(sentRequests.Dispatch, 1, "Should send dispatch request at least once");
-            Assert.LessOrEqual(receivedRequests.UpdateDispatched, 1, "Should receive dispatch status update at most once");
-            Assert.LessOrEqual(receivedRequests.UpdateEnroute, 1, "Should receive enroute status update at most once");
-            Assert.LessOrEqual(receivedRequests.UpdatePickedUp, 1, "Should receive pickuedup status update at most once");
-            Assert.LessOrEqual(receivedRequests.UpdateComplete, 1, "Should receive complete status update at most once");
+            Assert.LessOrEqual(receivedRequests.DispatchedUpdates, 1, "Should receive dispatch status update at most once");
+            Assert.LessOrEqual(receivedRequests.EnrouteUpdates, 1, "Should receive enroute status update at most once");
+            Assert.LessOrEqual(receivedRequests.PickedUpUpdates, 1, "Should receive pickuedup status update at most once");
+            Assert.LessOrEqual(receivedRequests.CompleteUpdates, 1, "Should receive complete status update at most once");
             
             if (trip.status == Status.Complete)
             {
                 //Don't check dispatched update received because sometimes it changes to enroute before tripthru notifies status
-                Assert.AreEqual(1, receivedRequests.UpdateEnroute, "Should receive enroute status update only once");
-                Assert.AreEqual(1, receivedRequests.UpdatePickedUp, "Should receive pickedup status update only once");
-                Assert.AreEqual(1, receivedRequests.UpdateComplete, "Should receive complete status update only once");
+                Assert.AreEqual(1, receivedRequests.EnrouteUpdates, "Should receive enroute status update only once");
+                Assert.AreEqual(1, receivedRequests.PickedUpUpdates, "Should receive pickedup status update only once");
+                Assert.AreEqual(1, receivedRequests.CompleteUpdates, "Should receive complete status update only once");
             }
         }
         public void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             if (trip.origination == PartnerTrip.Origination.Foreign)
                 Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once");
-            Assert.LessOrEqual(sentRequests.UpdateDispatched, 1, "Should send dispatch status update at most once");
-            Assert.LessOrEqual(sentRequests.UpdateEnroute, 1, "Should send enroute status update at most once");
-            Assert.LessOrEqual(sentRequests.UpdatePickedUp, 1, "Should send pickedup status update at most once");
-            Assert.LessOrEqual(sentRequests.UpdateComplete, 1, "Should send complete status update at most once");
+            Assert.LessOrEqual(sentRequests.DispatchedUpdates, 1, "Should send dispatch status update at most once");
+            Assert.LessOrEqual(sentRequests.EnrouteUpdates, 1, "Should send enroute status update at most once");
+            Assert.LessOrEqual(sentRequests.PickedUpUpdates, 1, "Should send pickedup status update at most once");
+            Assert.LessOrEqual(sentRequests.CompleteUpdates, 1, "Should send complete status update at most once");
 
             if (trip.status == Status.Complete)
             {
-                Assert.AreEqual(1, sentRequests.UpdateDispatched, "Should send dispatch status update only once");
-                Assert.AreEqual(1, sentRequests.UpdateEnroute, "Should send enroute status update only once");
-                Assert.AreEqual(1, sentRequests.UpdatePickedUp, "Should send pickedup status update only once");
-                Assert.AreEqual(1, sentRequests.UpdateComplete, "Should send complete status update only once");
+                Assert.AreEqual(1, sentRequests.DispatchedUpdates, "Should send dispatch status update only once");
+                Assert.AreEqual(1, sentRequests.EnrouteUpdates, "Should send enroute status update only once");
+                Assert.AreEqual(1, sentRequests.PickedUpUpdates, "Should send pickedup status update only once");
+                Assert.AreEqual(1, sentRequests.CompleteUpdates, "Should send complete status update only once");
             }
         }
         public void ValidateReceivedRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)

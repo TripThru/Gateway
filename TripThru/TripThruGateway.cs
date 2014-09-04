@@ -536,6 +536,7 @@ namespace TripThruCore
 
         public Gateway.UpdateTripStatusResponse UpdateTrip(Gateway.UpdateTripStatusRequest r)
         {
+            Logger.Log("UpdateTripStatus (" + r.status + ") received from " + r.clientID + ". Trip: " + r.tripID);
             if (!tripthru.activeTrips.ContainsKey(r.tripID))
             {
                 Logger.AddTag("ClientId", r.clientID);
@@ -562,9 +563,11 @@ namespace TripThruCore
             }
             else
             {
+                Logger.Log("Updating trip and activating isDirty flag");
                 var trip = tripthru.activeTrips[r.tripID];
                 Gateway.UpdateTripStatusResponse response = null;
                 Logger.AddTag("Destination partner", destPartner.name);
+                Logger.SetOriginatingId(r.clientID);
                 Logger.SetServicingId(destPartner.ID);
                 trip.Status = r.status;
                 trip.DriverLocation = r.driverLocation;
