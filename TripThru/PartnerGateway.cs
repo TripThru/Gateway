@@ -890,7 +890,7 @@ namespace TripThruCore
                     readyForDispatch = partner.CreateLocalTripInTripThru(t);
                 if (!readyForDispatch) return false;
                 DispatchToFirstAvailableDriver(t);
-                t.UpdateTripStatus(notifyPartner: true, status: Status.Dispatched, driverLocation: t.driver.location, eta: t.pickupTime);
+                t.UpdateTripStatus(notifyPartner: true, status: Status.Dispatched, driverLocation: new Location(t.driver.location.Lat, t.driver.location.Lng), eta: t.pickupTime);
                 return true;
             }
             Logger.Log("No drivers are currently available");
@@ -1467,7 +1467,7 @@ namespace TripThruCore
             Logger.Log("The destination has been reached for: " + t);
             Logger.Tab();
             t.dropoffTime = DateTime.UtcNow;
-            t.UpdateTripStatus(notifyPartner: true, driverLocation: t.driverLocation, status: Status.Complete);
+            t.UpdateTripStatus(notifyPartner: true, driverLocation: new Location(t.driverLocation.Lat, t.driverLocation.Lng), status: Status.Complete);
             CompleteTrip(t);
             Logger.Untab();
         }
@@ -1482,7 +1482,7 @@ namespace TripThruCore
             Logger.Log("Picking up: " + trip);
             Logger.Tab();
             DateTime eta = UpdateDriverRouteAndGetETA(trip.driver, trip.dropoffLocation);
-            trip.UpdateTripStatus(notifyPartner: true, status: Status.PickedUp, driverLocation: trip.driver.location, eta: eta);
+            trip.UpdateTripStatus(notifyPartner: true, status: Status.PickedUp, driverLocation: new Location(trip.driver.location.Lat, trip.driver.location.Lng), eta: eta);
             Logger.Untab();
         }
 
@@ -1512,7 +1512,7 @@ namespace TripThruCore
             Logger.Log("Driver is now enroute: " + trip);
             Logger.Tab();
             DateTime eta = UpdateDriverRouteAndGetETA(trip.driver, trip.pickupLocation);
-            trip.UpdateTripStatus(notifyPartner: true, status: Status.Enroute, driverLocation: trip.driver.location, eta: eta);
+            trip.UpdateTripStatus(notifyPartner: true, status: Status.Enroute, driverLocation: new Location(trip.driver.location.Lat, trip.driver.location.Lng), eta: eta);
             Logger.Untab();
         }
 
