@@ -69,7 +69,6 @@ namespace Tests
         }
 
         [Test]
-        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
         public void NotEnoughDrivers_SingleTrips()
         {
             Logger.Log("Test_TripLifeCycle_NotEnoughDrivers_SingleTrips");
@@ -86,7 +85,6 @@ namespace Tests
         }
 
         [Test]
-        [ExpectedException(typeof(AssertionException), ExpectedMessage = "But was:  Queued", MatchType = MessageMatch.Contains)]
         public void NotEnoughDrivers_SimultaneousTrips_VerifyRejected()
         {
             Logger.Log("NotEnoughDrivers_SimultaneousTrips_VerifyRejected");
@@ -478,7 +476,7 @@ namespace Tests
         {
             var requests = partnerServiceMock.RequestsByTripId[trip.ID];
             Assert.GreaterOrEqual(requests.RejectedUpdates, 1,
-                "Trip didn't advance from Queued status but wasn't never rejected");
+                "Trip didn't advance from Queued status but wasn't rejected either");
         }
 
         private void ValidateTripThruStatus(PartnerTrip trip)
