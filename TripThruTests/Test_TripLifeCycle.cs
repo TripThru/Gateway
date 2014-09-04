@@ -376,7 +376,7 @@ namespace Tests
             }
 
             Assert.AreEqual(Status.Queued, trip.status, "The trip: " + trip.ID + " was not queued.");
-            Assert.AreEqual(activeTrips, response, "Active trips count doesn't match.");
+            Assert.AreEqual(activeTrips, response, "Active trips count doesn't match. Trip: " + trip.ID);
             ValidateNextTripStatus(fleet, trip, Status.Dispatched);
             ValidateNextTripStatus(fleet, trip, Status.Enroute);
             ValidateNextTripStatus(fleet, trip, Status.PickedUp);
@@ -476,7 +476,7 @@ namespace Tests
         {
             var requests = partnerServiceMock.RequestsByTripId[trip.publicID];
             Assert.GreaterOrEqual(requests.RejectedUpdates, 1,
-                "Trip didn't advance from Queued status but wasn't rejected either");
+                "Trip didn't advance from Queued status but wasn't rejected either. Trip: " + trip.ID);
         }
 
         private void ValidateTripThruStatus(PartnerTrip trip)
@@ -572,7 +572,7 @@ namespace Tests
             if (trip.service == PartnerTrip.Origination.Foreign)
                 return;
             Status currentStatus = trip.status;
-            Assert.AreNotEqual(trip.ETA, null, "The trip ETA is null. Trip ID");
+            Assert.AreNotEqual(trip.ETA, null, "The trip ETA is null. Trip: " + trip.ID);
             DateTime timeoutAt = (DateTime) trip.ETA + maxLateness;
             while (!trip.driver.location.Equals(fleet.location, tolerance: locationVerificationTolerance) && Test_TripLifeCycle_Base.testsRunning)
             {
@@ -585,8 +585,8 @@ namespace Tests
         private void ValidateTripRequests(GatewayMock originatingGateway, GatewayMock servicingGateway, PartnerTrip trip)
         {
             var id = trip.publicID;
-            Assert.IsTrue(originatingGateway.RequestsByTripId.ContainsKey(id), "Should have received at least one request");
-            Assert.IsTrue(servicingGateway.RequestsByTripId.ContainsKey(id), "Should have sent at least one request");
+            Assert.IsTrue(originatingGateway.RequestsByTripId.ContainsKey(id), "Should have received at least one request. Trip: " + trip.ID);
+            Assert.IsTrue(servicingGateway.RequestsByTripId.ContainsKey(id), "Should have sent at least one request. Trip: " + trip.ID);
 
             var receivedRequests = originatingGateway.RequestsByTripId[id];
             var sentRequests = servicingGateway.RequestsByTripId[id];
@@ -603,45 +603,45 @@ namespace Tests
         }
         private void ValidateSentRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
-            Assert.Greater(sentRequests.Dispatch, 0, "Never made a dispatch request");
+            Assert.Greater(sentRequests.Dispatch, 0, "Never made a dispatch request. Trip: " + trip.ID);
         }
         private void ValidateReceivedRequestsForTripServiceForeign(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
-            Assert.GreaterOrEqual(sentRequests.Dispatch, 1, "Should send dispatch request at least once");
-            Assert.LessOrEqual(receivedRequests.DispatchedUpdates, 1, "Should receive dispatch status update at most once");
-            Assert.LessOrEqual(receivedRequests.EnrouteUpdates, 1, "Should receive enroute status update at most once");
-            Assert.LessOrEqual(receivedRequests.PickedUpUpdates, 1, "Should receive pickuedup status update at most once");
-            Assert.LessOrEqual(receivedRequests.CompleteUpdates, 1, "Should receive complete status update at most once");
+            Assert.GreaterOrEqual(sentRequests.Dispatch, 1, "Should send dispatch request at least once. Trip: " + trip.ID);
+            Assert.LessOrEqual(receivedRequests.DispatchedUpdates, 1, "Should receive dispatch status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(receivedRequests.EnrouteUpdates, 1, "Should receive enroute status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(receivedRequests.PickedUpUpdates, 1, "Should receive pickuedup status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(receivedRequests.CompleteUpdates, 1, "Should receive complete status update at most once. Trip: " + trip.ID);
             
             if (trip.status == Status.Complete)
             {
                 //Don't check dispatched update received because sometimes it changes to enroute before tripthru notifies status
-                Assert.AreEqual(1, receivedRequests.EnrouteUpdates, "Should receive enroute status update only once");
-                Assert.AreEqual(1, receivedRequests.PickedUpUpdates, "Should receive pickedup status update only once");
-                Assert.AreEqual(1, receivedRequests.CompleteUpdates, "Should receive complete status update only once");
+                Assert.AreEqual(1, receivedRequests.EnrouteUpdates, "Should receive enroute status update only once. Trip: " + trip.ID);
+                Assert.AreEqual(1, receivedRequests.PickedUpUpdates, "Should receive pickedup status update only once. Trip: " + trip.ID);
+                Assert.AreEqual(1, receivedRequests.CompleteUpdates, "Should receive complete status update only once. Trip: " + trip.ID);
             }
         }
         private void ValidateSentRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             if (trip.origination == PartnerTrip.Origination.Foreign)
-                Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once");
-            Assert.LessOrEqual(sentRequests.DispatchedUpdates, 1, "Should send dispatch status update at most once");
-            Assert.LessOrEqual(sentRequests.EnrouteUpdates, 1, "Should send enroute status update at most once");
-            Assert.LessOrEqual(sentRequests.PickedUpUpdates, 1, "Should send pickedup status update at most once");
-            Assert.LessOrEqual(sentRequests.CompleteUpdates, 1, "Should send complete status update at most once");
+                Assert.GreaterOrEqual(receivedRequests.Dispatch, 1, "Should receive dispatch request at least once. Trip: " + trip.ID);
+            Assert.LessOrEqual(sentRequests.DispatchedUpdates, 1, "Should send dispatch status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(sentRequests.EnrouteUpdates, 1, "Should send enroute status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(sentRequests.PickedUpUpdates, 1, "Should send pickedup status update at most once. Trip: " + trip.ID);
+            Assert.LessOrEqual(sentRequests.CompleteUpdates, 1, "Should send complete status update at most once. Trip: " + trip.ID);
 
             if (trip.status == Status.Complete)
             {
-                Assert.AreEqual(1, sentRequests.DispatchedUpdates, "Should send dispatch status update only once");
-                Assert.AreEqual(1, sentRequests.EnrouteUpdates, "Should send enroute status update only once");
-                Assert.AreEqual(1, sentRequests.PickedUpUpdates, "Should send pickedup status update only once");
-                Assert.AreEqual(1, sentRequests.CompleteUpdates, "Should send complete status update only once");
+                Assert.AreEqual(1, sentRequests.DispatchedUpdates, "Should send dispatch status update only once. Trip: " + trip.ID);
+                Assert.AreEqual(1, sentRequests.EnrouteUpdates, "Should send enroute status update only once. Trip: " + trip.ID);
+                Assert.AreEqual(1, sentRequests.PickedUpUpdates, "Should send pickedup status update only once. Trip: " + trip.ID);
+                Assert.AreEqual(1, sentRequests.CompleteUpdates, "Should send complete status update only once. Trip: " + trip.ID);
             }
         }
         private void ValidateReceivedRequestsForTripServiceLocal(GatewayMock.TripRequests receivedRequests, GatewayMock.TripRequests sentRequests, PartnerTrip trip)
         {
             if (trip.status == Status.Complete)
-                Assert.AreEqual(1, receivedRequests.GetStatus, "Should receive GetTripStatus request to update gateway stats once");
+                Assert.AreEqual(1, receivedRequests.GetStatus, "Should receive GetTripStatus request to update gateway stats once. Trip: " + trip.ID);
         }
     }
 
