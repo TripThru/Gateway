@@ -1312,7 +1312,7 @@ namespace TripThruCore
         // Todo: This is a helper method to run tests, should be a cleaner way of doing this from the tests side
         public void ProcessForeignTrips()
         {
-            var trips = queue.Where(t => t.origination == PartnerTrip.Origination.Foreign);
+            var trips = queue.Where(t => t.origination == PartnerTrip.Origination.Foreign).ToList();
             foreach (var trip in trips)
                 ProcessTrip(trip);
         }
@@ -1467,7 +1467,7 @@ namespace TripThruCore
             Logger.Log("The destination has been reached for: " + t);
             Logger.Tab();
             t.dropoffTime = DateTime.UtcNow;
-            t.UpdateTripStatus(notifyPartner: true, driverLocation: new Location(t.driverLocation.Lat, t.driverLocation.Lng), status: Status.Complete);
+            t.UpdateTripStatus(notifyPartner: true, driverLocation: new Location(t.driver.location.Lat, t.driver.location.Lng), status: Status.Complete);
             CompleteTrip(t);
             Logger.Untab();
         }
