@@ -1,0 +1,1 @@
+<Playlist Version="1.0"><Add Test="Tests.TripLifeCycle_Tester.EnoughDrivers_AllPartners_Gateway" /><Add Test="Tests.TripLifeCycle_Tester.EnoughDrivers_TwoPartnersShareJobs_Gateway" /></Playlist>
