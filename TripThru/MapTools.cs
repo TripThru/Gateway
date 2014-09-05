@@ -75,52 +75,8 @@ namespace Utils
             }
             return poly;
         }
-        public static Dictionary<string, Pair<string, string>> locationAddresses = new Dictionary<string, Pair<string, string>>();
-        public static Dictionary<string, string> locationNames = new Dictionary<string, string>();
 
-        public static void ClearCache()
-        {
-            locationAddresses.Clear();
-            locationNames.Clear();
-        }
-
-        static string locationNames_Filename;
-        static string routes_Filename;
-        static string locationAddresses_Filename;
         public static double distance_and_time_scale = 1;
-
-        public static void SetGeodataFilenames(string locationNames, string routes, string locationAddresses)
-        {
-            locationNames_Filename = locationNames;
-            routes_Filename = routes;
-            locationAddresses_Filename = locationAddresses;
-        }
-
-        public static void LoadGeoData()
-        {
-            LoadGeoLocationAddress();
-            LoadGeoLocationNames();
-        }
-
-        private static void LoadGeoLocationNames()
-        {
-            using (var sr = new StreamReader(locationNames_Filename))
-            {
-                var lines = sr.ReadToEnd();
-                locationNames = JsonConvert.DeserializeObject<Dictionary<string, string>>(lines) ??
-                                new Dictionary<string, string>();
-            }
-        }
-
-        private static void LoadGeoLocationAddress()
-        {
-            using (var sr = new StreamReader(locationAddresses_Filename))
-            {
-                var lines = sr.ReadToEnd();
-                locationAddresses = JsonConvert.DeserializeObject<Dictionary<string, Pair<string, string>>>(lines) ??
-                                    new Dictionary<string, Pair<string, string>>();
-            }
-        }
 
         private static DateTime googleQueryLimitEnd;
         private static int googleRequestCount = 0;
@@ -158,85 +114,7 @@ namespace Utils
             }
         }
 
-        public static void WriteGeoData()
-        {
-            WriteGeoLocationNames();
-            WriteGeoLocationAddresses();
-        }
-
-        private static void WriteGeoLocationAddresses()
-        {
-            if (locationAddresses_Filename == null) return;
-            File.WriteAllText(locationAddresses_Filename, String.Empty);
-            using (var sr = new StreamWriter(locationAddresses_Filename))
-            {
-                var serializer = new JavaScriptSerializer();
-                var locationAddressesJson = JsonConvert.SerializeObject(locationAddresses);
-                sr.Write(locationAddressesJson);
-            }
-        }
-
-        private static void WriteGeoLocationNames()
-        {
-            if (locationNames_Filename == null) return;
-            File.WriteAllText(locationNames_Filename, String.Empty);
-            using (var sr = new StreamWriter(locationNames_Filename))
-            {
-                var locationNamesJson = JsonConvert.SerializeObject(locationNames);
-                sr.Write(locationNamesJson);
-            }
-        }
-
-
-        // http://code.google.com/apis/maps/documentation/geocoding/#ReverseGeocoding
-        public static string GetReverseGeoLoc(Location location)
-        {
-            lock (locationNames)
-            {
-                string key = location.getID();
-                if (locationNames.ContainsKey(key))
-                    return locationNames[key];
-                return GetReverseGeoLocationNameFromMapService(location);
-            }
-        }
-
-        private static string GetReverseGeoLocationNameFromMapService(Location location)
-        {
-            if (ReachedOverQueryLimit())
-                throw new Exception("Reached google OVER_QUERY_LIMIT");
-            XmlDocument doc = new XmlDocument();
-            {
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + location.Lat + "," + location.Lng + "&sensor=false");
-                XmlNode status = doc.SelectSingleNode("//GeocodeResponse/status");
-                if (status == null || status.InnerText == "ZERO_RESULTS" || status.InnerText == "OVER_QUERY_LIMIT")
-                {
-                    LogNewRequest(successful: false);
-                    Logger.LogDebug("Google request error", status != null ? status.InnerText : "status is null");
-                    throw new Exception("Reached google OVER_QUERY_LIMIT");
-                }
-                else
-                {
-                    LogNewRequest(successful: true);
-                    status = doc.SelectSingleNode("//GeocodeResponse/result/formatted_address");
-                    locationNames.Add(location.getID(), status.InnerText);
-                    WriteGeoLocationNames();
-                    return status.InnerText;
-                }
-            }
-        }
-
         public static Pair<string, string> GetReverseGeoLocAddress(Location location)
-        {
-            lock (locationAddresses)
-            {
-                string key = location.getID();
-                if (locationAddresses.ContainsKey(key))
-                    return locationAddresses[key];
-                return GetReverseGeoAddressFromMapService(location);
-            }
-        }
-
-        private static Pair<string, string> GetReverseGeoAddressFromMapService(Location location)
         {
             if (ReachedOverQueryLimit())
                 throw new Exception("Reached google OVER_QUERY_LIMIT");
@@ -262,10 +140,7 @@ namespace Utils
                 string postal_code = postalCodeNode != null ? postalCodeNode.InnerText : "";
 
                 address = new Pair<string, string>(street_number + " " + route, postal_code);
-                locationAddresses.Add(location.getID(), address);
-                WriteGeoLocationAddresses();
                 return address;
-
             }
             else
             {
