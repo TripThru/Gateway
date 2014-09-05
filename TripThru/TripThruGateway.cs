@@ -27,6 +27,8 @@ namespace TripThruCore
         private RedisDictionary<string, List<Zone>> partnerCoverage;
         public readonly TimeSpan missedBookingPeriod = new TimeSpan(0, 30, 0);
         private TripsManager tripsManager;
+        private PartnersUpdateThread partnersUpdateThread;
+        private HealthCheckThread healthCheckThread;
 
         public List<Zone> GetPartnerCoverage(string partnerID)
         {
@@ -45,8 +47,14 @@ namespace TripThruCore
                 LoadTDispatchIntegrations();
             this.tripsManager = async == true ? new TripsManagerAsync(this) : new TripsManager(this);
 
-            new PartnersUpdateThread(partners);
-            new HealthCheckThread(this);
+            this.partnersUpdateThread = new PartnersUpdateThread(partners);
+            this.healthCheckThread = new HealthCheckThread(this);
+        }
+        public void Dispose()
+        {
+            this.healthCheckThread.Dispose();
+            this.partnersUpdateThread.Dispose();
+            this.tripsManager.Dispose();
         }
 
         private void InitializePersistantDataObjects()
@@ -436,7 +444,6 @@ namespace TripThruCore
             foreach (Gateway p in partners.Values)
                 p.Update();
         }
-
     }
 
     public class TripsManager
@@ -444,14 +451,27 @@ namespace TripThruCore
 
         private TimeSpan monitorsInteval;
         private TripThru tripthru;
+        private TripDispatcherThread tripDispatcherThread;
+        private TripUpdaterThread tripUpdaterThread;
+        private NewQuotesHandlerThread newQuotesHandlerThread;
+        private CompleteQuotesHandlerThread completeQuotesHandlerThread;
+
         public TripsManager(TripThru tripthru)
         {
             this.monitorsInteval = new TimeSpan(0, 0, 5);
             this.tripthru = tripthru;
-            new TripDispatcherThread(this, monitorsInteval);
-            new TripUpdaterThread(this, monitorsInteval);
-            new NewQuotesHandlerThread(this, monitorsInteval);
-            new CompleteQuotesHandlerThread(this, monitorsInteval);
+            this.tripDispatcherThread = new TripDispatcherThread(this, monitorsInteval);
+            this.tripUpdaterThread = new TripUpdaterThread(this, monitorsInteval);
+            this.newQuotesHandlerThread = new NewQuotesHandlerThread(this, monitorsInteval);
+            this.completeQuotesHandlerThread = new CompleteQuotesHandlerThread(this, monitorsInteval);
+        }
+
+        public void Dispose()
+        {
+            this.tripDispatcherThread.Dispose();
+            this.tripUpdaterThread.Dispose();
+            this.newQuotesHandlerThread.Dispose();
+            this.completeQuotesHandlerThread.Dispose();
         }
 
         public Gateway.DispatchTripResponse CreateTrip(Gateway.DispatchTripRequest r)
@@ -1019,7 +1039,7 @@ namespace TripThruCore
             {
                 try
                 {
-                    while (true)
+                    while (!_workerTerminateSignal)
                     {
                         var trips = _tripManager.tripthru.activeTrips.GetTripsByState(TripState.New);
                         foreach (var trip in trips.ToList())
@@ -1050,6 +1070,7 @@ namespace TripThruCore
             public void Dispose()
             {
                 Logger.LogDebug("TripDispatcher disposed");
+                _workerTerminateSignal = true;
             }
         }
 
@@ -1073,7 +1094,7 @@ namespace TripThruCore
             {
                 try
                 {
-                    while (true)
+                    while (!_workerTerminateSignal)
                     {
                         var trips = _tripManager.tripthru.activeTrips.GetDirtyTrips();
                         foreach (var trip in trips.ToList())
@@ -1105,6 +1126,7 @@ namespace TripThruCore
             public void Dispose()
             {
                 Logger.LogDebug("TripUpdater disposed");
+                _workerTerminateSignal = true;
             }
         }
 
@@ -1126,7 +1148,7 @@ namespace TripThruCore
 
             private void StartThread()
             {
-                while (true)
+                while (!_workerTerminateSignal)
                 {
                     try
                     {
@@ -1158,6 +1180,7 @@ namespace TripThruCore
             public void Dispose()
             {
                 Logger.LogDebug("NewQuotesHandler disposed");
+                _workerTerminateSignal = true;
             }
         }
 
@@ -1179,7 +1202,7 @@ namespace TripThruCore
 
             private void StartThread()
             {
-                while (true)
+                while (!_workerTerminateSignal)
                 {
                     try
                     {
@@ -1213,6 +1236,7 @@ namespace TripThruCore
             public void Dispose()
             {
                 Logger.LogDebug("CompleteQuotesHandler disposed");
+                _workerTerminateSignal = true;
             }
         }
 
@@ -1416,7 +1440,7 @@ namespace TripThruCore
         {
             try
             {
-                while (true)
+                while (!_workerTerminateSignal)
                 {
                     _tripthruGateway.HealthCheck();
                     System.Threading.Thread.Sleep(_heartbeat);
@@ -1431,6 +1455,7 @@ namespace TripThruCore
         public void Dispose()
         {
             Logger.LogDebug("HealthCheckThread disposed");
+            _workerTerminateSignal = true;
         }
     }
 
@@ -1453,7 +1478,7 @@ namespace TripThruCore
         {
             try
             {
-                while (true)
+                while (!_workerTerminateSignal)
                 {
                     try
                     {
@@ -1478,6 +1503,7 @@ namespace TripThruCore
             catch (Exception e)
             {
                 Logger.LogDebug("PartnersUpdateThread initialization error :" + e.Message, e.StackTrace);
+                _workerTerminateSignal = true;
             }
         }
 
