@@ -9,7 +9,7 @@ namespace TripThruTests
 {
     public class GatewayMock : GatewayWithStats
     {
-        Gateway server;
+        public Gateway server;
         public Dictionary<string, TripRequests> RequestsByTripId;
         public class TripRequests
         {
@@ -41,7 +41,7 @@ namespace TripThruTests
             this.RequestsByTripId = new Dictionary<string, TripRequests>();
         }
 
-        private TripRequests GetTripRequests(string tripId)
+        protected TripRequests GetTripRequests(string tripId)
         {
             if (!RequestsByTripId.ContainsKey(tripId))
                 RequestsByTripId[tripId] = new TripRequests();

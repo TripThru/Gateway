@@ -86,9 +86,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="GatewayClientMock.cs" />
     <Compile Include="GatewayMock.cs" />
-    <Compile Include="Test_TripLifeCycle.cs" />
+    <Compile Include="Test_TripLifeCycle_Base.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Test_TripLifeCycle_LocalGateway.cs" />
+    <Compile Include="Test_TripLifeCycle_RemoteGateway.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.TripThruGateway\Web\ServiceStack.TripThruGateway.csproj">
