@@ -10,6 +10,12 @@ using TripThruCore;
 using System.Threading;
 using TripThruCore.Storage;
 using ServiceStack.TripThruGateway;
+using ServiceStack.WebHost.Endpoints;
+using ServiceStack.WebHost.Endpoints.Extensions;
+using Funq;
+using ServiceStack.Common.Web;
+using ServiceStack.ServiceInterface.Cors;
+using ServiceStack.Text;
 
 namespace TripThruTests
 {
@@ -29,6 +35,7 @@ namespace TripThruTests
                 Logger.Tab();
                 MapTools.distance_and_time_scale = .05;
                 Logger.Untab();
+
             }
 
             [TearDown]
@@ -49,6 +56,52 @@ namespace TripThruTests
             {
                 Logger.Log("EnoughDrivers_AllPartners_Gateway");
             }
+        }
+    }
+
+    public class SelfAppHost : AppHostHttpListenerBase
+    {
+        public SelfAppHost(string serviceName)
+            : base(serviceName, typeof(GatewayService).Assembly)
+        {
+            
+        }
+
+        public override void Configure(Container container)
+        {
+            AppHostCommon.Init(container);
+            this.SetConfig(AppHostCommon.GetConfig());
+            this.Plugins.AddRange(AppHostCommon.GetPlugins());
+
+            JsConfig.DateHandler = JsonDateHandler.ISO8601;
+            JsConfig.EmitCamelCaseNames = true;
+        }
+    }
+
+    public static class AppHostCommon
+    {
+        public static void Init(Container container)
+        {
+        }
+
+        public static EndpointHostConfig GetConfig()
+        {
+            return new EndpointHostConfig
+            {
+                GlobalResponseHeaders = {
+					{ "Access-Control-Allow-Origin", "*" },
+					{ "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" },
+					{ "Access-Control-Allow-Headers", "Content-Type" },
+				},
+                DebugMode = true,
+                DefaultContentType = ContentType.Json,
+                AllowJsonpRequests = true,
+            };
+        }
+
+        public static IEnumerable<IPlugin> GetPlugins()
+        {
+            yield return new CorsFeature();
         }
     }
 }
