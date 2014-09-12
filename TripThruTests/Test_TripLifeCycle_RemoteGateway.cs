@@ -29,13 +29,10 @@ namespace TripThruTests
             public void SetUp()
             {
                 Logger.OpenLog("Nunit", splunkEnabled: false);
+                Logger.Log("Setting up");
                 StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
                 StorageManager.Reset(); // Sometimes mongo can't delete on teardown between tests
-                Logger.Log("Setting up");
-                Logger.Tab();
                 MapTools.distance_and_time_scale = .05;
-                Logger.Untab();
-
             }
 
             [TearDown]
@@ -64,7 +61,7 @@ namespace TripThruTests
         public SelfAppHost(string serviceName)
             : base(serviceName, typeof(GatewayService).Assembly)
         {
-            
+             
         }
 
         public override void Configure(Container container)
@@ -102,6 +99,88 @@ namespace TripThruTests
         public static IEnumerable<IPlugin> GetPlugins()
         {
             yield return new CorsFeature();
+        }
+    }
+
+    /*
+     * This class is a hack to have one AppHost receiving requests for all partners, it relies on TripThru
+     * sending the target partner's clientID instead of TripThru's own ID by modifying the database accounts
+     * setting TripThruAccessToken the be the same as each partner's AccessToken.
+     * 
+     * We need to find a way to start multiple AppHosts each with it's own individual partner instance
+     * passed to GatewayService's constructor instead of having a static gateway.
+     */
+    public class PartnersGateway : Gateway
+    {
+        private Dictionary<string, Gateway> partnersByClientID;
+
+        public PartnersGateway() : 
+            base("PartnersGateway", "PartnersGateway")
+        {
+            this.partnersByClientID = new Dictionary<string, Gateway>();
+        }
+
+        private void ValidatePartnerExists(string id)
+        {
+            if (!partnersByClientID.ContainsKey(id))
+                throw new Exception("Partner " + id + " not found");
+        }
+
+        public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner, List<Zone> coverage)
+        {
+            if (partnersByClientID.ContainsKey(partner.ID))
+                throw new Exception("Partner " + partner.ID + " already exists.");
+            partnersByClientID[partner.ID] = partner;
+            return new RegisterPartnerResponse();
+        }
+
+        public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].GetPartnerInfo(request);
+        }
+
+        public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].DispatchTrip(request);
+        }
+
+        public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].QuoteTrip(request);
+        }
+
+        public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].GetTripStatus(request);
+        }
+
+        public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].UpdateTripStatus(request);
+        }
+
+        public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].UpdateQuote(request);
+        }
+
+        public override GetQuoteResponse GetQuote(GetQuoteRequest request)
+        {
+            ValidatePartnerExists(request.clientID);
+            request.clientID = "TripThru";
+            return partnersByClientID[request.clientID].GetQuote(request);
         }
     }
 }
