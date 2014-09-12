@@ -65,22 +65,40 @@ namespace TripThruTests
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
-            requests++;
-            GetTripRequests(request.tripID).Dispatch++;
+            LogDispatchRequest(request);
             Gateway.DispatchTripResponse resp = server.DispatchTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
             return resp;
         }
+        public override void DispatchTripAsync(Gateway.DispatchTripRequest request, Action<Gateway.DispatchTripResponse> callback)
+        {
+            LogDispatchRequest(request);
+            server.DispatchTripAsync(request, callback);
+        }
+        private void LogDispatchRequest(Gateway.DispatchTripRequest request)
+        {
+            requests++;
+            GetTripRequests(request.tripID).Dispatch++;
+        }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
-            requests++;
-            GetTripRequests(request.tripId).Quote++;
+            LogQuoteRequest(request);
             Gateway.QuoteTripResponse resp = server.QuoteTrip(request);
             if (resp.result == Gateway.Result.Rejected)
                 rejects++;
             return resp;
+        }
+        public override void QuoteTripAsync(Gateway.QuoteTripRequest request, Action<Gateway.QuoteTripResponse> callback)
+        {
+            LogQuoteRequest(request);
+            server.QuoteTripAsync(request, callback);
+        }
+        private void LogQuoteRequest(Gateway.QuoteTripRequest request)
+        {
+            requests++;
+            GetTripRequests(request.tripId).Quote++;
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
@@ -92,6 +110,17 @@ namespace TripThruTests
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
+            LogUpdateTripStatusRequest(request);
+            return server.UpdateTripStatus(request);
+        }
+        public override void UpdateTripStatusAsync(Gateway.UpdateTripStatusRequest request, Action<Gateway.UpdateTripStatusResponse> callback)
+        {
+            LogUpdateTripStatusRequest(request);
+            server.UpdateTripStatusAsync(request, callback);
+        }
+        private void LogUpdateTripStatusRequest(Gateway.UpdateTripStatusRequest request)
+        {
+
             requests++;
             var tripRequests = GetTripRequests(request.tripID);
             switch (request.status)
@@ -127,14 +156,22 @@ namespace TripThruTests
                     cancels++;
                     break;
             }
-            return server.UpdateTripStatus(request);
         }
 
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
+            LogUpdateQuoteRequest(request);
+            return server.UpdateQuote(request);
+        }
+        public override void UpdateQuoteAsync(Gateway.UpdateQuoteRequest request, Action<Gateway.UpdateQuoteResponse> callback)
+        {
+            LogUpdateQuoteRequest(request);
+            server.UpdateQuoteAsync(request, callback);
+        }
+        private void LogUpdateQuoteRequest(Gateway.UpdateQuoteRequest request)
+        {
             requests++;
             GetTripRequests(request.tripId).UpdateQuote++;
-            return server.UpdateQuote(request);
         }
 
         public override GetQuoteResponse GetQuote(GetQuoteRequest request)
