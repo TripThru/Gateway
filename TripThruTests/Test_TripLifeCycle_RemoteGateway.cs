@@ -16,6 +16,7 @@ using Funq;
 using ServiceStack.Common.Web;
 using ServiceStack.ServiceInterface.Cors;
 using ServiceStack.Text;
+using TripThruSsh;
 
 namespace TripThruTests
 {
@@ -25,6 +26,16 @@ namespace TripThruTests
         [Category("TripLifeCycle_Remote")]
         public class TripLifeCycle_RemoteTester
         {
+            PartnersGateway partnersGateway;
+            GatewayDeploy.Environment remoteServerEnvironment = new GatewayDeploy.Environment()
+            {
+                host = "107.170.235.36",
+                sshPort = 22,
+                user = "tripservice",
+                password = "Tr1PServ1CeSt@Ck",
+                debug = true
+            };
+
             [SetUp]
             public void SetUp()
             {
@@ -33,12 +44,16 @@ namespace TripThruTests
                 StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
                 StorageManager.Reset(); // Sometimes mongo can't delete on teardown between tests
                 MapTools.distance_and_time_scale = .05;
+                partnersGateway = new PartnersGateway();
+                GatewayDeploy.Start(remoteServerEnvironment);
             }
 
             [TearDown]
             public void TearDown()
             {
                 Logger.Log("Tearing down");
+                GatewayDeploy.Stop(remoteServerEnvironment);
+                partnersGateway = null;
                 StorageManager.Reset();
             }
 

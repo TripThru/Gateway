@@ -55,6 +55,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Org.Mentalis.Security">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Org.Mentalis.Security.1.0.0\lib\net40\Org.Mentalis.Security.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack">
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.3.9.60\lib\net35\ServiceStack.dll</HintPath>
     </Reference>
@@ -88,6 +91,9 @@
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="Tamir.SharpSSH">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Tamir.SharpSSH.1.1.1.13\lib\Tamir.SharpSSH.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -113,6 +119,10 @@
     <ProjectReference Include="..\ServiceStack.TripThruGateway\Web\ServiceStack.TripThruGateway.csproj">
       <Project>{EE3EB8BB-A24E-4F71-8277-1C6DAE652E2C}</Project>
       <Name>ServiceStack.TripThruGateway</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TripThruSsh\TripThruSSH.csproj">
+      <Project>{3679dfaf-17b8-4ab5-ac8b-993342998d2b}</Project>
+      <Name>TripThruSSH</Name>
     </ProjectReference>
     <ProjectReference Include="..\TripThru\TripThru.csproj">
       <Project>{92469c21-fcb0-428c-bcbf-0865443edbb2}</Project>
