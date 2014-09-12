@@ -16,10 +16,6 @@ namespace TripThruSsh
         private static SshExec ssh;
         private static string localPath;
         private static string remoteFilePath;
-        private static string host;
-        private static string user;
-        private static string password;
-        private static int sshPort;
         private static string webServer;
         private static string monoServer;
         private static List<PartnerConfiguration> partnerConfigurations;
@@ -33,22 +29,18 @@ namespace TripThruSsh
             bool simulatedPartners = false // true will deploy both gateway and simulated partners
         )
         {
-            if (environment == null || environment.host == null || environment.password == null || environment.user == null)
+            if (environment == null || environment.host == null || environment.password == null || environment.user == null || environment.sshPort == null)
                 throw new Exception("Environment must be fully specified");
             if (projectsLocalPath == null || projectsRemotePath == null || (simulatedPartners && partnerConfigurationsPath == null))
                 throw new Exception("Directories can't be null");
 
             localPath = projectsLocalPath;
             remoteFilePath = projectsRemotePath;
-            host = environment.host;
-            user = environment.user;
-            password = environment.password;
-            sshPort = environment.sshPort;
-            monoServer = "http://" + host + "/";
-            webServer = "http://" + host + ":8080/";
+            monoServer = "http://" + environment.host + "/";
+            webServer = "http://" + environment.host + ":8080/";
             partnerConfigurations = MakePartnersConfigurations(configurationsPath: partnerConfigurationsPath, debugMode: environment.debug);
 
-            OpenSshConnection();
+            OpenSshConnection(environment);
             if (!updateConfigurationsOnly) 
                 UploadProjects(includePartners: simulatedPartners);
             UpdateTripThruGatewayConfiguration(debugMode: environment.debug);
@@ -57,6 +49,22 @@ namespace TripThruSsh
             if (!updateConfigurationsOnly) 
                 UpdateMonoConfiguration(includePartners: simulatedPartners);
             RestartMono(includePartners: simulatedPartners);
+            CloseSshConnection();
+        }
+        public static void Start(Environment environment)
+        {
+            if (environment == null || environment.host == null || environment.password == null || environment.user == null || environment.sshPort == null)
+                throw new Exception("Environment must be fully specified");
+            OpenSshConnection(environment);
+            StartMono();
+            CloseSshConnection();
+        }
+        public static void Stop(Environment environment)
+        {
+            if (environment == null || environment.host == null || environment.password == null || environment.user == null || environment.sshPort == null)
+                throw new Exception("Environment must be fully specified");
+            OpenSshConnection(environment);
+            StopMono();
             CloseSshConnection();
         }
 
@@ -83,17 +91,17 @@ namespace TripThruSsh
             }
             return partnerConfigurations;
         }
-        private static void OpenSshConnection()
+        private static void OpenSshConnection(Environment environment)
         {
-            ssh = new SshExec(host, user, password);
-            ssh.Connect(sshPort);
+            ssh = new SshExec(environment.host, environment.user, environment.password);
+            ssh.Connect(environment.sshPort);
             Console.WriteLine("Connected");
 
-            sftpBase = new Tamir.SharpSsh.Sftp(host, user, password);
+            sftpBase = new Tamir.SharpSsh.Sftp(environment.host, environment.user, environment.password);
             sftpBase.OnTransferStart += new FileTransferEvent(sftpBase_OnTransferStart);
             sftpBase.OnTransferEnd += new FileTransferEvent(sftpBase_OnTransferEnd);
             Console.WriteLine("Trying to Open Connection...");
-            sftpBase.Connect(sshPort);
+            sftpBase.Connect(environment.sshPort);
             Console.WriteLine("Connected Successfully !");
         }
         private static void UploadProjects(bool includePartners)
@@ -211,16 +219,11 @@ namespace TripThruSsh
         }
         private static void RestartMono(bool includePartners)
         {
-            Console.WriteLine("Stopping mono");
-            ssh.RunCommand("kill -9 $(netstat -tpan |grep \"LISTEN\"|grep :9000|awk -F' ' '{print $7}'|awk -F'/' '{print $1}')");
-
+            StopMono();
             Console.WriteLine("Updating web folder");
             ssh.RunCommand("rm -rf /var/www/ServiceStack.*");
             ssh.RunCommand("cp -a " + remoteFilePath + "/ServiceStack.* /var/www/");
-            
-            Console.WriteLine("Starting mono");
-            ssh.RunCommand("nohup fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log > tripthru.out 2> tripthru.err < /dev/null &");
-
+            StartMono();
             if (includePartners)
             {
                 Console.WriteLine("Sleep 8 seconds, waiting for mono to initialize.");
@@ -254,6 +257,16 @@ namespace TripThruSsh
             }
 
             Console.WriteLine("Done!");
+        }
+        private static void StopMono()
+        {
+            Console.WriteLine("Stopping mono");
+            ssh.RunCommand("kill -9 $(netstat -tpan |grep \"LISTEN\"|grep :9000|awk -F' ' '{print $7}'|awk -F'/' '{print $1}')");
+        }
+        private static void StartMono()
+        {
+            Console.WriteLine("Starting mono");
+            ssh.RunCommand("nohup fastcgi-mono-server4 --appconfigdir /etc/rc.d/init.d/mono-fastcgi /socket=tcp:127.0.0.1:9000 /logfile=/var/log/mono/fastcgi.log > tripthru.out 2> tripthru.err < /dev/null &");
         }
         private static void CloseSshConnection()
         {
