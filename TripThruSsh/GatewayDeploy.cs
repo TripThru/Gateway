@@ -10,7 +10,7 @@ using TripThruCore;
 
 namespace TripThruSsh
 {
-    class GatewayDeploy
+    public class GatewayDeploy
     {
         private static SshTransferProtocolBase sftpBase;
         private static SshExec ssh;
