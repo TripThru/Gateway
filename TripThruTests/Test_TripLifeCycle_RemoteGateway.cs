@@ -26,7 +26,8 @@ namespace TripThruTests
         [Category("TripLifeCycle_Remote")]
         public class TripLifeCycle_RemoteTester
         {
-            PartnersGatewayHub partnersGateway;
+            PartnersGatewayHub partnersGatewayHub;
+            GatewayMock tripthru;
             SelfAppHost partnersServiceHost;
             GatewayDeploy.Environment remoteServerEnvironment = new GatewayDeploy.Environment()
             {
@@ -45,20 +46,49 @@ namespace TripThruTests
                 StorageManager.OpenStorage(new MongoDbStorage("mongodb://localhost:27017/", "TripThru"));
                 StorageManager.Reset(); // Sometimes mongo can't delete on teardown between tests
                 MapTools.distance_and_time_scale = .05;
-                partnersGateway = new PartnersGatewayHub();
-                GatewayService.gateway = partnersGateway;
+                StartPartnersHost();
+                StartTripThruHost();
+            }
+
+            private void StartPartnersHost()
+            {
+                partnersGatewayHub = new PartnersGatewayHub();
+                GatewayService.gateway = partnersGatewayHub;
                 partnersServiceHost = new SelfAppHost("PartnersHost");
                 partnersServiceHost.Start("http://localhost:8081/");
-                GatewayDeploy.Start(remoteServerEnvironment);
             }
+            private void StopPartnersHost()
+            {
+                partnersGatewayHub = null;
+                partnersServiceHost.Stop();
+            }
+            private void StartTripThruHost()
+            {
+                GatewayDeploy.Start(remoteServerEnvironment);
+                Dictionary<string, PartnerAccount> accountsByClientID = new Dictionary<string, PartnerAccount>();
+                var partnerAccounts = StorageManager.GetPartnerAccounts()
+                    .Where(a => a.Role == Storage.UserRole.partner);
+                foreach (var account in partnerAccounts)
+                    accountsByClientID[account.ClientId] = account;
+                var tripThruGatewayHub = new TripThruGatewayHub(
+                    tripThruUrl: "http://" + remoteServerEnvironment.host + "/TripThru.TripThruGateway/",
+                    partnerConfigurationByClientID: accountsByClientID
+                );
+                tripthru = new GatewayMock(tripThruGatewayHub);
+            }
+            private void StopTripThruHost()
+            {
+                GatewayDeploy.Stop(remoteServerEnvironment);
+                tripthru = null;
+            }
+
 
             [TearDown]
             public void TearDown()
             {
                 Logger.Log("Tearing down");
-                GatewayDeploy.Stop(remoteServerEnvironment);
-                partnersGateway = null;
-                partnersServiceHost.Stop();
+                StopPartnersHost();
+                StopTripThruHost();
                 StorageManager.Reset();
             }
 
@@ -66,12 +96,54 @@ namespace TripThruTests
             public void EnoughDrivers_TwoPartnersShareJobs_Gateway()
             {
                 Logger.Log("EnoughDrivers_TwoPartnersShareJobs_Gateway");
+                var libA = new Test_TripLifeCycle_Base(
+                    filename: "Test_Configurations/ForeignTripsEnoughDriversA.txt",
+                    tripthru: tripthru,
+                    maxLateness: new TimeSpan(0, 5, 0),
+                    origination: PartnerTrip.Origination.Local,
+                    service: PartnerTrip.Origination.Foreign,
+                    locationVerificationTolerance: 4);
+                var libB = new Test_TripLifeCycle_Base(
+                    filename: "Test_Configurations/ForeignTripsEnoughDriversB.txt",
+                    tripthru: tripthru,
+                    maxLateness: new TimeSpan(0, 5, 0),
+                    origination: PartnerTrip.Origination.Local,
+                    service: PartnerTrip.Origination.Foreign,
+                    locationVerificationTolerance: 4);
+                List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
+                subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
+                List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
+                Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
+                    timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
+                    simInterval: new TimeSpan(0, 0, 1)
+                );
             }
 
             [Test]
             public void EnoughDrivers_AllPartners_Gateway()
             {
                 Logger.Log("EnoughDrivers_AllPartners_Gateway");
+                TimeSpan maxLateness = new TimeSpan(0, 20, 0);
+                double locationVerificationTolerance = 4;
+                string[] filePaths = Directory.GetFiles("../../Test_Configurations/Partners/");
+                Logger.Log("filePaths = " + filePaths);
+                List<SubTest> subtests = new List<SubTest>();
+                List<Partner> partners = new List<Partner>();
+                foreach (string filename in filePaths)
+                {
+                    Logger.Log("filename = " + filename);
+                    var lib = new Test_TripLifeCycle_Base(
+                        filename: filename,
+                        tripthru: tripthru,
+                        maxLateness: maxLateness,
+                        locationVerificationTolerance: locationVerificationTolerance);
+                    partners.Add(lib.partner);
+                    subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
+                }
+                Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
+                    timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
+                    simInterval: new TimeSpan(0, 0, 1)
+                );
             }
         }
     }
@@ -219,10 +291,10 @@ namespace TripThruTests
         private Dictionary<string, GatewayClient> tripThruClientByClientID;
         private string tripThruUrl;
         // Add configuration before partner registration to use access token and callback url when registering
-        private Dictionary<string, PartnerConfiguration> partnerConfigurationByClientID;
+        private Dictionary<string, PartnerAccount> partnerConfigurationByClientID;
 
-        public TripThruGatewayHub(string tripThruUrl, string callback, 
-            Dictionary<string, PartnerConfiguration> partnerConfigurationByClientID) :
+        public TripThruGatewayHub(string tripThruUrl,
+            Dictionary<string, PartnerAccount> partnerConfigurationByClientID) :
             base("TripThruGatewayHub", "TripThruGatewayHub")
         {
             this.tripThruClientByClientID = new Dictionary<string, GatewayClient>();
@@ -239,7 +311,7 @@ namespace TripThruTests
         {
             if (!partnerConfigurationByClientID.ContainsKey(partner.ID))
                 throw new Exception("Access token not added for " + partner.ID);
-            var accessToken = partnerConfigurationByClientID[partner.ID].Partner.AccessToken;
+            var accessToken = partnerConfigurationByClientID[partner.ID].AccessToken;
             tripThruClientByClientID[partner.ID] = new GatewayClient("TripThru", "TripThru", tripThruUrl, accessToken);
             return tripThruClientByClientID[partner.ID];
         }
@@ -248,8 +320,8 @@ namespace TripThruTests
             var config = partnerConfigurationByClientID[partner.ID];
             return new RegisterPartnerRequest(
                 name: partner.name,
-                callback_url: config.Partner.CallbackUrl,
-                accessToken: config.Partner.AccessToken,
+                callback_url: config.CallbackUrl,
+                accessToken: config.AccessToken,
                 coverage: coverage
             );
         }
