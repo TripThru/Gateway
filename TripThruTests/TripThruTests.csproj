@@ -45,6 +45,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DiffieHellman">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\DiffieHellman.1.0.0\lib\net40\DiffieHellman.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.OrmLite.Sqlite.Mono.3.9.71\lib\net35\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
@@ -108,7 +111,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="GatewayClientMock.cs" />
     <Compile Include="GatewayMock.cs" />
     <Compile Include="Test_TripLifeCycle_Base.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
