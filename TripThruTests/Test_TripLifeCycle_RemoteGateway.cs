@@ -55,7 +55,7 @@ namespace TripThruTests
                 partnersGatewayHub = new PartnersGatewayHub();
                 GatewayService.gateway = partnersGatewayHub;
                 partnersServiceHost = new SelfAppHost("PartnersHost");
-                partnersServiceHost.Start("http://localhost:8081/");
+                partnersServiceHost.Start("http://127.0.0.1:9001/");
             }
             private void StopPartnersHost()
             {
