@@ -20,7 +20,7 @@ namespace TripThruTests
         private GatewayMock partnerServiceMock;
         PartnerTrip.Origination? origination = null;
         PartnerTrip.Origination? service = null;
-        public TimeSpan simInterval = new TimeSpan(0, 0, 1);
+        public static TimeSpan simInterval = new TimeSpan(0, 0, 1);
         public TimeSpan maxLateness = new TimeSpan(0, 0, 2);
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
@@ -107,6 +107,7 @@ namespace TripThruTests
         public static void RunSubTests(List<Partner> partners, List<SubTest> singleTrips_Subtests, DateTime timeoutAt, TimeSpan simInterval)
         {
             Test_TripLifeCycle_Base.testsRunning = true;
+            Test_TripLifeCycle_Base.simInterval = simInterval;
             var fleets = new List<PartnerFleet>();
             foreach (var partner in partners)
                 fleets.AddRange(partner.PartnerFleets.Values);
