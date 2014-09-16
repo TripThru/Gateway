@@ -64,13 +64,12 @@ namespace TripThruTests
                 {
                     partnersServiceHost = new SelfAppHost("PartnersHost");
                     partnersServiceHost.Init();
+                    partnersServiceHost.Start("http://*:8081/");
                 }
-                partnersServiceHost.Start("http://*:8081/");
             }
             private void StopPartnersHost()
             {
                 partnersGatewayHub = null;
-                partnersServiceHost.Stop();
             }
             private void StartTripThruHost()
             {

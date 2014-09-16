@@ -312,6 +312,8 @@ namespace TripThruTests
         {
             var tripId = trip.publicID;
             Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
+            if (trip.status != response.status)
+                ValidateTripThruReceivedStatusUpdateButSkippedIt(trip, trip.status);
             Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
             ValidateTripStatusLocation(trip, trip.status, response.driverLocation);
         }
