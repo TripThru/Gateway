@@ -110,7 +110,10 @@ namespace ServiceStack.TripThruGateway
                 },
                 (r, ex) =>
                 {
-                    Logger.BeginRequest("Exception ocurred async DispatchTrip. Trip: " + tripId + ", Result: " + (r != null ? r.ResultCode.ToString() : "null"), ex);
+                    Logger.BeginRequest("Exception ocurred async DispatchTrip.  Trip: " + tripId + ", Result: "
+                        + (r != null ? r.ResultCode.ToString() : "null")
+                        + ", Exception: " + ex.ToString(),
+                        ex);
                     Gateway.DispatchTripResponse result = null;
                     if (r != null)
                         result = new Gateway.DispatchTripResponse(r.ResultCode);
@@ -203,7 +206,10 @@ namespace ServiceStack.TripThruGateway
                 },
                 (r, ex) =>
                 {
-                    Logger.BeginRequest("Exception ocurred async QuoteTrip. Trip: " + tripId + ", Result: " + (r != null ? r.ResultCode.ToString() : "null"), ex);
+                    Logger.BeginRequest("Exception ocurred async QuoteTrip. Trip: " + tripId + ", Result: " 
+                        + (r != null ? r.ResultCode.ToString() : "null")
+                        + ", Exception: " + ex.ToString(), 
+                        ex);
                     Gateway.QuoteTripResponse result = null;
                     if (r != null)
                         result = new Gateway.QuoteTripResponse(r.ResultCode);
@@ -286,7 +292,10 @@ namespace ServiceStack.TripThruGateway
                 },
                 (r, ex) =>
                 {
-                    Logger.BeginRequest("Exception ocurred async UpdateQuote. Trip: " + tripId + ", Result: " + (r != null ? r.ResultCode.ToString() : "null"), ex);
+                    Logger.BeginRequest("Exception ocurred async UpdateQuote. Trip: " + tripId + ", Result: "
+                        + (r != null ? r.ResultCode.ToString() : "null")
+                        + ", Exception: " + ex.ToString(),
+                        ex);
                     Gateway.UpdateQuoteResponse result = null;
                     if (r != null)
                         result = new Gateway.UpdateQuoteResponse(r.ResultCode);
@@ -436,7 +445,10 @@ namespace ServiceStack.TripThruGateway
                 },
                 (r, ex) =>
                 {
-                    Logger.BeginRequest("Exception ocurred async UpdateTripStatus. Trip: " + tripId + ", Result: " + (r != null ? r.ResultCode.ToString() : "null"), ex);
+                    Logger.BeginRequest("Exception ocurred async UpdateTripStatus. Trip: " + tripId + ", Result: "
+                        + (r != null ? r.ResultCode.ToString() : "null")
+                        + ", Exception: " + ex.ToString(),
+                        ex);
                     Gateway.UpdateTripStatusResponse result = null;
                     if (r != null)
                         result = new Gateway.UpdateTripStatusResponse(r.ResultCode);

@@ -16,6 +16,7 @@ using Funq;
 using ServiceStack.Common.Web;
 using ServiceStack.ServiceInterface.Cors;
 using ServiceStack.Text;
+using ServiceStack.ServiceHost;
 using TripThruSsh;
 
 namespace TripThruTests
@@ -52,7 +53,12 @@ namespace TripThruTests
 
             private void StartPartnersHost()
             {
-                partnersGatewayHub = new PartnersGatewayHub();
+                Dictionary<string, PartnerAccount> accountsByAccessToken = new Dictionary<string, PartnerAccount>();
+                var partnerAccounts = StorageManager.GetPartnerAccounts();
+                foreach (var account in partnerAccounts)
+                    accountsByAccessToken[account.AccessToken] = account;
+
+                partnersGatewayHub = new PartnersGatewayHub(accountsByAccessToken);
                 GatewayService.gateway = partnersGatewayHub;
                 partnersServiceHost = new SelfAppHost("PartnersHost");
                 partnersServiceHost.Init();
@@ -61,6 +67,7 @@ namespace TripThruTests
             private void StopPartnersHost()
             {
                 partnersGatewayHub = null;
+                partnersServiceHost.Dispose();
                 partnersServiceHost.Stop();
             }
             private void StartTripThruHost()
@@ -81,6 +88,13 @@ namespace TripThruTests
             {
                 GatewayDeploy.Stop(remoteServerEnvironment);
                 tripthru = null;
+            }
+            // We have a GatewayService connected to a gateway that concentrates all partners so 
+            // we need to register the partners instances used by the tests.
+            private void RegisterPartners(List<Partner> partners)
+            {
+                foreach (var partner in partners)
+                    partnersGatewayHub.RegisterPartner(partner, partner.PartnerFleets.First().Value.coverage);
             }
 
 
@@ -114,6 +128,7 @@ namespace TripThruTests
                 List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
                 subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
                 List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
+                RegisterPartners(partners);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
                     simInterval: new TimeSpan(0, 0, 10)
@@ -141,6 +156,7 @@ namespace TripThruTests
                     partners.Add(lib.partner);
                     subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
                 }
+                RegisterPartners(partners);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
                     simInterval: new TimeSpan(0, 0, 10)
@@ -172,6 +188,24 @@ namespace TripThruTests
             JsConfig.DateHandler = JsonDateHandler.ISO8601;
             JsConfig.EmitCamelCaseNames = true;
 
+            //Unhandled exceptions
+            //Handle Exceptions occurring in Services:
+            this.ServiceExceptionHandler = (request, exception) =>
+            {
+                //log your exceptions here
+                Logger.LogDebug("ServiceExceptionHandler : " + exception.Message, exception.StackTrace);
+
+                //call default exception handler or prepare your own custom response
+                return DtoUtils.HandleException(this, request, exception);
+            };
+            //Handle Unhandled Exceptions occurring outside of Services, 
+            //E.g. in Request binding or filters:
+            this.ExceptionHandler = (req, res, operationName, ex) =>
+            {
+                Logger.LogDebug("ExceptionHandler : " + ex.Message, ex.StackTrace);
+                res.Write("Error: {0}: {1}".Fmt(ex.GetType().Name, ex.Message));
+                res.End();
+            };
             /**
              * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain
              * than to add them manually to the deployment server
@@ -214,7 +248,7 @@ namespace TripThruTests
 
     /*
      * This class is a hack to have one AppHost receiving requests for all partners, it relies on TripThru
-     * sending the target partner's clientID instead of TripThru's own ID by modifying the database accounts
+     * sending the target partner's access token instead of TripThru's own ID by modifying the database accounts
      * setting TripThruAccessToken the be the same as each partner's AccessToken.
      * 
      * We need to find a way to start multiple AppHosts each with it's own individual partner instance
@@ -223,17 +257,27 @@ namespace TripThruTests
     public class PartnersGatewayHub : Gateway
     {
         private Dictionary<string, Gateway> partnersByClientID;
+        private Dictionary<string, PartnerAccount> partnerConfigurationByAccessToken;
 
-        public PartnersGatewayHub() : 
+        public PartnersGatewayHub(Dictionary<string, PartnerAccount> partnerConfigurationByAccessToken) : 
             base("PartnersGatewayHub", "PartnersGatewayHub")
         {
             this.partnersByClientID = new Dictionary<string, Gateway>();
+            this.partnerConfigurationByAccessToken = partnerConfigurationByAccessToken;
         }
 
         private void ValidatePartnerExists(string id)
         {
             if (!partnersByClientID.ContainsKey(id))
                 throw new Exception("Partner " + id + " not found");
+        }
+
+        // Since we need to receive a request from GatewayService with a targeted partner we return the partner's account
+        public override PartnerAccount GetPartnerAccountByAccessToken(string accessToken)
+        {
+            if (!partnerConfigurationByAccessToken.ContainsKey(accessToken))
+                return null;
+            return partnerConfigurationByAccessToken[accessToken];
         }
 
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway partner, List<Zone> coverage)
@@ -247,50 +291,57 @@ namespace TripThruTests
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].GetPartnerInfo(request);
+            return partnersByClientID[partnerId].GetPartnerInfo(request);
         }
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].DispatchTrip(request);
+            return partnersByClientID[partnerId].DispatchTrip(request);
         }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].QuoteTrip(request);
+            return partnersByClientID[partnerId].QuoteTrip(request);
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].GetTripStatus(request);
+            return partnersByClientID[partnerId].GetTripStatus(request);
         }
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].UpdateTripStatus(request);
+            return partnersByClientID[partnerId].UpdateTripStatus(request);
         }
 
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].UpdateQuote(request);
+            return partnersByClientID[partnerId].UpdateQuote(request);
         }
 
         public override GetQuoteResponse GetQuote(GetQuoteRequest request)
         {
             ValidatePartnerExists(request.clientID);
+            var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[request.clientID].GetQuote(request);
+            return partnersByClientID[partnerId].GetQuote(request);
         }
     }
 
