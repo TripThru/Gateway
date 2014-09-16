@@ -43,7 +43,7 @@ namespace TripThruSsh
                 projectsLocalPath: @"Z:\WindowsDev\Gateway\",
                 projectsRemotePath: "/home/tripservice/servicestack/",
                 partnerConfigurationsPath: "PartnerConfigurations/",
-                updateConfigurationsOnly: true,
+                updateConfigurationsOnly: false,
                 simulatedPartners: false
             );
         }
