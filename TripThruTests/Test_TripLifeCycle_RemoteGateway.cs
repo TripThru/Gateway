@@ -55,7 +55,8 @@ namespace TripThruTests
                 partnersGatewayHub = new PartnersGatewayHub();
                 GatewayService.gateway = partnersGatewayHub;
                 partnersServiceHost = new SelfAppHost("PartnersHost");
-                partnersServiceHost.Start("http://127.0.0.1:9001/");
+                partnersServiceHost.Init();
+                partnersServiceHost.Start("http://*:8081/");
             }
             private void StopPartnersHost()
             {
@@ -153,7 +154,13 @@ namespace TripThruTests
         public SelfAppHost(string serviceName)
             : base(serviceName, typeof(GatewayService).Assembly)
         {
-             
+            
+        }
+
+        public void AddPrefixes(List<string> prefixes)
+        {
+            foreach(var prefix in prefixes)
+                base.Listener.Prefixes.Add(prefix);
         }
 
         public override void Configure(Container container)
@@ -164,6 +171,16 @@ namespace TripThruTests
 
             JsConfig.DateHandler = JsonDateHandler.ISO8601;
             JsConfig.EmitCamelCaseNames = true;
+
+            /**
+             * Note: since Mono by default doesn't have any trusted certificates is better to validate them in the app domain
+             * than to add them manually to the deployment server
+            */
+            System.Net.ServicePointManager.ServerCertificateValidationCallback =
+                (sender, certificate, chain, sslPolicyErrors) =>
+            {
+                return true; //Todo: fix this to actually validate the certificates
+            };
         }
     }
 
@@ -182,6 +199,7 @@ namespace TripThruTests
 					{ "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" },
 					{ "Access-Control-Allow-Headers", "Content-Type" },
 				},
+                ServiceStackHandlerFactoryPath = "services",
                 DebugMode = true,
                 DefaultContentType = ContentType.Json,
                 AllowJsonpRequests = true,
