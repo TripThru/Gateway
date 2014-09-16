@@ -115,7 +115,7 @@ namespace TripThruTests
                 List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
                 Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
-                    simInterval: new TimeSpan(0, 0, 1)
+                    simInterval: new TimeSpan(0, 0, 10)
                 );
             }
 
@@ -142,7 +142,7 @@ namespace TripThruTests
                 }
                 Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
-                    simInterval: new TimeSpan(0, 0, 1)
+                    simInterval: new TimeSpan(0, 0, 10)
                 );
             }
         }
