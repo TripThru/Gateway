@@ -252,6 +252,7 @@ namespace TripThruTests
             }
 
             Assert.AreEqual(nextStatus, trip.status, "The trip did not advance to the expected status. Trip ID: " + trip.ID);
+            Thread.Sleep(1000); // Give a margin for the partner to notify tripthru
             ValidateTripThruStatus(trip);
             ValidateTripStatusLocation(trip, trip.status, trip.driverLocation);
         }
@@ -312,9 +313,10 @@ namespace TripThruTests
         {
             var tripId = trip.publicID;
             Gateway.GetTripStatusResponse response = tripthru.GetTripStatus(new Gateway.GetTripStatusRequest(partner.ID, tripId));
-            if (trip.status != response.status)
+            if (trip.status != response.status && TripIsForeign(trip))
                 ValidateTripThruReceivedStatusUpdateButSkippedIt(trip, trip.status);
-            Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
+            else
+                Assert.AreEqual(trip.status, response.status, "The trip local status doesn't match the gateway status. Trip ID: " + tripId);
             ValidateTripStatusLocation(trip, trip.status, response.driverLocation);
         }
 
