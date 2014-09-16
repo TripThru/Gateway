@@ -231,10 +231,17 @@ namespace TripThruTests
 
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
         {
+            var timeoutAt = GetTimeWhenStatusShouldBeReached(trip);
             if (nextStatus == Status.Dispatched)
-                WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, GetTimeWhenStatusShouldBeReached(trip));
+                WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, timeoutAt);
             else
-                WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, GetTimeWhenStatusShouldBeReached(trip));
+                WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, timeoutAt);
+
+            if (DateTime.UtcNow > timeoutAt)
+                Assert.AreEqual(nextStatus, trip.status, "Reached timeout but trip didn't advance to expected status." +
+                    "Trip ID: " + trip.ID);
+
+            Thread.Sleep(new TimeSpan(0, 0, 5)); // Give enough time for updates to reach all parties
 
             /* 
              * - If trip is still in Queued status we need to verify that it actually got a Rejected update from tripthru.
@@ -252,7 +259,6 @@ namespace TripThruTests
             }
 
             Assert.AreEqual(nextStatus, trip.status, "The trip did not advance to the expected status. Trip ID: " + trip.ID);
-            Thread.Sleep(1000); // Give a margin for the partner to notify tripthru
             ValidateTripThruStatus(trip);
             ValidateTripStatusLocation(trip, trip.status, trip.driverLocation);
         }
@@ -299,7 +305,6 @@ namespace TripThruTests
                 if (response.result == Gateway.Result.OK)
                     status = response.status;
             }
-            Thread.Sleep(new TimeSpan(0, 0, 5)); // Give tripthru enough time to notify update to originating partner
         }
 
         private void ValidateTripWasRejected(PartnerTrip trip)
@@ -329,22 +334,26 @@ namespace TripThruTests
             {
                 case Status.Dispatched:
                     Assert.AreEqual(1, requests.DispatchedUpdates, 
-                        "TripThru didn't receive Dispatched trip status update. TripID: " + tripId);
+                        "TripThru didn't receive Dispatched trip status update and trip is "
+                        + trip.status +" . TripID: " + trip.ID);
                     location = requests.DispatchedRequest.driverLocation;
                     break;
                 case Status.Enroute:
                     Assert.AreEqual(1, requests.EnrouteUpdates,
-                        "TripThru didn't receive Enroute trip status update. TripID: " + tripId);
+                        "TripThru didn't receive Enroute trip status update and trip is "
+                        + trip.status + " . TripID: " + trip.ID);
                     location = requests.EnrouteRequest.driverLocation;
                     break;
                 case Status.PickedUp:
                     Assert.AreEqual(1, requests.PickedUpUpdates,
-                        "TripThru didn't receive PickedUp trip status update. TripID: " + tripId);
+                        "TripThru didn't receive PickedUp trip status update and trip is "
+                        + trip.status + " . TripID: " + trip.ID);
                     location = requests.PickedUpRequest.driverLocation;
                     break;
                 case Status.Complete:
                     Assert.AreEqual(1, requests.CompleteUpdates,
-                        "TripThru didn't receive Complete trip status update. TripID: " + tripId);
+                        "TripThru didn't receive Complete trip status update and trip is "
+                        + trip.status + " . TripID: " + trip.ID);
                     location = requests.PickedUpRequest.driverLocation;
                     break;
             }
