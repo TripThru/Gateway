@@ -1,17 +1,20 @@
 ﻿{
-  "tripThruUrlMono" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
-  "tripThruUrl" : "http://http://localhost:17187/",
-  "simInterval" : 10,
-  "partner" : {
-      "name" : "Luxor Cab",
-      "clientId" : "luxor@tripthru.com",
-      "accessToken" : "luxor23noiasdn2123",
-	  "callbackUrlMono" : "http://54.201.134.194/ServiceStack.LuxorCab/"
-	  "callbackUrl" : "http://http://localhost:17188/"
-  },
+    "host": {
+        "virtualPath": "/TripThru.Tuxor/"
+    },
+    "partner": {
+        "callbackUrlMono": "TripThru.Tuxor/",
+        "clientId": "tuxor@tripthru.com",
+		"name": "Tuxor",
+        "webUrl": "BookingsTuxor/",
+        "webUrlRelative": "/BookingsTuxor/index.php"
+    },
+    "simInterval": 10,
+    "tripThruUrlMono" : "TripThru.TripThruGateway/",
+    "tripThruUrl" : "TripThru.TripThruGateway/",
   "fleets" : [
-    {
-        "name" : "Luxor Cab - SF",
+    { 
+		"name": "Tuxor",
         "baseCost" : 3.00,
         "costPerMile" : 2.70,
         "tripsPerHour" : 0,

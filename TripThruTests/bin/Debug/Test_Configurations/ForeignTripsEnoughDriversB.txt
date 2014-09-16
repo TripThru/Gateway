@@ -1,15 +1,18 @@
 {
-  "tripThruUrl" : "http://54.201.134.194/ServiceStack.TripThruGateway/",
+  "tripThruUrl" : "TripThru.TripThruGateway/",
+  "tripThruUrlMono" : "TripThru.TripThruGateway/",
   "simInterval" : 10,
+  "enabled" : true,
   "partner" : {
-      "name" : "Les Taxi Blues",
-      "clientId" : "les@tripthru.com",
-      "accessToken" : "les12ondazazxx21",
-    "callbackUrl" : "http://54.201.134.194/ServiceStack.LesTaxiBlues/"
+      "ClientId": "los@tripthru.com",
+	  "Name": "Los Taxi Blus",
+      "callbackUrlMono" : "TripThru.LosTaxiBlus/",
+	  "webUrl" : "BookingsLosTaxiBlus/",
+	  "webUrlRelative" : "/BookingsLosTaxiBlus/index.php"
   },
   "fleets" : [
     {
-        "name" : "Les Taxi Blues",
+        "name" : "Los Taxi Blus",
         "baseCost" : 5.00,
         "costPerMile" : 4.70,
         "tripsPerHour" : 0,
