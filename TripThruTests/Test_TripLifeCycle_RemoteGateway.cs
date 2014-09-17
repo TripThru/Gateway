@@ -132,7 +132,7 @@ namespace TripThruTests
                 RegisterPartners(partners);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
-                    simInterval: new TimeSpan(0, 0, 10)
+                    simInterval: new TimeSpan(0, 0, 50)
                 );
             }
 
@@ -160,7 +160,7 @@ namespace TripThruTests
                 RegisterPartners(partners);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
-                    simInterval: new TimeSpan(0, 0, 10)
+                    simInterval: new TimeSpan(0, 0, 50)
                 );
             }
         }
