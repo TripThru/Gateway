@@ -21,7 +21,7 @@ namespace TripThruTests
         PartnerTrip.Origination? origination = null;
         PartnerTrip.Origination? service = null;
         public static TimeSpan simInterval = new TimeSpan(0, 0, 1);
-        public TimeSpan maxLateness = new TimeSpan(0, 0, 2);
+        public TimeSpan maxLateness = new TimeSpan(0, 5, 0);
         public double locationVerificationTolerance = .6;
         public int _activeTrips;
         List<String> tripsList = new List<String>();
