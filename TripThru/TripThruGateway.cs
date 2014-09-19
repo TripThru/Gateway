@@ -241,7 +241,7 @@ namespace TripThruCore
                 Logger.Log("Partner " + request.clientID + " not found.");
                 return new GetQuoteResponse(result: Result.NotFound);
             }
-            var quote = StorageManager.GetQuote(request.tripId);
+            var quote = activeQuotes[request.tripId];
             if (quote != null)
             {
                 return new GetQuoteResponse(status: quote.Status, quotes: quote.ReceivedQuotes);
@@ -276,7 +276,7 @@ namespace TripThruCore
                 Logger.Log("Partner " + r.clientID + " not found.");
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
-            var trip = StorageManager.GetTrip(r.tripID);
+            var trip = activeTrips[r.tripID];
             if (trip != null)
             {
                 return MakeGetTripStatusResponse(trip);
