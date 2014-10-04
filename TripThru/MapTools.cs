@@ -77,6 +77,7 @@ namespace Utils
         }
 
         public static double distance_and_time_scale = 1;
+        public static Dictionary<string, Route> routesById = new Dictionary<string, Route>();
 
         private static DateTime googleQueryLimitEnd;
         private static int googleRequestCount = 0;
@@ -153,9 +154,14 @@ namespace Utils
         public static Route GetRoute(Location from, Location to)
         {
             var key = Route.GetKey(from, to);
+            if (routesById.ContainsKey(key))
+                return routesById[key];
             var route = StorageManager.GetRoute(key);
             if (route != null)
+            {
+                routesById[key] = route;
                 return route;
+            }
             if (ReachedOverQueryLimit())
                 throw new Exception("Reached google OVER_QUERY_LIMIT");
             const double metersToMiles = 0.000621371192;
