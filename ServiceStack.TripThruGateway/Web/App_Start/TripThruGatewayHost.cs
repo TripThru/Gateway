@@ -116,7 +116,7 @@ namespace ServiceStack.TripThruGateway
                 }
 
                 var accounts = StorageManager.GetPartnerAccounts();
-                Logger.OpenLog("TripThruGateway");
+                Logger.OpenLog("TripThruGateway", splunkEnabled: false);
                 GatewayService.gateway = new TripThru(async: true, enableTDispatch: false);
                 foreach (var account in accounts)
                 {
