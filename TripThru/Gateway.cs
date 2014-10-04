@@ -1090,7 +1090,12 @@ namespace TripThruCore
             }
             public T this[string id]
             {
-                get { return dict[id]; }
+                get
+                {
+                    T value;
+                    dict.TryGetValue(id, out value);
+                    return value;
+                }
             }
             public abstract void Insert(string id, T value);
             public abstract void Remove(string id);
