@@ -358,7 +358,7 @@ namespace TripThruTests
                     Assert.AreEqual(1, requests.CompleteUpdates,
                         "TripThru didn't receive Complete trip status update and trip is "
                         + trip.status + " . TripID: " + trip.ID);
-                    location = requests.PickedUpRequest.driverLocation;
+                    location = requests.CompleteRequest.driverLocation;
                     break;
             }
             ValidateTripStatusLocation(trip, status, location);
