@@ -91,11 +91,12 @@ namespace TripThruTests
                 tripthru = null;
             }
             // We have a GatewayService connected to a gateway that concentrates all partners so 
-            // we need to register the partners instances used by the tests.
-            private void RegisterPartners(List<Partner> partners)
+            // we need to register the partners instances used by the tests. We use the mocks created by
+            // Test_TripLifeCycle_Base to catch all the incoming requests used for validations.
+            private void RegisterPartners(List<GatewayMock> partners)
             {
                 foreach (var partner in partners)
-                    partnersGatewayHub.RegisterPartner(partner, partner.PartnerFleets.First().Value.coverage);
+                    partnersGatewayHub.RegisterPartner(partner, ((Partner)partner.server).PartnerFleets.First().Value.coverage);
             }
 
 
@@ -129,7 +130,8 @@ namespace TripThruTests
                 List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
                 subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
                 List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
-                RegisterPartners(partners);
+                List < GatewayMock > partnerMocks = new List<GatewayMock>() { libA.partnerServiceMock, libB.partnerServiceMock };
+                RegisterPartners(partnerMocks);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
                     simInterval: new TimeSpan(0, 0, 50)
@@ -146,6 +148,7 @@ namespace TripThruTests
                 Logger.Log("filePaths = " + filePaths);
                 List<SubTest> subtests = new List<SubTest>();
                 List<Partner> partners = new List<Partner>();
+                List < GatewayMock > partnerMocks = new List<GatewayMock>();
                 foreach (string filename in filePaths)
                 {
                     Logger.Log("filename = " + filename);
@@ -155,9 +158,10 @@ namespace TripThruTests
                         maxLateness: maxLateness,
                         locationVerificationTolerance: locationVerificationTolerance);
                     partners.Add(lib.partner);
+                    partnerMocks.Add(lib.partnerServiceMock);
                     subtests.AddRange(lib.MakeSimultaneousTripLifecycle_SubTests());
                 }
-                RegisterPartners(partners);
+                RegisterPartners(partnerMocks);
                 Test_TripLifeCycle_Base.RunSubTests(partners, subtests,
                     timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
                     simInterval: new TimeSpan(0, 0, 50)
