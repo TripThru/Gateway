@@ -360,9 +360,12 @@ namespace TripThruCore
                 }
                 else
                 {
+                    DateTime? eta = null;
+                    if (r.eta != null)
+                        eta = TimeZoneInfo.ConvertTimeToUtc((DateTime)r.eta, TimeZoneInfo.Local);
                     PartnerTrip t = tripsByID[r.tripID];
                     response = new UpdateTripStatusResponse();
-                    t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: r.eta);
+                    t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: eta);
                     Logger.SetServicingId(this.ID);
                 }
             }
