@@ -110,35 +110,6 @@ namespace TripThruTests
             }
 
             [Test]
-            public void EnoughDrivers_TwoPartnersShareJobs_Gateway()
-            {
-                Logger.Log("EnoughDrivers_TwoPartnersShareJobs_Gateway");
-                var libA = new Test_TripLifeCycle_Base(
-                    filename: "Test_Configurations/ForeignTripsEnoughDriversA.txt",
-                    tripthru: tripthru,
-                    maxLateness: new TimeSpan(0, 5, 0),
-                    origination: PartnerTrip.Origination.Local,
-                    service: PartnerTrip.Origination.Foreign,
-                    locationVerificationTolerance: 4);
-                var libB = new Test_TripLifeCycle_Base(
-                    filename: "Test_Configurations/ForeignTripsEnoughDriversB.txt",
-                    tripthru: tripthru,
-                    maxLateness: new TimeSpan(0, 5, 0),
-                    origination: PartnerTrip.Origination.Local,
-                    service: PartnerTrip.Origination.Foreign,
-                    locationVerificationTolerance: 4);
-                List<SubTest> subTests = libA.MakeSimultaneousTripLifecycle_SubTests();
-                subTests.AddRange(libB.MakeSimultaneousTripLifecycle_SubTests());
-                List<Partner> partners = new List<Partner>() { libA.partner, libB.partner };
-                List < GatewayMock > partnerMocks = new List<GatewayMock>() { libA.partnerServiceMock, libB.partnerServiceMock };
-                RegisterPartners(partnerMocks);
-                Test_TripLifeCycle_Base.RunSubTests(partners, subTests,
-                    timeoutAt: DateTime.UtcNow + new TimeSpan(1, 0, 0),
-                    simInterval: new TimeSpan(0, 0, 50)
-                );
-            }
-
-            [Test]
             public void EnoughDrivers_AllPartners_Gateway()
             {
                 Logger.Log("EnoughDrivers_AllPartners_Gateway");
