@@ -276,7 +276,11 @@ namespace TripThruCore
                 Logger.Log("Partner " + r.clientID + " not found.");
                 return new GetTripStatusResponse(result: Result.NotFound);
             }
-            var trip = activeTrips[r.tripID];
+            Trip trip = null;
+            if (activeTrips.ContainsKey(r.tripID))
+                trip = activeTrips[r.tripID];
+            else
+                trip = StorageManager.GetTrip(r.tripID);
             if (trip != null)
             {
                 return MakeGetTripStatusResponse(trip);
