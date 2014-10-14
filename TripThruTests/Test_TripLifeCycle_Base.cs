@@ -17,7 +17,7 @@ namespace TripThruTests
         public string filename;
         public GatewayMock tripthru;
         public Partner partner;
-        private GatewayMock partnerServiceMock;
+        public GatewayMock partnerServiceMock;
         PartnerTrip.Origination? origination = null;
         PartnerTrip.Origination? service = null;
         public static TimeSpan simInterval = new TimeSpan(0, 0, 1);
@@ -232,14 +232,16 @@ namespace TripThruTests
         public void ValidateNextTripStatus(PartnerFleet fleet, PartnerTrip trip, Status nextStatus)
         {
             var timeoutAt = GetTimeWhenStatusShouldBeReached(trip);
+            var statusReached = false;
             if (nextStatus == Status.Dispatched)
-                WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, timeoutAt);
+                statusReached = WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(fleet, trip, timeoutAt);
             else
-                WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, timeoutAt);
+                statusReached = WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, timeoutAt);
 
-            if (DateTime.UtcNow > timeoutAt)
-                Assert.AreEqual(nextStatus, trip.status, "Reached timeout but trip didn't advance to expected status." +
-                    "Trip ID: " + trip.ID);
+            Assert.IsTrue(statusReached,
+                "Reached timeout but trip didn't advance to expected status " + nextStatus + ". Trip ID: " + trip.ID +
+                ". ETA: " + trip.ETA.ToString() + ". Timeout at: " + timeoutAt.ToString() + ". Time now: " + DateTime.UtcNow.ToString());
+ 
 
             Thread.Sleep(new TimeSpan(0, 0, 5)); // Give enough time for updates to reach all parties
 
@@ -271,7 +273,7 @@ namespace TripThruTests
             return !trip.PartnerFleet.FleetServesLocation(trip.pickupLocation);
         }
 
-        private void WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, Status nextStatus, DateTime timeoutAt)
+        private bool WaitUntilStatusReachedOrTimeout(PartnerFleet fleet, PartnerTrip trip, Status nextStatus, DateTime timeoutAt)
         {
             while (trip.status != nextStatus && DateTime.UtcNow < timeoutAt && Test_TripLifeCycle_Base.testsRunning)
             {
@@ -283,8 +285,9 @@ namespace TripThruTests
                 fleet.ProcessTrip(trip);
                 Thread.Sleep(simInterval);
             }
+            return trip.status == nextStatus;
         }
-        private void WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
+        private bool WaitUntilTripIsSuccessfullyDispatchedToTripThruOrTimesout(PartnerFleet fleet, PartnerTrip trip, DateTime timeoutAt)
         {
             /* 
              * The trip will advance to dispatched status on the partner's side but tripthru could reject it so we wait 
@@ -305,6 +308,7 @@ namespace TripThruTests
                 if (response.result == Gateway.Result.OK)
                     status = response.status;
             }
+            return status == Status.Dispatched;
         }
 
         private void ValidateTripWasRejected(PartnerTrip trip)
