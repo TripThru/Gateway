@@ -132,7 +132,7 @@ namespace TripThruTests
                     if (test.Passed == null)
                         passed = null;
                 }
-                Console.WriteLine("Threads: " + (System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "Mb");
+                Console.WriteLine("Threads: " + (System.Diagnostics.Process.GetCurrentProcess().Threads.Count.ToString()));
                 Thread.Sleep(simInterval);
             }
             Test_TripLifeCycle_Base.testsRunning = false;
