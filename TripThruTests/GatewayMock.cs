@@ -110,6 +110,7 @@ namespace TripThruTests
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
+            Console.WriteLine("GM " + this.server.ID + "  UpdateTripStatus(" + request.status + ", " + request.tripID + ") received from " + request.clientID);
             LogUpdateTripStatusRequest(request);
             return server.UpdateTripStatus(request);
         }

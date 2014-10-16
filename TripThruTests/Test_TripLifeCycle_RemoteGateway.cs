@@ -306,6 +306,7 @@ namespace TripThruTests
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
+            Console.WriteLine("PH UpdateTripStatus(" + request.status + ", " + request.tripID + ") received from " + request.clientID);
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
