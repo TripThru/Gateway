@@ -1332,6 +1332,7 @@ namespace ServiceStack.TripThruGateway
                     Logger.AddTag("ClientId", clientId);
                     Logger.AddTag("TripID", request.TripId);
                     Logger.SetOriginatingId(acct.ClientId);
+                    Logger.Log("Response: " + tripStatusResponse.Result);
                     Logger.EndRequest(tripStatusResponse);
                 }
                 return tripStatusResponse;
