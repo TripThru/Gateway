@@ -142,10 +142,10 @@ namespace TripThruTests
         }
     }
     
-    public class SelfAppHost : AppHostHttpListenerLongRunningBase
+    public class SelfAppHost : AppHostHttpListenerBase
     {
         public SelfAppHost(string serviceName)
-            : base(serviceName, 1000, typeof(GatewayService).Assembly)
+            : base(serviceName, typeof(GatewayService).Assembly)
         {
             
         }
