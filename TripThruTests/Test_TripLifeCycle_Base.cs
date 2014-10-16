@@ -314,6 +314,7 @@ namespace TripThruTests
         private void ValidateTripWasRejected(PartnerTrip trip)
         {
             var message = "GM " + partnerServiceMock.server.ID + " " + partnerServiceMock.GetHashCode() + " Trip didn't advance from Queued status but wasn't rejected either. Status: "+ trip.status +". Trip: " + trip.ID + " " + trip.GetHashCode();
+            Console.WriteLine("GM " + partnerServiceMock.server.ID);
             foreach (var r in partnerServiceMock.RequestsByTripId.Keys)
                 Console.WriteLine(r);
             Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". No requests received.");
