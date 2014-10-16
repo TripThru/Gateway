@@ -314,9 +314,9 @@ namespace TripThruTests
         private void ValidateTripWasRejected(PartnerTrip trip)
         {
             var message = "GM " + partnerServiceMock.server.ID + " " + partnerServiceMock.GetHashCode() + " Trip didn't advance from Queued status but wasn't rejected either. Status: "+ trip.status +". Trip: " + trip.ID + " " + trip.GetHashCode();
-            Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". No requests received.");
+            Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". Requests: " + (partnerServiceMock.RequestsByTripId[trip.publicID] == null ? 0 : partnerServiceMock.RequestsByTripId[trip.publicID].RejectedUpdates));
             var requests = partnerServiceMock.RequestsByTripId[trip.publicID];
-            Assert.GreaterOrEqual(requests.RejectedUpdates, 1, message + ". No rejected update received.");
+            Assert.GreaterOrEqual(requests.RejectedUpdates, 1, message + "Requests: " + partnerServiceMock.RequestsByTripId[trip.publicID].RejectedUpdates);
         }
 
         private void ValidateTripThruStatus(PartnerTrip trip)
