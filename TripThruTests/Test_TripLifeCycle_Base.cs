@@ -243,7 +243,7 @@ namespace TripThruTests
                 ". ETA: " + trip.ETA.ToString() + ". Timeout at: " + timeoutAt.ToString() + ". Time now: " + DateTime.UtcNow.ToString());
  
 
-            Thread.Sleep(new TimeSpan(0, 0, 5)); // Give enough time for updates to reach all parties
+            Thread.Sleep(new TimeSpan(0, 1, 0)); // Give enough time for updates to reach all parties
 
             /* 
              * - If trip is still in Queued status we need to verify that it actually got a Rejected update from tripthru.
@@ -314,8 +314,6 @@ namespace TripThruTests
         private void ValidateTripWasRejected(PartnerTrip trip)
         {
             var message = "GM " + partnerServiceMock.server.ID + " " + partnerServiceMock.GetHashCode() + " Trip didn't advance from Queued status but wasn't rejected either. Status: "+ trip.status +". Trip: " + trip.ID + " " + trip.GetHashCode();
-            if (!partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID))
-                Thread.Sleep(new TimeSpan(0, 1, 30));
             Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". No requests received at all.");
             var requests = partnerServiceMock.RequestsByTripId[trip.publicID];
             Assert.GreaterOrEqual(requests.RejectedUpdates, 1, message + "No rejected requests received.");
