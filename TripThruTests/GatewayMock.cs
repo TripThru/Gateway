@@ -124,6 +124,7 @@ namespace TripThruTests
 
             requests++;
             var tripRequests = GetTripRequests(request.tripID);
+            Console.WriteLine("Adding " + request.status + " request to " + tripRequests + " " + request.tripID);
             switch (request.status)
             {
                 case Status.Queued:
