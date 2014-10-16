@@ -18,6 +18,7 @@ using ServiceStack.ServiceInterface.Cors;
 using ServiceStack.Text;
 using ServiceStack.ServiceHost;
 using TripThruSsh;
+using System.Collections.Concurrent;
 
 namespace TripThruTests
 {
@@ -53,7 +54,7 @@ namespace TripThruTests
 
             private void StartPartnersHost()
             {
-                Dictionary<string, PartnerAccount> accountsByAccessToken = new Dictionary<string, PartnerAccount>();
+                ConcurrentDictionary<string, PartnerAccount> accountsByAccessToken = new ConcurrentDictionary<string, PartnerAccount>();
                 var partnerAccounts = StorageManager.GetPartnerAccounts();
                 foreach (var account in partnerAccounts)
                     accountsByAccessToken[account.AccessToken] = account;
@@ -261,13 +262,13 @@ namespace TripThruTests
      */
     public class PartnersGatewayHub : Gateway
     {
-        private Dictionary<string, Gateway> partnersByClientID;
-        private Dictionary<string, PartnerAccount> partnerConfigurationByAccessToken;
+        private ConcurrentDictionary<string, Gateway> partnersByClientID;
+        private ConcurrentDictionary<string, PartnerAccount> partnerConfigurationByAccessToken;
 
-        public PartnersGatewayHub(Dictionary<string, PartnerAccount> partnerConfigurationByAccessToken) : 
+        public PartnersGatewayHub(ConcurrentDictionary<string, PartnerAccount> partnerConfigurationByAccessToken) : 
             base("PartnersGatewayHub", "PartnersGatewayHub")
         {
-            this.partnersByClientID = new Dictionary<string, Gateway>();
+            this.partnersByClientID = new ConcurrentDictionary<string, Gateway>();
             this.partnerConfigurationByAccessToken = partnerConfigurationByAccessToken;
         }
 
@@ -275,6 +276,13 @@ namespace TripThruTests
         {
             if (!partnersByClientID.ContainsKey(id))
                 throw new Exception("Partner " + id + " not found");
+        }
+
+        private Gateway GetPartner(string clientID)
+        {
+            Gateway partner = null;
+            partnersByClientID.TryGetValue(clientID, out partner);
+            return partner;
         }
 
         // Since we need to receive a request from GatewayService with a targeted partner we return the partner's account
@@ -298,7 +306,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].GetPartnerInfo(request);
+            return GetPartner(partnerId).GetPartnerInfo(request);
         }
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
@@ -306,7 +314,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].DispatchTrip(request);
+            return GetPartner(partnerId).DispatchTrip(request);
         }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
@@ -314,7 +322,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].QuoteTrip(request);
+            return GetPartner(partnerId).QuoteTrip(request);
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
@@ -322,7 +330,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].GetTripStatus(request);
+            return GetPartner(partnerId).GetTripStatus(request);
         }
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
@@ -330,7 +338,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].UpdateTripStatus(request);
+            return GetPartner(partnerId).UpdateTripStatus(request);
         }
 
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
@@ -338,7 +346,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].UpdateQuote(request);
+            return GetPartner(partnerId).UpdateQuote(request);
         }
 
         public override GetQuoteResponse GetQuote(GetQuoteRequest request)
@@ -346,7 +354,7 @@ namespace TripThruTests
             ValidatePartnerExists(request.clientID);
             var partnerId = request.clientID;
             request.clientID = "TripThru";
-            return partnersByClientID[partnerId].GetQuote(request);
+            return GetPartner(partnerId).GetQuote(request);
         }
     }
 
