@@ -454,9 +454,9 @@ namespace TripThruTests
         private readonly SmartThreadPool _threadPoolManager;
         //private readonly ILog _log = LogManager.GetLogger(typeof(HttpListenerBase));
 
-        private const int IdleTimeout = 300;
+        private const int IdleTimeout = 5000;
 
-        protected AppHostHttpListenerSmartThreadPool(int poolSize = 500)
+        protected AppHostHttpListenerSmartThreadPool(int poolSize = 1000)
         {
             _threadPoolManager = new SmartThreadPool(IdleTimeout, poolSize);
         }
@@ -540,6 +540,7 @@ namespace TripThruTests
                 catch (Exception ex)
                 {
                     //_log.Error("Listen()", ex);
+                    Console.WriteLine("AppHost Listen exception: " + ex.ToString());
                     return;
                 }
                 if (Listener == null) return;
@@ -574,6 +575,7 @@ namespace TripThruTests
                 // methods of the .NET Framework work.
                 string errMsg = ex + ": " + isListening;
                 //_log.Warn(errMsg);
+                Console.WriteLine("AppHost warn: " + errMsg);
                 return;
             }
             finally
@@ -586,6 +588,7 @@ namespace TripThruTests
             }
 
             //_log.InfoFormat("{0} Request : {1}", context.Request.UserHostAddress, context.Request.RawUrl);
+            Console.WriteLine("Apphost request: " + "{0} Request : {1}", context.Request.UserHostAddress, context.Request.RawUrl);
 
             RaiseReceiveWebRequest(context);
 
@@ -599,6 +602,7 @@ namespace TripThruTests
                 {
                     var error = string.Format("Error this.ProcessRequest(context): [{0}]: {1}", ex.GetType().Name, ex.Message);
                     //_log.ErrorFormat(error);
+                    Console.WriteLine("AppHost exception: " + error);
 
                     try
                     {
@@ -622,6 +626,7 @@ namespace TripThruTests
                         error = string.Format("Error this.ProcessRequest(context)(Exception while writing error to the response): [{0}]: {1}",
                                               errorEx.GetType().Name, errorEx.Message);
                         //_log.ErrorFormat(error);
+                        Console.WriteLine("AppHost exception: " + error);
                     }
                 }
             });
