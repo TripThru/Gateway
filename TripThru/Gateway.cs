@@ -1142,28 +1142,29 @@ namespace TripThruCore
             public override void Update(Trip trip)
             {
                 if (!ContainsKey(trip.Id)) return;
-                this[trip.Id].FleetId = trip.FleetId;
-                this[trip.Id].FleetName = trip.FleetName;
-                this[trip.Id].DriverId = trip.DriverId;
-                this[trip.Id].DriverName = trip.DriverName;
-                this[trip.Id].DriverLocation = trip.DriverLocation;
-                this[trip.Id].ETA = trip.ETA;
-                this[trip.Id].Price = trip.Price;
-                this[trip.Id].OccupiedDistance = trip.OccupiedDistance;
+                var t = this[trip.Id];
+                t.FleetId = trip.FleetId;
+                t.FleetName = trip.FleetName;
+                t.DriverId = trip.DriverId;
+                t.DriverName = trip.DriverName;
+                t.DriverLocation = trip.DriverLocation;
+                t.ETA = trip.ETA;
+                t.Price = trip.Price;
+                t.OccupiedDistance = trip.OccupiedDistance;
                 if (trip.Status == Status.PickedUp)
                 {
-                    var lastStatusChange = this[trip.Id].LastStatusChange;
+                    var lastStatusChange = t.LastStatusChange;
                     if (lastStatusChange != null)
-                        this[trip.Id].OccupiedTime = DateTime.UtcNow - (DateTime)lastStatusChange;
+                        t.OccupiedTime = DateTime.UtcNow - (DateTime)lastStatusChange;
                 }
-                if (trip.Status != this[trip.Id].Status)
+                if (trip.Status != t.Status)
                 {
-                    this[trip.Id].Status = trip.Status;
-                    this[trip.Id].LastStatusChange = DateTime.UtcNow;
+                    t.Status = trip.Status;
+                    t.LastStatusChange = DateTime.UtcNow;
                 }
-                this[trip.Id].LastUpdate = DateTime.UtcNow;
-                this[trip.Id].IsDirty = trip.IsDirty;
-                this[trip.Id].MadeDirtyById = trip.MadeDirtyById;
+                t.LastUpdate = DateTime.UtcNow;
+                t.IsDirty = trip.IsDirty;
+                t.MadeDirtyById = trip.MadeDirtyById;
                 StorageManager.UpdateTrip(trip);
             }
             public List<Trip> GetTripsByState(TripState state)
@@ -1214,13 +1215,14 @@ namespace TripThruCore
             public override void Update(TripQuotes quote)
             {
                 if (!ContainsKey(quote.Id)) return;
-                this[quote.Id].Autodispatch = quote.Autodispatch;
-                this[quote.Id].Id = quote.Id;
-                this[quote.Id].PartnersThatServe = quote.PartnersThatServe;
-                this[quote.Id].QuoteRequest = quote.QuoteRequest;
-                this[quote.Id].ReceivedQuotes = quote.ReceivedQuotes;
-                this[quote.Id].ReceivedUpdatesCount = quote.ReceivedUpdatesCount;
-                this[quote.Id].Status = quote.Status;
+                var q = this[quote.Id];
+                q.Autodispatch = quote.Autodispatch;
+                q.Id = quote.Id;
+                q.PartnersThatServe = quote.PartnersThatServe;
+                q.QuoteRequest = quote.QuoteRequest;
+                q.ReceivedQuotes = quote.ReceivedQuotes;
+                q.ReceivedUpdatesCount = quote.ReceivedUpdatesCount;
+                q.Status = quote.Status;
                 StorageManager.UpdateQuote(quote.Clone());
             }
             public List<TripQuotes> GetQuotesByStatus(QuoteStatus status)
