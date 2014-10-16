@@ -1256,7 +1256,7 @@ namespace ServiceStack.TripThruGateway
                     if (acct != null && message == null)
                     {
                         clientId = acct.ClientId;
-                        Logger.BeginRequest("UpdateTripStatus(" + request.Status + ") received from " + acct.UserName, request, request.TripId);
+                        Logger.BeginRequest("UpdateTripStatus(" + request.Status + ", " + request.TripId + ") received from " + acct.UserName, request, request.TripId);
                         Location driverLocation = null;
                         if (request.DriverLocationLat != null && request.DriverLocationLng != null)
                         {
