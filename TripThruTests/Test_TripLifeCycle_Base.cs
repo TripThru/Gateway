@@ -316,7 +316,7 @@ namespace TripThruTests
             var message = "GM " + partnerServiceMock.server.ID + " " + partnerServiceMock.GetHashCode() + " Trip didn't advance from Queued status but wasn't rejected either. Status: "+ trip.status +". Trip: " + trip.ID + " " + trip.GetHashCode();
             if (!partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID))
                 Thread.Sleep(30000);
-            Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". No requests received at all. Keys: " + keys);
+            Assert.IsTrue(partnerServiceMock.RequestsByTripId.ContainsKey(trip.publicID), message + ". No requests received at all.");
             var requests = partnerServiceMock.RequestsByTripId[trip.publicID];
             Assert.GreaterOrEqual(requests.RejectedUpdates, 1, message + "No rejected requests received.");
         }
