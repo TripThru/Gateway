@@ -369,7 +369,7 @@ namespace TripThruCore
                     tripsByID.TryGetValue(r.tripID, out t);
                     response = new UpdateTripStatusResponse();
                     t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: eta);
-                    Logger.Log("New status: " + t.status);
+                    Logger.Log("New status: " + t.status + " " + t.GetHashCode());
                     Logger.SetServicingId(this.ID);
                 }
             }
