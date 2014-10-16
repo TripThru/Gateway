@@ -566,7 +566,9 @@ namespace TripThruCore
         private void UpdateDriverLocation(Location location)
         {
             this.driverLocation = location;
-            partner.activeTrips[ID].DriverLocation = location;
+            var trip = partner.activeTrips[ID];
+            trip.DriverLocation = location;
+            partner.activeTrips.Update(trip);
             if (driverInitiaLocation == null)
                 this.driverInitiaLocation = location;
         }
