@@ -25,7 +25,7 @@ namespace ServiceStack.TripThruGateway
         }
         private JsonServiceClient GetClient()
         {
-            return new JsonServiceClient(RootUrl) { Timeout = this.timeout };
+            return new JsonServiceClient(RootUrl) { Timeout = this.timeout, ReadWriteTimeout = this.timeout };
         }
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway.RegisterPartnerRequest request)
         {
