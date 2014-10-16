@@ -554,8 +554,12 @@ namespace TripThruCore
                     service = Origination.Local;
                 }
             }
-            if (IsOneOfTheActiveTrips())
-                partner.activeTrips[ID].Status = status;
+            if (IsOneOfTheActiveTrips()) 
+            {
+                var trip = partner.activeTrips[ID];
+                trip.Status = status;
+                partner.activeTrips.Update(trip);
+            }
             this.status = status;
             lastStatusNotifiedToPartner = status;
         }
