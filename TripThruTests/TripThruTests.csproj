@@ -93,7 +93,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ServiceStack.TripThruGateway\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
+    <Reference Include="SmartThreadPool">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\SmartThreadPool.dll.2.2.3\lib\SmartThreadPool.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Rx-Core.2.2.5\lib\net40\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Rx-Interfaces.2.2.5\lib\net40\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Rx-Linq.2.2.5\lib\net40\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices">
+      <HintPath>..\ServiceStack.TripThruGateway\packages\Rx-PlatformServices.2.2.5\lib\net40\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
     <Reference Include="Tamir.SharpSSH">
       <HintPath>..\ServiceStack.TripThruGateway\packages\Tamir.SharpSSH.1.1.1.13\lib\Tamir.SharpSSH.dll</HintPath>
     </Reference>
