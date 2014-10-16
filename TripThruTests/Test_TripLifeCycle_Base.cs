@@ -239,7 +239,7 @@ namespace TripThruTests
                 statusReached = WaitUntilStatusReachedOrTimeout(fleet, trip, nextStatus, timeoutAt);
 
             Assert.IsTrue(statusReached,
-                "Reached timeout but trip didn't advance to expected status " + nextStatus + ". Trip ID: " + trip.ID +
+                "Reached timeout but trip didn't advance to expected status " + nextStatus + ". Trip ID: " + trip.ID + ". Status: " + trip.status +
                 ". ETA: " + trip.ETA.ToString() + ". Timeout at: " + timeoutAt.ToString() + ". Time now: " + DateTime.UtcNow.ToString());
  
 
