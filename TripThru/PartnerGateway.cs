@@ -8,6 +8,7 @@ using ServiceStack.Text;
 using Utils;
 using TripThruCore.Storage;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace TripThruCore
 {
@@ -15,7 +16,7 @@ namespace TripThruCore
     {
         static readonly object locker = new object();
 
-        public readonly Dictionary<string, PartnerTrip> tripsByID;
+        public readonly ConcurrentDictionary<string, PartnerTrip> tripsByID;
         public readonly Dictionary<string, PartnerFleet> PartnerFleets;
         public DateTime lastSim;
         public readonly Gateway tripthru;
@@ -304,7 +305,8 @@ namespace TripThruCore
                 {
 
                     Logger.SetServicingId(this.ID);
-                    PartnerTrip t = tripsByID[r.tripID];
+                    PartnerTrip t = null;
+                    tripsByID.TryGetValue(r.tripID, out t);
                     DateTime? pickupTime = null;
                     if (t.status == Status.PickedUp || t.status == Status.DroppedOff || t.status == Status.Complete)
                         pickupTime = t.pickupTime; // Only if trip has been pickedup.
@@ -363,9 +365,11 @@ namespace TripThruCore
                     DateTime? eta = null;
                     if (r.eta != null)
                         eta = TimeZoneInfo.ConvertTimeToUtc((DateTime)r.eta, TimeZoneInfo.Local);
-                    PartnerTrip t = tripsByID[r.tripID];
+                    PartnerTrip t = null;
+                    tripsByID.TryGetValue(r.tripID, out t);
                     response = new UpdateTripStatusResponse();
                     t.UpdateTripStatus(notifyPartner: false, status: r.status, driverLocation: r.driverLocation, eta: eta);
+                    Logger.Log("New status: " + t.status);
                     Logger.SetServicingId(this.ID);
                 }
             }
@@ -384,7 +388,7 @@ namespace TripThruCore
                     AddPartnerFleet(f);
             }
 
-            tripsByID = new Dictionary<string, PartnerTrip>();
+            tripsByID = new ConcurrentDictionary<string, PartnerTrip>();
 
             partnerAccounts.Clear();
             clientIdByAccessToken.Clear();
@@ -562,6 +566,7 @@ namespace TripThruCore
             }
             this.status = status;
             lastStatusNotifiedToPartner = status;
+
         }
         private void UpdateDriverLocation(Location location)
         {
