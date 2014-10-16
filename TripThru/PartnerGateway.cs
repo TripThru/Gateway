@@ -1167,7 +1167,7 @@ namespace TripThruCore
                     throw new Exception("Trip " + t + ": already exist in activeTrips dictionary -- Existing trip = " + partner.activeTrips[t.ID]);
                 if (partner.tripsByID.ContainsKey(t.ID))
                     throw new Exception("Trip " + t + ": already exist in tripsByID dictionary");
-                partner.tripsByID.Add(t.ID, t);
+                partner.tripsByID.TryAdd(t.ID, t);
                 partner.activeTrips.Insert(t.ID, new Trip
                 {
                     FleetId = t.PartnerFleet != null ? t.PartnerFleet.ID : null,
@@ -1247,7 +1247,8 @@ namespace TripThruCore
 
         public void RemoveTrip(LinkedListNode<PartnerTrip> t)
         {
-            partner.tripsByID.Remove(t.Value.ID);
+            PartnerTrip trip = null;
+            partner.tripsByID.TryRemove(t.Value.ID, out trip);
             queue.Remove(t);
         }
 
