@@ -342,7 +342,7 @@ namespace TripThruTests
      */
     public class TripThruGatewayHub : Gateway
     {
-        private Dictionary<string, GatewayClient> tripThruClientByClientID;
+        private ConcurrentDictionary<string, GatewayClient> tripThruClientByClientID;
         private string tripThruUrl;
         // Add configuration before partner registration to use access token and callback url when registering
         private Dictionary<string, PartnerAccount> partnerConfigurationByClientID;
@@ -351,7 +351,7 @@ namespace TripThruTests
             Dictionary<string, PartnerAccount> partnerConfigurationByClientID) :
             base("TripThruGatewayHub", "TripThruGatewayHub")
         {
-            this.tripThruClientByClientID = new Dictionary<string, GatewayClient>();
+            this.tripThruClientByClientID = new ConcurrentDictionary<string, GatewayClient>();
             this.tripThruUrl = tripThruUrl;
             this.partnerConfigurationByClientID = partnerConfigurationByClientID;
         }
@@ -366,8 +366,15 @@ namespace TripThruTests
             if (!partnerConfigurationByClientID.ContainsKey(partner.ID))
                 throw new Exception("Access token not added for " + partner.ID);
             var accessToken = partnerConfigurationByClientID[partner.ID].AccessToken;
-            tripThruClientByClientID[partner.ID] = new GatewayClient("TripThru", "TripThru", tripThruUrl, accessToken);
-            return tripThruClientByClientID[partner.ID];
+            var client = new GatewayClient("TripThru", "TripThru", tripThruUrl, accessToken);
+            tripThruClientByClientID.TryAdd(partner.ID, client);
+            return client;
+        }
+        private GatewayClient GetTripThruClient(string partnerId)
+        {
+            GatewayClient client = null;
+            tripThruClientByClientID.TryGetValue(partnerId, out client);
+            return client;
         }
         private Gateway.RegisterPartnerRequest MakeRegisterPartnerRequest(Gateway partner, List<Zone> coverage)
         {
@@ -390,43 +397,43 @@ namespace TripThruTests
         public override Gateway.GetPartnerInfoResponse GetPartnerInfo(Gateway.GetPartnerInfoRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].GetPartnerInfo(request);
+            return GetTripThruClient(request.clientID).GetPartnerInfo(request);
         }
 
         public override Gateway.DispatchTripResponse DispatchTrip(Gateway.DispatchTripRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].DispatchTrip(request);
+            return GetTripThruClient(request.clientID).DispatchTrip(request);
         }
 
         public override Gateway.QuoteTripResponse QuoteTrip(Gateway.QuoteTripRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].QuoteTrip(request);
+            return GetTripThruClient(request.clientID).QuoteTrip(request);
         }
 
         public override Gateway.GetTripStatusResponse GetTripStatus(Gateway.GetTripStatusRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].GetTripStatus(request);
+            return GetTripThruClient(request.clientID).GetTripStatus(request);
         }
 
         public override Gateway.UpdateTripStatusResponse UpdateTripStatus(Gateway.UpdateTripStatusRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].UpdateTripStatus(request);
+            return GetTripThruClient(request.clientID).UpdateTripStatus(request);
         }
 
         public override Gateway.UpdateQuoteResponse UpdateQuote(Gateway.UpdateQuoteRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].UpdateQuote(request);
+            return GetTripThruClient(request.clientID).UpdateQuote(request);
         }
 
         public override GetQuoteResponse GetQuote(GetQuoteRequest request)
         {
             ValidatePartnerExists(request.clientID);
-            return tripThruClientByClientID[request.clientID].GetQuote(request);
+            return GetTripThruClient(request.clientID).GetQuote(request);
         }
     }
 }

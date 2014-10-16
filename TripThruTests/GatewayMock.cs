@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using TripThruCore;
 using Utils;
+using System.Collections.Concurrent;
 
 namespace TripThruTests
 {
     public class GatewayMock : GatewayWithStats
     {
         public Gateway server;
-        public Dictionary<string, TripRequests> RequestsByTripId;
+        public ConcurrentDictionary<string, TripRequests> RequestsByTripId;
         public class TripRequests
         {
             public int Quote = 0;
@@ -38,14 +39,16 @@ namespace TripThruTests
             : base(server.ID, server.name)
         {
             this.server = server;
-            this.RequestsByTripId = new Dictionary<string, TripRequests>();
+            this.RequestsByTripId = new ConcurrentDictionary<string, TripRequests>();
         }
 
         protected TripRequests GetTripRequests(string tripId)
         {
             if (!RequestsByTripId.ContainsKey(tripId))
-                RequestsByTripId[tripId] = new TripRequests();
-            return RequestsByTripId[tripId];
+                RequestsByTripId.TryAdd(tripId, new TripRequests());
+            TripRequests r = null;
+            RequestsByTripId.TryGetValue(tripId, out r);
+            return r;
         }
 
         public override Gateway.RegisterPartnerResponse RegisterPartner(Gateway gateway, List<Zone> coverage)
