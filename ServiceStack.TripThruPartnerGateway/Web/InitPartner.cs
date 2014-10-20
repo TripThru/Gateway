@@ -31,9 +31,6 @@ namespace ServiceStack.TripThruPartnerGateway
 	{
         public object Any(IReturn<InitPartner> request)
         {
-            MapTools.SetGeodataFilenames("~/App_Data/Geo-Location-Names.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Routes.txt".MapHostAbsolutePath(), "~/App_Data/Geo-Location-Addresses.txt".MapHostAbsolutePath());
-            MapTools.LoadGeoData();
-            MapTools.WriteGeoData();
             PartnerConfiguration configuration = TripThruCore.Partner.LoadPartnerConfigurationFromJsonFile("~/PartnerConfiguration.txt".MapHostAbsolutePath());
 
             if (configuration.host.debug)
@@ -54,8 +51,6 @@ namespace ServiceStack.TripThruPartnerGateway
                 TripThruCore.Partner partner = new TripThruCore.Partner(configuration.Partner.ClientId, configuration.Partner.Name, new GatewayClient("TripThru", "TripThru", configuration.TripThruUrl ?? configuration.TripThruUrlMono, configuration.Partner.AccessToken), configuration.partnerFleets);
 
                 GatewayService.gateway = partner;
-
-                MapTools.WriteGeoData();
 
                 var sim = new SimulationThread(partner, configuration);
             }
@@ -117,7 +112,6 @@ namespace ServiceStack.TripThruPartnerGateway
                                 lastHealthCheck = DateTime.UtcNow;
                             }
                         }
-                        MapTools.WriteGeoData();
                     }
                     catch (Exception e)
                     {

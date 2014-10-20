@@ -49,12 +49,6 @@ namespace Program
         static void Main(string[] args)
         {
             Logger.OpenLog("", "C:\\Users\\Edward\\");
-
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
-
-            MapTools.LoadGeoData();
-
-            MapTools.WriteGeoData();
             string[] filePaths = Directory.GetFiles("../../Partner_Configurations/");
 
             tripthru = new TripThru();
@@ -75,13 +69,10 @@ namespace Program
                     tripthru.RegisterPartner(partner);
                 }
             }
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
-            MapTools.WriteGeoData();
 
 
 
             Simulate(partners, DateTime.UtcNow + new TimeSpan(2, 30, 0));
-            MapTools.WriteGeoData();
         }
 
         public static void Simulate(List<Gateway> partners, DateTime until)
@@ -94,7 +85,6 @@ namespace Program
                 p.Log();
             Logger.Untab();
             Logger.EndRequest(null);
-            MapTools.SetGeodataFilenames("../../App_Data/Geo-Location-Names.txt", "../../App_Data/Geo-Routes.txt", "../../App_Data/Geo-Location-Addresses.txt");
 
             TimeSpan simInterval = new TimeSpan(0, 0, 10);
             while (DateTime.UtcNow < until)
@@ -102,7 +92,6 @@ namespace Program
                 Logger.BeginRequest("Heartbeat", null);
                 tripthru.Update();
                 Logger.EndRequest(null);
-                MapTools.WriteGeoData();
                 System.Threading.Thread.Sleep(simInterval);
                 tripthru.LogStats();
             }

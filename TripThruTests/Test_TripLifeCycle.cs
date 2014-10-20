@@ -20,15 +20,10 @@ namespace Tests
         public void SetUp()
         {
             Logger.OpenLog("Nunit", splunkEnabled: false);
-            MapTools.ClearCache();
             StorageManager.OpenStorage(new SqliteStorage("App_Data/db.sqlite"));
             Logger.Log("Setting up");
             Logger.Tab();
             MapTools.distance_and_time_scale = .05;
-            MapTools.SetGeodataFilenames(locationNames: "Test_GeoData/Geo-Location-Names.txt",
-                routes: "Test_GeoData/Geo-Routes.txt",
-                locationAddresses: "Test_GeoData/Geo-Location-Addresses.txt");
-            MapTools.LoadGeoData();
             Logger.Untab();
         }
 
@@ -36,7 +31,6 @@ namespace Tests
         public void TearDown()
         {
             Logger.Log("Tearing down");
-            MapTools.ClearCache();
         }
 
         [Test]
